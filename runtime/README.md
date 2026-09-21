@@ -1,10 +1,7 @@
 # runtime/
 
-3D game runtime lives here (engine lock pending Coordinador).
+**Engine LOCKED: Godot 4** (only pipeline — no R3F).
 
-**Recommendation:** Godot 4 (native glTF, cinematic lights/camera).  
-**Alternative:** Three.js / R3F only if dual-mode must share the Vite web shell with 2D.
+Fase 2 after scaffold merge: vertical slice **Maya + Cuyabeno** (world id `selva`) with dual-mode selector visible.
 
-One pipeline only — never both.
-
-Fase 2 (after Coordinador OK on docs A–E): vertical slice Maya + Selva Dulce with mode selector visible.
+Import glTF from `assets/greybox/`.

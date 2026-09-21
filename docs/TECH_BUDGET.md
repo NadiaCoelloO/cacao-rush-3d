@@ -15,15 +15,17 @@
 - Format: **glTF 2.0, Y-up**
 - English file/node names
 
-## Target platform (proposal)
+## Target platform — LOCKED
 
-**Primary recommendation: Godot 4** — native glTF, strong lighting/camera for cinematic track, desktop + export path.
+**Godot 4** — unique pipeline. **No R3F / Three.js.**
 
-**Alternative:** Three.js / React Three Fiber **only if** dual-mode must live in the same Vite web preview as 2D (`:8080`).
-
-**One pipeline only** — never both. Coordinador locks in review.
+Native glTF, cinematic lights/camera. Dual-mode launches Godot build for 3D track.
 
 ## Performance
 
-- Target **60 fps** on mid laptop / mid phone (slice)
-- FIXED_DT gameplay = `1/60` (match 2D), independent of render fps when possible
+- Target **60 fps** mid laptop / mid phone (slice)
+- FIXED_DT gameplay = `1/60` (match 2D)
+
+## Gate
+
+High-poly finales after greybox OK. Runtime full = Fase 2 vertical slice (Maya + Cuyabeno) in Godot 4 after scaffold merge.

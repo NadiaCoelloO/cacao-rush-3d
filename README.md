@@ -1,32 +1,32 @@
 # cacao-rush-3d
 
-Cacao Rush — **3D cinematográfico** (dual-mode con arcade 2D).
+Cacao Rush — **3D cinematográfico** (dual-mode). **Godot 4** only.
 
 | | |
 |---|---|
-| **2D truth (READ ONLY)** | [`NadiaCoelloO/sand-vivid-dawn-sail`](https://github.com/NadiaCoelloO/sand-vivid-dawn-sail) @ `f278dd97` |
-| **This repo** | assets (Blender/glTF) + 3D runtime |
-| **Rule** | 2D validates; 3D **ports** — same gameplay, cinematic camera/lights/staging |
+| **2D truth** | [`sand-vivid-dawn-sail`](https://github.com/NadiaCoelloO/sand-vivid-dawn-sail) @ `f278dd9730cb335590d50287303907e57f8f3461` |
+| **Engine** | **Godot 4** (locked — no R3F) |
+| **Pilot** | World id `selva` · display **Cuyabeno** |
 
 ## Layout
 
 ```
 assets/greybox/     # blockout glTF (Assets 3D)
-assets/scripts/bpy/ # reproducible Blender scripts
-assets/budgets/     # tris/maps/LOD sheets
-docs/               # Phase 1 contracts (Pista 3D)
-runtime/            # engine project (TBD)
+assets/scripts/bpy/
+assets/budgets/
+docs/               # Phase 1 contracts
+runtime/            # Godot 4 project (Fase 2)
 ```
 
-## Docs (Fase 1 A–E)
+## Docs A–E
 
-- [DUAL_MODE_SCOPE](docs/DUAL_MODE_SCOPE.md) — «Elegí tu versión»
-- [TECH_BUDGET](docs/TECH_BUDGET.md) — ceilings + platform
-- [ASSET_PRIORITY](docs/ASSET_PRIORITY.md) — Maya + Selva first
-- [BRIEF_ASSETS_MAYA_SELVA](docs/BRIEF_ASSETS_MAYA_SELVA.md) — lote 1
-- [PORT_MAP](docs/PORT_MAP.md) — `src/game` → 3D 1:1
-- [PORT_CONTRACT](docs/PORT_CONTRACT.md) — API / timings
+- [DUAL_MODE_SCOPE](docs/DUAL_MODE_SCOPE.md)
+- [TECH_BUDGET](docs/TECH_BUDGET.md)
+- [ASSET_PRIORITY](docs/ASSET_PRIORITY.md)
+- [BRIEF_ASSETS_MAYA_SELVA](docs/BRIEF_ASSETS_MAYA_SELVA.md)
+- [PORT_MAP](docs/PORT_MAP.md) · [PORT_CONTRACT](docs/PORT_CONTRACT.md)
+- [WORLD_SELVA_DISPLAY](docs/WORLD_SELVA_DISPLAY.md)
 
-## Status
+## Locks 2026-09-21
 
-GO 3D Nadia OK 2026-09-21. Fase 1 preprod in flight. No full campaign loop yet.
+Godot 4 · Cuyabeno · tip pin · heroes 1:1 · save policy Fase 2.
