@@ -58,7 +58,7 @@ def _subdivide_plane(obj, cuts: int = 4) -> None:
 def build_selva_parts(mat_floor, mat_platform, mat_root, mat_litter):
     """
     Flat / lightly subdivided floor slab ~18x18m with raised platforms
-    and cacao-root stubs + hojarasca blocks (Selva Dulce Ecuador — not Asia/bamboo).
+    and cacao-root stubs + hojarasca blocks (Cuyabeno — not Asia/bamboo).
     """
     parts = []
     half = CHUNK_SIZE_M * 0.5
