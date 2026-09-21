@@ -1,7 +1,7 @@
 """
-Cacao Rush 3D — Selva Dulce (Ecuador / Mindo) floor chunk greybox (Phase 1)
+Cacao Rush 3D — Cuyabeno pilot (path id: selva) floor chunk greybox (Phase 1)
 
-Selva Dulce Ecuador identity: leaf litter (hojarasca) + cacao root stubs.
+Cuyabeno (EC rainforest) identity: leaf litter (hojarasca) + cacao root stubs.
 NO Asian jungle, NO bamboo.
 
 Usage:
@@ -135,7 +135,7 @@ def build_selva_parts(mat_floor, mat_platform, mat_root, mat_litter):
 
 
 def main():
-    args = parse_args("Export Selva Dulce floor chunk greybox GLB with 3 LODs")
+    args = parse_args("Export selva floor chunk greybox GLB (display: Cuyabeno)")
     set_unit_meters()
     clear_scene()
 
