@@ -1,4 +1,4 @@
-```
+﻿```
 ASSET hero_grey
 tris: 896 / 25000
 lods: 896, 358, 106
