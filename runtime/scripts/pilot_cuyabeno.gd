@@ -4,6 +4,7 @@ extends Node3D
 ## Repo source of truth: assets/greybox/ (see runtime/models/README.md).
 ##
 ## CIN-001 totem warp Cuyabeno, ASSET OK @ d93f777 (runtime/models/totem_warp_cuyabeno.glb).
+## If GLB missing locally: `git checkout main -- runtime/models/totem_warp_cuyabeno.glb`
 
 const FLOOR_GLB := "res://models/chunk_selva_floor.glb"
 const TOTEM_GLB := "res://models/totem_warp_cuyabeno.glb"
@@ -25,7 +26,6 @@ func _ready() -> void:
 
 
 func _try_load_floor() -> void:
-	# Preferred: import assets/greybox/worlds/selva/chunk_selva_floor.glb → res://models/
 	if ResourceLoader.exists(FLOOR_GLB):
 		var packed: Resource = load(FLOOR_GLB)
 		if packed is PackedScene:
@@ -33,8 +33,6 @@ func _try_load_floor() -> void:
 			_world_root.add_child(inst)
 			if _floor_placeholder:
 				_floor_placeholder.visible = false
-			return
-	# Placeholder CSGBox3D remains — replace with chunk_selva_floor.glb after import.
 
 
 func _try_load_totem() -> void:
