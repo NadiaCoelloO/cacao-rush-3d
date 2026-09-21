@@ -1,44 +1,32 @@
-# Cacao Rush — 3D
+# cacao-rush-3d
 
-Cinematic **3D** port of *Cacao Rush* (Ecuador arcade).
+Cacao Rush — **3D cinematográfico** (dual-mode). **Godot 4** only.
 
-## Dual mode
+| | |
+|---|---|
+| **2D truth** | [`sand-vivid-dawn-sail`](https://github.com/NadiaCoelloO/sand-vivid-dawn-sail) @ `f278dd9730cb335590d50287303907e57f8f3461` |
+| **Engine** | **Godot 4** (locked — no R3F) |
+| **Pilot** | World id `selva` · display **Cuyabeno** |
 
-Players choose:
-
-| Mode | Repo |
-|------|------|
-| Arcade 2D (source of truth) | [`NadiaCoelloO/sand-vivid-dawn-sail`](https://github.com/NadiaCoelloO/sand-vivid-dawn-sail) |
-| 3D cinematic | **this repo** |
-
-**Contract:** 2D validates gameplay; 3D ports (no redesign). Code/commits in English; production reports in voseo.
-
-## Owners
-
-- **Pista 3D (Astra)** — port owner, budgets, dual-mode selector, vertical slice
-- **Assets 3D (Blender)** — bpy → LOD → glTF/`.glb`, Maya grey blockout first
-- **Cine** — non-loop pieces later (intro / trailers); not gameplay
-
-## Phase 1 (in flight)
-
-1. Documented bpy pipeline (model → LOD → export Y-up `.glb`)
-2. Maya grey blockout
-3. Pilot environment kit (Selva EC)
-4. Prioritized asset list + tris budgets
-
-No high-poly until Pista 3D greenlights.
-
-## Identity gates
-
-- Secret display/id: **Mindo** (copy may say Chocó Andino; no separate world)
-- Nix hair: solid **purple/violet** (no white-cap)
-- Ecuador toponyms / biome fauna; no ninja aesthetic
-
-## Layout (suggested)
+## Layout
 
 ```
-docs/           # budgets, port map, pipeline
-assets/blender/ # bpy scripts, .blend sources
-assets/glb/     # exported LODs
-runtime/        # 3D game code (when started)
+assets/greybox/     # blockout glTF (Assets 3D)
+assets/scripts/bpy/
+assets/budgets/
+docs/               # Phase 1 contracts
+runtime/            # Godot 4 project (Fase 2)
 ```
+
+## Docs A–E
+
+- [DUAL_MODE_SCOPE](docs/DUAL_MODE_SCOPE.md)
+- [TECH_BUDGET](docs/TECH_BUDGET.md)
+- [ASSET_PRIORITY](docs/ASSET_PRIORITY.md)
+- [BRIEF_ASSETS_MAYA_SELVA](docs/BRIEF_ASSETS_MAYA_SELVA.md)
+- [PORT_MAP](docs/PORT_MAP.md) · [PORT_CONTRACT](docs/PORT_CONTRACT.md)
+- [WORLD_SELVA_DISPLAY](docs/WORLD_SELVA_DISPLAY.md)
+
+## Locks 2026-09-21
+
+Godot 4 · Cuyabeno · tip pin · heroes 1:1 · save policy Fase 2.
