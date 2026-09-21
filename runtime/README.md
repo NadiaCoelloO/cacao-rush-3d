@@ -31,8 +31,9 @@ Fase 2 vertical slice: dual-mode selector + **Maya** on **Cuyabeno** (world id `
 |---|---|
 | `hero_grey.glb` | 896 / 25 000 |
 | `chunk_selva_floor.glb` | 380 / 80 000 |
+| `totem_warp_cuyabeno.glb` | 858 / 2 000 (LOD1 360) — CIN-001 ASSET OK @ d93f777 |
 
-Source: `assets/greybox/`. Copy into `models/` for live glTF — see [models/README.md](models/README.md). Until then CSG placeholders run the slice.
+Source: `assets/greybox/` + CIN-001 totem in `models/`. See [models/README.md](models/README.md). CSG placeholders remain if a glTF is missing.
 
 ## Layout
 
