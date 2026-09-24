@@ -1,4 +1,4 @@
-ASSET totem_warp_cuyabeno
+﻿ASSET totem_warp_cuyabeno
 tris: 858 / 2000
 lods: 858, 360
 maps: simple PBR/unlit greybox (Totem_Stone, Totem_GoldAccent, Totem_CyanTip, Totem_Liana) — no textures

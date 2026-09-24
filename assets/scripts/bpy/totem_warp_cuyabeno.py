@@ -76,27 +76,91 @@ def _rotate_obj(obj: bpy.types.Object, euler_xyz: tuple[float, float, float]) ->
     apply_all_transforms(obj)
 
 def build_totem_parts(mat_stone, mat_gold, mat_cyan, mat_liana):
+    """
+    Tall warp-post silhouette (~2.9 m):
+      stepped base → lower shaft → ledge → upper shaft → crown platform
+      + gold oval plates + liana ribbons + cacao oro cluster + cyan tip
+    """
     parts = []
-    parts.append(primitive_cube("Totem_Base_Step0", (0.0, 0.0, 0.10), (0.95, 0.95, 0.20), mat_stone))
-    parts.append(primitive_cube("Totem_Base_Step1", (0.0, 0.0, 0.28), (0.72, 0.72, 0.18), mat_stone))
-    parts.append(primitive_cube("Totem_Shaft_Lower", (0.0, 0.0, 0.95), (0.48, 0.48, 1.10), mat_stone))
-    parts.append(primitive_cube("Totem_Ledge_Mid", (0.0, 0.0, 1.55), (0.58, 0.58, 0.12), mat_stone))
-    parts.append(primitive_cube("Totem_Shaft_Upper", (0.0, 0.0, 2.05), (0.40, 0.40, 0.90), mat_stone))
-    parts.append(primitive_cube("Totem_Crown_Plate", (0.0, 0.0, 2.55), (0.50, 0.50, 0.12), mat_stone))
+
+    parts.append(
+        primitive_cube("Totem_Base_Step0", (0.0, 0.0, 0.10), (0.95, 0.95, 0.20), mat_stone)
+    )
+    parts.append(
+        primitive_cube("Totem_Base_Step1", (0.0, 0.0, 0.28), (0.72, 0.72, 0.18), mat_stone)
+    )
+
+    parts.append(
+        primitive_cube("Totem_Shaft_Lower", (0.0, 0.0, 0.95), (0.48, 0.48, 1.10), mat_stone)
+    )
+
+    parts.append(
+        primitive_cube("Totem_Ledge_Mid", (0.0, 0.0, 1.55), (0.58, 0.58, 0.12), mat_stone)
+    )
+
+    parts.append(
+        primitive_cube("Totem_Shaft_Upper", (0.0, 0.0, 2.05), (0.40, 0.40, 0.90), mat_stone)
+    )
+
+    parts.append(
+        primitive_cube("Totem_Crown_Plate", (0.0, 0.0, 2.55), (0.50, 0.50, 0.12), mat_stone)
+    )
+
     spike_h = 0.14
     spike_s = 0.08
     for i, (sx, sy) in enumerate(((0.18, 0.18), (0.18, -0.18), (-0.18, 0.18), (-0.18, -0.18))):
-        parts.append(primitive_cube(f"Totem_Crown_Spike_{i}", (sx, sy, 2.55 + spike_h * 0.5 + 0.06), (spike_s, spike_s, spike_h), mat_stone))
-    parts.append(primitive_cylinder("Totem_GoldBand_Lower", (0.0, 0.0, 0.55), radius=0.26, depth=0.06, mat=mat_gold, vertices=10))
-    parts.append(primitive_cylinder("Totem_GoldBand_Upper", (0.0, 0.0, 2.20), radius=0.22, depth=0.05, mat=mat_gold, vertices=10))
+        parts.append(
+            primitive_cube(
+                f"Totem_Crown_Spike_{i}",
+                (sx, sy, 2.55 + spike_h * 0.5 + 0.06),
+                (spike_s, spike_s, spike_h),
+                mat_stone,
+            )
+        )
+
+    parts.append(
+        primitive_cylinder(
+            "Totem_GoldBand_Lower",
+            (0.0, 0.0, 0.55),
+            radius=0.26,
+            depth=0.06,
+            mat=mat_gold,
+            vertices=10,
+        )
+    )
+    parts.append(
+        primitive_cylinder(
+            "Totem_GoldBand_Upper",
+            (0.0, 0.0, 2.20),
+            radius=0.22,
+            depth=0.05,
+            mat=mat_gold,
+            vertices=10,
+        )
+    )
+
     plate_z_pairs = ((1.05, 0.25), (2.00, 0.21))
     for zi, (pz, pr) in enumerate(plate_z_pairs):
-        for fi, (px, py, rot_z) in enumerate(((0.25, 0.0, math.radians(90)), (-0.25, 0.0, math.radians(90)), (0.0, 0.25, 0.0), (0.0, -0.25, 0.0))):
+        for fi, (px, py, rot_z) in enumerate(
+            (
+                (0.25, 0.0, math.radians(90)),
+                (-0.25, 0.0, math.radians(90)),
+                (0.0, 0.25, 0.0),
+                (0.0, -0.25, 0.0),
+            )
+        ):
             if zi == 0 and fi >= 2:
                 continue
             if zi == 1 and fi >= 2:
                 continue
-            plate = primitive_cylinder(f"Totem_GoldOval_{zi}_{fi}", (px if zi == 0 else px * 0.85, py if zi == 0 else py * 0.85, pz), radius=pr, depth=0.035, mat=mat_gold, vertices=10)
+            plate = primitive_cylinder(
+                f"Totem_GoldOval_{zi}_{fi}",
+                (px if zi == 0 else px * 0.85, py if zi == 0 else py * 0.85, pz),
+                radius=pr,
+                depth=0.035,
+                mat=mat_gold,
+                vertices=10,
+            )
             if abs(px) > abs(py):
                 _rotate_obj(plate, (0.0, math.radians(90), 0.0))
             else:
@@ -104,6 +168,7 @@ def build_totem_parts(mat_stone, mat_gold, mat_cyan, mat_liana):
             plate.scale = (0.55, 1.0, 1.15)
             apply_all_transforms(plate)
             parts.append(plate)
+
     liana_specs = [
         ("Totem_Liana_0", (0.28, 0.05, 0.90), 0.035, 1.40, (0.15, 0.0, 0.2)),
         ("Totem_Liana_1", (-0.26, -0.08, 1.20), 0.030, 1.10, (-0.12, 0.05, -0.25)),
@@ -113,8 +178,14 @@ def build_totem_parts(mat_stone, mat_gold, mat_cyan, mat_liana):
         vine = primitive_cylinder(name, loc, radius=rad, depth=depth, mat=mat_liana, vertices=8)
         _rotate_obj(vine, rot)
         parts.append(vine)
-    parts.append(primitive_cube("Totem_Liana_Ribbon_A", (0.30, 0.0, 1.40), (0.04, 0.12, 0.55), mat_liana))
-    parts.append(primitive_cube("Totem_Liana_Ribbon_B", (-0.12, 0.28, 0.75), (0.35, 0.04, 0.05), mat_liana))
+
+    parts.append(
+        primitive_cube("Totem_Liana_Ribbon_A", (0.30, 0.0, 1.40), (0.04, 0.12, 0.55), mat_liana)
+    )
+    parts.append(
+        primitive_cube("Totem_Liana_Ribbon_B", (-0.12, 0.28, 0.75), (0.35, 0.04, 0.05), mat_liana)
+    )
+
     cacao_offsets = [
         (0.00, 0.00, 2.72, 0.11, 0.18),
         (0.12, 0.05, 2.68, 0.09, 0.15),
@@ -123,16 +194,38 @@ def build_totem_parts(mat_stone, mat_gold, mat_cyan, mat_liana):
         (-0.06, 0.10, 2.67, 0.08, 0.13),
     ]
     for i, (cx, cy, cz, rx, rz) in enumerate(cacao_offsets):
-        pod = primitive_uv_sphere(f"Totem_CacaoOro_{i}", (cx, cy, cz), radius=rx, mat=mat_gold, segments=8, ring_count=6)
+        pod = primitive_uv_sphere(
+            f"Totem_CacaoOro_{i}",
+            (cx, cy, cz),
+            radius=rx,
+            mat=mat_gold,
+            segments=8,
+            ring_count=6,
+        )
         pod.scale = (1.0, 0.85, rz / max(rx, 1e-6))
         apply_all_transforms(pod)
         parts.append(pod)
-    tip = primitive_cone("Totem_CyanTip", (0.0, 0.0, TOTEM_TIP_Z), radius1=0.07, depth=0.16, mat=mat_cyan, vertices=8)
+
+    tip = primitive_cone(
+        "Totem_CyanTip",
+        (0.0, 0.0, TOTEM_TIP_Z),
+        radius1=0.07,
+        depth=0.16,
+        mat=mat_cyan,
+        vertices=8,
+    )
     parts.append(tip)
+
     return parts
 
 def build_maya_scale_stub(mat) -> bpy.types.Object:
-    stub = primitive_cube("Maya_Scale_Stub", (1.20, 0.0, MAYA_HEIGHT * 0.5), (0.18, 0.18, MAYA_HEIGHT), mat)
+    """Thin ~1.7 m capsule/cube marker so totem ~2.9 m reads correctly vs Maya."""
+    stub = primitive_cube(
+        "Maya_Scale_Stub",
+        (1.20, 0.0, MAYA_HEIGHT * 0.5),
+        (0.18, 0.18, MAYA_HEIGHT),
+        mat,
+    )
     if stub.data:
         stub.data.name = "Maya_Scale_Stub"
     return stub
@@ -141,34 +234,59 @@ def main():
     args = parse_args("Export totem_warp_cuyabeno greybox GLB with 2 LODs (CIN-001)")
     set_unit_meters()
     clear_scene()
+
     mat_stone = make_grey_material("Totem_Stone", 0.42)
-    mat_gold = make_tint_material("Totem_GoldAccent", (0.72, 0.58, 0.22), metallic=0.65, roughness=0.35, unlit=False)
-    mat_cyan = make_tint_material("Totem_CyanTip", (0.25, 0.65, 0.85), metallic=0.05, roughness=0.4, unlit=True)
+    mat_gold = make_tint_material(
+        "Totem_GoldAccent",
+        (0.72, 0.58, 0.22),
+        metallic=0.65,
+        roughness=0.35,
+        unlit=False,
+    )
+    mat_cyan = make_tint_material(
+        "Totem_CyanTip",
+        (0.25, 0.65, 0.85),
+        metallic=0.05,
+        roughness=0.4,
+        unlit=True,
+    )
     mat_liana = make_grey_material("Totem_Liana", 0.28)
     mat_maya = make_grey_material("Maya_Stub_Grey", 0.55)
+
     parts = build_totem_parts(mat_stone, mat_gold, mat_cyan, mat_liana)
+
     lod0 = join_meshes(parts, "Totem_Warp_Cuyabeno_LOD0")
     apply_all_transforms(lod0)
     triangulate_object(lod0)
+
     lod0.name = "Totem_Warp_Cuyabeno_LOD0"
     if lod0.data:
         lod0.data.name = "Totem_Warp_Cuyabeno_LOD0"
+
     tris0 = count_tris(lod0)
-    print(f"[INFO] Totem_Warp_Cuyabeno_LOD0 tris={tris0}")
+    print(f"[INFO] Totem_Warp_Cuyabeno_LOD0 tris={tris0} (soft ≤{TARGET_LOD0_MAX}, hard ≤{BUDGET_TRIS})")
+
     ratio1 = min(0.42, TARGET_LOD1_MAX / max(tris0, 1))
     lod1 = decimate_lod(lod0, "Totem_Warp_Cuyabeno_LOD1", ratio=ratio1, mat=None)
     tris1 = count_tris(lod1)
     print(f"[INFO] Totem_Warp_Cuyabeno_LOD1 tris={tris1}")
+
     root = ensure_parent_empty("Totem_Warp_Cuyabeno", (0.0, 0.0, 0.0))
     lod0.parent = root
     lod1.parent = root
+
     vfx = ensure_parent_empty("VFX_WarpBeam_Spawn", (0.0, 0.0, TOTEM_TIP_Z + 0.08))
     vfx.parent = root
+
     maya = build_maya_scale_stub(mat_maya)
     maya.parent = root
+
     fail_if_over_budget(tris0, BUDGET_TRIS, "Totem_Warp_Cuyabeno_LOD0")
     export_glb_yup(args.out, objects=[root, lod0, lod1, vfx, maya])
-    print(f"[DONE] totem_warp_cuyabeno → {args.out} | LOD0={tris0} LOD1={tris1}")
+    print(
+        f"[DONE] totem_warp_cuyabeno → {args.out} | LOD0={tris0} LOD1={tris1} | "
+        f"display=Cuyabeno world=selva tip_z={TOTEM_TIP_Z}"
+    )
 
 if __name__ == "__main__":
     main()
