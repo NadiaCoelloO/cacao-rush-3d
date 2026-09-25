@@ -19,10 +19,27 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 use_collision = true
 size = Vector3(24, 0.5, 8)
 
-[node name="CSGPlatform" type="CSGBox3D" parent="WorldRoot/FloorPlaceholder"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.5, 0)
+[node name="PlatformSolidAnchor" type="Node3D" parent="WorldRoot"]
+; Solid mid platform 3×2×1 m; GLB origin bottom-center — ASSET OK greybox
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0)
+
+[node name="PlatformSolidPlaceholder" type="Node3D" parent="WorldRoot/PlatformSolidAnchor"]
+
+[node name="CSGSolid" type="CSGBox3D" parent="WorldRoot/PlatformSolidAnchor/PlatformSolidPlaceholder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 use_collision = true
-size = Vector3(3, 1, 3)
+size = Vector3(3, 1, 2)
+
+[node name="PlatformOnewayAnchor" type="Node3D" parent="WorldRoot"]
+; Oneway thin hop 4×2×0.18 m toward totem @ 7.5 — ASSET OK greybox
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 0)
+
+[node name="PlatformOnewayPlaceholder" type="Node3D" parent="WorldRoot/PlatformOnewayAnchor"]
+
+[node name="CSGOneway" type="CSGBox3D" parent="WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
+use_collision = true
+size = Vector3(4, 0.18, 2)
 
 [node name="TotemWarpAnchor" type="Node3D" parent="WorldRoot"]
 ; CIN-001 totem warp Cuyabeno, ASSET OK @ d93f777 — greybox playable placeholder
