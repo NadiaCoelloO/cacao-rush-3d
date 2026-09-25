@@ -1,8 +1,8 @@
 # Port contract (summary)
 
-**2D tip pin:** `NadiaCoelloO/sand-vivid-dawn-sail` @ `e7fd5c28356fde01a8261a77b8bc6a55b3f513a3`  
-**Prior pins:** `8e7ce7ad` (oleada 2) · `f278dd97` (oleada 1) — superseded for new port work.  
-**Oleada 3 delta:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md)
+**2D tip pin:** `NadiaCoelloO/sand-vivid-dawn-sail` @ `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (oleada 3+4)  
+**Prior pins:** `e7fd5c28` (oleada 3 docs) · `8e7ce7ad` (oleada 2) · `f278dd97` (oleada 1) — superseded for new port work.  
+**Oleada 3 delta:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md) — T-019 mantle + T-018 proneClearsLip ported in `runtime/scripts/player_maya.gd` (PR#4).
 
 **Engine LOCKED:** Godot 4 (no R3F).
 

@@ -1,8 +1,8 @@
 # Port delta — oleada 3 (2026-09-25 Guayaquil)
 
 **2D truth (READ ONLY):** `NadiaCoelloO/sand-vivid-dawn-sail`  
-**Tip pin:** `e7fd5c28356fde01a8261a77b8bc6a55b3f513a3`  
-**Status:** preproducción only · High-poly HOLD · no gameplay 3D ticket yet  
+**Tip pin:** `e7fd5c28356fde01a8261a77b8bc6a55b3f513a3` (oleada 3 docs) → `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (oleada 4 port, see status below)  
+**Status:** T-019 / T-018 ported in PR#4 (draft, awaiting Nadia playtest) · High-poly HOLD  
 **Source notes:** ChatGPT refs `06-pista-2d/SYNC_T-018_*` … `SYNC_T-021_*` (refreshed ~14:51 Guayaquil)
 
 Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timings.
@@ -32,4 +32,25 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 ## Related open work (do not merge here)
 
 - PR#3 `feat/wire-selva-platforms` — wire solid+oneway into pilot
-- PR#4 `cursor/maya-feel-parity-d54e` (draft) — Maya run/jump/coyote @ tip `8e7ce7ad` (oleada 2); explicitly out-of-scope there: ledge/crouch → covered by T-019 / T-018 above
+- PR#4 `cursor/maya-feel-parity-d54e` (draft) — Maya run/jump/coyote @ tip `8e7ce7ad` (oleada 2) **+ oleada 4 port below**
+
+## Oleada 4 port status — PR#4 @ 2D tip `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (2026-09-25)
+
+Ported into `runtime/scripts/player_maya.gd`, checked by `runtime/tests/maya_feel_check.gd`
+(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 41/41).
+Same tick order as `sim.ts updateGame()`: applyRun → applyJump → applyGravity → resolve →
+(`hanging` ? `tickMantle` : `ledgeGrab`) → `updateCrouch` → kill → followCam.
+Source read: `sim.ts` snapshot at the tip carried in the oleada-4 refs pack (`MANTLE_T`, `mantleT`,
+`proneClearsLip`, `PH_CROUCH`/`PH_PRONE` present; run/jump constants unchanged vs `8e7ce7ad`).
+The 2D repo is private, so the SHA could not be re-fetched from GitHub in the port run — re-verify
+`sim.ts` @ `5fd45031` against the constants below on the next cadence.
+
+| Ticket | Status | 1:1 in 3D |
+|---|---|---|
+| T-019 mantle | **ported** | `ledgeSide` (22 px in / 18 px out), `findLedge` (hand = top − 8 px, \|lip − hand\| ≤ 26 px, best < 28 px), `ledgeGrab` (falling, jump held, not rising > 40 px/s; hang x = lip − w + 6 px, head 8 px above lip, `blockedAt` stand check), `tickMantle` smoothstep over `MANTLE_T = 0.28 s` → stand at lip + 2 px, grounded, jumps refilled, coyote. `down` releases the hang (applyRun). Jump from hang = 2D wall kick `−hangDir · runSpeed · 0.95` + `jumpVel`. Solids are read as XY AABBs from the physics colliders (CSG box, StaticBody box/convex/concave). Nix wall-face climb: no Nix in 3D yet — untouched. |
+| T-018 proneClearsLip | **ported** | `PH_CROUCH` 24 px / `PH_PRONE` 14 px capsules swapped by `tryHeight` (grow needs headroom), `updateCrouch` (`down && !jumpHeld && (grounded \|\| dragging)`, crawl if \|vx\| > 18 px/s or standing box blocked or `proneClearsLip(sign moveX)` — probe `dir · 8 px`, blocks 24 − 1 px, clears 14 − 1 px), `applyRun` crouchMul 0.55 / 0.42, camera focus follows `p.h/2`. `applyJump` dropT 0.18 s on down + jump (no jump); the one-way pass-through itself stays with the PR#3 wiring. New input `move_down` (S / ↓) = 2D `Actions.down`. |
+| T-020 Maya cream/tan | **HOLD** | No crouch/crawl material or pose exists in the greybox pipeline (hero_grey is one static grey mesh). Greybox only squashes the placeholder to the hitbox height (held while still). Cream/tan stays an Assets note; no new meshes. |
+| T-021 flicker | **n/a in 3D** | No sprite sheets / pixel camera in Godot; no shimmer mechanism to copy. Crouch pose is a single held state. Revisit only if a presentation flicker shows in playtest. |
+
+Not ported (not in this ticket, unchanged from oleada 2): wall slide / wall jump (`probeWall`/`wallDir`), dash,
+water, poison, crumble, one-way pass-through.
