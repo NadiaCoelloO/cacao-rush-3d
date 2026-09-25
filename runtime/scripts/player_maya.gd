@@ -1,9 +1,9 @@
 extends CharacterBody3D
 ## Maya controller for the Fase 2 vertical slice — movement feel ported 1:1
 ## from the 2D sim (src/game/sim.ts + characters.ts, id "maya").
-## Truth pin: sand-vivid-dawn-sail @ f278dd9 (not readable by the cloud agent);
-## values transcribed from NadiaCoelloO/Cacao.Game @ 77e55b5 src/game — re-diff
-## against the pin when it is reachable.
+## 2D truth: sand-vivid-dawn-sail @ 8e7ce7ad87f37ac79731806b5668bf47f84382d6.
+## Step order per tick: applyRun → applyJump → applyGravity → resolve → kill
+## (80 px below level) → followCam.
 ##
 ## Units: 2D px → metres at PX_TO_M. Scale is set by the collision box, not the
 ## sprite: PH=42 px ≈ Maya 1.75 m (capsule 1.8 m) → 24 px/m, T=32 px = 1.333 m,

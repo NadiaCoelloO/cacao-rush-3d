@@ -15,7 +15,7 @@ Fase 2 vertical slice: dual-mode selector + **Maya** on **Cuyabeno** (world id `
 
 | Button | Behavior |
 |---|---|
-| **Arcade 2D** | Info only — 2D truth is [`sand-vivid-dawn-sail`](https://github.com/NadiaCoelloO/sand-vivid-dawn-sail) @ tip pin `f278dd9730cb335590d50287303907e57f8f3461` (separate build; no launch from here). |
+| **Arcade 2D** | Info only — 2D truth is [`sand-vivid-dawn-sail`](https://github.com/NadiaCoelloO/sand-vivid-dawn-sail) @ tip `8e7ce7ad87f37ac79731806b5668bf47f84382d6` (separate build; no launch from here). |
 | **3D Cinemático** | Loads `scenes/pilot_cuyabeno.tscn`. |
 
 ## Pilot: Cuyabeno

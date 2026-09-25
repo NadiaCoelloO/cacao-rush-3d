@@ -2,7 +2,8 @@ extends SceneTree
 ## Headless feel check for player_maya.gd against 2D sim.ts numbers (Maya, 60 Hz).
 ##   godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd
 ## Expected values come from a verbatim JS port of applyRun/applyJump/applyGravity
-## on a flat floor (Cacao.Game @ 77e55b5 src/game/sim.ts). Exit code 1 on any failure.
+## on a flat floor (sand-vivid-dawn-sail @ 8e7ce7ad src/game/sim.ts, Maya from
+## characters.ts). Exit code 1 on any failure.
 
 const PX := 24.0
 const PLAYER_SCRIPT := preload("res://scripts/player_maya.gd")
