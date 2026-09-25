@@ -23,7 +23,8 @@ Fase 2 vertical slice: dual-mode selector + **Maya** on **Cuyabeno** (world id `
 - Display name: **Cuyabeno** (not Selva Dulce, not Yasuní).
 - Code / asset folder id: `selva`.
 - Controls: A/D or arrows move · Space/W jump · Esc back to mode select.
-- Feel stub (`player_maya.gd`): COYOTE **0.1**, BUFFER **0.12**, CUT **0.48** (match 2D; full `sim.ts` port next).
+- Feel (`player_maya.gd`): 2D `sim.ts` run/jump/gravity port at 24 px/m — COYOTE **0.1**, BUFFER **0.12**, CUT **0.48** per tick, 2 jumps, 2D `followCam` framing, fall-kill respawn 80 px below the floor.
+- Headless feel check: `godot --headless --path runtime -s res://tests/maya_feel_check.gd` (exit 0 = pass).
 
 ## Greybox tris (no high-poly yet)
 
