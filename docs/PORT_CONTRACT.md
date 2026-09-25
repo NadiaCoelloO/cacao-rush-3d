@@ -1,6 +1,8 @@
 # Port contract (summary)
 
-**2D tip pin:** `NadiaCoelloO/sand-vivid-dawn-sail` @ `f278dd9730cb335590d50287303907e57f8f3461`
+**2D tip pin:** `NadiaCoelloO/sand-vivid-dawn-sail` @ `e7fd5c28356fde01a8261a77b8bc6a55b3f513a3`  
+**Prior pins:** `8e7ce7ad` (oleada 2) · `f278dd97` (oleada 1) — superseded for new port work.  
+**Oleada 3 delta:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md)
 
 **Engine LOCKED:** Godot 4 (no R3F).
 
