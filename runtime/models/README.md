@@ -1,4 +1,4 @@
-﻿# runtime/models
+# runtime/models
 
 Godot 4 imports glTF from here (`res://models/`) for the Fase 2 pilot (world id `selva` · display **Cuyabeno**).
 
@@ -24,6 +24,7 @@ Greybox models below are **real binary glTF** (`.glb`, magic `glTF`) committed w
 - `chunk_selva_oneway` — thin slab 4.0×2.0×0.18 m + underside chevron cue (visual only); budget `ASSET_chunk_selva_oneway.md`
 - Scripts: `assets/scripts/bpy/chunk_selva_platform_solid.py`, `chunk_selva_oneway.py`
 - Sources: `assets/source/*.blend`
+- Wired into pilot: `PlatformSolidAnchor` **(3.5, 0, 0)** mid jump; `PlatformOnewayAnchor` **(6.0, 1.0, 0)** hop toward totem. CSG placeholders hidden when GLBs load; StaticBody box fallback if GLB has no collision. High-poly HOLD.
 
 ## Notes
 
