@@ -70,6 +70,41 @@ def make_grey_material(
     return mat
 
 
+
+def make_rgb_material(
+    name: str,
+    r: float,
+    g: float,
+    b: float,
+    unlit: bool = True,
+) -> bpy.types.Material:
+    """
+    Flat RGB material for greybox / feel-parity tints (sRGB 0–1).
+    When unlit=True, uses Emission so shading is flat (arcade look), matching make_grey_material.
+    Does not replace make_grey_material — grey scripts keep working.
+    """
+    mat = bpy.data.materials.get(name)
+    if mat is None:
+        mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+    out = nodes.new("ShaderNodeOutputMaterial")
+    color = (float(r), float(g), float(b), 1.0)
+    if unlit:
+        emit = nodes.new("ShaderNodeEmission")
+        emit.inputs["Color"].default_value = color
+        emit.inputs["Strength"].default_value = 1.0
+        links.new(emit.outputs["Emission"], out.inputs["Surface"])
+    else:
+        bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+        bsdf.inputs["Base Color"].default_value = color
+        bsdf.inputs["Roughness"].default_value = 0.7
+        links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    return mat
+
+
 def assign_material(obj: bpy.types.Object, mat: bpy.types.Material) -> None:
     if obj.type != "MESH":
         return
