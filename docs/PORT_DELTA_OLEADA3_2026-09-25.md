@@ -11,7 +11,7 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 
 | Area | Status |
 |---|---|
-| PR#4 oleada 4 (Fable) | **Done on branch** `cursor/maya-feel-parity-d54e` — T-019 mantle + T-018 `proneClearsLip` in `player_maya.gd` (@ `7f718ce7`, 41/41) **+ T-020 greybox tint** on Assets `hero_grey.glb` @ `402121f` (2026-09-26, 53/53 — see "PR#4 merge-ready note" below). Draft. **Do not merge** until Nadia playtest. |
+| PR#4 oleada 4 (Fable) | **Done on branch** `cursor/maya-feel-parity-d54e` — T-019 mantle + T-018 `proneClearsLip` in `player_maya.gd` (@ `7f718ce7`, 41/41) **+ T-020 greybox tint** on Assets `hero_grey.glb` @ `402121f` (2026-09-26, 54/54 on Godot 4.2.2–4.7 — see "PR#4 merge-ready note" below). Draft. **Do not merge** until Nadia playtest. |
 | PR#3 platforms wire | Still open @ `0b35977e` — playtest hold. Untouched this cadence. |
 | 2D tip after `e7fd5c28` | T-017 kakaw rename · T-016 water biomes · T-015 Ecuador toponyms · T-014 Nix outfit → tip `5fd45031` |
 | High-poly | HOLD |
@@ -55,8 +55,9 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 ## Oleada 4 port status — PR#4 @ 2D tip `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (2026-09-25)
 
 Ported into `runtime/scripts/player_maya.gd`, checked by `runtime/tests/maya_feel_check.gd`
-(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 53/53 — the
-original 41 feel checks unchanged + 8 T-020 tint checks + 2 slot-selection checks + 2 Identidad hue-band guards).
+(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 54/54 — the
+original 41 feel checks unchanged + 8 T-020 tint checks + 2 slot-selection checks + 2 Identidad hue-band guards + 1 harness
+tick guard; green on Godot 4.2.2, 4.3, 4.4.1, 4.5, 4.6, 4.7).
 Same tick order as `sim.ts updateGame()`: applyRun → applyJump → applyGravity → resolve →
 (`hanging` ? `tickMantle` : `ledgeGrab`) → `updateCrouch` → kill → followCam.
 Source read: `sim.ts` snapshot at the tip carried in the oleada-4 refs pack (`MANTLE_T`, `mantleT`,
@@ -76,7 +77,9 @@ water, poison, crumble, one-way pass-through.
 
 ### PR#4 merge-ready note (T-020 greybox, 2026-09-26)
 
-- T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` 53/53 (Godot 4.2.2 headless).
+- T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` **54/54 on Godot 4.2.2, 4.3, 4.4.1, 4.5, 4.6 and 4.7** (headless, `--fixed-fps 60`).
+- BOT QA gap closed (2026-09-26): the harness drove inputs from a `physics_frame` continuation, which on Godot 4.3+ makes `is_action_just_pressed` lag `is_action_pressed` by one tick (45/53 on 4.3–4.7, the 8 jump-press checks). Inputs are now set from the idle frame (`process_frame`) — the path a real key event takes — and a guard check asserts one physics tick per frame. `player_maya.gd` untouched.
+- Branch merged up to `main` @ `14b08cb5` (docs-only reconciliation; Assets `hero_grey.glb` @ 402121f slots and tint commits intact).
 - **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive) · **ASSET OK** (Orquestador, 2026-09-26) for `hero_grey.glb` @ 402121f on this branch. High-poly still HOLD.
 - Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Slot rule (`TINT_OUTFIT_SLOTS = ["Maya_Body"]`): named slots present → only outfit slots tinted, `Maya_Hair` untouched, `Maya_Pack` treated as accessory (add it to the list if Identidad classes the satchel as outfit); no named slots yet → every `BaseMaterial3D` on the hero instance is tinted. Emissive or albedo materials both work. Further Assets pushes stay compatible as long as those slot names hold.
 - Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3`.
