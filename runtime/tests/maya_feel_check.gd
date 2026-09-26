@@ -4,7 +4,9 @@ extends SceneTree
 ## Expected values come from a verbatim JS port of applyRun/applyJump/applyGravity
 ## on a flat floor (sand-vivid-dawn-sail @ 5fd45031 src/game/sim.ts, Maya from
 ## characters.ts; run/jump numbers unchanged since 8e7ce7ad). T-019 mantle and
-## T-018 proneClearsLip cases use the same sim.ts geometry constants.
+## T-018 proneClearsLip cases use the same sim.ts geometry constants. T-020
+## checks the greybox cream/tan albedo override (2D PR #12 crouch-1 / crawl-1
+## outfit averages) on a MeshInstance3D + CSG placeholder and on hero_grey.glb.
 ## Exit code 1 on any failure.
 
 const PX := 24.0
@@ -19,6 +21,8 @@ const LIP_GAP := 0.75
 const LOW_LIP_X := -88.5          # right face of a rock too low even for prone: 0.4 m
 const LOW_LIP_GAP := 0.4
 const BODY_R := 0.35
+## Greybox grey the test placeholder starts with (must come back when standing).
+const GREY := Color(0.45, 0.45, 0.45)
 
 var _fails := 0
 var _held := false
@@ -69,11 +73,15 @@ func _run() -> void:
 	_expect("mantle: jump from hang vy (720 - grav tick)", kick.y, 685.0, 0.5)
 	_expect("mantle: jump from hang kicks -0.95 run", kick.x, -275.5, 0.5)
 
-	# T-018 crouch / prone (updateCrouch, proneClearsLip).
+	# T-018 crouch / prone (updateCrouch, proneClearsLip) + T-020 cream/tan tint.
+	_expect("tint: standing = untouched greybox", 1.0 if _tint_restored() else 0.0, 1.0, 0.0)
 	_expect("crouch: down still → PH_CROUCH 24 px", await _crouch_height(0.0), 24.0, 0.01)
+	_expect_arr("tint: crouch albedo RGB8 (crouch-1)", _tint_rgb8(), [138, 99, 65], 0.0)
 	_expect("crouch: release → stands again", await _release_height(), 43.2, 0.01)
+	_expect("tint: stand restores greybox", 1.0 if _tint_restored() else 0.0, 1.0, 0.0)
 	_expect_arr("crawl: down+move px/s (0.42 run)", await _crawl_series(3), [76.667, 121.8, 121.8], 0.01)
 	_expect("crawl: moving crouch → PH_PRONE 14 px", _p._h * PX, 14.0, 0.01)
+	_expect_arr("tint: crawl albedo RGB8 (crawl-1)", _tint_rgb8(), [148, 110, 76], 0.0)
 	await _settle()
 	_expect("prone lip: standing push does not pass", 1.0 if await _push_lip(LIP_X, false) else 0.0, 0.0, 0.0)
 	_expect("prone lip: proneClearsLip(-1) at 18 px lip", 1.0 if _p._prone_clears_lip(-1.0) else 0.0, 1.0, 0.0)
@@ -81,6 +89,7 @@ func _run() -> void:
 	_expect("prone lip: down+move forces crawl under", 1.0 if await _push_lip(LIP_X, true) else 0.0, 1.0, 0.0)
 	await _step(0.0, false, false)
 	_expect("prone lip: release under rock stays prone", 1.0 if _p._dragging and is_equal_approx(_p._h * PX, 14.0) else 0.0, 1.0, 0.0)
+	_expect_arr("tint: prone under rock keeps crawl tan", _tint_rgb8(), [148, 110, 76], 0.0)
 	var out_left := false
 	for i in 90:
 		await _step(-1.0, false, false)
@@ -88,6 +97,7 @@ func _run() -> void:
 			out_left = true
 	await _step(0.0, false, false)
 	_expect("prone lip: crawls out and stands up", 1.0 if out_left and is_equal_approx(_p._h * PX, 43.2) else 0.0, 1.0, 0.0)
+	_expect("tint: stood up → greybox restored", 1.0 if _tint_restored() else 0.0, 1.0, 0.0)
 	await _settle()
 	_expect("prone lip: 0.4 m lip blocks prone too", 1.0 if await _push_lip(LOW_LIP_X, true) else 0.0, 0.0, 0.0)
 	_expect("prone lip: proneClearsLip(-1) false at 0.4 m", 1.0 if _p._prone_clears_lip(-1.0) else 0.0, 0.0, 0.0)
@@ -121,12 +131,28 @@ func _build_flat_world() -> void:
 	var mesh := Node3D.new()
 	mesh.name = "MeshPlaceholder"
 	_p.add_child(mesh)
+	# T-020: the player picks up hero_grey.glb as _visual (placeholder hidden), so
+	# these two are registered as extra tint slots below to cover the CSG path
+	# and a mesh with a material of its own (must be duplicated, not mutated).
+	var body := MeshInstance3D.new()
+	body.name = "Body"
+	var box_mesh := BoxMesh.new()
+	var grey := StandardMaterial3D.new()
+	grey.albedo_color = GREY
+	grey.roughness = 0.9
+	box_mesh.material = grey
+	body.mesh = box_mesh
+	mesh.add_child(body)
+	var csg := CSGBox3D.new()
+	csg.name = "Csg"
+	mesh.add_child(csg)
 	var cam := Camera3D.new()
 	cam.name = "Camera3D"
 	_p.add_child(cam)
 	_p.set_script(PLAYER_SCRIPT)
 	_p.position = Vector3(0, 0.05, 0)
 	_root.add_child(_p)
+	_p._collect_tint_slots(mesh)
 
 
 func _add_box(center: Vector3, size: Vector3) -> void:
@@ -370,6 +396,67 @@ func _push_lip(face_x: float, down: bool) -> bool:
 	return false
 
 
+## T-020: every material slot under `node` as the player sees it — MeshInstance3D
+## surface overrides (glTF path) and CSG primitive materials (placeholder path).
+## Nulls are kept so the caller can tell "restored" from "tinted".
+func _slot_materials(node: Node) -> Array:
+	var out := []
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		for i in mi.mesh.get_surface_count():
+			out.append(mi.get_surface_override_material(i))
+	elif node is CSGPrimitive3D:
+		out.append(node.get("material"))
+	for c in node.get_children():
+		out.append_array(_slot_materials(c))
+	return out
+
+
+## Slots under `node` whose albedo equals `want`.
+func _count_tinted(node: Node, want: Color) -> int:
+	var n := 0
+	for m in _slot_materials(node):
+		if m is BaseMaterial3D and (m as BaseMaterial3D).albedo_color == want:
+			n += 1
+	return n
+
+
+func _count_overrides(node: Node) -> int:
+	var n := 0
+	for m in _slot_materials(node):
+		if m != null:
+			n += 1
+	return n
+
+
+## 8-bit albedo while crouched / crawling: the hero_grey.glb surfaces and the
+## two registered placeholders must all carry pose_tint_color(); the Body mesh
+## keeps its own grey material and the override keeps its roughness (duplicate,
+## not mutation). [-1, -1, -1] on any mismatch.
+func _tint_rgb8() -> Array:
+	var body: MeshInstance3D = _p.get_node("MeshPlaceholder/Body")
+	var want: Color = _p.pose_tint_color()
+	var slots := _slot_materials(_p._visual) + _slot_materials(_p.get_node("MeshPlaceholder"))
+	if slots.size() < 2 or _count_tinted(_p._visual, want) + _count_tinted(_p.get_node("MeshPlaceholder"), want) != slots.size():
+		return [-1, -1, -1]
+	var over := body.get_surface_override_material(0) as BaseMaterial3D
+	if over == null or not is_equal_approx(over.roughness, 0.9):
+		return [-1, -1, -1]
+	if (body.mesh.surface_get_material(0) as BaseMaterial3D).albedo_color != GREY:
+		return [-1, -1, -1]
+	return [want.r8, want.g8, want.b8]
+
+
+## Standing puts back exactly what the slots had at _ready: no overrides on the
+## glb, CSG material null, Body mesh material untouched.
+func _tint_restored() -> bool:
+	var body: MeshInstance3D = _p.get_node("MeshPlaceholder/Body")
+	return _p._pose_tint == _p.PoseTint.STAND \
+		and _count_overrides(_p._visual) == 0 \
+		and _count_overrides(_p.get_node("MeshPlaceholder")) == 0 \
+		and (body.mesh.surface_get_material(0) as BaseMaterial3D).albedo_color == GREY
+
+
 func _falls_and_respawns(spawn: Vector3, run_to_x: float) -> bool:
 	await _settle()
 	_p.global_position = Vector3(run_to_x + 100.0, 0.05, 0)
@@ -388,6 +475,17 @@ func _pilot_smoke() -> void:
 	for i in 60:
 		await _step(0.0, false)
 	_expect("pilot: Maya lands on floor from spawn", 1.0 if _p.is_on_floor() and absf(_p.global_position.y) < 0.1 else 0.0, 1.0, 0.0)
+	# T-020 on the real greybox: hero_grey.glb = 3 LODs × 3 surfaces, no overrides
+	# at rest; every surface goes cream while crouched and comes back on release.
+	var hero: Node3D = _p._visual
+	var glb_attached := hero != _p.get_node("MeshPlaceholder")
+	var overrides_at_rest := _count_overrides(hero)
+	await _step(0.0, false, true)
+	_expect("pilot: crouch tints all 9 hero_grey surfaces", float(_count_tinted(hero, _p.TINT_CROUCH)) if glb_attached and overrides_at_rest == 0 else -1.0, 9.0, 0.0)
+	await _step(0.0, false, false)
+	_expect("pilot: release restores hero_grey materials", float(_count_overrides(hero)), 0.0, 0.0)
+	for i in 10:
+		await _step(0.0, false)
 	var on_ledge := false
 	await _step(1.0, true)
 	for i in 90:

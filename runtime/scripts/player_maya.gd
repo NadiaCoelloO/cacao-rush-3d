@@ -2,8 +2,8 @@ extends CharacterBody3D
 ## Maya controller for the Fase 2 vertical slice — movement feel ported 1:1
 ## from the 2D sim (src/game/sim.ts + characters.ts, id "maya").
 ## 2D truth: sand-vivid-dawn-sail @ 5fd450312c8e6ad0a214f35b68fd81ec2857fec3
-## (oleada 3+4: T-019 mantle, T-018 proneClearsLip; run/jump numbers unchanged
-## since 8e7ce7ad).
+## (oleada 3+4: T-019 mantle, T-018 proneClearsLip, T-020 crouch/crawl cream
+## tint; run/jump numbers unchanged since 8e7ce7ad).
 ## Step order per tick, same as sim.ts updateGame(): applyRun → applyJump →
 ## applyGravity → resolve → (hanging ? tickMantle : ledgeGrab) → updateCrouch →
 ## kill (80 px below level) → followCam.
@@ -74,6 +74,15 @@ const HANG_KICK_MUL := 0.95
 ## (2D overlaps() is strict).
 const PROBE_EPS := 0.01
 
+## T-020 (2D PR #12, recolor only): Maya's crouch-1..6 / crawl-1..6 outfit is
+## cream/tan, not olive. Greybox equivalent: while crouching / crawling the
+## hero_grey albedo is overridden with the average opaque outfit colour sampled
+## from the 2D crouch-1 / crawl-1 PNGs; standing restores the untouched greybox
+## materials. Runtime override only — no crouch mesh, high-poly HOLD.
+enum PoseTint { STAND, CROUCH, CRAWL }
+const TINT_CROUCH := Color(138.0 / 255.0, 99.0 / 255.0, 65.0 / 255.0)
+const TINT_CRAWL := Color(148.0 / 255.0, 110.0 / 255.0, 76.0 / 255.0)
+
 ## sim.ts followCam: look-ahead facing*48 px (lerp 4.2/s), focus 28 px above the
 ## hitbox centre (p.h/2, so it drops with the crouch), follow k = 1 - exp(-16 dt).
 const CAM_LOOK_AHEAD := 48.0 * PX_TO_M
@@ -115,6 +124,13 @@ var _stand_shape: Shape3D
 var _height_shapes := {}
 var _visual: Node3D
 
+## T-020 tint state: every material slot under _visual (MeshInstance3D surface
+## or CSG primitive) with the material it had at _ready, plus the tinted
+## duplicates keyed by pose → source material.
+var _pose_tint := PoseTint.STAND
+var _tint_slots: Array[Dictionary] = []
+var _tint_cache := {}
+
 @onready var _camera: Camera3D = $Camera3D
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _mesh_placeholder: Node3D = $MeshPlaceholder
@@ -124,6 +140,7 @@ func _ready() -> void:
 	_visual = _mesh_placeholder
 	# Try to instance greybox glTF if present under res://models/.
 	_try_attach_hero_mesh()
+	_collect_tint_slots(_visual)
 	_read_hitbox()
 	_spawn = global_transform
 	_snap_camera()
@@ -242,6 +259,7 @@ func _respawn() -> void:
 	_crouching = false
 	_dragging = false
 	_set_height(_stand_h)
+	_refresh_pose_tint()
 	_snap_camera()
 
 
@@ -378,14 +396,17 @@ func _update_crouch() -> void:
 			or _prone_clears_lip(move_dir)
 		_dragging = crawl
 		_try_height(PH_PRONE if crawl else PH_CROUCH)
+		_refresh_pose_tint()
 		return
 	if _try_height(_stand_h):
 		_crouching = false
 		_dragging = false
+		_refresh_pose_tint()
 		return
 	_crouching = true
 	_dragging = true
 	_try_height(PH_PRONE)
+	_refresh_pose_tint()
 
 
 ## 2D tryHeight: shrinking always succeeds; growing needs headroom.
@@ -422,9 +443,84 @@ func _set_height(h: float) -> void:
 			_collision.shape = _height_shapes[h]
 		_collision.position.y = h * 0.5
 	# Greybox pose: squash the placeholder to the hitbox height (held while still;
-	# no crouch mesh/material yet — T-020 high-poly HOLD).
+	# no crouch mesh — high-poly HOLD). The T-020 cream/tan tint is applied by
+	# _refresh_pose_tint once updateCrouch has settled the crouch/drag flags.
 	if _visual:
 		_visual.scale.y = h / _stand_h
+
+
+# --- T-020 crouch / crawl cream-tan greybox tint (2D PR #12, recolor only).
+
+## Pose the tint should show for the current updateCrouch flags.
+func _refresh_pose_tint() -> void:
+	var pose := PoseTint.STAND
+	if _dragging:
+		pose = PoseTint.CRAWL
+	elif _crouching:
+		pose = PoseTint.CROUCH
+	_set_pose_tint(pose)
+
+
+func _set_pose_tint(pose: PoseTint) -> void:
+	if pose == _pose_tint:
+		return
+	_pose_tint = pose
+	for slot in _tint_slots:
+		var node: Node = slot["node"]
+		if not is_instance_valid(node):
+			continue
+		var mat: Material = slot["base"] if pose == PoseTint.STAND else _tinted_material(slot["source"], pose)
+		if slot["surface"] >= 0:
+			(node as MeshInstance3D).set_surface_override_material(slot["surface"], mat)
+		else:
+			node.set("material", mat)
+
+
+## Albedo for a pose, or the untouched greybox when standing.
+func pose_tint_color() -> Color:
+	match _pose_tint:
+		PoseTint.CROUCH:
+			return TINT_CROUCH
+		PoseTint.CRAWL:
+			return TINT_CRAWL
+	return Color(1.0, 1.0, 1.0)
+
+
+## Records every material slot under `node`: MeshInstance3D surfaces keep their
+## override (usually none — the glTF material lives on the mesh) and CSG
+## primitives keep their `material`, so STAND puts back exactly what was there.
+func _collect_tint_slots(node: Node) -> void:
+	if node == null:
+		return
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		var count := mi.mesh.get_surface_count() if mi.mesh else 0
+		for i in count:
+			var base: Material = mi.get_surface_override_material(i)
+			var source: Material = base if base else mi.mesh.surface_get_material(i)
+			_tint_slots.append({"node": mi, "surface": i, "base": base, "source": source})
+	elif node is CSGPrimitive3D and "material" in node:
+		var base: Material = node.get("material")
+		_tint_slots.append({"node": node, "surface": -1, "base": base, "source": base})
+	for child in node.get_children():
+		_collect_tint_slots(child)
+
+
+## Duplicate of `source` with the pose albedo (roughness/metallic etc. kept), or a
+## fresh StandardMaterial3D when the slot had none. Shared per pose + source.
+func _tinted_material(source: Material, pose: PoseTint) -> Material:
+	var key := "%d:%d" % [pose, source.get_instance_id() if source else 0]
+	if _tint_cache.has(key):
+		return _tint_cache[key]
+	var tinted: BaseMaterial3D
+	if source is BaseMaterial3D:
+		tinted = (source as BaseMaterial3D).duplicate() as BaseMaterial3D
+		tinted.albedo_texture = null
+	else:
+		tinted = StandardMaterial3D.new()
+	tinted.albedo_color = TINT_CRAWL if pose == PoseTint.CRAWL else TINT_CROUCH
+	_tint_cache[key] = tinted
+	return tinted
 
 
 # --- Solid queries (2D blockedAt / solids()) against the physics world.
