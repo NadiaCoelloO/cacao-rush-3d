@@ -6,7 +6,7 @@ Greybox models below are **real binary glTF** (`.glb`, magic `glTF`) committed w
 
 | File | Source | Tris (greybox) | Size | SHA256 |
 |------|--------|----------------|------|--------|
-| `hero_grey.glb` | `assets/greybox/heroes/hero_grey.glb` | 896 / 25k | 111064 B | `839287ed18e56c90a334b3a8707b757f9f44dd6d944f78c83e67665890fb11f1` |
+| `hero_grey.glb` | `assets/greybox/heroes/hero_grey.glb` (T-020 cream/tan, slots `Maya_Body` / `Maya_Hair` / `Maya_Pack`, @ 402121f) | 896 / 25k | 111048 B | `1e299bf47c6924048ceb0cb88c58943af651197c866914ffa7039d1b3cc1c10e` |
 | `chunk_selva_floor.glb` | `assets/greybox/worlds/selva/chunk_selva_floor.glb` | 380 / 80k | 49428 B | `444d56329bbb38ab96645816c648888e4161723c115aa684d17ded4af02ef676` |
 | `totem_warp_cuyabeno.glb` | CIN-001 (ASSET OK @ d93f777) | 858 / 2000 (LOD1 360) | 103188 B | `e4b5a10c1f9d3e9d338fe37beca7542dcea8ec74d505e2a9b9fb5b790845f1bf` |
 | `chunk_selva_platform_solid.glb` | `assets/greybox/worlds/selva/` | 120 / 2000 (LOD1 42) | 17308 B | `ec363297b08a48d0bfb98aca29dde210ea8b6b035fa5a705c382f642d2675044` |
