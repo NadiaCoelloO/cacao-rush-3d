@@ -77,6 +77,9 @@ func _run() -> void:
 	# Identidad PASA: tints stay in the ~28° hue band (cream/tan, never olive).
 	_expect("identidad: crouch tint hue ≈ 28°", _p.TINT_CROUCH.h * 360.0, _p.TINT_HUE_DEG, _p.TINT_HUE_BAND_DEG)
 	_expect("identidad: crawl tint hue ≈ 28°", _p.TINT_CRAWL.h * 360.0, _p.TINT_HUE_DEG, _p.TINT_HUE_BAND_DEG)
+	# Slot selection: named Assets slots → outfit only; no names yet → whole instance.
+	_expect("tint: named slots → only Maya_Body registered", float(_slots_registered(["Maya_Body", "Maya_Hair", "Maya_Pack"])), 1.0, 0.0)
+	_expect("tint: unnamed materials → fallback tints all", float(_slots_registered(["", "", ""])), 3.0, 0.0)
 	_expect("tint: standing = untouched greybox", 1.0 if _tint_restored() else 0.0, 1.0, 0.0)
 	_expect("crouch: down still → PH_CROUCH 24 px", await _crouch_height(0.0), 24.0, 0.01)
 	_expect_arr("tint: crouch albedo RGB8 (crouch-1)", _tint_rgb8(), [138, 99, 65], 0.0)
@@ -452,6 +455,27 @@ func _tint_rgb8() -> Array:
 	if (body.mesh.surface_get_material(0) as BaseMaterial3D).albedo_color != GREY:
 		return [-1, -1, -1]
 	return [want.r8, want.g8, want.b8]
+
+
+## Builds a throwaway hero-like instance with one StandardMaterial3D surface per
+## name, runs the player's slot collection on it and returns how many slots it
+## registered (the player's slot list is restored afterwards).
+func _slots_registered(names: Array) -> int:
+	var hero := Node3D.new()
+	for n in names:
+		var mi := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		var mat := StandardMaterial3D.new()
+		mat.resource_name = n
+		box.material = mat
+		mi.mesh = box
+		hero.add_child(mi)
+	var before: int = _p._tint_slots.size()
+	_p._collect_tint_slots(hero)
+	var added: int = _p._tint_slots.size() - before
+	_p._tint_slots.resize(before)
+	hero.free()
+	return added
 
 
 ## Standing puts back exactly what the slots had at _ready: no overrides on the

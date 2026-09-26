@@ -79,9 +79,11 @@ const PROBE_EPS := 0.01
 ## hero_grey outfit colour is overridden with the average opaque outfit colour
 ## sampled from the 2D crouch-1 / crawl-1 PNGs; standing restores the untouched
 ## greybox materials. Runtime override only — no crouch mesh, high-poly HOLD.
-## hero_grey.glb (assets 402121f) exposes stable slots Maya_Body / Maya_Hair /
-## Maya_Pack: only the outfit slot is tinted (hair/pack unchanged, as in 2D). A
-## visual without named slots (CSG fallback) is tinted whole.
+## hero_grey.glb (assets 402121f, ASSET OK) exposes stable slots Maya_Body /
+## Maya_Hair / Maya_Pack: only the outfit slots are tinted (hair unchanged, as
+## in 2D). Maya_Pack (satchel) is an accessory, not outfit, in the 2D recolor —
+## add it to TINT_OUTFIT_SLOTS if Identidad reclassifies it. A hero instance
+## without named slots (older glb, CSG fallback) is tinted whole.
 ## Identidad PASA (greybox T-020, 2026-09-26): both tints sit in the ~28° hue
 ## band (crouch 27.9°, crawl 28.3°) — never olive (≈60–90°). Retune only with
 ## a new 2D sample and Identidad re-check.
@@ -90,7 +92,7 @@ const TINT_CROUCH := Color(138.0 / 255.0, 99.0 / 255.0, 65.0 / 255.0)
 const TINT_CRAWL := Color(148.0 / 255.0, 110.0 / 255.0, 76.0 / 255.0)
 const TINT_HUE_DEG := 28.0
 const TINT_HUE_BAND_DEG := 4.0
-const TINT_OUTFIT_SLOT := "Maya_Body"
+const TINT_OUTFIT_SLOTS: Array[String] = ["Maya_Body"]
 
 ## sim.ts followCam: look-ahead facing*48 px (lerp 4.2/s), focus 28 px above the
 ## hitbox centre (p.h/2, so it drops with the crouch), follow k = 1 - exp(-16 dt).
@@ -498,7 +500,7 @@ func pose_tint_color() -> Color:
 ## Records the material slots to tint under `visual`: MeshInstance3D surfaces
 ## keep their override (usually none — the glTF material lives on the mesh) and
 ## CSG primitives keep their `material`, so STAND puts back exactly what was
-## there. If the visual has TINT_OUTFIT_SLOT materials only those are kept.
+## there. If the visual has TINT_OUTFIT_SLOTS materials only those are kept.
 func _collect_tint_slots(visual: Node) -> void:
 	var found: Array[Dictionary] = []
 	_walk_tint_slots(visual, found)
@@ -524,7 +526,12 @@ func _walk_tint_slots(node: Node, out: Array[Dictionary]) -> void:
 
 
 func _is_outfit_slot(source: Material) -> bool:
-	return source != null and source.resource_name.begins_with(TINT_OUTFIT_SLOT)
+	if source == null:
+		return false
+	for slot in TINT_OUTFIT_SLOTS:
+		if source.resource_name.begins_with(slot):
+			return true
+	return false
 
 
 ## Duplicate of `source` carrying the pose colour (roughness etc. kept), or a
