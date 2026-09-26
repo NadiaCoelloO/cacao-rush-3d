@@ -8,6 +8,15 @@ extends SceneTree
 ## checks the greybox cream/tan albedo override (2D PR #12 crouch-1 / crawl-1
 ## outfit averages) on a MeshInstance3D + CSG placeholder and on hero_grey.glb.
 ## Exit code 1 on any failure.
+##
+## Input timing: inputs are set from the idle frame (`process_frame`) and read
+## by the player in the physics step that follows, the same path a real key
+## event takes. `--fixed-fps 60` makes that exactly one physics tick per frame
+## (guarded by the first check). Setting inputs from a `physics_frame`
+## continuation instead makes `is_action_just_pressed` lag `is_action_pressed`
+## by one tick on Godot 4.3+ (45/53 there, 8 jump-press checks), so a 1-tick
+## tap is never seen as a press; 4.2 had no lag. Verified green on 4.2.2, 4.3,
+## 4.4.1, 4.5, 4.6 and 4.7.
 
 const PX := 24.0
 const PLAYER_SCRIPT := preload("res://scripts/player_maya.gd")
@@ -37,8 +46,13 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	await physics_frame
+	await _tick()
 	_build_flat_world()
+	# Harness assumption: one physics tick per idle frame (--fixed-fps 60).
+	var pf0 := Engine.get_physics_frames()
+	for i in 10:
+		await _tick()
+	_expect("harness: 1 physics tick per frame (--fixed-fps 60)", float(Engine.get_physics_frames() - pf0), 10.0, 0.0)
 	await _settle()
 
 	_expect_arr("run ramp px/s", await _vx_series(1.0, 5), [76.667, 153.333, 230.0, 290.0, 290.0], 0.01)
@@ -109,7 +123,7 @@ func _run() -> void:
 	_expect("prone lip: proneClearsLip(-1) false at 0.4 m", 1.0 if _p._prone_clears_lip(-1.0) else 0.0, 0.0, 0.0)
 
 	_root.queue_free()
-	await physics_frame
+	await _tick()
 	await _pilot_smoke()
 
 	print("MAYA FEEL CHECK: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
@@ -172,6 +186,12 @@ func _add_box(center: Vector3, size: Vector3) -> void:
 	_root.add_child(body)
 
 
+## One idle frame = one physics tick under --fixed-fps 60. Inputs set before this
+## are read by the player's _physics_process inside it (see header note).
+func _tick() -> void:
+	await process_frame
+
+
 ## Applies inputs for one physics tick (runs before the player's _physics_process).
 func _step(move: float, held: bool, down := false) -> void:
 	if move != _move:
@@ -194,7 +214,7 @@ func _step(move: float, held: bool, down := false) -> void:
 		else:
 			Input.action_release("move_down")
 		_down = down
-	await physics_frame
+	await _tick()
 
 
 func _settle(x := 0.0) -> void:
