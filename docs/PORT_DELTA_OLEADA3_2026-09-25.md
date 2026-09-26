@@ -37,8 +37,8 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 ## Oleada 4 port status — PR#4 @ 2D tip `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (2026-09-25)
 
 Ported into `runtime/scripts/player_maya.gd`, checked by `runtime/tests/maya_feel_check.gd`
-(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 49/49 — the
-original 41 feel checks unchanged + 8 T-020 tint checks).
+(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 51/51 — the
+original 41 feel checks unchanged + 8 T-020 tint checks + 2 Identidad hue-band guards).
 Same tick order as `sim.ts updateGame()`: applyRun → applyJump → applyGravity → resolve →
 (`hanging` ? `tickMantle` : `ledgeGrab`) → `updateCrouch` → kill → followCam.
 Source read: `sim.ts` snapshot at the tip carried in the oleada-4 refs pack (`MANTLE_T`, `mantleT`,
@@ -50,7 +50,7 @@ The 2D repo is private, so the SHA could not be re-fetched from GitHub in the po
 |---|---|---|
 | T-019 mantle | **ported** | `ledgeSide` (22 px in / 18 px out), `findLedge` (hand = top − 8 px, \|lip − hand\| ≤ 26 px, best < 28 px), `ledgeGrab` (falling, jump held, not rising > 40 px/s; hang x = lip − w + 6 px, head 8 px above lip, `blockedAt` stand check), `tickMantle` smoothstep over `MANTLE_T = 0.28 s` → stand at lip + 2 px, grounded, jumps refilled, coyote. `down` releases the hang (applyRun). Jump from hang = 2D wall kick `−hangDir · runSpeed · 0.95` + `jumpVel`. Solids are read as XY AABBs from the physics colliders (CSG box, StaticBody box/convex/concave). Nix wall-face climb: no Nix in 3D yet — untouched. |
 | T-018 proneClearsLip | **ported** | `PH_CROUCH` 24 px / `PH_PRONE` 14 px capsules swapped by `tryHeight` (grow needs headroom), `updateCrouch` (`down && !jumpHeld && (grounded \|\| dragging)`, crawl if \|vx\| > 18 px/s or standing box blocked or `proneClearsLip(sign moveX)` — probe `dir · 8 px`, blocks 24 − 1 px, clears 14 − 1 px), `applyRun` crouchMul 0.55 / 0.42, camera focus follows `p.h/2`. `applyJump` dropT 0.18 s on down + jump (no jump); the one-way pass-through itself stays with the PR#3 wiring. New input `move_down` (S / ↓) = 2D `Actions.down`. |
-| T-020 Maya cream/tan | **greybox done** (2026-09-26) | Runtime material override in `player_maya.gd`: while `updateCrouch` reports crouching the `hero_grey` outfit is **RGB 138,99,65** (average opaque outfit of 2D `crouch-1`), while dragging/crawling **RGB 148,110,76** (`crawl-1`); standing restores the untouched materials. Targets the `Maya_Body` slot of the Assets `hero_grey.glb` (@ 402121f: idle cream body 224,184,136 / brown hair / tan pack, unlit Emission) on all 3 LODs — hair / pack untouched, like the 2D recolor; a visual without named slots (CSG fallback) is tinted whole. Tint goes through `emission` on the unlit export, `albedo_color` otherwise (glTF `MeshInstance3D` surface overrides, `material` on CSG; roughness etc. kept via duplicate). Refreshed after `updateCrouch` and on respawn, so the prone-under-rock hold keeps the crawl tan. No crouch mesh / pose — the placeholder is still squashed to the hitbox height. **High-poly HOLD** until post-delivery Identidad PASA. |
+| T-020 Maya cream/tan | **greybox done** (2026-09-26) | Runtime material override in `player_maya.gd`: while `updateCrouch` reports crouching the `hero_grey` outfit is **RGB 138,99,65** (average opaque outfit of 2D `crouch-1`), while dragging/crawling **RGB 148,110,76** (`crawl-1`); standing restores the untouched materials. Targets the `Maya_Body` slot of the Assets `hero_grey.glb` (@ 402121f: idle cream body 224,184,136 / brown hair / tan pack, unlit Emission) on all 3 LODs — hair / pack untouched, like the 2D recolor; a visual without named slots (CSG fallback) is tinted whole. Tint goes through `emission` on the unlit export, `albedo_color` otherwise (glTF `MeshInstance3D` surface overrides, `material` on CSG; roughness etc. kept via duplicate). Refreshed after `updateCrouch` and on respawn, so the prone-under-rock hold keeps the crawl tan. No crouch mesh / pose — the placeholder is still squashed to the hitbox height. **Identidad PASA** for the greybox tint (2026-09-26): hue ~28° band — crouch 27.9°, crawl 28.3° — never olive (≈60–90°); guarded in the headless check (`TINT_HUE_DEG` 28 ± 4). **High-poly still HOLD.** |
 | T-021 flicker | **n/a in 3D** | No sprite sheets / pixel camera in Godot; no shimmer mechanism to copy. Crouch pose is a single held state. Revisit only if a presentation flicker shows in playtest. |
 
 Not ported (not in this ticket, unchanged from oleada 2): wall slide / wall jump (`probeWall`/`wallDir`), dash,
@@ -58,8 +58,9 @@ water, poison, crumble, one-way pass-through.
 
 ### PR#4 merge-ready note (T-020 greybox, 2026-09-26)
 
-- T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` 49/49 (Godot 4.2.2 headless).
-- Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated.
+- T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` 51/51 (Godot 4.2.2 headless).
+- **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive). High-poly still HOLD.
+- Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Further Assets pushes to this branch stay compatible as long as the outfit slot keeps the `Maya_Body` name (any `BaseMaterial3D`, emissive or albedo); a glb without named slots is tinted whole.
 - Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3`.
 - **Ready for Nadia OK to merge — stays draft, not merged.** No writes to `sand-vivid-dawn-sail`.
 - Deferred: high-poly crouch/crawl materials & pose (Identidad HOLD), PR#3 platform polish, water / dash / wall.
