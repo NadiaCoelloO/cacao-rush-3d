@@ -76,12 +76,16 @@ const PROBE_EPS := 0.01
 
 ## T-020 (2D PR #12, recolor only): Maya's crouch-1..6 / crawl-1..6 outfit is
 ## cream/tan, not olive. Greybox equivalent: while crouching / crawling the
-## hero_grey albedo is overridden with the average opaque outfit colour sampled
-## from the 2D crouch-1 / crawl-1 PNGs; standing restores the untouched greybox
-## materials. Runtime override only — no crouch mesh, high-poly HOLD.
+## hero_grey outfit colour is overridden with the average opaque outfit colour
+## sampled from the 2D crouch-1 / crawl-1 PNGs; standing restores the untouched
+## greybox materials. Runtime override only — no crouch mesh, high-poly HOLD.
+## hero_grey.glb (assets 402121f) exposes stable slots Maya_Body / Maya_Hair /
+## Maya_Pack: only the outfit slot is tinted (hair/pack unchanged, as in 2D). A
+## visual without named slots (CSG fallback) is tinted whole.
 enum PoseTint { STAND, CROUCH, CRAWL }
 const TINT_CROUCH := Color(138.0 / 255.0, 99.0 / 255.0, 65.0 / 255.0)
 const TINT_CRAWL := Color(148.0 / 255.0, 110.0 / 255.0, 76.0 / 255.0)
+const TINT_OUTFIT_SLOT := "Maya_Body"
 
 ## sim.ts followCam: look-ahead facing*48 px (lerp 4.2/s), focus 28 px above the
 ## hitbox centre (p.h/2, so it drops with the crouch), follow k = 1 - exp(-16 dt).
@@ -486,10 +490,18 @@ func pose_tint_color() -> Color:
 	return Color(1.0, 1.0, 1.0)
 
 
-## Records every material slot under `node`: MeshInstance3D surfaces keep their
-## override (usually none — the glTF material lives on the mesh) and CSG
-## primitives keep their `material`, so STAND puts back exactly what was there.
-func _collect_tint_slots(node: Node) -> void:
+## Records the material slots to tint under `visual`: MeshInstance3D surfaces
+## keep their override (usually none — the glTF material lives on the mesh) and
+## CSG primitives keep their `material`, so STAND puts back exactly what was
+## there. If the visual has TINT_OUTFIT_SLOT materials only those are kept.
+func _collect_tint_slots(visual: Node) -> void:
+	var found: Array[Dictionary] = []
+	_walk_tint_slots(visual, found)
+	var outfit := found.filter(func(s: Dictionary) -> bool: return _is_outfit_slot(s["source"]))
+	_tint_slots.append_array(outfit if not outfit.is_empty() else found)
+
+
+func _walk_tint_slots(node: Node, out: Array[Dictionary]) -> void:
 	if node == null:
 		return
 	if node is MeshInstance3D:
@@ -498,29 +510,50 @@ func _collect_tint_slots(node: Node) -> void:
 		for i in count:
 			var base: Material = mi.get_surface_override_material(i)
 			var source: Material = base if base else mi.mesh.surface_get_material(i)
-			_tint_slots.append({"node": mi, "surface": i, "base": base, "source": source})
+			out.append({"node": mi, "surface": i, "base": base, "source": source})
 	elif node is CSGPrimitive3D and "material" in node:
 		var base: Material = node.get("material")
-		_tint_slots.append({"node": node, "surface": -1, "base": base, "source": base})
+		out.append({"node": node, "surface": -1, "base": base, "source": base})
 	for child in node.get_children():
-		_collect_tint_slots(child)
+		_walk_tint_slots(child, out)
 
 
-## Duplicate of `source` with the pose albedo (roughness/metallic etc. kept), or a
+func _is_outfit_slot(source: Material) -> bool:
+	return source != null and source.resource_name.begins_with(TINT_OUTFIT_SLOT)
+
+
+## Duplicate of `source` carrying the pose colour (roughness etc. kept), or a
 ## fresh StandardMaterial3D when the slot had none. Shared per pose + source.
+## The Blender greybox exports "unlit Emission" (albedo black, emission = flat
+## colour), so an emissive source is tinted through its emission; anything else
+## through albedo.
 func _tinted_material(source: Material, pose: PoseTint) -> Material:
 	var key := "%d:%d" % [pose, source.get_instance_id() if source else 0]
 	if _tint_cache.has(key):
 		return _tint_cache[key]
+	var tint := TINT_CRAWL if pose == PoseTint.CRAWL else TINT_CROUCH
 	var tinted: BaseMaterial3D
 	if source is BaseMaterial3D:
 		tinted = (source as BaseMaterial3D).duplicate() as BaseMaterial3D
-		tinted.albedo_texture = null
 	else:
 		tinted = StandardMaterial3D.new()
-	tinted.albedo_color = TINT_CRAWL if pose == PoseTint.CRAWL else TINT_CROUCH
+	if tinted.emission_enabled:
+		tinted.emission_texture = null
+		tinted.emission = tint
+	else:
+		tinted.albedo_texture = null
+		tinted.albedo_color = tint
 	_tint_cache[key] = tinted
 	return tinted
+
+
+## The flat colour a greybox material shows (emission for the unlit export,
+## albedo otherwise). Used by the headless check.
+static func flat_color(mat: Material) -> Color:
+	if mat is BaseMaterial3D:
+		var bm := mat as BaseMaterial3D
+		return bm.emission if bm.emission_enabled else bm.albedo_color
+	return Color(0, 0, 0, 0)
 
 
 # --- Solid queries (2D blockedAt / solids()) against the physics world.

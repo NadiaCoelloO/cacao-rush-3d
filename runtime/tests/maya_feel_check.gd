@@ -412,11 +412,12 @@ func _slot_materials(node: Node) -> Array:
 	return out
 
 
-## Slots under `node` whose albedo equals `want`.
+## Slots under `node` whose flat colour (emission on the unlit glb export,
+## albedo otherwise) equals `want`.
 func _count_tinted(node: Node, want: Color) -> int:
 	var n := 0
 	for m in _slot_materials(node):
-		if m is BaseMaterial3D and (m as BaseMaterial3D).albedo_color == want:
+		if m != null and PLAYER_SCRIPT.flat_color(m) == want:
 			n += 1
 	return n
 
@@ -429,15 +430,18 @@ func _count_overrides(node: Node) -> int:
 	return n
 
 
-## 8-bit albedo while crouched / crawling: the hero_grey.glb surfaces and the
-## two registered placeholders must all carry pose_tint_color(); the Body mesh
-## keeps its own grey material and the override keeps its roughness (duplicate,
-## not mutation). [-1, -1, -1] on any mismatch.
+## 8-bit colour while crouched / crawling: every override on hero_grey.glb (the
+## Maya_Body outfit slots) and both registered placeholders must carry
+## pose_tint_color(); the Body mesh keeps its own grey material and the override
+## keeps its roughness (duplicate, not mutation). [-1, -1, -1] on any mismatch.
 func _tint_rgb8() -> Array:
 	var body: MeshInstance3D = _p.get_node("MeshPlaceholder/Body")
+	var placeholder: Node = _p.get_node("MeshPlaceholder")
 	var want: Color = _p.pose_tint_color()
-	var slots := _slot_materials(_p._visual) + _slot_materials(_p.get_node("MeshPlaceholder"))
-	if slots.size() < 2 or _count_tinted(_p._visual, want) + _count_tinted(_p.get_node("MeshPlaceholder"), want) != slots.size():
+	var glb_tinted := _count_tinted(_p._visual, want)
+	if glb_tinted < 1 or glb_tinted != _count_overrides(_p._visual):
+		return [-1, -1, -1]
+	if _count_tinted(placeholder, want) != 2 or _slot_materials(placeholder).size() != 2:
 		return [-1, -1, -1]
 	var over := body.get_surface_override_material(0) as BaseMaterial3D
 	if over == null or not is_equal_approx(over.roughness, 0.9):
@@ -475,13 +479,15 @@ func _pilot_smoke() -> void:
 	for i in 60:
 		await _step(0.0, false)
 	_expect("pilot: Maya lands on floor from spawn", 1.0 if _p.is_on_floor() and absf(_p.global_position.y) < 0.1 else 0.0, 1.0, 0.0)
-	# T-020 on the real greybox: hero_grey.glb = 3 LODs × 3 surfaces, no overrides
-	# at rest; every surface goes cream while crouched and comes back on release.
+	# T-020 on the real greybox: hero_grey.glb = 3 LODs × (Maya_Body, Maya_Hair,
+	# Maya_Pack), no overrides at rest; only the 3 outfit surfaces go cream while
+	# crouched (hair / pack keep the idle materials) and come back on release.
 	var hero: Node3D = _p._visual
 	var glb_attached := hero != _p.get_node("MeshPlaceholder")
 	var overrides_at_rest := _count_overrides(hero)
 	await _step(0.0, false, true)
-	_expect("pilot: crouch tints all 9 hero_grey surfaces", float(_count_tinted(hero, _p.TINT_CROUCH)) if glb_attached and overrides_at_rest == 0 else -1.0, 9.0, 0.0)
+	_expect("pilot: crouch tints the 3 Maya_Body surfaces", float(_count_tinted(hero, _p.TINT_CROUCH)) if glb_attached and overrides_at_rest == 0 else -1.0, 3.0, 0.0)
+	_expect("pilot: Maya_Hair / Maya_Pack untouched", float(_count_overrides(hero) - _count_tinted(hero, _p.TINT_CROUCH)), 0.0, 0.0)
 	await _step(0.0, false, false)
 	_expect("pilot: release restores hero_grey materials", float(_count_overrides(hero)), 0.0, 0.0)
 	for i in 10:
