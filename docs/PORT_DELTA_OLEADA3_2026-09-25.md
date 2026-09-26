@@ -37,8 +37,8 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 ## Oleada 4 port status — PR#4 @ 2D tip `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (2026-09-25)
 
 Ported into `runtime/scripts/player_maya.gd`, checked by `runtime/tests/maya_feel_check.gd`
-(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 51/51 — the
-original 41 feel checks unchanged + 8 T-020 tint checks + 2 Identidad hue-band guards).
+(`godot --headless --fixed-fps 60 --path runtime -s res://tests/maya_feel_check.gd`, 53/53 — the
+original 41 feel checks unchanged + 8 T-020 tint checks + 2 slot-selection checks + 2 Identidad hue-band guards).
 Same tick order as `sim.ts updateGame()`: applyRun → applyJump → applyGravity → resolve →
 (`hanging` ? `tickMantle` : `ledgeGrab`) → `updateCrouch` → kill → followCam.
 Source read: `sim.ts` snapshot at the tip carried in the oleada-4 refs pack (`MANTLE_T`, `mantleT`,
@@ -58,9 +58,9 @@ water, poison, crumble, one-way pass-through.
 
 ### PR#4 merge-ready note (T-020 greybox, 2026-09-26)
 
-- T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` 51/51 (Godot 4.2.2 headless).
+- T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` 53/53 (Godot 4.2.2 headless).
 - **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive) · **ASSET OK** (Orquestador, 2026-09-26) for `hero_grey.glb` @ 402121f on this branch. High-poly still HOLD.
-- Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Further Assets pushes to this branch stay compatible as long as the outfit slot keeps the `Maya_Body` name (any `BaseMaterial3D`, emissive or albedo); a glb without named slots is tinted whole.
+- Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Slot rule (`TINT_OUTFIT_SLOTS = ["Maya_Body"]`): named slots present → only outfit slots tinted, `Maya_Hair` untouched, `Maya_Pack` treated as accessory (add it to the list if Identidad classes the satchel as outfit); no named slots yet → every `BaseMaterial3D` on the hero instance is tinted. Emissive or albedo materials both work. Further Assets pushes stay compatible as long as those slot names hold.
 - Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3`.
 - **Ready for Nadia OK to merge — stays draft, not merged.** No writes to `sand-vivid-dawn-sail`.
 - Deferred: high-poly crouch/crawl materials & pose (Identidad HOLD), PR#3 platform polish, water / dash / wall.
