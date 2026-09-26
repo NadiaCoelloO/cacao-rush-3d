@@ -2,7 +2,7 @@
 
 **2D tip pin:** `NadiaCoelloO/sand-vivid-dawn-sail` @ `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (oleada 3+4)  
 **Prior pins:** `e7fd5c28` (oleada 3 docs) · `8e7ce7ad` (oleada 2) · `f278dd97` (oleada 1) — superseded for new port work.  
-**Oleada delta:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md) — T-019/T-018 on PR#4 draft; T-014…T-017 tip debt recorded.
+**Oleada delta:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md) — T-019 mantle + T-018 proneClearsLip + T-020 greybox tint ported in `runtime/scripts/player_maya.gd` (PR#4 draft); T-014…T-017 tip debt recorded.
 
 **Engine LOCKED:** Godot 4 (no R3F).
 
