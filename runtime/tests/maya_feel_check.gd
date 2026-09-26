@@ -74,6 +74,9 @@ func _run() -> void:
 	_expect("mantle: jump from hang kicks -0.95 run", kick.x, -275.5, 0.5)
 
 	# T-018 crouch / prone (updateCrouch, proneClearsLip) + T-020 cream/tan tint.
+	# Identidad PASA: tints stay in the ~28° hue band (cream/tan, never olive).
+	_expect("identidad: crouch tint hue ≈ 28°", _p.TINT_CROUCH.h * 360.0, _p.TINT_HUE_DEG, _p.TINT_HUE_BAND_DEG)
+	_expect("identidad: crawl tint hue ≈ 28°", _p.TINT_CRAWL.h * 360.0, _p.TINT_HUE_DEG, _p.TINT_HUE_BAND_DEG)
 	_expect("tint: standing = untouched greybox", 1.0 if _tint_restored() else 0.0, 1.0, 0.0)
 	_expect("crouch: down still → PH_CROUCH 24 px", await _crouch_height(0.0), 24.0, 0.01)
 	_expect_arr("tint: crouch albedo RGB8 (crouch-1)", _tint_rgb8(), [138, 99, 65], 0.0)

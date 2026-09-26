@@ -82,9 +82,14 @@ const PROBE_EPS := 0.01
 ## hero_grey.glb (assets 402121f) exposes stable slots Maya_Body / Maya_Hair /
 ## Maya_Pack: only the outfit slot is tinted (hair/pack unchanged, as in 2D). A
 ## visual without named slots (CSG fallback) is tinted whole.
+## Identidad PASA (greybox T-020, 2026-09-26): both tints sit in the ~28° hue
+## band (crouch 27.9°, crawl 28.3°) — never olive (≈60–90°). Retune only with
+## a new 2D sample and Identidad re-check.
 enum PoseTint { STAND, CROUCH, CRAWL }
 const TINT_CROUCH := Color(138.0 / 255.0, 99.0 / 255.0, 65.0 / 255.0)
 const TINT_CRAWL := Color(148.0 / 255.0, 110.0 / 255.0, 76.0 / 255.0)
+const TINT_HUE_DEG := 28.0
+const TINT_HUE_BAND_DEG := 4.0
 const TINT_OUTFIT_SLOT := "Maya_Body"
 
 ## sim.ts followCam: look-ahead facing*48 px (lerp 4.2/s), focus 28 px above the
