@@ -59,7 +59,7 @@ water, poison, crumble, one-way pass-through.
 ### PR#4 merge-ready note (T-020 greybox, 2026-09-26)
 
 - T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` 51/51 (Godot 4.2.2 headless).
-- **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive). High-poly still HOLD.
+- **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive) · **ASSET OK** (Orquestador, 2026-09-26) for `hero_grey.glb` @ 402121f on this branch. High-poly still HOLD.
 - Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Further Assets pushes to this branch stay compatible as long as the outfit slot keeps the `Maya_Body` name (any `BaseMaterial3D`, emissive or albedo); a glb without named slots is tinted whole.
 - Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3`.
 - **Ready for Nadia OK to merge — stays draft, not merged.** No writes to `sand-vivid-dawn-sail`.
