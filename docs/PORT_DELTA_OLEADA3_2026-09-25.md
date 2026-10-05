@@ -1,13 +1,33 @@
 # Port delta — oleada 3+4 (2026-09-25 Guayaquil)
 
 **2D truth (READ ONLY):** `NadiaCoelloO/sand-vivid-dawn-sail`  
-**Tip pin:** `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (post T-014; supersedes `e7fd5c28`)  
+**Tip pin:** `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (post T-014; supersedes `e7fd5c28`) — re-verified READ ONLY 2026-09-29 ~15:00 Guayaquil  
 **Status:** preproducción · High-poly HOLD · PR#3 open · PR#4 T-019 / T-018 / T-020 (greybox tint) — **merge-ready, draft, awaiting Nadia OK** (no merge without Nadia playtest OK)  
 **Source notes:** ChatGPT refs `06-pista-2d/SYNC_T-014_*` … `SYNC_T-021_*` · oleada-4 Fable pack · `fable-t020-refs` pack
 
 Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timings.
 
-## Cadence 17:00 — what changed since `0c4116ce` (15:00)
+## Cadence 2026-10-05 — merged `main` @ `580a3bb` into PR#4
+
+| Area | Status |
+|---|---|
+| PR#4 oleada 4 + T-020 | **Hold on branch** `cursor/maya-feel-parity-d54e` — T-019 mantle + T-018 `proneClearsLip` + **T-020 cream/tan greybox tint** on Assets `hero_grey.glb` @ `402121f`; `player_maya.gd` feel/timings **untouched** this merge. Docs-only conflict resolution (keep `main` structure + restore PR#4 status). Headless `maya_feel_check.gd` **54/54** on Godot 4.3 after merging `main` @ `580a3bb`. Still **draft**. **Do not merge** until Nadia playtest OK. |
+| PR#3 platforms wire | Still open @ `0b35977e` — playtest hold. Untouched. High-poly HOLD. |
+| 2D tip | Unchanged @ `5fd45031` (READ ONLY pin from 2026-09-29). |
+| High-poly | HOLD |
+| `main` | Merged `580a3bb` (WORLD-001 briefs + cadence 15:00 port docs). No gameplay on `main`. |
+
+## Cadence 15:00 (2026-09-29) — what changed since `14b08cb5` (2026-09-25 17:00)
+
+| Area | Status |
+|---|---|
+| PR#4 oleada 4 + T-020 | **Advanced on branch** `cursor/maya-feel-parity-d54e` @ `f9a879d1` — T-019 mantle + T-018 `proneClearsLip` + **T-020 cream/tan greybox tint** on Assets `hero_grey.glb` @ `402121f`; headless `maya_feel_check.gd` **54/54** on Godot 4.2.2–4.7; BOT QA harness fixed; merged up to `main` @ `14b08cb5`; Identidad PASA · ASSET OK. Still **draft**. **Do not merge** until Nadia playtest OK. |
+| PR#3 platforms wire | Still open @ `0b35977e` — playtest hold. Untouched. High-poly HOLD. |
+| 2D tip | Unchanged @ `5fd45031` (READ ONLY re-check). |
+| High-poly | HOLD |
+| Cadence note | Prior automation ~13:08 Guayaquil failed (`gh` CLI unauthenticated). This push uses GitHub MCP write path only. |
+
+## Cadence 17:00 (2026-09-25) — what changed since `0c4116ce` (15:00)
 
 | Area | Status |
 |---|---|
@@ -50,7 +70,7 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 ## Related open work (do not merge here)
 
 - PR#3 `feat/wire-selva-platforms` @ `0b35977e` — wire solid+oneway into pilot
-- PR#4 `cursor/maya-feel-parity-d54e` (draft) — Maya feel 1:1 + oleada 4 mantle/prone + T-020 greybox tint on Assets `hero_grey.glb` @ `402121f`; merged up to `main` @ `14b08cb5`; **status below**; playtest then merge
+- PR#4 `cursor/maya-feel-parity-d54e` (draft) — Maya feel 1:1 + oleada 4 mantle/prone + T-020 greybox tint on Assets `hero_grey.glb` @ `402121f`; merged up to `main` @ `580a3bb`; **status below**; playtest then merge
 
 ## Oleada 4 port status — PR#4 @ 2D tip `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (2026-09-25)
 
@@ -62,8 +82,7 @@ Same tick order as `sim.ts updateGame()`: applyRun → applyJump → applyGravit
 (`hanging` ? `tickMantle` : `ledgeGrab`) → `updateCrouch` → kill → followCam.
 Source read: `sim.ts` snapshot at the tip carried in the oleada-4 refs pack (`MANTLE_T`, `mantleT`,
 `proneClearsLip`, `PH_CROUCH`/`PH_PRONE` present; run/jump constants unchanged vs `8e7ce7ad`).
-The 2D repo is private, so the SHA could not be re-fetched from GitHub in the port run — re-verify
-`sim.ts` @ `5fd45031` against the constants below on the next cadence.
+2D tip re-verified READ ONLY @ `5fd45031` on 2026-09-29 cadence (no tip move).
 
 | Ticket | Status | 1:1 in 3D |
 |---|---|---|
@@ -75,14 +94,14 @@ The 2D repo is private, so the SHA could not be re-fetched from GitHub in the po
 Not ported (not in this ticket, unchanged from oleada 2): wall slide / wall jump (`probeWall`/`wallDir`), dash,
 water, poison, crumble, one-way pass-through.
 
-### PR#4 merge-ready note (T-020 greybox, 2026-09-26)
+### PR#4 merge-ready note (T-020 greybox, 2026-09-26; tip pin re-check 2026-09-29)
 
 - T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` **54/54 on Godot 4.2.2, 4.3, 4.4.1, 4.5, 4.6 and 4.7** (headless, `--fixed-fps 60`).
 - BOT QA gap closed (2026-09-26): the harness drove inputs from a `physics_frame` continuation, which on Godot 4.3+ makes `is_action_just_pressed` lag `is_action_pressed` by one tick (45/53 on 4.3–4.7, the 8 jump-press checks). Inputs are now set from the idle frame (`process_frame`) — the path a real key event takes — and a guard check asserts one physics tick per frame. `player_maya.gd` untouched.
-- Branch merged up to `main` @ `14b08cb5` (docs-only reconciliation; Assets `hero_grey.glb` @ 402121f slots and tint commits intact).
+- Merged up to `main` @ `580a3bb` (docs-only reconciliation; Assets `hero_grey.glb` @ 402121f slots and tint commits intact). `player_maya.gd` feel/timings not changed in this merge. Headless re-run after merge: **54/54** on Godot 4.3 (`--fixed-fps 60`).
 - **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive) · **ASSET OK** (Orquestador, 2026-09-26) for `hero_grey.glb` @ 402121f on this branch. High-poly still HOLD.
 - Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Slot rule (`TINT_OUTFIT_SLOTS = ["Maya_Body"]`): named slots present → only outfit slots tinted, `Maya_Hair` untouched, `Maya_Pack` treated as accessory (add it to the list if Identidad classes the satchel as outfit); no named slots yet → every `BaseMaterial3D` on the hero instance is tinted. Emissive or albedo materials both work. Further Assets pushes stay compatible as long as those slot names hold.
-- Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3`.
+- Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (re-verified READ ONLY 2026-09-29).
 - **Ready for Nadia OK to merge — stays draft, not merged.** No writes to `sand-vivid-dawn-sail`.
 - Deferred: high-poly crouch/crawl materials & pose (Identidad HOLD), PR#3 platform polish, water / dash / wall.
 - Observation for Assets (not changed here): Blender `default_value` colours are linear, so the glb's baked idle cream imports as sRGB ≈ 241,221,193 rather than 224,184,136. The runtime tint is sRGB-exact (Godot `Color`), so crouch/crawl match the 2D samples regardless.
