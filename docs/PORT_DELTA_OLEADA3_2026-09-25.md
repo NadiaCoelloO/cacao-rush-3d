@@ -11,7 +11,7 @@ Until Nadia’s **go 3D**, record 1:1 port debt here. Do not “improve” timin
 
 | Area | Status |
 |---|---|
-| PR#4 oleada 4 + T-020 | **Hold on branch** `cursor/maya-feel-parity-d54e` — T-019 mantle + T-018 `proneClearsLip` + **T-020 cream/tan greybox tint** on Assets `hero_grey.glb` @ `402121f`; `player_maya.gd` feel/timings **untouched** this merge. Docs-only conflict resolution (keep `main` structure + restore PR#4 status). Still **draft**. **Do not merge** until Nadia playtest OK. |
+| PR#4 oleada 4 + T-020 | **Hold on branch** `cursor/maya-feel-parity-d54e` — T-019 mantle + T-018 `proneClearsLip` + **T-020 cream/tan greybox tint** on Assets `hero_grey.glb` @ `402121f`; `player_maya.gd` feel/timings **untouched** this merge. Docs-only conflict resolution (keep `main` structure + restore PR#4 status). Headless `maya_feel_check.gd` **54/54** on Godot 4.3 after merging `main` @ `580a3bb`. Still **draft**. **Do not merge** until Nadia playtest OK. |
 | PR#3 platforms wire | Still open @ `0b35977e` — playtest hold. Untouched. High-poly HOLD. |
 | 2D tip | Unchanged @ `5fd45031` (READ ONLY pin from 2026-09-29). |
 | High-poly | HOLD |
@@ -98,7 +98,7 @@ water, poison, crumble, one-way pass-through.
 
 - T-019 mantle + T-018 proneClearsLip + T-020 greybox tint wired; `maya_feel_check.gd` **54/54 on Godot 4.2.2, 4.3, 4.4.1, 4.5, 4.6 and 4.7** (headless, `--fixed-fps 60`).
 - BOT QA gap closed (2026-09-26): the harness drove inputs from a `physics_frame` continuation, which on Godot 4.3+ makes `is_action_just_pressed` lag `is_action_pressed` by one tick (45/53 on 4.3–4.7, the 8 jump-press checks). Inputs are now set from the idle frame (`process_frame`) — the path a real key event takes — and a guard check asserts one physics tick per frame. `player_maya.gd` untouched.
-- Merged up to `main` @ `580a3bb` (docs-only reconciliation; Assets `hero_grey.glb` @ 402121f slots and tint commits intact). `player_maya.gd` feel/timings not changed in this merge.
+- Merged up to `main` @ `580a3bb` (docs-only reconciliation; Assets `hero_grey.glb` @ 402121f slots and tint commits intact). `player_maya.gd` feel/timings not changed in this merge. Headless re-run after merge: **54/54** on Godot 4.3 (`--fixed-fps 60`).
 - **Identidad PASA** (greybox T-020 cream/tan, hue ~28° band, no olive) · **ASSET OK** (Orquestador, 2026-09-26) for `hero_grey.glb` @ 402121f on this branch. High-poly still HOLD.
 - Assets `hero_grey.glb` @ 402121f (cream/tan idle base, named slots) is the tint target; `runtime/models/README.md` hash row updated. Slot rule (`TINT_OUTFIT_SLOTS = ["Maya_Body"]`): named slots present → only outfit slots tinted, `Maya_Hair` untouched, `Maya_Pack` treated as accessory (add it to the list if Identidad classes the satchel as outfit); no named slots yet → every `BaseMaterial3D` on the hero instance is tinted. Emissive or albedo materials both work. Further Assets pushes stay compatible as long as those slot names hold.
 - Tip pin unchanged: `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (re-verified READ ONLY 2026-09-29).
