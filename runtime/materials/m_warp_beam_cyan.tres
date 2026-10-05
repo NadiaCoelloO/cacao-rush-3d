@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cacao_m_warp_cyan"]
+
+[ext_resource type="Shader" path="res://shaders/warp_beam.gdshader" id="1_beam"]
+
+[resource]
+resource_name = "LOOK001_BeamCyan"
+render_priority = 11
+shader = ExtResource("1_beam")
+shader_parameter/beam_color = Color(0.513726, 0.835294, 0.85098, 1)
+shader_parameter/strength = 2.6
+shader_parameter/height_m = 5.0
+shader_parameter/height_fade_pow = 1.6
+shader_parameter/facing_gain = 0.85
