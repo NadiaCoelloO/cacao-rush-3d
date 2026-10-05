@@ -1,0 +1,1 @@
+probe chunk_ruinas_<id>_LOD0.glb end
