@@ -2,9 +2,9 @@ extends Node3D
 ## Pilot vertical slice: world id `selva`, display name **Cuyabeno**.
 ## LOOK-001: instances selva_look001_LOD* (decor + gameplay visuals) and rebuilds
 ## water / fog / sky / warp beam / film grade in `look001_cuyabeno.gd`.
-## Collisions stay on the CSG port (floor + 1 m solid). The Assets oneway baked
-## at Blender (1,0,1.8) is hidden; the greybox oneway is instanced at the PR#3
-## anchor Godot (6, 1, 0) — tip 5fd45031 selva-1 oneway #0 at tile x=6.
+## Collisions: CSGFloor + CSGPlatform (x=6, 3×1×3) + CSGOneway plank at the
+## PR#3 anchor Godot (6, 1, 0) size 4×0.18×2 (use_collision=true). The Assets
+## oneway baked at Blender (1,0,1.8) is hidden. Tip 5fd45031 selva-1 oneway #0.
 ## High-poly HOLD. player_maya.gd timings are not touched.
 ##
 ## Fallback if LOOK GLBs are missing: original greybox floor + CIN-001 totem.
@@ -56,7 +56,11 @@ func _ready() -> void:
 
 
 func _try_load_look() -> bool:
+	# LOD0 is required. If it is missing, keep CSG placeholders visible.
 	if not ResourceLoader.exists(LOOK_LOD0):
+		return false
+	var packed0: Resource = load(LOOK_LOD0)
+	if not (packed0 is PackedScene):
 		return false
 	var paths := [LOOK_LOD0, LOOK_LOD1, LOOK_LOD2]
 	for i in paths.size():
@@ -113,8 +117,10 @@ func _try_load_totem() -> void:
 
 
 func _try_load_oneway() -> void:
-	# PR#3 / tip 5fd45031 oneway #0: Godot (6, 1, 0). Visual only — collisions
-	# stay on the existing CSG port (oneway 3D is not a true one-way yet).
+	# PR#3 / tip 5fd45031 oneway #0: Godot (6, 1, 0), box 4×0.18×2.
+	# CSGOneway keeps use_collision=true even when the placeholder is hidden
+	# (visibility does not disable CSG collision). 3D oneway is not a true
+	# one-way collider yet (same risk as PR#3).
 	if _oneway_placeholder:
 		_oneway_placeholder.visible = false
 	if not ResourceLoader.exists(ONEWAY_GLB) or _oneway_anchor == null:

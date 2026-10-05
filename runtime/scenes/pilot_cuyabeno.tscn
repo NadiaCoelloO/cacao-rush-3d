@@ -33,7 +33,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 0)
 
 [node name="CSGOneway" type="CSGBox3D" parent="WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
-use_collision = false
+use_collision = true
 size = Vector3(4, 0.18, 2)
 
 [node name="TotemWarpAnchor" type="Node3D" parent="WorldRoot"]

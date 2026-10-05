@@ -15,9 +15,10 @@ The LOD glTFs carry geometry, vertex colours, and simple PBR / unlit / emissive 
 | M_BLACKWATER | `runtime/shaders/blackwater.gdshader` — #10191A, roughness 0.15, two slow world-XZ ripples, **opaque** |
 | M_WARP_GOLD / CYAN | imported emissive; energy toggled active 3.0 / 2.4 vs dim 0.35 / 0.25 |
 | Warp beam | `runtime/shaders/warp_beam.gdshader` additive cones at `VFX_WarpBeam_Spawn` |
-| Fog | Environment volumetric fog (density 0.0025) + 12 FogVolume ellipsoids |
-| Sky | ProceduralSkyMaterial residual blue-grey + warm horizon |
-| Grade | Filmic tonemap (AgX is 4.4+), glow on levels 3–5, contrast 1.03 / sat 0.95 |
+| Fog | Environment volumetric fog (density 0.014, olive-grey) + 12 low banks + 6 trunk volumes + aerial haze |
+| Sky | Dark green-grey dome, energy 0.16; extra canopy instances close holes |
+| Grade | Filmic exposure 0.58, contrast 1.06 / sat 0.86 / brightness 0.92 |
+| Maya / platforms | Lit #808080 body (paint_v03 / M_MAYA_GREY); oneway slab #7e7058 not emissive grey |
 
 Renderer stays **Forward+** (project lock). Mobile/Compatibility would drop FogVolume; do not switch the project renderer.
 
@@ -25,7 +26,7 @@ Renderer stays **Forward+** (project lock). Mobile/Compatibility would drop FogV
 
 Assets baked `SELVA_GP_Oneway_01` at Blender `(1, 0, 1.8)` → Godot ≈ `(1, 1.8, 0)`. That is **wrong** for the pilot slice.
 
-The loader **hides** the baked mesh and instances `chunk_selva_oneway.glb` at `WorldRoot/PlatformOnewayAnchor` **Godot (6, 1, 0)** — selva-1 oneway #0, tile x=6. Collision stays the existing CSG port (`CSGFloor` + `CSGPlatform` at x=6); the 3D oneway is not a true one-way collider (same risk as PR#3).
+The loader **hides** the baked mesh and instances `chunk_selva_oneway.glb` at `WorldRoot/PlatformOnewayAnchor` **Godot (6, 1, 0)** — selva-1 oneway #0, tile x=6. `CSGOneway` is a 4×0.18×2 m box with `use_collision=true` (same as PR#3); hiding the placeholder does not disable CSG collision. The 3D oneway is not a true one-way collider yet.
 
 ## LOD
 

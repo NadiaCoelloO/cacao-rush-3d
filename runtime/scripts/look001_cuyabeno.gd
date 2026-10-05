@@ -13,13 +13,24 @@ const BEAM_CYAN_MAT := preload("res://materials/m_warp_beam_cyan.tres")
 
 const WATER_Y := -0.12
 const TOTEM_XZ := Vector3(7.5, 0.0, 0.0)
-const MAYA_STILL := Vector3(5.55, 1.02, 0.0)
+const MAYA_STILL := Vector3(5.55, 1.20, 0.0)
 const WARP_GOLD_ACTIVE := 3.0
 const WARP_CYAN_ACTIVE := 2.4
-const WARP_GOLD_DIM := 0.35
-const WARP_CYAN_DIM := 0.25
-const TOTEM_LIGHT_ACTIVE := 2.0
-const TOTEM_LIGHT_DIM := 0.15
+const WARP_GOLD_DIM := 0.55
+const WARP_CYAN_DIM := 0.28
+const TOTEM_LIGHT_ACTIVE := 1.4
+const TOTEM_LIGHT_DIM := 0.35
+## paint_v03 / M_MAYA_GREY — cream-grey, never white puro. Mesh materials only
+## (not surface overrides) so T-020 crouch/crawl overrides still land on Maya_Body.
+const MAYA_BODY := Color("8f8578")
+const MAYA_HAIR := Color("6b5a46")
+const MAYA_PACK := Color("8a7358")
+const ONEWAY_SLAB := Color("7e7058")
+const ONEWAY_CUE := Color("4a3a2a")
+const PLAT_ALBEDO := Color(0.58, 0.54, 0.46)
+const CACAO_Y := Color("d6ab3d")
+const CACAO_O := Color("ce722e")
+const CACAO_R := Color("a64b36")
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
 ## volumetric fog on the Environment covers that role in Forward+).
@@ -38,6 +49,17 @@ const FOG_BANKS := [
 	{"pos": Vector3(20.0532, 0.1, -14.9661), "size": Vector3(10.0, 1.454, 6.0), "yaw": 149.6},
 ]
 
+## Mid-height haze between trunks (not over landing tops). Fills the air the
+## ground-hugging banks leave empty, matching the Blender stills.
+const FOG_TRUNKS := [
+	{"pos": Vector3(3.0, 3.4, -11.0), "size": Vector3(16.0, 7.5, 11.0), "yaw": 18.0},
+	{"pos": Vector3(-7.5, 4.0, -13.0), "size": Vector3(14.0, 8.5, 13.0), "yaw": 42.0},
+	{"pos": Vector3(12.0, 3.2, -9.5), "size": Vector3(12.0, 7.0, 10.0), "yaw": -8.0},
+	{"pos": Vector3(0.5, 5.5, -20.0), "size": Vector3(24.0, 11.0, 16.0), "yaw": 10.0},
+	{"pos": Vector3(-4.0, 3.2, 9.5), "size": Vector3(18.0, 6.5, 8.0), "yaw": 95.0},
+	{"pos": Vector3(8.0, 4.2, -15.5), "size": Vector3(14.0, 8.0, 12.0), "yaw": 55.0},
+]
+
 var _env: Environment
 var _totem_light: OmniLight3D
 var _beam: Node3D
@@ -51,6 +73,10 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 		if r is Node:
 			_lod_roots.append(r)
 	_bind_look_meshes()
+	_grade_platforms()
+	_grade_oneway(pilot)
+	_grade_hero(pilot)
+	_thicken_canopy()
 	_build_environment(pilot)
 	_build_lights(pilot)
 	_build_fog()
@@ -108,8 +134,8 @@ func capture_still(shot: String, out_path: String) -> void:
 		return
 	cam.current = true
 	set_totem_state(shot == "laguna")
-	# A few frames so SSR / probe / volumetric fog settle.
-	for i in 12:
+	# More frames so volumetric fog / SSR settle on software rasterizers too.
+	for i in 24:
 		await tree.process_frame
 	var img: Image = vp.get_texture().get_image()
 	if img == null:
@@ -138,10 +164,131 @@ func _walk_look(n: Node) -> void:
 				var mat := mi.mesh.surface_get_material(s)
 				if mat is BaseMaterial3D:
 					var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+					if String(dup.resource_name).find("GOLD") >= 0:
+						dup.albedo_color = CACAO_Y
 					mi.set_surface_override_material(s, dup)
 					_warp_mats.append(dup)
 	for c in n.get_children():
 		_walk_look(c)
+
+
+func _grade_hero(pilot: Node3D) -> void:
+	var player: Node = pilot.get_node_or_null("PlayerMaya")
+	if player == null:
+		return
+	_grade_hero_node(player)
+
+
+func _grade_hero_node(n: Node) -> void:
+	if n is MeshInstance3D:
+		var mi := n as MeshInstance3D
+		if mi.mesh:
+			mi.mesh = mi.mesh.duplicate()
+			for s in mi.mesh.get_surface_count():
+				var mat := mi.mesh.surface_get_material(s)
+				if not (mat is BaseMaterial3D):
+					continue
+				var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+				var slot := String(d.resource_name)
+				# Lit albedo, emission off: unlit #f1ddc1 reads as white puro under filmic.
+				d.emission_enabled = false
+				d.emission_energy_multiplier = 0.0
+				d.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+				d.roughness = 0.72
+				if slot.begins_with("Maya_Body"):
+					d.albedo_color = MAYA_BODY
+				elif slot.begins_with("Maya_Hair"):
+					d.albedo_color = MAYA_HAIR
+				elif slot.begins_with("Maya_Pack"):
+					d.albedo_color = MAYA_PACK
+				else:
+					d.albedo_color = MAYA_BODY
+				mi.mesh.surface_set_material(s, d)
+	for c in n.get_children():
+		_grade_hero_node(c)
+
+
+func _grade_platforms() -> void:
+	for root in _lod_roots:
+		_grade_platform_node(root)
+
+
+func _grade_platform_node(n: Node) -> void:
+	if n is MeshInstance3D:
+		var nm := String(n.name)
+		if nm.begins_with("SELVA_GP_PlatformSolid") or nm.begins_with("SELVA_GP_Platforms") or nm.begins_with("SELVA_GP_Floor"):
+			var mi := n as MeshInstance3D
+			if mi.mesh:
+				for s in mi.mesh.get_surface_count():
+					var mat := mi.get_active_material(s)
+					if mat is BaseMaterial3D:
+						var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+						d.albedo_color = PLAT_ALBEDO
+						d.vertex_color_use_as_albedo = true
+						d.emission_enabled = false
+						d.roughness = 0.82
+						mi.set_surface_override_material(s, d)
+	for c in n.get_children():
+		_grade_platform_node(c)
+
+
+func _grade_oneway(pilot: Node3D) -> void:
+	var anchor: Node = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor")
+	if anchor:
+		_grade_oneway_node(anchor)
+
+
+func _grade_oneway_node(n: Node) -> void:
+	if n is MeshInstance3D:
+		var mi := n as MeshInstance3D
+		if mi.mesh:
+			mi.mesh = mi.mesh.duplicate()
+			for s in mi.mesh.get_surface_count():
+				var mat := mi.mesh.surface_get_material(s)
+				if not (mat is BaseMaterial3D):
+					continue
+				var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+				d.emission_enabled = false
+				d.emission_energy_multiplier = 0.0
+				d.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+				d.roughness = 0.78
+				var slot := String(d.resource_name)
+				if slot.find("Cue") >= 0:
+					d.albedo_color = ONEWAY_CUE
+				else:
+					d.albedo_color = ONEWAY_SLAB
+				mi.mesh.surface_set_material(s, d)
+	for c in n.get_children():
+		_grade_oneway_node(c)
+
+
+func _thicken_canopy() -> void:
+	# Reuse the LOD canopy mesh (not a new high-poly) to close sky holes.
+	for root in _lod_roots:
+		var canopy := _find_named(root, "LOOK001_Canopy")
+		if canopy == null or not (canopy is MeshInstance3D):
+			continue
+		var parent := canopy.get_parent()
+		if parent == null:
+			continue
+		for k in 1:
+			var extra := (canopy as MeshInstance3D).duplicate() as MeshInstance3D
+			extra.name = "%s_cover%d" % [canopy.name, k]
+			extra.rotate_y(deg_to_rad(21.0))
+			extra.scale = Vector3(1.08, 1.04, 1.08)
+			extra.position.y += 0.45
+			parent.add_child(extra)
+		# Understory stays put — lifting it closed the dosel sightline.
+
+
+func _find_named(n: Node, prefix: String) -> Node:
+	if n.name.begins_with(prefix):
+		return n
+	for c in n.get_children():
+		var hit := _find_named(c, prefix)
+		if hit:
+			return hit
+	return null
 
 
 func _clear_visibility_range(n: Node) -> void:
@@ -162,23 +309,24 @@ func _build_environment(pilot: Node3D) -> void:
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_SKY
 	var sky_mat := ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = Color("5c6b7c")
-	sky_mat.sky_horizon_color = Color("8a7a66")
-	sky_mat.ground_horizon_color = Color("6e6a63")
+	sky_mat.sky_top_color = Color("3a4844")
+	sky_mat.sky_horizon_color = Color("6a655c")
+	sky_mat.ground_horizon_color = Color("4a5048")
 	sky_mat.ground_bottom_color = Color("10191a")
-	sky_mat.sky_energy_multiplier = 0.5
-	sky_mat.ground_energy_multiplier = 0.25
-	sky_mat.sun_angle_max = 18.0
-	sky_mat.sun_curve = 0.12
+	sky_mat.sky_energy_multiplier = 0.32
+	sky_mat.ground_energy_multiplier = 0.18
+	sky_mat.sun_angle_max = 14.0
+	sky_mat.sun_curve = 0.15
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	_env.sky = sky
+	_env.background_energy_multiplier = 0.55
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_env.ambient_light_color = Color("6f8c8a")
-	_env.ambient_light_energy = 0.45
+	_env.ambient_light_color = Color("5a6e68")
+	_env.ambient_light_energy = 0.38
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.tonemap_exposure = 0.85
+	_env.tonemap_exposure = 0.82
 	_env.ssr_enabled = true
 	_env.ssr_max_steps = 64
 	_env.ssr_fade_in = 0.15
@@ -198,15 +346,16 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.set("glow_levels/6", 0.0)
 	_env.set("glow_levels/7", 0.0)
 	_env.adjustment_enabled = true
+	_env.adjustment_brightness = 1.0
 	_env.adjustment_contrast = 1.03
-	_env.adjustment_saturation = 0.95
+	_env.adjustment_saturation = 0.92
 	_env.volumetric_fog_enabled = true
-	_env.volumetric_fog_density = 0.0025
-	_env.volumetric_fog_albedo = Color(0.80, 0.84, 0.88)
-	_env.volumetric_fog_anisotropy = 0.3
-	_env.volumetric_fog_length = 64.0
+	_env.volumetric_fog_density = 0.006
+	_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
+	_env.volumetric_fog_anisotropy = 0.32
+	_env.volumetric_fog_length = 72.0
 	_env.volumetric_fog_detail_spread = 2.0
-	_env.volumetric_fog_ambient_inject = 0.2
+	_env.volumetric_fog_ambient_inject = 0.28
 	we.environment = _env
 
 
@@ -220,22 +369,22 @@ func _build_lights(pilot: Node3D) -> void:
 	key.name = "LOOK001_KEY_SunDawn_Filtered"
 	key.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(-35.0), deg_to_rad(70.0), 0.0)), Vector3(0, 8, 4))
 	key.light_color = Color(1.0, 0.78, 0.56)
-	key.light_energy = 1.6
+	key.light_energy = 1.35
 	key.shadow_enabled = true
-	key.shadow_blur = 1.5
-	key.light_volumetric_fog_energy = 1.0
-	key.light_specular = 0.6
+	key.shadow_blur = 1.8
+	key.light_volumetric_fog_energy = 1.35
+	key.light_specular = 0.35
 	if key.get("light_angular_distance") != null:
 		key.set("light_angular_distance", 4.0)
 	add_child(key)
 
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
-	fill.light_color = Color("9ee6ec")
-	fill.light_energy = 0.35
+	fill.light_color = Color("8a9a88")
+	fill.light_energy = 0.26
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
-	fill.light_volumetric_fog_energy = 0.15
+	fill.light_volumetric_fog_energy = 0.2
 	add_child(fill)
 	fill.position = Vector3(-8.0, 8.5, 6.0)
 	fill.look_at(Vector3(4.0, 0.0, -6.0), Vector3.UP)
@@ -243,11 +392,11 @@ func _build_lights(pilot: Node3D) -> void:
 	var lateral := OmniLight3D.new()
 	lateral.name = "LOOK001_KEY_Soft_Lateral"
 	lateral.position = Vector3(18.0, 5.0, 6.0)
-	lateral.light_color = Color("ffcc94")
-	lateral.light_energy = 1.2
+	lateral.light_color = Color("e0b07a")
+	lateral.light_energy = 0.5
 	lateral.light_specular = 0.0
-	lateral.omni_range = 28.0
-	lateral.light_volumetric_fog_energy = 0.4
+	lateral.omni_range = 18.0
+	lateral.light_volumetric_fog_energy = 0.25
 	lateral.shadow_enabled = false
 	add_child(lateral)
 
@@ -270,7 +419,7 @@ func _build_fog() -> void:
 	var noise := FastNoiseLite.new()
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	noise.seed = 1001
-	noise.frequency = 0.25
+	noise.frequency = 0.22
 	noise.fractal_octaves = 3
 	var tex := NoiseTexture3D.new()
 	tex.width = 64
@@ -278,22 +427,47 @@ func _build_fog() -> void:
 	tex.depth = 64
 	tex.seamless = true
 	tex.noise = noise
-	var mat := FogMaterial.new()
-	mat.density = 0.5
-	mat.albedo = Color(0.78, 0.82, 0.86)
-	mat.height_falloff = 0.8
-	mat.edge_fade = 0.6
-	mat.density_texture = tex
+	var bank_mat := FogMaterial.new()
+	bank_mat.density = 0.62
+	bank_mat.albedo = Color(0.74, 0.76, 0.70)
+	bank_mat.height_falloff = 0.55
+	bank_mat.edge_fade = 0.5
+	bank_mat.density_texture = tex
 	for i in FOG_BANKS.size():
 		var spec: Dictionary = FOG_BANKS[i]
-		var vol := FogVolume.new()
-		vol.name = "LOOK001_FogBank_%02d" % i
-		vol.shape = RenderingServer.FOG_VOLUME_SHAPE_ELLIPSOID
-		vol.size = spec["size"]
-		vol.position = spec["pos"]
-		vol.rotation_degrees = Vector3(0.0, spec["yaw"], 0.0)
-		vol.material = mat
-		add_child(vol)
+		add_child(_make_fog_volume("LOOK001_FogBank_%02d" % i, spec, bank_mat))
+	var trunk_mat := FogMaterial.new()
+	trunk_mat.density = 0.18
+	trunk_mat.albedo = Color(0.68, 0.72, 0.66)
+	trunk_mat.height_falloff = 0.25
+	trunk_mat.edge_fade = 0.45
+	trunk_mat.density_texture = tex
+	for i in FOG_TRUNKS.size():
+		var spec: Dictionary = FOG_TRUNKS[i]
+		add_child(_make_fog_volume("LOOK001_FogTrunk_%02d" % i, spec, trunk_mat))
+	var haze := FogVolume.new()
+	haze.name = "LOOK001_AerialHaze"
+	haze.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+	haze.size = Vector3(120.0, 28.0, 90.0)
+	haze.position = Vector3(0.0, 10.0, -14.0)
+	var haze_mat := FogMaterial.new()
+	haze_mat.density = 0.04
+	haze_mat.albedo = Color(0.66, 0.70, 0.64)
+	haze_mat.height_falloff = 0.08
+	haze_mat.edge_fade = 0.3
+	haze.material = haze_mat
+	add_child(haze)
+
+
+func _make_fog_volume(vol_name: String, spec: Dictionary, mat: FogMaterial) -> FogVolume:
+	var vol := FogVolume.new()
+	vol.name = vol_name
+	vol.shape = RenderingServer.FOG_VOLUME_SHAPE_ELLIPSOID
+	vol.size = spec["size"]
+	vol.position = spec["pos"]
+	vol.rotation_degrees = Vector3(0.0, spec["yaw"], 0.0)
+	vol.material = mat
+	return vol
 
 
 func _build_probe() -> void:

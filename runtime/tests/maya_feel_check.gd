@@ -549,13 +549,16 @@ func _pilot_smoke() -> void:
 	for i in 30:
 		await _step(0.0, false)
 	_expect("pilot: full jump from spawn lands on ledge", 1.0 if on_ledge else 0.0, 1.0, 0.0)
-	# 1 m solid platform (CSGPlatform x 4.5..7.5, or PR#3's PlatformSolidAnchor
-	# x 2..5): jump straight up beside its left face, the tip is caught on the way
-	# down (CSG / StaticBody collider → AABB path).
+	# 1 m solid (CSGPlatform x 4.5..7.5, or PR#3 PlatformSolidAnchor x 2..5),
+	# or LOOK-001 CSGOneway 4×0.18×2 at (6,1,0) whose left face is x=4. Jump
+	# straight up beside the left face; the tip is caught on the way down.
 	var face_x := 4.5
 	var solid_anchor: Node3D = pilot.get_node_or_null("WorldRoot/PlatformSolidAnchor")
+	var oneway_anchor: Node3D = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor")
 	if solid_anchor:
 		face_x = solid_anchor.global_position.x - 1.5
+	elif oneway_anchor:
+		face_x = oneway_anchor.global_position.x - 2.0
 	_p.global_position = Vector3(face_x - BODY_R - 0.1, 0.05, 0)
 	_p.velocity = Vector3.ZERO
 	for i in 20:
@@ -567,7 +570,7 @@ func _pilot_smoke() -> void:
 		if _p._hanging:
 			grabbed = true
 		elif grabbed and _p._grounded:
-			mantled = _p.global_position.y > 0.9 and _p.global_position.y < 1.3 and absf(_p.global_position.x - (face_x + 2.0 / PX + BODY_R)) < 0.05
+			mantled = _p.global_position.y > 0.9 and _p.global_position.y < 1.4 and absf(_p.global_position.x - (face_x + 2.0 / PX + BODY_R)) < 0.05
 			break
 	for i in 30:
 		await _step(0.0, false)

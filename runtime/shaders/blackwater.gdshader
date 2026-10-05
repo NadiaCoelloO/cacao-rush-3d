@@ -7,9 +7,9 @@ shader_type spatial;
 // Reflections: Environment SSR (on-screen) + ReflectionProbe over the lagoon (off-screen).
 render_mode cull_disabled, depth_draw_opaque, specular_schlick_ggx;
 
-uniform vec4 albedo : source_color = vec4(0.0627, 0.0980, 0.1020, 1.0); // #10191A (sRGB)
-uniform float roughness : hint_range(0.0, 1.0) = 0.15;
-uniform float specular : hint_range(0.0, 1.0) = 0.5;
+uniform vec4 albedo : source_color = vec4(0.063, 0.090, 0.078, 1.0); // olive-black, not cyan
+uniform float roughness : hint_range(0.0, 1.0) = 0.28;
+uniform float specular : hint_range(0.0, 1.0) = 0.18;
 uniform sampler2D ripple_broad : hint_normal, repeat_enable, filter_linear_mipmap;
 uniform sampler2D ripple_fine : hint_normal, repeat_enable, filter_linear_mipmap;
 uniform float broad_scale_m = 4.0;

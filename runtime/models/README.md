@@ -26,7 +26,7 @@ Greybox models below are **real binary glTF** (`.glb`, magic `glTF`) committed w
 - Geometry only in the GLB (vertex colours + simple PBR/unlit/emissive). Water ripples, fog, sky, warp beam and film grade are rebuilt in Godot — `docs/LOOK-001_GODOT.md`, `runtime/scripts/look001_cuyabeno.gd`.
 - Instanced by `scripts/pilot_cuyabeno.gd` under `WorldRoot` with VisibilityRange (LOD0 0–35 m, LOD1 30–70 m, LOD2 65 m+). When LOOK GLBs load, `chunk_selva_floor.glb` and `totem_warp_cuyabeno.glb` are **not** also instanced (the look chunk already includes the totem).
 - Baked `SELVA_GP_Oneway_01` (Assets Blender `(1,0,1.8)`) is hidden; `chunk_selva_oneway.glb` is placed at **Godot (6, 1, 0)** (PR#3 / tip `5fd45031` selva-1 oneway #0).
-- Collisions stay CSG (`CSGFloor` + `CSGPlatform`). High-poly HOLD.
+- `CSGOneway` at that anchor is **4×0.18×2 m with `use_collision=true`** (PR#3 box). Hidden placeholder keeps the collider. 3D oneway is not a true one-way yet.
 
 ## Platforms (Pista 3D greybox)
 
