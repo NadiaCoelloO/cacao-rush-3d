@@ -173,9 +173,9 @@ Magenta, estética de platformer genérico o referencias arquitectónicas del su
 Entregable	Nombre / especificación
 Script bpy reproducible	ruinas_look001.py
 Escena editable	RUINAS_LOOK001.blend
-Geometría LOD0	chunk_ruinas_\u003cid\u003e_LOD0.glb
-Geometría LOD1	chunk_ruinas_\u003cid\u003e_LOD1.glb
-Geometría LOD2	chunk_ruinas_\u003cid\u003e_LOD2.glb
+Geometría LOD0	chunk_ruinas_<id>_LOD0.glb
+Geometría LOD1	chunk_ruinas_<id>_LOD1.glb
+Geometría LOD2	chunk_ruinas_<id>_LOD2.glb
 Still de piedra	RUINAS_LOOK001_piedra.png, 1920×1080
 Still de dosel	RUINAS_LOOK001_dosel.png, 1920×1080
 Registro de entrega	RUINAS_LOOK001_manifest.json
