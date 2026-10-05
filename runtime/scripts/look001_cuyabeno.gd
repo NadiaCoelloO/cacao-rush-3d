@@ -166,6 +166,11 @@ func _walk_look(n: Node) -> void:
 					var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
 					if String(dup.resource_name).find("GOLD") >= 0:
 						dup.albedo_color = CACAO_Y
+						dup.emission = CACAO_Y
+					elif String(dup.resource_name).find("CYAN") >= 0:
+						# Identidad: marker tip is Kakaw pod orange, not turquoise.
+						dup.albedo_color = CACAO_O
+						dup.emission = CACAO_O
 					mi.set_surface_override_material(s, dup)
 					_warp_mats.append(dup)
 	for c in n.get_children():
@@ -491,7 +496,8 @@ func _build_beam(pilot: Node3D) -> void:
 		_beam.position = Vector3(7.5, 3.03, 0.0)
 		add_child(_beam)
 	_beam.add_child(_make_beam("Gold", Vector3(0.07, 0.30, 6.2), BEAM_GOLD_MAT, Vector3.ZERO))
-	_beam.add_child(_make_beam("CyanCore", Vector3(0.025, 0.085, 5.0), BEAM_CYAN_MAT, Vector3(0.02, 0.0, 0.02)))
+	# Secondary core is Kakaw orange (paint_v03 Y/O/R), not turquoise.
+	_beam.add_child(_make_beam("PodCore", Vector3(0.025, 0.085, 5.0), BEAM_CYAN_MAT, Vector3(0.02, 0.0, 0.02)))
 	# Cheat-mirror so the lagoon reads the beam when SSR misses an off-screen shaft.
 	var mirror := Node3D.new()
 	mirror.name = "Mirror"

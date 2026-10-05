@@ -6,7 +6,7 @@
 resource_name = "LOOK001_BeamCyan"
 render_priority = 11
 shader = ExtResource("1_beam")
-shader_parameter/beam_color = Color(0.513726, 0.835294, 0.85098, 1)
+shader_parameter/beam_color = Color(0.808, 0.447, 0.180, 1)
 shader_parameter/strength = 2.6
 shader_parameter/height_m = 5.0
 shader_parameter/height_fade_pow = 1.6
