@@ -695,16 +695,59 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	else:
 		cluster.position = Vector3(7.5, 0.0, 0.0)
 		add_child(cluster)
-	# Three elongated ribbed ellipsoids, slightly separated, hanging from the
-	# crown. Beam spawn stays at local y=3.03 so the shaft rises from the pods.
+	# Wood socket covers the baked GLB crown shards + gold blob (those read as
+	# a torch from the close-up). Beam spawn stays at local y=3.03.
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color(0.22, 0.16, 0.10)
+	wood.roughness = 0.88
+	wood.emission_enabled = false
+	var sock := MeshInstance3D.new()
+	sock.name = "Calyx"
+	var sock_mesh := CylinderMesh.new()
+	sock_mesh.top_radius = 0.15
+	sock_mesh.bottom_radius = 0.20
+	sock_mesh.height = 0.11
+	sock_mesh.radial_segments = 12
+	sock.mesh = sock_mesh
+	sock.material_override = wood
+	sock.position = Vector3(0.0, 2.62, 0.0)
+	sock.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	cluster.add_child(sock)
+	# At most two broad dark-green cacao leaves (rounded, not spiky) behind
+	# the cluster so leftover GLB shards stay hidden from Cam_TotemPods.
+	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.10, 2.70, -0.22), Vector3(deg_to_rad(-28.0), deg_to_rad(35.0), deg_to_rad(12.0))))
+	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.16, 2.68, -0.20), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
+	# Three whole elongated ribbed ellipsoids, slightly separated, hanging.
 	var specs := [
-		{"pos": Vector3(0.18, 2.80, 0.05), "eul": Vector3(deg_to_rad(58.0), deg_to_rad(18.0), deg_to_rad(8.0)), "col": CACAO_Y},
-		{"pos": Vector3(-0.16, 2.78, 0.12), "eul": Vector3(deg_to_rad(52.0), deg_to_rad(-48.0), deg_to_rad(-6.0)), "col": CACAO_O},
-		{"pos": Vector3(0.03, 2.76, -0.18), "eul": Vector3(deg_to_rad(62.0), deg_to_rad(155.0), deg_to_rad(4.0)), "col": CACAO_R},
+		{"pos": Vector3(0.17, 2.90, 0.12), "eul": Vector3(deg_to_rad(42.0), deg_to_rad(28.0), 0.0), "col": CACAO_Y},
+		{"pos": Vector3(-0.18, 2.88, 0.10), "eul": Vector3(deg_to_rad(46.0), deg_to_rad(-55.0), 0.0), "col": CACAO_O},
+		{"pos": Vector3(0.02, 2.86, -0.17), "eul": Vector3(deg_to_rad(50.0), deg_to_rad(168.0), 0.0), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
 		cluster.add_child(_make_cacao_pod("Pod_%d" % i, spec["pos"], spec["eul"], spec["col"]))
+
+
+func _make_cacao_leaf(leaf_name: String, pos: Vector3, eul: Vector3) -> MeshInstance3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.12, 0.22, 0.11)
+	mat.roughness = 0.90
+	mat.emission_enabled = false
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.11
+	sphere.height = 0.04
+	sphere.radial_segments = 10
+	sphere.rings = 6
+	var mi := MeshInstance3D.new()
+	mi.name = leaf_name
+	mi.mesh = sphere
+	mi.material_override = mat
+	mi.position = pos
+	mi.rotation = eul
+	mi.scale = Vector3(1.55, 1.0, 2.35)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
 
 
 func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -> Node3D:
@@ -718,17 +761,17 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -
 	mat.emission_enabled = true
 	mat.emission = col
 	mat.emission_energy_multiplier = 1.15
-	mat.roughness = 0.62
+	mat.roughness = 0.68
 	mat.metallic = 0.0
 	_pod_mats.append(mat)
-	# Body: elongated ellipsoid along local Y (pointed via end cones).
+	# Whole elongated ellipsoid (capsule) along local Y, not a flattened disc.
 	var body := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.055
-	sphere.height = 0.22
-	sphere.radial_segments = 12
-	sphere.rings = 8
-	body.mesh = sphere
+	var cap := CapsuleMesh.new()
+	cap.radius = 0.058
+	cap.height = 0.26
+	cap.radial_segments = 12
+	cap.rings = 4
+	body.mesh = cap
 	body.material_override = mat
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(body)
@@ -736,28 +779,27 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -
 		var tip := MeshInstance3D.new()
 		var cone := CylinderMesh.new()
 		cone.top_radius = 0.0
-		cone.bottom_radius = 0.038
-		cone.height = 0.055
+		cone.bottom_radius = 0.032
+		cone.height = 0.045
 		cone.radial_segments = 10
 		tip.mesh = cone
 		tip.material_override = mat
-		tip.position = Vector3(0.0, sign * 0.125, 0.0)
+		tip.position = Vector3(0.0, sign * 0.145, 0.0)
 		if sign < 0.0:
 			tip.rotation.x = PI
 		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(tip)
-	# Longitudinal ribs — cacao, not a smooth berry.
 	for k in 5:
 		var ang := TAU * float(k) / 5.0
 		var rib := MeshInstance3D.new()
 		var cyl := CylinderMesh.new()
-		cyl.top_radius = 0.007
-		cyl.bottom_radius = 0.007
-		cyl.height = 0.20
+		cyl.top_radius = 0.006
+		cyl.bottom_radius = 0.006
+		cyl.height = 0.22
 		cyl.radial_segments = 6
 		rib.mesh = cyl
 		rib.material_override = mat
-		rib.position = Vector3(cos(ang) * 0.048, 0.0, sin(ang) * 0.048)
+		rib.position = Vector3(cos(ang) * 0.052, 0.0, sin(ang) * 0.052)
 		rib.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(rib)
 	return root
