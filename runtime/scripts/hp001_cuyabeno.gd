@@ -16,9 +16,10 @@ const TRUNK := [
 ]
 const TREES_JSON := "res://data/hp001_tree_instances.json"
 const BEAM_ORIGIN_LOCAL := Vector3(-0.0009, 2.2783, 0.220)
-const LOD_BEGIN := [0.0, 30.0, 65.0]
-const LOD_END := [35.0, 70.0, 0.0]
-const LOD_MARGIN := 4.0
+# Tight ranges: LOD0 = play space, LOD2 = far background. Fade margin 3 m.
+const LOD_BEGIN := [0.0, 16.0, 36.0]
+const LOD_END := [20.0, 40.0, 0.0]
+const LOD_MARGIN := 3.0
 const CELL := 18.0
 const VARIANTS := ["Thin", "Medium", "Thick"]
 
@@ -123,31 +124,24 @@ func _wire_trunks(pilot: Node3D) -> void:
 				mm.transform_format = MultiMesh.TRANSFORM_3D
 				mm.mesh = meshes[mesh_key]
 				mm.instance_count = xforms.size()
-				var aabb := AABB()
 				for i in xforms.size():
 					var world_xf: Transform3D = xforms[i]
 					var local := Transform3D(world_xf.basis, world_xf.origin - centroid)
 					mm.set_instance_transform(i, local)
-					var p := local.origin
-					if i == 0:
-						aabb = AABB(p, Vector3.ZERO)
-					else:
-						aabb = aabb.expand(p)
-				aabb = aabb.grow(8.0)
-				aabb.size.y += 16.0
 				var mmi := MultiMeshInstance3D.new()
 				mmi.name = "HP001_Trunk_%s_LOD%d_%d_%d" % [variant, lod, key.x, key.y]
 				mmi.multimesh = mm
 				mmi.position = centroid
-				mmi.custom_aabb = aabb
 				if bark:
 					mmi.material_override = bark
 				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 				_apply_lod_range(mmi, LOD_BEGIN[lod], LOD_END[lod])
-				if lod >= 2:
-					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				else:
+				# Shadows: directional key only, and only near LOD0 clusters.
+				var xz := Vector2(centroid.x, centroid.z).length()
+				if lod == 0 and xz <= 24.0:
 					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				else:
+					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				root.add_child(mmi)
 				mm_count += 1
 	print("HP001 trunks: ", trees.size(), " instances, ", mm_count, " MultiMeshes")

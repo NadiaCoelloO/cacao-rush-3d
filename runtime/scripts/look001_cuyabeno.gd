@@ -232,6 +232,8 @@ func capture_still(shot: String, out_path: String) -> void:
 		"primitives": Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
 		"draw_calls": Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 		"video_mem_bytes": Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED),
+		"texture_mem_bytes": Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),
+		"buffer_mem_bytes": Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED),
 		"objects": Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 	}
 	print("HP001_E1_PERF ", JSON.stringify(perf))
