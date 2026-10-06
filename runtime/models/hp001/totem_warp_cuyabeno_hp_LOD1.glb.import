@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://hp001totemlod1"
-path="res://.godot/imported/totem_warp_cuyabeno_hp_LOD1.glb-b308f11e48a7c494e1117ee7baf34a64.scn"
+uid="uid://csihh020wgr4c"
+path="res://.godot/imported/totem_warp_cuyabeno_hp_LOD1.glb-7d1bdcd89d4b5c82d46fdecd73fadd12.scn"
 
 [deps]
 
 source_file="res://models/hp001/totem_warp_cuyabeno_hp_LOD1.glb"
-dest_files=["res://.godot/imported/totem_warp_cuyabeno_hp_LOD1.glb-b308f11e48a7c494e1117ee7baf34a64.scn"]
+dest_files=["res://.godot/imported/totem_warp_cuyabeno_hp_LOD1.glb-7d1bdcd89d4b5c82d46fdecd73fadd12.scn"]
 
 [params]
 

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://hp001trunklod2"
-path="res://.godot/imported/trunk_selva_kit_hp_LOD2.glb-8f603bea70f2d37f7e463a11308d586f.scn"
+uid="uid://csihh34augr4d"
+path="res://.godot/imported/trunk_selva_kit_hp_LOD2.glb-cbf183c2709ca217506095b63715a9f8.scn"
 
 [deps]
 
 source_file="res://models/hp001/trunk_selva_kit_hp_LOD2.glb"
-dest_files=["res://.godot/imported/trunk_selva_kit_hp_LOD2.glb-8f603bea70f2d37f7e463a11308d586f.scn"]
+dest_files=["res://.godot/imported/trunk_selva_kit_hp_LOD2.glb-cbf183c2709ca217506095b63715a9f8.scn"]
 
 [params]
 
