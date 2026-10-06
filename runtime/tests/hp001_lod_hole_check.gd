@@ -13,9 +13,15 @@ func _init() -> void:
 	print("HP001 LOD ranges (begin–end, margin)")
 	_print_stack("totem", HP.TOTEM_LOD_BEGIN, HP.TOTEM_LOD_END, HP.TOTEM_LOD_MARGIN)
 	_print_stack("trunk Thin/Medium/Thick", HP.LOD_BEGIN, HP.LOD_END, HP.LOD_MARGIN)
+	_print_stack("dock", HP.DOCK_LOD_BEGIN, HP.DOCK_LOD_END, HP.DOCK_LOD_MARGIN)
+	_print_stack("groundcover Fern/CacaoLeaves", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN)
 	failed += _check("totem", HP.TOTEM_LOD_BEGIN, HP.TOTEM_LOD_END, HP.TOTEM_LOD_MARGIN)
 	for v in HP.VARIANTS:
 		failed += _check("trunk %s" % v, HP.LOD_BEGIN, HP.LOD_END, HP.LOD_MARGIN)
+	failed += _check("dock", HP.DOCK_LOD_BEGIN, HP.DOCK_LOD_END, HP.DOCK_LOD_MARGIN)
+	# Groundcover has no LOD2 on purpose: it may fade out past LOD1 end.
+	failed += _check_until("groundcover Fern", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN, 37.0)
+	failed += _check_until("groundcover CacaoLeaves", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN, 37.0)
 	if failed == 0:
 		print("HP001 LOD HOLE CHECK: PASS (0 holes, 0–%.0f m @ %.1f m, first-frame hysteresis)" % [MAX_D, STEP])
 		quit(0)
@@ -34,10 +40,14 @@ func _print_stack(label: String, begins: Array, ends: Array, margin: float) -> v
 
 
 func _check(label: String, begins: Array, ends: Array, margin: float) -> int:
-	var holes: PackedFloat32Array = HP.lod_stack_holes(begins, ends, margin, MAX_D, STEP)
-	var samples := int(MAX_D / STEP) + 1
+	return _check_until(label, begins, ends, margin, MAX_D)
+
+
+func _check_until(label: String, begins: Array, ends: Array, margin: float, max_d: float) -> int:
+	var holes: PackedFloat32Array = HP.lod_stack_holes(begins, ends, margin, max_d, STEP)
+	var samples := int(max_d / STEP) + 1
 	if holes.is_empty():
-		print("  %s: PASS  %d/%d distances have ≥1 LOD" % [label, samples, samples])
+		print("  %s: PASS  %d/%d distances have ≥1 LOD (0–%.1f m)" % [label, samples, samples, max_d])
 		return 0
 	print("  %s: FAIL  %d holes, first at %.1f m (showing up to 12)" % [label, holes.size(), holes[0]])
 	var n := mini(12, holes.size())

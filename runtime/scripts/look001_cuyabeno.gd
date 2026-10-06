@@ -183,6 +183,23 @@ func capture_still(shot: String, out_path: String) -> void:
 			player.rotation = Vector3.ZERO
 			player.set_physics_process(true)
 		cam = play_cam
+	elif shot == "dock":
+		# Capture-only: Maya lands on the bank beside the pier so deck height reads.
+		# Does not change the gameplay Camera3D follow rig.
+		if player:
+			player.global_position = Vector3(9.35, 1.2, -3.25)
+			player.rotation = Vector3.ZERO
+			player.set_physics_process(true)
+			if play_cam:
+				play_cam.current = false
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_DockCloseup"
+		pods_cam.far = 80.0
+		pods_cam.fov = 42.0
+		pods_cam.position = Vector3(12.65, 1.42, -7.55)
+		get_parent().add_child(pods_cam)
+		pods_cam.look_at(Vector3(10.05, 0.42, -5.15), Vector3.UP)
+		cam = pods_cam
 	else:
 		if player:
 			player.global_position = MAYA_STILL
@@ -217,7 +234,7 @@ func capture_still(shot: String, out_path: String) -> void:
 		if cam == null:
 			push_error("LOOK-001 capture: missing camera for " + shot)
 			return
-		if player and shot != "pods":
+		if player and shot != "pods" and shot != "dock":
 			if shot == "dosel":
 				# 3/4 toward Cam_Dosel so she reads as a character, not a blade.
 				var aim := Vector3(cam.global_position.x, player.global_position.y, cam.global_position.z)
@@ -237,10 +254,13 @@ func capture_still(shot: String, out_path: String) -> void:
 	# Follow fill is for the spawn gameplay cam (KEY_Maya does not reach).
 	# Laguna / dosel / pods keep vertex albedo + scene KEY so Maya stays cream.
 	_set_maya_follow_for_shot(player, shot == "gameplay")
-	if shot == "gameplay":
-		# Let Maya land from spawn y=1.2 so followCam is the in-game view.
+	if shot == "gameplay" or shot == "dock":
+		# Let Maya land from y=1.2 so feet sit on the existing collision.
 		for i in 40:
 			await tree.physics_frame
+		if shot == "dock" and player:
+			var aim := Vector3(10.0, player.global_position.y, -6.2)
+			player.look_at(aim, Vector3.UP)
 	# More frames so volumetric fog / SSR settle on software rasterizers too.
 	for i in 24:
 		await tree.process_frame

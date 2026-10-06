@@ -1,8 +1,9 @@
 extends Node
-## HP-001 E1: high-poly totem + trunk kit for Cuyabeno (visual only).
+## HP-001 E1/E2a: high-poly totem + trunk kit + visual dock + groundcover.
 ## Totem sits on TotemWarpAnchor (same pivot/footprint as LOOK/greybox).
 ## Trunks instance LOOK-001 tree transforms via MultiMesh + visibility_range LODs.
-## Collisions stay on the existing CSG shapes; this node never adds physics.
+## Dock and groundcover are visual only. Collisions stay on the existing CSG
+## shapes; this node never adds physics. WaterLily is not instanced.
 
 const TOTEM := [
 	"res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb",
@@ -15,6 +16,15 @@ const TRUNK := [
 	"res://models/hp001/trunk_selva_kit_hp_LOD2.glb",
 ]
 const TREES_JSON := "res://data/hp001_tree_instances.json"
+const DOCK := [
+	"res://models/hp001/dock_cuyabeno_hp_LOD0.glb",
+	"res://models/hp001/dock_cuyabeno_hp_LOD1.glb",
+	"res://models/hp001/dock_cuyabeno_hp_LOD2.glb",
+]
+const GROUNDCOVER := [
+	"res://models/hp001/groundcover_cuyabeno_LOD0.glb",
+	"res://models/hp001/groundcover_cuyabeno_LOD1.glb",
+]
 const BEAM_ORIGIN_LOCAL := Vector3(-0.0009, 2.2783, 0.220)
 # Trunks: overlap enough that Godot 4.2.2 first-frame hysteresis cannot
 # hide every LOD (become-visible uses [begin+margin, end-margin]).
@@ -27,8 +37,27 @@ const LOD_MARGIN := 3.0
 const TOTEM_LOD_BEGIN := [0.0, 28.0, 58.0]
 const TOTEM_LOD_END := [36.0, 66.0, 0.0]
 const TOTEM_LOD_MARGIN := 4.0
+# Dock: unique prop, never fully culled (same hysteresis rule as the totem).
+const DOCK_LOD_BEGIN := [0.0, 28.0, 58.0]
+const DOCK_LOD_END := [36.0, 66.0, 0.0]
+const DOCK_LOD_MARGIN := 4.0
+# Groundcover LOD0/1 overlap; LOD1 fades out (no LOD2 in the kit). WaterLily excluded.
+const GC_LOD_BEGIN := [0.0, 12.0]
+const GC_LOD_END := [18.0, 40.0]
+const GC_LOD_MARGIN := 3.0
+const GC_KINDS := ["Fern", "CacaoLeaves"]
+# No greybox wooden walkway in the lagoon: pier on the −Z shore, east of the
+# totem, off the playable strip / oneway / solid (x≈10, into the lagoon).
+const DOCK_ORIGIN := Vector3(10.0, 0.0, -4.0)
+const DOCK_YAW := PI * 0.5
+const DOCK_SEGMENTS := [
+	{"kind": "Straight", "along_m": 2.0},
+	{"kind": "End", "along_m": 6.0},
+]
+const FLOOR_COLLISION_TOP := 0.0
 const CELL := 18.0
 const VARIANTS := ["Thin", "Medium", "Thick"]
+var dock_deck_delta_m := 0.0
 
 var totem_mats: Array[BaseMaterial3D] = []
 
@@ -42,7 +71,9 @@ func wire(pilot: Node3D) -> bool:
 		return false
 	_wire_totem(pilot)
 	_wire_trunks(pilot)
-	print("HP001 wired totem LODs + %s trunk MultiMeshes" % str(VARIANTS))
+	_wire_dock(pilot)
+	_wire_groundcover(pilot)
+	print("HP001 wired totem LODs + %s trunk MultiMeshes + dock + groundcover" % str(VARIANTS))
 	return true
 
 
@@ -171,6 +202,241 @@ func _wire_trunks(pilot: Node3D) -> void:
 	print("HP001 trunks: ", trees.size(), " instances, ", mm_count, " MultiMeshes")
 
 
+func _wire_dock(pilot: Node3D) -> void:
+	if not ResourceLoader.exists(DOCK[0]):
+		push_warning("HP001: dock GLBs missing")
+		return
+	var kit := _load_named_kit(DOCK, ["Straight", "End", "Step"], "Dock_%s_LOD%d", "M_Dock_HP")
+	var meshes: Dictionary = kit["meshes"]
+	var mat: BaseMaterial3D = kit["mat"]
+	if not meshes.has("Straight_0"):
+		push_warning("HP001: Dock_Straight mesh missing")
+		return
+	var deck_top := _deck_plank_top_y(meshes["Straight_0"])
+	# Visual Y only. CSGFloor top is y=0; Maya stands on that at the bank.
+	var root_y := FLOOR_COLLISION_TOP - deck_top
+	dock_deck_delta_m = (root_y + deck_top) - FLOOR_COLLISION_TOP
+	var world: Node3D = pilot.get_node_or_null("WorldRoot")
+	var root := Node3D.new()
+	root.name = "HP001_Dock"
+	root.position = Vector3(DOCK_ORIGIN.x, root_y, DOCK_ORIGIN.z)
+	root.rotation.y = DOCK_YAW
+	if world:
+		world.add_child(root)
+	else:
+		add_child(root)
+	for spec in DOCK_SEGMENTS:
+		var kind := String(spec["kind"])
+		var along_m := float(spec["along_m"])
+		for lod in 3:
+			var key := "%s_%d" % [kind, lod]
+			if not meshes.has(key):
+				continue
+			var mi := MeshInstance3D.new()
+			mi.name = "HP001_Dock_%s_LOD%d" % [kind, lod]
+			mi.mesh = meshes[key]
+			mi.position = Vector3(along_m, 0.0, 0.0)
+			if mat:
+				mi.material_override = mat
+			mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+			_apply_lod_range(mi, DOCK_LOD_BEGIN[lod], DOCK_LOD_END[lod], DOCK_LOD_MARGIN)
+			if lod == 0:
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			else:
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			root.add_child(mi)
+	print(
+		"HP001 dock deck_top_local=%.4f collision_top=%.4f visual_y=%.4f delta=%.4f"
+		% [deck_top, FLOOR_COLLISION_TOP, root_y, dock_deck_delta_m]
+	)
+
+
+func _wire_groundcover(pilot: Node3D) -> void:
+	if not ResourceLoader.exists(GROUNDCOVER[0]):
+		push_warning("HP001: groundcover GLBs missing")
+		return
+	var kit := _load_named_kit(GROUNDCOVER, GC_KINDS, "GC_%s_LOD%d", "M_Groundcover")
+	var meshes: Dictionary = kit["meshes"]
+	var mat: BaseMaterial3D = kit["mat"]
+	if mat:
+		_harden_mat(mat, 0.5, true)
+	var placements := _scatter_groundcover()
+	var world: Node3D = pilot.get_node_or_null("WorldRoot")
+	var root := Node3D.new()
+	root.name = "HP001_Groundcover"
+	if world:
+		world.add_child(root)
+	else:
+		add_child(root)
+	var mm_count := 0
+	for kind in GC_KINDS:
+		var by_cell: Dictionary = {}
+		for p in placements:
+			if String(p["kind"]) != kind:
+				continue
+			var xf: Transform3D = p["xf"]
+			var key := _cluster_key(xf.origin)
+			if not by_cell.has(key):
+				by_cell[key] = []
+			(by_cell[key] as Array).append(xf)
+		for key in by_cell.keys():
+			var xforms: Array = by_cell[key]
+			var centroid := Vector3.ZERO
+			for xf in xforms:
+				centroid += (xf as Transform3D).origin
+			centroid /= float(xforms.size())
+			var cluster_mmis: Array[MultiMeshInstance3D] = []
+			var shared_aabb := AABB()
+			var have_aabb := false
+			for lod in GC_LOD_BEGIN.size():
+				var mesh_key := "%s_%d" % [kind, lod]
+				if not meshes.has(mesh_key):
+					continue
+				var mm := MultiMesh.new()
+				mm.transform_format = MultiMesh.TRANSFORM_3D
+				mm.mesh = meshes[mesh_key]
+				mm.instance_count = xforms.size()
+				for i in xforms.size():
+					var world_xf: Transform3D = xforms[i]
+					var local := Transform3D(world_xf.basis, world_xf.origin - centroid)
+					mm.set_instance_transform(i, local)
+					if lod == 0:
+						var inst_aabb := _xform_aabb(local, mm.mesh.get_aabb())
+						if not have_aabb:
+							shared_aabb = inst_aabb
+							have_aabb = true
+						else:
+							shared_aabb = shared_aabb.merge(inst_aabb)
+				var mmi := MultiMeshInstance3D.new()
+				mmi.name = "HP001_GC_%s_LOD%d_%d_%d" % [kind, lod, key.x, key.y]
+				mmi.multimesh = mm
+				mmi.position = centroid
+				if mat:
+					mmi.material_override = mat
+				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				_apply_lod_range(mmi, GC_LOD_BEGIN[lod], GC_LOD_END[lod], GC_LOD_MARGIN)
+				root.add_child(mmi)
+				cluster_mmis.append(mmi)
+				mm_count += 1
+			if have_aabb:
+				for mmi in cluster_mmis:
+					mmi.custom_aabb = shared_aabb
+	print("HP001 groundcover: ", placements.size(), " instances, ", mm_count, " MultiMeshes (no WaterLily)")
+
+
+func _load_named_kit(paths: Array, variants: Array, name_fmt: String, mat_name: String) -> Dictionary:
+	var meshes := {}
+	var shared: BaseMaterial3D = null
+	for lod in paths.size():
+		if not ResourceLoader.exists(paths[lod]):
+			continue
+		var packed: Resource = load(paths[lod])
+		if not (packed is PackedScene):
+			continue
+		var inst: Node = (packed as PackedScene).instantiate()
+		for v in variants:
+			var mi := _find_named(inst, name_fmt % [v, lod]) as MeshInstance3D
+			if mi == null:
+				mi = _find_named_contains(inst, "%s_LOD%d" % [v, lod]) as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			meshes["%s_%d" % [v, lod]] = mi.mesh
+			if lod == 0 and shared == null:
+				var mat := mi.material_override
+				if mat == null:
+					mat = mi.get_active_material(0)
+				if mat is BaseMaterial3D:
+					shared = (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+					_harden_mat(shared)
+					shared.resource_name = mat_name
+		inst.free()
+	return {"meshes": meshes, "mat": shared}
+
+
+func _deck_plank_top_y(mesh: Mesh) -> float:
+	if mesh == null or mesh.get_surface_count() == 0:
+		return 0.42
+	var arr: Array = mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var acc := 0.0
+	var n := 0
+	for v in verts:
+		# Planks: deck width 1.8 m (local Z), height band around 0.42; skip posts/piles.
+		if abs(v.x) < 1.95 and abs(v.z) < 0.92 and v.y > 0.30 and v.y < 0.52:
+			acc += v.y
+			n += 1
+	if n == 0:
+		return 0.42
+	return acc / float(n)
+
+
+func _scatter_groundcover() -> Array:
+	var out: Array = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261006
+	var trees := _load_trees()
+	var n_fern := 0
+	var n_leaf := 0
+	# Ferns hugging tree bases off the playable strip.
+	for t in trees:
+		if n_fern >= 10:
+			break
+		if typeof(t) != TYPE_DICTIONARY:
+			continue
+		var o: Array = t.get("origin", [])
+		if o.size() < 3:
+			continue
+		var base := Vector3(float(o[0]), float(o[1]), float(o[2]))
+		var ang := rng.randf() * TAU
+		var rad := rng.randf_range(1.35, 2.4)
+		var p := Vector3(base.x + cos(ang) * rad, max(base.y, -0.08), base.z + sin(ang) * rad)
+		if _gc_blocked(p):
+			continue
+		out.append({"kind": "Fern", "xf": _gc_xform(p, rng)})
+		n_fern += 1
+	# Shore belts (lagoon −Z and back +Z), off the 8 m playable floor.
+	var tries := 0
+	while (n_fern < 12 or n_leaf < 16) and tries < 220:
+		tries += 1
+		var shore := -1.0 if rng.randf() < 0.62 else 1.0
+		var p := Vector3(
+			rng.randf_range(-11.5, 12.5),
+			-0.04,
+			shore * rng.randf_range(4.45, 7.4)
+		)
+		if _gc_blocked(p):
+			continue
+		if n_fern < 12 and rng.randf() < 0.45:
+			out.append({"kind": "Fern", "xf": _gc_xform(p, rng)})
+			n_fern += 1
+		elif n_leaf < 16:
+			p.y = -0.06
+			out.append({"kind": "CacaoLeaves", "xf": _gc_xform(p, rng)})
+			n_leaf += 1
+	return out
+
+
+func _gc_xform(origin: Vector3, rng: RandomNumberGenerator) -> Transform3D:
+	var yaw := rng.randf() * TAU
+	var s := rng.randf_range(0.82, 1.18)
+	var b := Basis(Vector3.UP, yaw).scaled(Vector3(s, s, s))
+	return Transform3D(b, origin)
+
+
+func _gc_blocked(p: Vector3) -> bool:
+	# Playable strip (CSGFloor 24×8), oneway, solid, totem, dock.
+	if abs(p.z) < 3.35 and abs(p.x) < 11.2:
+		return true
+	if p.x > 4.0 and p.x < 8.2 and abs(p.z) < 1.35:
+		return true
+	if Vector2(p.x - 7.5, p.z).length() < 1.6:
+		return true
+	if p.x > 8.6 and p.x < 11.5 and p.z < -3.4 and p.z > -12.5:
+		return true
+	return false
+
+
 func _load_trunk_kit() -> Dictionary:
 	var meshes := {}
 	var bark: BaseMaterial3D = null
@@ -268,13 +534,17 @@ static func lod_stack_holes(begins: Array, ends: Array, margin: float, max_d := 
 	return holes
 
 
-func _harden_mat(mat: BaseMaterial3D) -> void:
+func _harden_mat(mat: BaseMaterial3D, scissor: float = 0.45, double_sided: bool = false) -> void:
 	if mat.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA:
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-		mat.alpha_scissor_threshold = 0.45
+		mat.alpha_scissor_threshold = scissor
 	elif mat.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS:
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-		mat.alpha_scissor_threshold = 0.45
+		mat.alpha_scissor_threshold = scissor
+	elif mat.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR:
+		mat.alpha_scissor_threshold = scissor
+	if double_sided:
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 

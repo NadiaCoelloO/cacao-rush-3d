@@ -173,13 +173,15 @@ func _run_capture() -> void:
 				if s == "pods":
 					tag = "totem_pods_v4"
 				elif s == "laguna":
-					tag = "laguna_v3"
+					tag = "laguna"
 				elif s == "dosel":
-					tag = "dosel_v3"
+					tag = "dosel"
 				elif s == "gameplay":
-					tag = "gameplay_v3"
+					tag = "gameplay"
+				elif s == "dock":
+					tag = "dock_closeup"
 			elif s == "gameplay":
 				tag = "gameplay_final"
-			var stem := "HP001_E1_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
+			var stem := "HP001_E2a_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
 			await _look.capture_still(s, "%s%s" % [out_dir, stem % tag])
 	get_tree().quit()
