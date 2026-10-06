@@ -105,7 +105,7 @@ func set_totem_state(active: bool) -> void:
 	for mat in _pod_mats:
 		if mat == null:
 			continue
-		mat.emission_energy_multiplier = 1.15 if active else 0.70
+		mat.emission_energy_multiplier = 0.55 if active else 0.32
 	if _totem_light:
 		_totem_light.light_energy = TOTEM_LIGHT_ACTIVE if active else TOTEM_LIGHT_DIM
 	if _beam:
@@ -766,13 +766,12 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	var toward_cam := Vector3(0.73, 0.12, 0.68)
 	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.16, 2.74, -0.18), toward_cam.rotated(Vector3.UP, deg_to_rad(-28.0)) + Vector3(0.0, 0.35, 0.0)))
 	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.18, 2.73, -0.16), toward_cam.rotated(Vector3.UP, deg_to_rad(24.0)) + Vector3(0.0, 0.40, 0.0)))
-	# Tight Y / O / R cluster in front of the cap, long axis across the close-up
-	# so each reads as a whole elongated ribbed ellipsoid (pointed ends).
-	var across := Vector3(0.70, -0.22, -0.68)
+	# Tight hanging bunch (not a left/right fire fan). Each pod is a whole
+	# ribbed ellipsoid with pointed ends, slightly separated.
 	var specs := [
-		{"pos": Vector3(0.03, 2.90, 0.23), "axis": across.rotated(Vector3.UP, deg_to_rad(-18.0)) + Vector3(0.0, -0.06, 0.0), "col": CACAO_Y},
-		{"pos": Vector3(0.24, 2.89, 0.01), "axis": across.rotated(Vector3.UP, deg_to_rad(16.0)) + Vector3(0.0, -0.08, 0.0), "col": CACAO_O},
-		{"pos": Vector3(0.20, 2.78, 0.19), "axis": Vector3(0.18, -0.92, 0.22), "col": CACAO_R},
+		{"pos": Vector3(-0.14, 2.82, 0.14), "axis": Vector3(-0.18, -0.96, 0.16), "col": CACAO_Y},
+		{"pos": Vector3(0.24, 2.82, 0.04), "axis": Vector3(0.22, -0.96, 0.10), "col": CACAO_O},
+		{"pos": Vector3(0.08, 2.72, 0.24), "axis": Vector3(0.06, -0.98, 0.18), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
@@ -821,15 +820,15 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	mat.albedo_color = col
 	mat.emission_enabled = true
 	mat.emission = col
-	mat.emission_energy_multiplier = 1.15
-	mat.roughness = 0.68
+	mat.emission_energy_multiplier = 0.55
+	mat.roughness = 0.78
 	mat.metallic = 0.0
 	_pod_mats.append(mat)
 	# Whole elongated ribbed ellipsoid along local Y, pointed ends — not a disc.
 	var body := MeshInstance3D.new()
 	var sph := SphereMesh.new()
-	sph.radius = 0.078
-	sph.height = 0.30
+	sph.radius = 0.090
+	sph.height = 0.28
 	sph.radial_segments = 12
 	sph.rings = 8
 	body.mesh = sph
@@ -840,12 +839,12 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 		var tip := MeshInstance3D.new()
 		var cone := CylinderMesh.new()
 		cone.top_radius = 0.0
-		cone.bottom_radius = 0.034
-		cone.height = 0.055
+		cone.bottom_radius = 0.038
+		cone.height = 0.050
 		cone.radial_segments = 10
 		tip.mesh = cone
 		tip.material_override = mat
-		tip.position = Vector3(0.0, sign * 0.162, 0.0)
+		tip.position = Vector3(0.0, sign * 0.152, 0.0)
 		if sign < 0.0:
 			tip.rotation.x = PI
 		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -856,11 +855,11 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 		var cyl := CylinderMesh.new()
 		cyl.top_radius = 0.007
 		cyl.bottom_radius = 0.007
-		cyl.height = 0.24
+		cyl.height = 0.16
 		cyl.radial_segments = 6
 		rib.mesh = cyl
 		rib.material_override = mat
-		rib.position = Vector3(cos(ang) * 0.070, 0.0, sin(ang) * 0.070)
+		rib.position = Vector3(cos(ang) * 0.086, 0.0, sin(ang) * 0.086)
 		rib.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(rib)
 	return root
