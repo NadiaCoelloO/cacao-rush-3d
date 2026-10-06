@@ -192,11 +192,23 @@ func capture_still(shot: String, out_path: String) -> void:
 		if shot == "pods":
 			pods_cam = Camera3D.new()
 			pods_cam.name = "Cam_TotemPods"
-			pods_cam.fov = 32.0
 			pods_cam.far = 80.0
-			pods_cam.position = Vector3(8.85, 3.08, 1.25)
-			get_parent().add_child(pods_cam)
-			pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
+			if _hp_ok:
+				# HP cluster is at BeamOrigin (~y 2.28), not the greybox 3.03 tip.
+				# 3/4 from +X/+Z, ~1.9 m; aim slightly below the empty so hanging
+				# pods and curved stalks sit in frame. Capture-only.
+				pods_cam.fov = 38.0
+				pods_cam.position = Vector3(8.96, 2.50, 1.38)
+				get_parent().add_child(pods_cam)
+				pods_cam.look_at(Vector3(7.50, 2.18, 0.18), Vector3.UP)
+				if player:
+					player.visible = false
+				_set_pods_closeup_beam(true)
+			else:
+				pods_cam.fov = 32.0
+				pods_cam.position = Vector3(8.85, 3.08, 1.25)
+				get_parent().add_child(pods_cam)
+				pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
 			cam = pods_cam
 		else:
 			var cam_name := "Cam_Laguna" if shot == "laguna" else "Cam_Dosel"
@@ -238,17 +250,21 @@ func capture_still(shot: String, out_path: String) -> void:
 	}
 	print("HP001_E1_PERF ", JSON.stringify(perf))
 	var img: Image = vp.get_texture().get_image()
-	if img == null:
+	if img:
+		img.save_png(out_path)
+		print("LOOK-001 wrote ", out_path, " ", img.get_width(), "x", img.get_height())
+		var perf_path := out_path.get_basename() + "_perf.json"
+		var pf := FileAccess.open(perf_path, FileAccess.WRITE)
+		if pf:
+			pf.store_string(JSON.stringify(perf, "\t"))
+			pf.close()
+			print("HP001_E1_PERF wrote ", perf_path)
+	else:
 		push_error("LOOK-001 capture: viewport image is null (headless dummy?)")
-		return
-	img.save_png(out_path)
-	print("LOOK-001 wrote ", out_path, " ", img.get_width(), "x", img.get_height())
-	var perf_path := out_path.get_basename() + "_perf.json"
-	var pf := FileAccess.open(perf_path, FileAccess.WRITE)
-	if pf:
-		pf.store_string(JSON.stringify(perf, "\t"))
-		pf.close()
-		print("HP001_E1_PERF wrote ", perf_path)
+	if shot == "pods" and _hp_ok:
+		_set_pods_closeup_beam(false)
+		if player:
+			player.visible = true
 	if pods_cam:
 		pods_cam.queue_free()
 
@@ -1016,6 +1032,16 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	nub.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(nub)
 	return root
+
+
+func _set_pods_closeup_beam(dim: bool) -> void:
+	# Capture-only: keep the beam origin readable without additive wash on the pods.
+	if BEAM_GOLD_MAT:
+		BEAM_GOLD_MAT.set_shader_parameter("strength", 1.35 if dim else 3.2)
+	if BEAM_CYAN_MAT:
+		BEAM_CYAN_MAT.set_shader_parameter("strength", 1.10 if dim else 2.6)
+	if _env:
+		_env.glow_intensity = 0.10 if dim else 0.25
 
 
 func _build_beam(pilot: Node3D) -> void:
