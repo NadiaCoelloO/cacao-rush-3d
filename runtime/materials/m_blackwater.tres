@@ -1,0 +1,48 @@
+[gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://cacao_m_blackwater"]
+
+[ext_resource type="Shader" path="res://shaders/blackwater.gdshader" id="1_blackwater"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_broad"]
+noise_type = 1
+seed = 1001
+frequency = 0.006
+fractal_octaves = 2
+fractal_gain = 0.4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_broad"]
+width = 256
+height = 256
+seamless = true
+as_normal_map = true
+bump_strength = 6.0
+noise = SubResource("FastNoiseLite_broad")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fine"]
+noise_type = 1
+seed = 1002
+frequency = 0.014
+fractal_octaves = 2
+fractal_gain = 0.45
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_fine"]
+width = 256
+height = 256
+seamless = true
+as_normal_map = true
+bump_strength = 4.0
+noise = SubResource("FastNoiseLite_fine")
+
+[resource]
+resource_name = "M_BLACKWATER"
+render_priority = 0
+shader = ExtResource("1_blackwater")
+shader_parameter/albedo = Color(0.063, 0.09, 0.078, 1)
+shader_parameter/roughness = 0.28
+shader_parameter/specular = 0.18
+shader_parameter/broad_scale_m = 4.0
+shader_parameter/fine_scale_m = 1.0
+shader_parameter/broad_drift_m_s = Vector2(0.035, 0.02)
+shader_parameter/fine_drift_m_s = Vector2(-0.02, 0.045)
+shader_parameter/ripple_strength = 0.1
+shader_parameter/ripple_broad = SubResource("NoiseTexture2D_broad")
+shader_parameter/ripple_fine = SubResource("NoiseTexture2D_fine")

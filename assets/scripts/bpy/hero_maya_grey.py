@@ -1,9 +1,12 @@
 """
-Cacao Rush 3D — Maya hero greybox (Phase 1)
+Cacao Rush 3D — Maya hero greybox (Phase 1) — T-020 cream/tan feel parity
 Arcade-readable contemporary Andean mestiza explorer blockout.
 
+Base albedo = idle cream (standing 2D idle). Runtime may tint crouch/crawl.
+Named material slots (stable for Godot override): Maya_Body, Maya_Hair, Maya_Pack.
+
 Usage:
-  blender --background --python tools/blender/hero_maya_grey.py -- --out export/hero_grey.glb
+  blender --background --python assets/scripts/bpy/hero_maya_grey.py -- --out assets/greybox/heroes/hero_grey.glb
 """
 from __future__ import annotations
 
@@ -25,7 +28,7 @@ from _common import (  # noqa: E402
     export_glb_yup,
     fail_if_over_budget,
     join_meshes,
-    make_grey_material,
+    make_rgb_material,
     parse_args,
     primitive_cube,
     primitive_cylinder,
@@ -34,7 +37,7 @@ from _common import (  # noqa: E402
     triangulate_object,
 )
 
-# Héroe budget: 25k LOD0 max; greybox aim ~8–12k
+# Hero budget: 25k LOD0 max; greybox aim ~8–12k
 BUDGET_TRIS = 25000
 TARGET_LOD0_MAX = 12000
 TARGET_LOD1_MAX = 12000
@@ -43,11 +46,17 @@ TARGET_LOD2_MAX = 5000
 # Idle arcade height target: 1.8–2.0 m (Blender meters, 1u=1m)
 TARGET_HEIGHT_M = 1.90
 
+# T-020 idle cream/tan (sRGB 0–1) sampled from 2D crouch/crawl sprites (tip 5fd45031).
+# Body base = idle cream so Fable runtime tint for crouch/crawl does not fight baked color.
+# Runtime tint targets (document only — not baked as sole base):
+#   crouch (138, 99, 65), crawl (148, 110, 76)
+BODY_CREAM = (0.878, 0.722, 0.533)   # RGB 224,184,136
+HAIR_BROWN = (0.408, 0.282, 0.157)   # RGB 104,72,40 — not white, not Nix indigo
+PACK_TAN = (0.596, 0.439, 0.282)     # RGB 152,112,72
+
 
 def build_maya_parts(mat_body, mat_hair, mat_pack):
     """Procedural humanoid ~1.9m tall from primitives; arcade chunky silhouette."""
-    # Scale factor so crown sits near TARGET_HEIGHT_M
-    # Layout designed around crown ≈ 1.90 m
     parts = []
 
     hips = primitive_cube("Maya_Hips", (0.0, 0.0, 1.02), (0.36, 0.22, 0.20), mat_body)
@@ -69,7 +78,7 @@ def build_maya_parts(mat_body, mat_hair, mat_pack):
     )
     parts.append(head)
 
-    # Short hair volume — mid/dark grey, NEVER white (Nix indigo rule is for Nix only)
+    # Short hair volume — darker brown, NEVER white (Nix indigo rule is for Nix only)
     hair = primitive_uv_sphere(
         "Maya_Hair", (0.0, -0.02, 1.94), radius=0.15, mat=mat_hair, segments=12, ring_count=8
     )
@@ -146,30 +155,33 @@ def build_maya_parts(mat_body, mat_hair, mat_pack):
 
 
 def main():
-    args = parse_args("Export Maya hero greybox GLB with LOD0/1/2")
+    args = parse_args("Export Maya hero greybox GLB with LOD0/1/2 (T-020 cream/tan)")
     set_unit_meters()
     clear_scene()
 
-    # Grey unlit-style flat mid-grey (Principled dark/rough ≈ unlit greybox look)
-    mat_body = make_grey_material("Maya_Body_Grey", 0.45)
-    mat_hair = make_grey_material("Maya_Hair_Grey", 0.32)
-    mat_pack = make_grey_material("Maya_Pack_Grey", 0.38)
+    # Unlit Emission cream/tan — named slots for runtime override (Fable tint)
+    mat_body = make_rgb_material("Maya_Body", *BODY_CREAM, unlit=True)
+    mat_hair = make_rgb_material("Maya_Hair", *HAIR_BROWN, unlit=True)
+    mat_pack = make_rgb_material("Maya_Pack", *PACK_TAN, unlit=True)
 
     parts = build_maya_parts(mat_body, mat_hair, mat_pack)
 
     lod0 = join_meshes(parts, "Maya_LOD0")
     apply_all_transforms(lod0)
     triangulate_object(lod0)
-    assign_material(lod0, mat_body)
+    # Keep multi-slot materials from join (Maya_Body / Maya_Hair / Maya_Pack) — do not flatten.
 
     tris0 = count_tris(lod0)
     print(f"[INFO] Maya_LOD0 tris={tris0} (soft target ≤{TARGET_LOD0_MAX}, height≈{TARGET_HEIGHT_M}m)")
+    slot_names = [m.name if m else "<empty>" for m in lod0.data.materials]
+    print(f"[INFO] Maya_LOD0 material slots: {slot_names}")
 
     ratio1 = min(0.40, TARGET_LOD1_MAX / max(tris0, 1))
     ratio2 = min(0.12, TARGET_LOD2_MAX / max(tris0, 1))
 
-    lod1 = decimate_lod(lod0, "Maya_LOD1", ratio=ratio1, mat=mat_body)
-    lod2 = decimate_lod(lod0, "Maya_LOD2", ratio=ratio2, mat=mat_body)
+    # mat=None preserves material slots through decimate
+    lod1 = decimate_lod(lod0, "Maya_LOD1", ratio=ratio1, mat=None)
+    lod2 = decimate_lod(lod0, "Maya_LOD2", ratio=ratio2, mat=None)
 
     tris1 = count_tris(lod1)
     tris2 = count_tris(lod2)
@@ -180,8 +192,19 @@ def main():
         lod.parent = root
 
     fail_if_over_budget(tris0, BUDGET_TRIS, "Maya_LOD0")
+
+    # Save blend alongside export if out dir exists
+    out_path = Path(args.out)
+    blend_path = out_path.with_suffix(".blend")
+    # Prefer assets/source/hero_grey.blend when exporting under repo layout
+    if "greybox" in str(out_path) or "heroes" in str(out_path):
+        # Will copy/save explicitly from caller; still write next to glb as backup name
+        pass
+    bpy.ops.wm.save_as_mainfile(filepath=str(out_path.parent / "hero_grey_export.blend"))
+
     export_glb_yup(args.out, objects=[root, lod0, lod1, lod2])
-    print(f"[DONE] hero_maya_grey → {args.out} | LOD0={tris0} LOD1={tris1} LOD2={tris2}")
+    print(f"[DONE] hero_maya_grey T-020 cream → {args.out} | LOD0={tris0} LOD1={tris1} LOD2={tris2}")
+    print(f"[DONE] slots={slot_names}")
 
 
 if __name__ == "__main__":
