@@ -199,6 +199,7 @@ func _walk_look(n: Node) -> void:
 					var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
 					if String(dup.resource_name).find("GOLD") >= 0:
 						dup.albedo_color = CACAO_Y
+						dup.emission_enabled = true
 						dup.emission = CACAO_Y
 						mi.set_surface_override_material(s, dup)
 						_warp_mats.append(dup)
