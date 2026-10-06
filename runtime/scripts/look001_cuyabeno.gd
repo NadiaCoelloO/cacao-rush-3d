@@ -131,40 +131,57 @@ func capture_still(shot: String, out_path: String) -> void:
 	if hud:
 		hud.visible = false
 	var player: Node3D = get_parent().get_node_or_null("PlayerMaya")
+	var play_cam: Camera3D = null
 	if player:
-		player.global_position = MAYA_STILL
-		player.rotation = Vector3.ZERO
-		player.set_physics_process(false)
-		var play_cam: Camera3D = player.get_node_or_null("Camera3D")
-		if play_cam:
-			play_cam.current = false
+		play_cam = player.get_node_or_null("Camera3D")
 	var cam: Camera3D
 	var pods_cam: Camera3D = null
-	if shot == "pods":
-		pods_cam = Camera3D.new()
-		pods_cam.name = "Cam_TotemPods"
-		pods_cam.fov = 32.0
-		pods_cam.far = 80.0
-		pods_cam.position = Vector3(8.85, 3.08, 1.25)
-		get_parent().add_child(pods_cam)
-		pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
-		cam = pods_cam
+	if shot == "gameplay":
+		# Actual follow-cam at scene spawn. Do not teleport to MAYA_STILL.
+		if player:
+			player.global_position = Vector3(0.0, 1.2, 0.0)
+			player.rotation = Vector3.ZERO
+			player.set_physics_process(true)
+		cam = play_cam
 	else:
-		var cam_name := "Cam_Laguna" if shot == "laguna" else "Cam_Dosel"
-		cam = get_parent().get_node_or_null(cam_name)
+		if player:
+			player.global_position = MAYA_STILL
+			player.rotation = Vector3.ZERO
+			player.set_physics_process(false)
+			if play_cam:
+				play_cam.current = false
+		if shot == "pods":
+			pods_cam = Camera3D.new()
+			pods_cam.name = "Cam_TotemPods"
+			pods_cam.fov = 32.0
+			pods_cam.far = 80.0
+			pods_cam.position = Vector3(8.85, 3.08, 1.25)
+			get_parent().add_child(pods_cam)
+			pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
+			cam = pods_cam
+		else:
+			var cam_name := "Cam_Laguna" if shot == "laguna" else "Cam_Dosel"
+			cam = get_parent().get_node_or_null(cam_name)
+		if cam == null:
+			push_error("LOOK-001 capture: missing camera for " + shot)
+			return
+		if player and shot != "pods":
+			if shot == "dosel":
+				# 3/4 toward Cam_Dosel so she reads as a character, not a blade.
+				var aim := Vector3(cam.global_position.x, player.global_position.y, cam.global_position.z)
+				player.look_at(aim, Vector3.UP)
+				player.rotate_y(deg_to_rad(38.0))
+			else:
+				player.rotation.y = deg_to_rad(35.0)
 	if cam == null:
 		push_error("LOOK-001 capture: missing camera for " + shot)
 		return
-	if player and shot != "pods":
-		if shot == "dosel":
-			# 3/4 toward Cam_Dosel so she reads as a character, not a blade.
-			var aim := Vector3(cam.global_position.x, player.global_position.y, cam.global_position.z)
-			player.look_at(aim, Vector3.UP)
-			player.rotate_y(deg_to_rad(38.0))
-		else:
-			player.rotation.y = deg_to_rad(35.0)
 	cam.current = true
 	set_totem_state(shot != "dosel")
+	if shot == "gameplay":
+		# Let Maya land from spawn y=1.2 so followCam is the in-game view.
+		for i in 40:
+			await tree.physics_frame
 	# More frames so volumetric fog / SSR settle on software rasterizers too.
 	for i in 24:
 		await tree.process_frame
@@ -688,8 +705,8 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	else:
 		cluster.position = Vector3(7.5, 0.0, 0.0)
 		add_child(cluster)
-	# Wood socket covers the baked GLB crown shards + gold blob (those read as
-	# a torch from the close-up). Beam spawn stays at local y=3.03.
+	# Small wood calyx on the crown plate. Beam spawn stays at local y=3.03.
+	# Do not swallow Cam_TotemPods look-at (7.5, 2.86, 0) with a giant nest.
 	var wood := StandardMaterial3D.new()
 	wood.albedo_color = Color(0.22, 0.16, 0.10)
 	wood.roughness = 0.88
@@ -697,9 +714,9 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	var sock := MeshInstance3D.new()
 	sock.name = "Calyx"
 	var sock_mesh := CylinderMesh.new()
-	sock_mesh.top_radius = 0.15
-	sock_mesh.bottom_radius = 0.20
-	sock_mesh.height = 0.11
+	sock_mesh.top_radius = 0.16
+	sock_mesh.bottom_radius = 0.21
+	sock_mesh.height = 0.12
 	sock_mesh.radial_segments = 12
 	sock.mesh = sock_mesh
 	sock.material_override = wood
@@ -730,43 +747,57 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 		band.position = Vector3(0.0, spec["y"], 0.0)
 		band.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		cluster.add_child(band)
-	# One nest swallows the baked crown pods (they fanned as orange/yellow
+	# Modest wood cap hides leftover baked crown lumps (already wood-overridden
+	# so they cannot read as fire). Top stays below the close-up look-at.
 	var nest := MeshInstance3D.new()
 	nest.name = "Nest"
 	var nest_mesh := SphereMesh.new()
-	nest_mesh.radius = 0.30
-	nest_mesh.height = 0.56
-	nest_mesh.radial_segments = 14
-	nest_mesh.rings = 8
+	nest_mesh.radius = 0.14
+	nest_mesh.height = 0.22
+	nest_mesh.radial_segments = 12
+	nest_mesh.rings = 6
 	nest.mesh = nest_mesh
 	nest.material_override = wood
 	nest.position = Vector3(0.0, 2.66, 0.0)
 	nest.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	cluster.add_child(nest)
-	# At most two broad dark-green cacao leaves (rounded, not spiky).
-	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.14, 2.72, -0.28), Vector3(deg_to_rad(-28.0), deg_to_rad(35.0), deg_to_rad(12.0))))
-	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.20, 2.70, -0.26), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
-	# Hang around the rim, long axis across Cam_TotemPods so we see the
-	# ellipsoid side (not an end-on melted disc on the nest).
+	# At most two broad dark-green cacao leaves (wide, rounded tip, not spiky).
+	# Disc faces Cam_TotemPods so they read as foliage, not edge-on needles.
+	var toward_cam := Vector3(0.73, 0.12, 0.68)
+	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.16, 2.74, -0.18), toward_cam.rotated(Vector3.UP, deg_to_rad(-28.0)) + Vector3(0.0, 0.35, 0.0)))
+	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.18, 2.73, -0.16), toward_cam.rotated(Vector3.UP, deg_to_rad(24.0)) + Vector3(0.0, 0.40, 0.0)))
+	# Tight Y / O / R cluster in front of the cap, long axis across the close-up
+	# so each reads as a whole elongated ribbed ellipsoid (pointed ends).
+	var across := Vector3(0.70, -0.22, -0.68)
 	var specs := [
-		{"pos": Vector3(0.18, 2.88, 0.54), "eul": Vector3(deg_to_rad(70.0), 0.0, 0.0), "col": CACAO_Y},
-		{"pos": Vector3(-0.54, 2.86, 0.12), "eul": Vector3(deg_to_rad(70.0), deg_to_rad(90.0), 0.0), "col": CACAO_O},
-		{"pos": Vector3(0.22, 2.84, -0.54), "eul": Vector3(deg_to_rad(70.0), deg_to_rad(180.0), 0.0), "col": CACAO_R},
+		{"pos": Vector3(0.03, 2.90, 0.23), "axis": across.rotated(Vector3.UP, deg_to_rad(-18.0)) + Vector3(0.0, -0.06, 0.0), "col": CACAO_Y},
+		{"pos": Vector3(0.24, 2.89, 0.01), "axis": across.rotated(Vector3.UP, deg_to_rad(16.0)) + Vector3(0.0, -0.08, 0.0), "col": CACAO_O},
+		{"pos": Vector3(0.20, 2.78, 0.19), "axis": Vector3(0.18, -0.92, 0.22), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
-		cluster.add_child(_make_cacao_pod("Pod_%d" % i, spec["pos"], spec["eul"], spec["col"]))
+		cluster.add_child(_make_cacao_pod("Pod_%d" % i, spec["pos"], spec["axis"], spec["col"]))
 
 
-func _make_cacao_leaf(leaf_name: String, pos: Vector3, eul: Vector3) -> MeshInstance3D:
+func _align_axis_y(node: Node3D, y_axis: Vector3) -> void:
+	var y := y_axis.normalized()
+	var x := Vector3.UP.cross(y)
+	if x.length_squared() < 0.0001:
+		x = Vector3.RIGHT.cross(y)
+	x = x.normalized()
+	var z := x.cross(y).normalized()
+	node.basis = Basis(x, y, z)
+
+
+func _make_cacao_leaf(leaf_name: String, pos: Vector3, face_dir: Vector3) -> MeshInstance3D:
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.12, 0.22, 0.11)
-	mat.roughness = 0.90
+	mat.albedo_color = Color(0.10, 0.20, 0.09)
+	mat.roughness = 0.92
 	mat.emission_enabled = false
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var sphere := SphereMesh.new()
 	sphere.radius = 0.11
-	sphere.height = 0.04
+	sphere.height = 0.034
 	sphere.radial_segments = 10
 	sphere.rings = 6
 	var mi := MeshInstance3D.new()
@@ -774,17 +805,17 @@ func _make_cacao_leaf(leaf_name: String, pos: Vector3, eul: Vector3) -> MeshInst
 	mi.mesh = sphere
 	mi.material_override = mat
 	mi.position = pos
-	mi.rotation = eul
-	mi.scale = Vector3(1.55, 1.0, 2.35)
+	_align_axis_y(mi, face_dir)
+	mi.scale = Vector3(1.85, 1.0, 2.55)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
 
 
-func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -> Node3D:
+func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Color) -> Node3D:
 	var root := Node3D.new()
 	root.name = pod_name
 	root.position = pos
-	root.rotation = eul
+	_align_axis_y(root, long_axis)
 	var mat := StandardMaterial3D.new()
 	mat.resource_name = "KakawPod"
 	mat.albedo_color = col
@@ -794,14 +825,14 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -
 	mat.roughness = 0.68
 	mat.metallic = 0.0
 	_pod_mats.append(mat)
-	# Whole elongated ellipsoid (capsule) along local Y, not a flattened disc.
+	# Whole elongated ribbed ellipsoid along local Y, pointed ends — not a disc.
 	var body := MeshInstance3D.new()
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.058
-	cap.height = 0.26
-	cap.radial_segments = 12
-	cap.rings = 4
-	body.mesh = cap
+	var sph := SphereMesh.new()
+	sph.radius = 0.078
+	sph.height = 0.30
+	sph.radial_segments = 12
+	sph.rings = 8
+	body.mesh = sph
 	body.material_override = mat
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(body)
@@ -809,12 +840,12 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -
 		var tip := MeshInstance3D.new()
 		var cone := CylinderMesh.new()
 		cone.top_radius = 0.0
-		cone.bottom_radius = 0.032
-		cone.height = 0.045
+		cone.bottom_radius = 0.034
+		cone.height = 0.055
 		cone.radial_segments = 10
 		tip.mesh = cone
 		tip.material_override = mat
-		tip.position = Vector3(0.0, sign * 0.145, 0.0)
+		tip.position = Vector3(0.0, sign * 0.162, 0.0)
 		if sign < 0.0:
 			tip.rotation.x = PI
 		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -823,13 +854,13 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -
 		var ang := TAU * float(k) / 5.0
 		var rib := MeshInstance3D.new()
 		var cyl := CylinderMesh.new()
-		cyl.top_radius = 0.006
-		cyl.bottom_radius = 0.006
-		cyl.height = 0.22
+		cyl.top_radius = 0.007
+		cyl.bottom_radius = 0.007
+		cyl.height = 0.24
 		cyl.radial_segments = 6
 		rib.mesh = cyl
 		rib.material_override = mat
-		rib.position = Vector3(cos(ang) * 0.052, 0.0, sin(ang) * 0.052)
+		rib.position = Vector3(cos(ang) * 0.070, 0.0, sin(ang) * 0.070)
 		rib.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(rib)
 	return root

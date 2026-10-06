@@ -163,5 +163,7 @@ func _run_capture() -> void:
 	if _look and _look.has_method("capture_still"):
 		for s in shots:
 			var tag := "totem_pods" if s == "pods" else s
+			if s == "gameplay":
+				tag = "gameplay_final"
 			await _look.capture_still(s, "%sLOOK-001_engine_%s.png" % [out_dir, tag])
 	get_tree().quit()
