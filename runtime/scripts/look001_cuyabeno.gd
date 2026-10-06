@@ -56,7 +56,8 @@ const FOG_TRUNKS := [
 	{"pos": Vector3(-7.5, 4.0, -13.0), "size": Vector3(14.0, 8.5, 13.0), "yaw": 42.0},
 	{"pos": Vector3(12.0, 3.2, -9.5), "size": Vector3(12.0, 7.0, 10.0), "yaw": -8.0},
 	{"pos": Vector3(0.5, 5.5, -20.0), "size": Vector3(24.0, 11.0, 16.0), "yaw": 10.0},
-	{"pos": Vector3(-4.0, 3.2, 9.5), "size": Vector3(18.0, 6.5, 8.0), "yaw": 95.0},
+	# Lighting pass: camera-side trunk at z=9.5 omitted — it sat on the
+	# playable corridor / Cam_Dosel and crushed Maya, floor, and mantle edges.
 	{"pos": Vector3(8.0, 4.2, -15.5), "size": Vector3(14.0, 8.0, 12.0), "yaw": 55.0},
 ]
 
@@ -328,10 +329,10 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.background_energy_multiplier = 0.55
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	_env.ambient_light_color = Color("5a6e68")
-	_env.ambient_light_energy = 0.38
+	_env.ambient_light_energy = 0.52
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.tonemap_exposure = 0.82
+	_env.tonemap_exposure = 0.94
 	_env.ssr_enabled = true
 	_env.ssr_max_steps = 64
 	_env.ssr_fade_in = 0.15
@@ -351,16 +352,16 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.set("glow_levels/6", 0.0)
 	_env.set("glow_levels/7", 0.0)
 	_env.adjustment_enabled = true
-	_env.adjustment_brightness = 1.0
-	_env.adjustment_contrast = 1.03
+	_env.adjustment_brightness = 1.05
+	_env.adjustment_contrast = 1.01
 	_env.adjustment_saturation = 0.92
 	_env.volumetric_fog_enabled = true
-	_env.volumetric_fog_density = 0.006
+	_env.volumetric_fog_density = 0.0034
 	_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
 	_env.volumetric_fog_anisotropy = 0.32
 	_env.volumetric_fog_length = 72.0
 	_env.volumetric_fog_detail_spread = 2.0
-	_env.volumetric_fog_ambient_inject = 0.28
+	_env.volumetric_fog_ambient_inject = 0.42
 	we.environment = _env
 
 
@@ -386,13 +387,13 @@ func _build_lights(pilot: Node3D) -> void:
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
 	fill.light_color = Color("8a9a88")
-	fill.light_energy = 0.26
+	fill.light_energy = 0.44
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.2
 	add_child(fill)
 	fill.position = Vector3(-8.0, 8.5, 6.0)
-	fill.look_at(Vector3(4.0, 0.0, -6.0), Vector3.UP)
+	fill.look_at(Vector3(5.0, 1.0, 0.0), Vector3.UP)
 
 	var lateral := OmniLight3D.new()
 	lateral.name = "LOOK001_KEY_Soft_Lateral"
@@ -404,6 +405,31 @@ func _build_lights(pilot: Node3D) -> void:
 	lateral.light_volumetric_fog_energy = 0.25
 	lateral.shadow_enabled = false
 	add_child(lateral)
+
+	# Lighting pass: local fill + rim so Maya, floor, solid/oneway @ (6,1,0)
+	# and mantle edges read along the playable route. No shadows (keep the
+	# closed-canopy key), low vol-fog energy so banks/haze stay on the lagoon.
+	var route_fill := OmniLight3D.new()
+	route_fill.name = "LOOK001_FILL_Route"
+	route_fill.position = Vector3(2.0, 3.7, -0.6)
+	route_fill.light_color = Color(1.0, 0.86, 0.68)
+	route_fill.light_energy = 0.88
+	route_fill.light_specular = 0.12
+	route_fill.omni_range = 11.0
+	route_fill.light_volumetric_fog_energy = 0.12
+	route_fill.shadow_enabled = false
+	add_child(route_fill)
+
+	var route_rim := OmniLight3D.new()
+	route_rim.name = "LOOK001_RIM_Route"
+	route_rim.position = Vector3(6.2, 3.4, 2.5)
+	route_rim.light_color = Color(0.82, 0.90, 0.86)
+	route_rim.light_energy = 0.62
+	route_rim.light_specular = 0.08
+	route_rim.omni_range = 9.0
+	route_rim.light_volumetric_fog_energy = 0.1
+	route_rim.shadow_enabled = false
+	add_child(route_rim)
 
 	var anchor: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
 	_totem_light = OmniLight3D.new()
@@ -453,15 +479,30 @@ func _build_fog() -> void:
 	var haze := FogVolume.new()
 	haze.name = "LOOK001_AerialHaze"
 	haze.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	haze.size = Vector3(120.0, 28.0, 90.0)
-	haze.position = Vector3(0.0, 10.0, -14.0)
+	# Lifted off the playable plane (y ~0–2); still covers canopy + lagoon depth.
+	haze.size = Vector3(120.0, 20.0, 80.0)
+	haze.position = Vector3(0.0, 14.0, -18.0)
 	var haze_mat := FogMaterial.new()
-	haze_mat.density = 0.04
+	haze_mat.density = 0.032
 	haze_mat.albedo = Color(0.66, 0.70, 0.64)
-	haze_mat.height_falloff = 0.08
+	haze_mat.height_falloff = 0.04
 	haze_mat.edge_fade = 0.3
 	haze.material = haze_mat
 	add_child(haze)
+	# Soft subtract over the playable strip so world vol-fog stays in the
+	# background without a hard hole. Negative density is a FogMaterial feature.
+	var clear := FogVolume.new()
+	clear.name = "LOOK001_PlayableClear"
+	clear.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+	clear.size = Vector3(18.0, 5.5, 8.0)
+	clear.position = Vector3(4.5, 2.2, 0.2)
+	var clear_mat := FogMaterial.new()
+	clear_mat.density = -0.1
+	clear_mat.albedo = Color(0.72, 0.75, 0.70)
+	clear_mat.height_falloff = 0.0
+	clear_mat.edge_fade = 0.85
+	clear.material = clear_mat
+	add_child(clear)
 
 
 func _make_fog_volume(vol_name: String, spec: Dictionary, mat: FogMaterial) -> FogVolume:
