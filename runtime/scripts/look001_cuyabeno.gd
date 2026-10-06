@@ -196,18 +196,13 @@ func _walk_look(n: Node) -> void:
 			# Hide baked cone + gold blob (they read as fire from Cam_TotemPods).
 			# Gold shaft rings are rebuilt as greybox in _build_kakaw_pods.
 			n.visible = false
-		if n.name.begins_with("LOOK001_Totem_Post") and mi.mesh:
-			# Drop vertex-coloured crown shards so they cannot z-fight Kakaw Y/O
-			# through the nest (that read as a melted yellow blob).
-			for s in mi.mesh.get_surface_count():
-				var pmat := mi.get_active_material(s)
-				if pmat is BaseMaterial3D:
-					var pd := (pmat as BaseMaterial3D).duplicate() as BaseMaterial3D
-					pd.vertex_color_use_as_albedo = false
-					pd.albedo_color = Color(0.28, 0.20, 0.13)
-					pd.emission_enabled = false
-					pd.emission_energy_multiplier = 0.0
-					mi.set_surface_override_material(s, pd)
+		if n.name.begins_with("LOOK001_Totem_Post"):
+			var wood_post := StandardMaterial3D.new()
+			wood_post.albedo_color = Color(0.28, 0.20, 0.13)
+			wood_post.vertex_color_use_as_albedo = false
+			wood_post.emission_enabled = false
+			wood_post.roughness = 0.85
+			mi.material_override = wood_post
 	for c in n.get_children():
 		_walk_look(c)
 
@@ -751,11 +746,12 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	# At most two broad dark-green cacao leaves (rounded, not spiky).
 	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.14, 2.72, -0.28), Vector3(deg_to_rad(-28.0), deg_to_rad(35.0), deg_to_rad(12.0))))
 	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.20, 2.70, -0.26), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
-	# Hang outward (not up) so they read as cacao, not a torch.
+	# Hang around the rim, long axis across Cam_TotemPods so we see the
+	# ellipsoid side (not an end-on melted disc on the nest).
 	var specs := [
-		{"pos": Vector3(0.40, 2.82, 0.22), "eul": Vector3(deg_to_rad(80.0), deg_to_rad(28.0), 0.0), "col": CACAO_Y},
-		{"pos": Vector3(-0.38, 2.80, 0.20), "eul": Vector3(deg_to_rad(82.0), deg_to_rad(-62.0), 0.0), "col": CACAO_O},
-		{"pos": Vector3(0.10, 2.78, -0.42), "eul": Vector3(deg_to_rad(78.0), deg_to_rad(174.0), 0.0), "col": CACAO_R},
+		{"pos": Vector3(0.18, 2.88, 0.54), "eul": Vector3(deg_to_rad(70.0), 0.0, 0.0), "col": CACAO_Y},
+		{"pos": Vector3(-0.54, 2.86, 0.12), "eul": Vector3(deg_to_rad(70.0), deg_to_rad(90.0), 0.0), "col": CACAO_O},
+		{"pos": Vector3(0.22, 2.84, -0.54), "eul": Vector3(deg_to_rad(70.0), deg_to_rad(180.0), 0.0), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
