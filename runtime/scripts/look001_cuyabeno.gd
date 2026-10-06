@@ -35,14 +35,14 @@ const PLAT_EMIT_ENERGY := 0.14
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
-## Gameplay-cam Maya-only fill (layer 20). Scene lights keep default layer 1.
+## Gameplay-cam Maya-only fill (visual layer 2). Scene lights keep default layer 1.
 ## Does not change KEY/FILL/RIM/SPOT energy or fog.
-const MAYA_FOLLOW_LAYER := 1 << 19
-const MAYA_BACK_FILL_ENERGY := 3.6
-const MAYA_BACK_FILL_RANGE := 3.4
-const MAYA_BACK_FILL_ATTEN := 1.35
-const MAYA_RIM_ENERGY := 1.15
-const MAYA_RIM_RANGE := 3.0
+const MAYA_FOLLOW_LAYER := 2
+const MAYA_BACK_FILL_ENERGY := 1.05
+const MAYA_BACK_FILL_RANGE := 3.0
+const MAYA_BACK_FILL_ATTEN := 1.5
+const MAYA_RIM_ENERGY := 0.40
+const MAYA_RIM_RANGE := 2.6
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
 ## volumetric fog on the Environment covers that role in Forward+).
@@ -77,6 +77,8 @@ var _beam: Node3D
 var _warp_mats: Array[BaseMaterial3D] = []
 var _pod_mats: Array[BaseMaterial3D] = []
 var _lod_roots: Array[Node] = []
+var _maya_fill: OmniLight3D = null
+var _maya_rim: OmniLight3D = null
 
 
 func apply(pilot: Node3D, lod_roots: Array) -> void:
@@ -187,6 +189,9 @@ func capture_still(shot: String, out_path: String) -> void:
 		return
 	cam.current = true
 	set_totem_state(shot != "dosel")
+	# Follow fill is for the spawn gameplay cam (KEY_Maya does not reach).
+	# Laguna / dosel / pods keep vertex albedo + scene KEY so Maya stays cream.
+	_set_maya_follow_for_shot(player, shot == "gameplay")
 	if shot == "gameplay":
 		# Let Maya land from spawn y=1.2 so followCam is the in-game view.
 		for i in 40:
@@ -243,6 +248,9 @@ func _grade_hero(pilot: Node3D) -> void:
 func _grade_hero_node(n: Node) -> void:
 	if n is MeshInstance3D:
 		var mi := n as MeshInstance3D
+		# Imported hero_grey is GI-static (light_baking=1); dynamic Omnis would miss her.
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		mi.layers = mi.layers | MAYA_FOLLOW_LAYER
 		if mi.mesh:
 			mi.mesh = mi.mesh.duplicate()
 			for s in mi.mesh.get_surface_count():
@@ -251,11 +259,12 @@ func _grade_hero_node(n: Node) -> void:
 					continue
 				var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
 				var slot := String(d.resource_name)
-				# Lit albedo, emission off: unlit #f1ddc1 reads as white puro under filmic.
-				d.emission_enabled = false
-				d.emission_energy_multiplier = 0.0
 				d.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
 				d.roughness = 0.48
+				d.metallic = 0.0
+				d.vertex_color_use_as_albedo = false
+				d.emission_enabled = false
+				d.emission_energy_multiplier = 0.0
 				if slot.begins_with("Maya_Body"):
 					d.albedo_color = MAYA_BODY
 				elif slot.begins_with("Maya_Hair"):
@@ -274,38 +283,73 @@ func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	if player == null:
 		return
 	_tag_maya_follow_layer(player)
-	# Parent to PlayerMaya so the fill rides spawn / run / mantle with her.
-	# cull_mask = layer 20 only: lights Maya, not floor / canopy / totem.
-	var fill := OmniLight3D.new()
-	fill.name = "LOOK001_FILL_MayaBack"
-	fill.light_color = Color(1.0, 0.90, 0.76)
-	fill.light_energy = MAYA_BACK_FILL_ENERGY
-	fill.light_specular = 0.0
-	fill.omni_range = MAYA_BACK_FILL_RANGE
-	fill.omni_attenuation = MAYA_BACK_FILL_ATTEN
-	fill.shadow_enabled = false
-	fill.light_volumetric_fog_energy = 0.0
-	fill.light_cull_mask = MAYA_FOLLOW_LAYER
+	# Parent to PlayerMaya (hero visual is a child). Local +Z is camera-back.
+	# cull_mask = layer 2 only: lights Maya, not floor / canopy / totem.
+	_maya_fill = OmniLight3D.new()
+	_maya_fill.name = "LOOK001_FILL_MayaBack"
+	_maya_fill.light_color = Color(1.0, 0.74, 0.50)
+	_maya_fill.light_energy = MAYA_BACK_FILL_ENERGY
+	_maya_fill.light_specular = 0.0
+	_maya_fill.omni_range = MAYA_BACK_FILL_RANGE
+	_maya_fill.omni_attenuation = MAYA_BACK_FILL_ATTEN
+	_maya_fill.shadow_enabled = false
+	_maya_fill.light_volumetric_fog_energy = 0.0
+	_maya_fill.light_cull_mask = MAYA_FOLLOW_LAYER
 	# Behind/above her back relative to PlayerMaya/Camera3D (+Z follow-cam).
-	fill.position = Vector3(0.0, 1.48, 1.72)
-	player.add_child(fill)
-	var rim := OmniLight3D.new()
-	rim.name = "LOOK001_RIM_MayaFollow"
-	rim.light_color = Color(1.0, 0.86, 0.68)
-	rim.light_energy = MAYA_RIM_ENERGY
-	rim.light_specular = 0.0
-	rim.omni_range = MAYA_RIM_RANGE
-	rim.omni_attenuation = 1.5
-	rim.shadow_enabled = false
-	rim.light_volumetric_fog_energy = 0.0
-	rim.light_cull_mask = MAYA_FOLLOW_LAYER
-	rim.position = Vector3(-0.45, 1.62, -0.85)
-	player.add_child(rim)
+	_maya_fill.position = Vector3(0.0, 1.22, 0.88)
+	player.add_child(_maya_fill)
+	_maya_rim = OmniLight3D.new()
+	_maya_rim.name = "LOOK001_RIM_MayaFollow"
+	_maya_rim.light_color = Color(1.0, 0.72, 0.48)
+	_maya_rim.light_energy = MAYA_RIM_ENERGY
+	_maya_rim.light_specular = 0.0
+	_maya_rim.omni_range = MAYA_RIM_RANGE
+	_maya_rim.omni_attenuation = 1.5
+	_maya_rim.shadow_enabled = false
+	_maya_rim.light_volumetric_fog_energy = 0.0
+	_maya_rim.light_cull_mask = MAYA_FOLLOW_LAYER
+	_maya_rim.position = Vector3(0.50, 1.48, -0.60)
+	player.add_child(_maya_rim)
+
+
+func _set_maya_follow_for_shot(player: Node, gameplay: bool) -> void:
+	if _maya_fill:
+		_maya_fill.visible = gameplay
+		_maya_fill.light_energy = MAYA_BACK_FILL_ENERGY if gameplay else 0.0
+	if _maya_rim:
+		_maya_rim.visible = gameplay
+		_maya_rim.light_energy = MAYA_RIM_ENERGY if gameplay else 0.0
+	if player == null:
+		return
+	_set_hero_capture_grade(player, gameplay)
+
+
+func _set_hero_capture_grade(n: Node, gameplay: bool) -> void:
+	if n is Camera3D or n is Light3D:
+		pass
+	elif n is GeometryInstance3D:
+		var gi := n as GeometryInstance3D
+		gi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED if gameplay else GeometryInstance3D.GI_MODE_STATIC
+		if n is MeshInstance3D:
+			var mi := n as MeshInstance3D
+			if mi.mesh:
+				for s in mi.mesh.get_surface_count():
+					var mat := mi.mesh.surface_get_material(s)
+					if mat is BaseMaterial3D:
+						# Vertex colors keep KEY_Maya cream on laguna/dosel; they crush
+						# the back to ~RGB 28 on the gameplay cam, so leave them off there.
+						(mat as BaseMaterial3D).vertex_color_use_as_albedo = not gameplay
+	for c in n.get_children():
+		_set_hero_capture_grade(c, gameplay)
 
 
 func _tag_maya_follow_layer(n: Node) -> void:
 	if n is Camera3D or n is Light3D:
 		pass
+	elif n is GeometryInstance3D:
+		var gi := n as GeometryInstance3D
+		gi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		gi.layers = gi.layers | MAYA_FOLLOW_LAYER
 	elif n is VisualInstance3D:
 		var vi := n as VisualInstance3D
 		vi.layers = vi.layers | MAYA_FOLLOW_LAYER
@@ -864,35 +908,45 @@ func _make_cacao_leaf(leaf_name: String, pos: Vector3, face_dir: Vector3) -> Mes
 
 
 func _make_cacao_pod_mesh() -> ArrayMesh:
-	# Local +Y = hanging tip (blunt). Local −Y = stalk (rounded sphere pole).
-	# Five longitudinal grooves are radius indents, not stuck-on slats.
+	# Local +Y = hanging tip (blunt cap). Local −Y = stalk (rounded sphere pole).
+	# Five longitudinal grooves are radius valleys, not stuck-on slat cylinders.
+	# Closed mesh: single pole verts so t=0 does not emit degenerate black faces.
 	var radius := 0.092
 	var half := 0.145
 	var grooves := 5
-	var groove_k := 0.17
-	var rings := 10
-	var segs := 20
+	var groove_k := 0.16
+	var rings := 12
+	var segs := 24
+	var stalk := Vector3(0.0, -half, 0.0)
+	var tip := Vector3(0.0, half + 0.006, 0.0)
 	var pts: Array[Vector3] = []
-	for i in rings + 1:
+	for i in range(1, rings):
 		var t: float = float(i) / float(rings)
 		var y: float = lerpf(-half, half, t)
 		var ring_r: float = sin(PI * t) * radius
-		if t > 0.78:
-			var u: float = (t - 0.78) / 0.22
-			ring_r = lerpf(sin(PI * t) * radius, radius * 0.20, u)
-		if t >= 0.999:
-			ring_r = radius * 0.18
+		if t > 0.70:
+			var u: float = (t - 0.70) / 0.30
+			# Blunt blossom cap (not a spike). Stalk pole stays spherical.
+			ring_r = lerpf(sin(PI * t) * radius, radius * 0.38 * sqrt(maxf(0.0, 1.0 - u * u)), u)
 		for j in segs:
 			var ang: float = TAU * float(j) / float(segs)
 			var rr: float = ring_r
-			if t > 0.14 and t < 0.90:
-				var groove: float = 0.5 + 0.5 * cos(float(grooves) * ang)
+			if t > 0.16 and t < 0.84:
+				var groove: float = pow(0.5 + 0.5 * cos(float(grooves) * ang), 1.35)
 				rr = ring_r * (1.0 - groove_k * groove)
 			pts.append(Vector3(cos(ang) * rr, y, sin(ang) * rr))
+	var body_rings := rings - 1
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_smooth_group(0)
-	for i in rings:
+	# Stalk cap: pole → first ring (CCW from outside).
+	for j in segs:
+		var a: int = j
+		var b: int = (j + 1) % segs
+		st.add_vertex(stalk)
+		st.add_vertex(pts[a])
+		st.add_vertex(pts[b])
+	for i in body_rings - 1:
 		for j in segs:
 			var a: int = i * segs + j
 			var b: int = i * segs + ((j + 1) % segs)
@@ -904,13 +958,12 @@ func _make_cacao_pod_mesh() -> ArrayMesh:
 			st.add_vertex(pts[b])
 			st.add_vertex(pts[c])
 			st.add_vertex(pts[d])
-	var cap := Vector3(0.0, half + 0.010, 0.0)
-	var last := rings * segs
+	var last := (body_rings - 1) * segs
 	for j in segs:
-		var b: int = last + ((j + 1) % segs)
 		var a: int = last + j
+		var b: int = last + ((j + 1) % segs)
 		st.add_vertex(pts[a])
-		st.add_vertex(cap)
+		st.add_vertex(tip)
 		st.add_vertex(pts[b])
 	st.generate_normals()
 	return st.commit()
@@ -929,6 +982,7 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	mat.emission_energy_multiplier = 0.55
 	mat.roughness = 0.78
 	mat.metallic = 0.0
+	mat.cull_mode = BaseMaterial3D.CULL_BACK
 	_pod_mats.append(mat)
 	var body := MeshInstance3D.new()
 	body.name = "Body"
