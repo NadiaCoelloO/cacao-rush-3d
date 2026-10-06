@@ -38,10 +38,10 @@ const CACAO_R := Color("a64b36")
 ## Gameplay-cam Maya-only fill (visual layer 2). Scene lights keep default layer 1.
 ## Does not change KEY/FILL/RIM/SPOT energy or fog.
 const MAYA_FOLLOW_LAYER := 2
-const MAYA_BACK_FILL_ENERGY := 1.05
+const MAYA_BACK_FILL_ENERGY := 0.70
 const MAYA_BACK_FILL_RANGE := 3.0
 const MAYA_BACK_FILL_ATTEN := 1.5
-const MAYA_RIM_ENERGY := 0.40
+const MAYA_RIM_ENERGY := 0.28
 const MAYA_RIM_RANGE := 2.6
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
@@ -79,6 +79,7 @@ var _pod_mats: Array[BaseMaterial3D] = []
 var _lod_roots: Array[Node] = []
 var _maya_fill: OmniLight3D = null
 var _maya_rim: OmniLight3D = null
+var _hero_mats: Array[BaseMaterial3D] = []
 
 
 func apply(pilot: Node3D, lod_roots: Array) -> void:
@@ -242,6 +243,7 @@ func _grade_hero(pilot: Node3D) -> void:
 	var player: Node = pilot.get_node_or_null("PlayerMaya")
 	if player == null:
 		return
+	_hero_mats.clear()
 	_grade_hero_node(player)
 
 
@@ -274,6 +276,7 @@ func _grade_hero_node(n: Node) -> void:
 				else:
 					d.albedo_color = MAYA_BODY
 				mi.mesh.surface_set_material(s, d)
+				_hero_mats.append(d)
 	for c in n.get_children():
 		_grade_hero_node(c)
 
@@ -319,28 +322,26 @@ func _set_maya_follow_for_shot(player: Node, gameplay: bool) -> void:
 	if _maya_rim:
 		_maya_rim.visible = gameplay
 		_maya_rim.light_energy = MAYA_RIM_ENERGY if gameplay else 0.0
+	for mat in _hero_mats:
+		if mat:
+			mat.vertex_color_use_as_albedo = not gameplay
 	if player == null:
 		return
-	_set_hero_capture_grade(player, gameplay)
+	_set_hero_gi_for_shot(player, gameplay)
+	var vertex_on := false
+	if not _hero_mats.is_empty():
+		vertex_on = _hero_mats[0].vertex_color_use_as_albedo
+	print("LOOK-001 follow gameplay=", gameplay, " hero_mats=", _hero_mats.size(), " vertex=", vertex_on)
 
 
-func _set_hero_capture_grade(n: Node, gameplay: bool) -> void:
+func _set_hero_gi_for_shot(n: Node, gameplay: bool) -> void:
 	if n is Camera3D or n is Light3D:
 		pass
 	elif n is GeometryInstance3D:
 		var gi := n as GeometryInstance3D
 		gi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED if gameplay else GeometryInstance3D.GI_MODE_STATIC
-		if n is MeshInstance3D:
-			var mi := n as MeshInstance3D
-			if mi.mesh:
-				for s in mi.mesh.get_surface_count():
-					var mat := mi.mesh.surface_get_material(s)
-					if mat is BaseMaterial3D:
-						# Vertex colors keep KEY_Maya cream on laguna/dosel; they crush
-						# the back to ~RGB 28 on the gameplay cam, so leave them off there.
-						(mat as BaseMaterial3D).vertex_color_use_as_albedo = not gameplay
 	for c in n.get_children():
-		_set_hero_capture_grade(c, gameplay)
+		_set_hero_gi_for_shot(c, gameplay)
 
 
 func _tag_maya_follow_layer(n: Node) -> void:
@@ -907,68 +908,6 @@ func _make_cacao_leaf(leaf_name: String, pos: Vector3, face_dir: Vector3) -> Mes
 	return mi
 
 
-func _make_cacao_pod_mesh() -> ArrayMesh:
-	# Local +Y = hanging tip (blunt cap). Local −Y = stalk (rounded sphere pole).
-	# Five longitudinal grooves are radius valleys, not stuck-on slat cylinders.
-	# Closed mesh: single pole verts so t=0 does not emit degenerate black faces.
-	var radius := 0.092
-	var half := 0.145
-	var grooves := 5
-	var groove_k := 0.16
-	var rings := 12
-	var segs := 24
-	var stalk := Vector3(0.0, -half, 0.0)
-	var tip := Vector3(0.0, half + 0.006, 0.0)
-	var pts: Array[Vector3] = []
-	for i in range(1, rings):
-		var t: float = float(i) / float(rings)
-		var y: float = lerpf(-half, half, t)
-		var ring_r: float = sin(PI * t) * radius
-		if t > 0.70:
-			var u: float = (t - 0.70) / 0.30
-			# Blunt blossom cap (not a spike). Stalk pole stays spherical.
-			ring_r = lerpf(sin(PI * t) * radius, radius * 0.38 * sqrt(maxf(0.0, 1.0 - u * u)), u)
-		for j in segs:
-			var ang: float = TAU * float(j) / float(segs)
-			var rr: float = ring_r
-			if t > 0.16 and t < 0.84:
-				var groove: float = pow(0.5 + 0.5 * cos(float(grooves) * ang), 1.35)
-				rr = ring_r * (1.0 - groove_k * groove)
-			pts.append(Vector3(cos(ang) * rr, y, sin(ang) * rr))
-	var body_rings := rings - 1
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	st.set_smooth_group(0)
-	# Stalk cap: pole → first ring (CCW from outside).
-	for j in segs:
-		var a: int = j
-		var b: int = (j + 1) % segs
-		st.add_vertex(stalk)
-		st.add_vertex(pts[a])
-		st.add_vertex(pts[b])
-	for i in body_rings - 1:
-		for j in segs:
-			var a: int = i * segs + j
-			var b: int = i * segs + ((j + 1) % segs)
-			var c: int = (i + 1) * segs + j
-			var d: int = (i + 1) * segs + ((j + 1) % segs)
-			st.add_vertex(pts[a])
-			st.add_vertex(pts[c])
-			st.add_vertex(pts[b])
-			st.add_vertex(pts[b])
-			st.add_vertex(pts[c])
-			st.add_vertex(pts[d])
-	var last := (body_rings - 1) * segs
-	for j in segs:
-		var a: int = last + j
-		var b: int = last + ((j + 1) % segs)
-		st.add_vertex(pts[a])
-		st.add_vertex(tip)
-		st.add_vertex(pts[b])
-	st.generate_normals()
-	return st.commit()
-
-
 func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Color) -> Node3D:
 	var root := Node3D.new()
 	root.name = pod_name
@@ -982,14 +921,37 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	mat.emission_energy_multiplier = 0.55
 	mat.roughness = 0.78
 	mat.metallic = 0.0
-	mat.cull_mode = BaseMaterial3D.CULL_BACK
 	_pod_mats.append(mat)
-	var body := MeshInstance3D.new()
-	body.name = "Body"
-	body.mesh = _make_cacao_pod_mesh()
-	body.material_override = mat
-	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	root.add_child(body)
+	# Closed ellipsoid: rounded stalk pole at local −Y, shaved blunt cap at +Y.
+	# Ribs are CSG cylinder subtractions (valleys), not stuck-on slat meshes.
+	var csg := CSGCombiner3D.new()
+	csg.name = "Body"
+	csg.material_override = mat
+	csg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var body := CSGSphere3D.new()
+	body.radius = 0.092
+	body.radial_segments = 16
+	body.rings = 10
+	body.smooth_faces = true
+	body.scale = Vector3(1.0, 1.55, 1.0)
+	body.material = mat
+	csg.add_child(body)
+	var blunt := CSGBox3D.new()
+	blunt.operation = CSGShape3D.OPERATION_SUBTRACTION
+	blunt.size = Vector3(0.22, 0.030, 0.22)
+	blunt.position = Vector3(0.0, 0.148, 0.0)
+	csg.add_child(blunt)
+	for i in 5:
+		var ang: float = TAU * float(i) / 5.0
+		var g := CSGCylinder3D.new()
+		g.operation = CSGShape3D.OPERATION_SUBTRACTION
+		g.radius = 0.015
+		g.height = 0.20
+		g.sides = 8
+		g.smooth_faces = true
+		g.position = Vector3(cos(ang) * 0.090, 0.0, sin(ang) * 0.090)
+		csg.add_child(g)
+	root.add_child(csg)
 	# Rounded stalk nub at local −Y (world top when hanging).
 	var nub := MeshInstance3D.new()
 	nub.name = "Stalk"
