@@ -196,6 +196,18 @@ func _walk_look(n: Node) -> void:
 			# Hide baked cone + gold blob (they read as fire from Cam_TotemPods).
 			# Gold shaft rings are rebuilt as greybox in _build_kakaw_pods.
 			n.visible = false
+		if n.name.begins_with("LOOK001_Totem_Post") and mi.mesh:
+			# Drop vertex-coloured crown shards so they cannot z-fight Kakaw Y/O
+			# through the nest (that read as a melted yellow blob).
+			for s in mi.mesh.get_surface_count():
+				var pmat := mi.get_active_material(s)
+				if pmat is BaseMaterial3D:
+					var pd := (pmat as BaseMaterial3D).duplicate() as BaseMaterial3D
+					pd.vertex_color_use_as_albedo = false
+					pd.albedo_color = Color(0.28, 0.20, 0.13)
+					pd.emission_enabled = false
+					pd.emission_energy_multiplier = 0.0
+					mi.set_surface_override_material(s, pd)
 	for c in n.get_children():
 		_walk_look(c)
 
