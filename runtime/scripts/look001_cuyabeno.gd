@@ -38,12 +38,13 @@ const CACAO_R := Color("a64b36")
 ## Gameplay-cam Maya-only fill (visual layer 2). Scene lights keep default layer 1.
 ## Does not change KEY/FILL/RIM/SPOT energy or fog.
 const MAYA_FOLLOW_LAYER := 2
-## Neutral-warm (#FFF4E6): orange (1,0.40,0.12) read hue 18° / sat 0.50 on the back.
-const MAYA_FOLLOW_LIGHT := Color(1.0, 0.957, 0.902)
-const MAYA_BACK_FILL_ENERGY := 0.24
+## Warm white near #FFF4E6. Slightly less G/B than 1/0.957/0.902 so the
+## lit back sits in hue 28–35° against Maya_Body albedo (pure #FFF4E6 → ~37°).
+const MAYA_FOLLOW_LIGHT := Color(1.0, 0.86, 0.70)
+const MAYA_BACK_FILL_ENERGY := 0.34
 const MAYA_BACK_FILL_RANGE := 3.0
 const MAYA_BACK_FILL_ATTEN := 1.5
-const MAYA_RIM_ENERGY := 0.08
+const MAYA_RIM_ENERGY := 0.10
 const MAYA_RIM_RANGE := 2.6
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
