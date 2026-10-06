@@ -155,8 +155,13 @@ func _run_capture() -> void:
 	if not out_dir.ends_with("/"):
 		out_dir += "/"
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	var shots: PackedStringArray = PackedStringArray(["laguna", "dosel"]) if shot == "both" else PackedStringArray([shot])
+	var shots: PackedStringArray
+	if shot == "both" or shot == "notes":
+		shots = PackedStringArray(["laguna", "dosel", "pods"])
+	else:
+		shots = PackedStringArray([shot])
 	if _look and _look.has_method("capture_still"):
 		for s in shots:
-			await _look.capture_still(s, "%sLOOK-001_engine_%s.png" % [out_dir, s])
+			var tag := "totem_pods" if s == "pods" else s
+			await _look.capture_still(s, "%sLOOK-001_engine_%s.png" % [out_dir, tag])
 	get_tree().quit()

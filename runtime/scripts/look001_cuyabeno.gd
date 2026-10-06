@@ -67,6 +67,7 @@ var _env: Environment
 var _totem_light: OmniLight3D
 var _beam: Node3D
 var _warp_mats: Array[BaseMaterial3D] = []
+var _pod_mats: Array[BaseMaterial3D] = []
 var _lod_roots: Array[Node] = []
 
 
@@ -85,6 +86,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_build_lights(pilot)
 	_build_fog()
 	_build_probe()
+	_build_kakaw_pods(pilot)
 	_build_beam(pilot)
 	set_totem_state(true)
 
@@ -99,6 +101,11 @@ func set_totem_state(active: bool) -> void:
 		if String(mat.resource_name).find("CYAN") >= 0:
 			energy = cyan
 		mat.emission_energy_multiplier = energy
+	# Pods keep a readable glow even when the beam is off (dosel).
+	for mat in _pod_mats:
+		if mat == null:
+			continue
+		mat.emission_energy_multiplier = 1.15 if active else 0.70
 	if _totem_light:
 		_totem_light.light_energy = TOTEM_LIGHT_ACTIVE if active else TOTEM_LIGHT_DIM
 	if _beam:
@@ -126,18 +133,38 @@ func capture_still(shot: String, out_path: String) -> void:
 	var player: Node3D = get_parent().get_node_or_null("PlayerMaya")
 	if player:
 		player.global_position = MAYA_STILL
-		player.rotation.y = deg_to_rad(35.0)
+		player.rotation = Vector3.ZERO
 		player.set_physics_process(false)
 		var play_cam: Camera3D = player.get_node_or_null("Camera3D")
 		if play_cam:
 			play_cam.current = false
-	var cam_name := "Cam_Laguna" if shot == "laguna" else "Cam_Dosel"
-	var cam: Camera3D = get_parent().get_node_or_null(cam_name)
+	var cam: Camera3D
+	var pods_cam: Camera3D = null
+	if shot == "pods":
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_TotemPods"
+		pods_cam.fov = 32.0
+		pods_cam.far = 80.0
+		pods_cam.position = Vector3(8.85, 3.08, 1.25)
+		get_parent().add_child(pods_cam)
+		pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
+		cam = pods_cam
+	else:
+		var cam_name := "Cam_Laguna" if shot == "laguna" else "Cam_Dosel"
+		cam = get_parent().get_node_or_null(cam_name)
 	if cam == null:
-		push_error("LOOK-001 capture: missing " + cam_name)
+		push_error("LOOK-001 capture: missing camera for " + shot)
 		return
+	if player and shot != "pods":
+		if shot == "dosel":
+			# 3/4 toward Cam_Dosel so she reads as a character, not a blade.
+			var aim := Vector3(cam.global_position.x, player.global_position.y, cam.global_position.z)
+			player.look_at(aim, Vector3.UP)
+			player.rotate_y(deg_to_rad(38.0))
+		else:
+			player.rotation.y = deg_to_rad(35.0)
 	cam.current = true
-	set_totem_state(shot == "laguna")
+	set_totem_state(shot != "dosel")
 	# More frames so volumetric fog / SSR settle on software rasterizers too.
 	for i in 24:
 		await tree.process_frame
@@ -147,6 +174,8 @@ func capture_still(shot: String, out_path: String) -> void:
 		return
 	img.save_png(out_path)
 	print("LOOK-001 wrote ", out_path, " ", img.get_width(), "x", img.get_height())
+	if pods_cam:
+		pods_cam.queue_free()
 
 
 func _bind_look_meshes() -> void:
@@ -171,12 +200,15 @@ func _walk_look(n: Node) -> void:
 					if String(dup.resource_name).find("GOLD") >= 0:
 						dup.albedo_color = CACAO_Y
 						dup.emission = CACAO_Y
+						mi.set_surface_override_material(s, dup)
+						_warp_mats.append(dup)
 					elif String(dup.resource_name).find("CYAN") >= 0:
-						# Identidad: marker tip is Kakaw pod orange, not turquoise.
-						dup.albedo_color = CACAO_O
-						dup.emission = CACAO_O
-					mi.set_surface_override_material(s, dup)
-					_warp_mats.append(dup)
+						# Identidad notes: hide the cone/flame tip; greybox pods replace it.
+						dup.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+						dup.albedo_color = Color(0, 0, 0, 0)
+						dup.emission_enabled = false
+						dup.emission_energy_multiplier = 0.0
+						mi.set_surface_override_material(s, dup)
 	for c in n.get_children():
 		_walk_look(c)
 
@@ -311,7 +343,53 @@ func _thicken_canopy() -> void:
 			extra.scale = Vector3(1.08, 1.04, 1.08)
 			extra.position.y += 0.45
 			parent.add_child(extra)
-		# Understory stays put — lifting it closed the dosel sightline.
+		# Identidad notes: extra clumps over the top-centre sky gaps (dosel + laguna).
+		# High Y only — does not sit on the playable route.
+		var covers := [
+			{"yaw": 48.0, "scale": Vector3(1.16, 1.10, 1.16), "off": Vector3(2.5, 1.35, -3.5)},
+			{"yaw": -38.0, "scale": Vector3(1.12, 1.08, 1.12), "off": Vector3(-1.8, 1.70, -5.0)},
+			{"yaw": 72.0, "scale": Vector3(1.20, 1.12, 1.20), "off": Vector3(4.2, 1.90, -7.2)},
+		]
+		for i in covers.size():
+			var spec: Dictionary = covers[i]
+			var clump := (canopy as MeshInstance3D).duplicate() as MeshInstance3D
+			clump.name = "%s_gap%d" % [canopy.name, i]
+			clump.rotate_y(deg_to_rad(spec["yaw"]))
+			clump.scale = spec["scale"]
+			clump.position += spec["off"]
+			parent.add_child(clump)
+	_add_canopy_leaf_cards()
+
+
+func _add_canopy_leaf_cards() -> void:
+	# Dark olive cards, no shadows, high above the path. Closes sepia sky
+	# at Cam_Dosel / Cam_Laguna top-centre without darkening the route.
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.11, 0.15, 0.10)
+	mat.roughness = 0.95
+	mat.emission_enabled = false
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var cards := [
+		{"pos": Vector3(5.8, 13.6, -1.2), "size": Vector2(9.0, 5.5), "eul": Vector3(deg_to_rad(-18.0), deg_to_rad(12.0), 0.0)},
+		{"pos": Vector3(7.4, 14.8, -4.0), "size": Vector2(8.0, 5.0), "eul": Vector3(deg_to_rad(-12.0), deg_to_rad(-25.0), 0.0)},
+		{"pos": Vector3(2.2, 15.4, -8.5), "size": Vector2(10.0, 6.0), "eul": Vector3(deg_to_rad(-22.0), deg_to_rad(40.0), 0.0)},
+		{"pos": Vector3(0.6, 16.6, -10.2), "size": Vector2(9.5, 5.5), "eul": Vector3(deg_to_rad(-28.0), deg_to_rad(-10.0), 0.0)},
+		{"pos": Vector3(4.8, 15.2, -6.4), "size": Vector2(8.5, 5.2), "eul": Vector3(deg_to_rad(-16.0), deg_to_rad(55.0), 0.0)},
+		{"pos": Vector3(9.0, 14.2, 1.0), "size": Vector2(7.5, 4.5), "eul": Vector3(deg_to_rad(-14.0), deg_to_rad(-50.0), 0.0)},
+	]
+	for i in cards.size():
+		var spec: Dictionary = cards[i]
+		var plane := PlaneMesh.new()
+		plane.size = spec["size"]
+		var mi := MeshInstance3D.new()
+		mi.name = "LOOK001_LeafCard_%02d" % i
+		mi.mesh = plane
+		mi.material_override = mat
+		mi.position = spec["pos"]
+		mi.rotation = spec["eul"]
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
 
 
 func _find_named(n: Node, prefix: String) -> Node:
@@ -604,6 +682,84 @@ func _build_probe() -> void:
 	probe.ambient_mode = ReflectionProbe.AMBIENT_ENVIRONMENT
 	probe.enable_shadows = true
 	add_child(probe)
+
+
+func _build_kakaw_pods(pilot: Node3D) -> void:
+	_pod_mats.clear()
+	var cluster := Node3D.new()
+	cluster.name = "LOOK001_KakawPods"
+	var anchor: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
+	if anchor:
+		anchor.add_child(cluster)
+	else:
+		cluster.position = Vector3(7.5, 0.0, 0.0)
+		add_child(cluster)
+	# Three elongated ribbed ellipsoids, slightly separated, hanging from the
+	# crown. Beam spawn stays at local y=3.03 so the shaft rises from the pods.
+	var specs := [
+		{"pos": Vector3(0.18, 2.80, 0.05), "eul": Vector3(deg_to_rad(58.0), deg_to_rad(18.0), deg_to_rad(8.0)), "col": CACAO_Y},
+		{"pos": Vector3(-0.16, 2.78, 0.12), "eul": Vector3(deg_to_rad(52.0), deg_to_rad(-48.0), deg_to_rad(-6.0)), "col": CACAO_O},
+		{"pos": Vector3(0.03, 2.76, -0.18), "eul": Vector3(deg_to_rad(62.0), deg_to_rad(155.0), deg_to_rad(4.0)), "col": CACAO_R},
+	]
+	for i in specs.size():
+		var spec: Dictionary = specs[i]
+		cluster.add_child(_make_cacao_pod("Pod_%d" % i, spec["pos"], spec["eul"], spec["col"]))
+
+
+func _make_cacao_pod(pod_name: String, pos: Vector3, eul: Vector3, col: Color) -> Node3D:
+	var root := Node3D.new()
+	root.name = pod_name
+	root.position = pos
+	root.rotation = eul
+	var mat := StandardMaterial3D.new()
+	mat.resource_name = "KakawPod"
+	mat.albedo_color = col
+	mat.emission_enabled = true
+	mat.emission = col
+	mat.emission_energy_multiplier = 1.15
+	mat.roughness = 0.62
+	mat.metallic = 0.0
+	_pod_mats.append(mat)
+	# Body: elongated ellipsoid along local Y (pointed via end cones).
+	var body := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.055
+	sphere.height = 0.22
+	sphere.radial_segments = 12
+	sphere.rings = 8
+	body.mesh = sphere
+	body.material_override = mat
+	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(body)
+	for sign in [-1.0, 1.0]:
+		var tip := MeshInstance3D.new()
+		var cone := CylinderMesh.new()
+		cone.top_radius = 0.0
+		cone.bottom_radius = 0.038
+		cone.height = 0.055
+		cone.radial_segments = 10
+		tip.mesh = cone
+		tip.material_override = mat
+		tip.position = Vector3(0.0, sign * 0.125, 0.0)
+		if sign < 0.0:
+			tip.rotation.x = PI
+		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(tip)
+	# Longitudinal ribs — cacao, not a smooth berry.
+	for k in 5:
+		var ang := TAU * float(k) / 5.0
+		var rib := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 0.007
+		cyl.bottom_radius = 0.007
+		cyl.height = 0.20
+		cyl.radial_segments = 6
+		rib.mesh = cyl
+		rib.material_override = mat
+		rib.position = Vector3(cos(ang) * 0.048, 0.0, sin(ang) * 0.048)
+		rib.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(rib)
+	return root
 
 
 func _build_beam(pilot: Node3D) -> void:
