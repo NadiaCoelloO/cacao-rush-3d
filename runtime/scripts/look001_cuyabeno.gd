@@ -192,24 +192,10 @@ func _walk_look(n: Node) -> void:
 		if n.name.begins_with("LOOK001_Blackwater"):
 			mi.material_override = WATER_MAT
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if n.name.begins_with("LOOK001_Totem_Warp") and mi.mesh:
-			for s in mi.mesh.get_surface_count():
-				var mat := mi.mesh.surface_get_material(s)
-				if mat is BaseMaterial3D:
-					var dup := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
-					if String(dup.resource_name).find("GOLD") >= 0:
-						dup.albedo_color = CACAO_Y
-						dup.emission_enabled = true
-						dup.emission = CACAO_Y
-						mi.set_surface_override_material(s, dup)
-						_warp_mats.append(dup)
-					elif String(dup.resource_name).find("CYAN") >= 0:
-						# Identidad notes: hide the cone/flame tip; greybox pods replace it.
-						dup.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-						dup.albedo_color = Color(0, 0, 0, 0)
-						dup.emission_enabled = false
-						dup.emission_energy_multiplier = 0.0
-						mi.set_surface_override_material(s, dup)
+		if n.name.begins_with("LOOK001_Totem_Warp"):
+			# Hide baked cone + gold blob (they read as fire from Cam_TotemPods).
+			# Gold shaft rings are rebuilt as greybox in _build_kakaw_pods.
+			n.visible = false
 	for c in n.get_children():
 		_walk_look(c)
 
@@ -713,8 +699,31 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	sock.position = Vector3(0.0, 2.62, 0.0)
 	sock.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	cluster.add_child(sock)
-	# One nest swallows the baked crown pods + gold blob (they fanned as
-	# orange/yellow fire shards from Cam_TotemPods).
+	var gold_mat := StandardMaterial3D.new()
+	gold_mat.resource_name = "WARP_GOLD"
+	gold_mat.albedo_color = CACAO_Y
+	gold_mat.emission_enabled = true
+	gold_mat.emission = CACAO_Y
+	gold_mat.emission_energy_multiplier = WARP_GOLD_ACTIVE
+	gold_mat.roughness = 0.45
+	_warp_mats.append(gold_mat)
+	for spec in [
+		{"name": "BandLow", "y": 0.55, "r": 0.27, "h": 0.06},
+		{"name": "BandHigh", "y": 2.20, "r": 0.23, "h": 0.05},
+	]:
+		var band := MeshInstance3D.new()
+		band.name = spec["name"]
+		var ring := CylinderMesh.new()
+		ring.top_radius = spec["r"]
+		ring.bottom_radius = spec["r"]
+		ring.height = spec["h"]
+		ring.radial_segments = 16
+		band.mesh = ring
+		band.material_override = gold_mat
+		band.position = Vector3(0.0, spec["y"], 0.0)
+		band.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		cluster.add_child(band)
+	# One nest swallows the baked crown pods (they fanned as orange/yellow
 	var nest := MeshInstance3D.new()
 	nest.name = "Nest"
 	var nest_mesh := SphereMesh.new()
