@@ -16,12 +16,14 @@ const TRUNK := [
 ]
 const TREES_JSON := "res://data/hp001_tree_instances.json"
 const BEAM_ORIGIN_LOCAL := Vector3(-0.0009, 2.2783, 0.220)
-# Trunks: tight ranges for the UHD triangle budget.
-const LOD_BEGIN := [0.0, 16.0, 36.0]
-const LOD_END := [20.0, 40.0, 0.0]
+# Trunks: overlap enough that Godot 4.2.2 first-frame hysteresis cannot
+# hide every LOD (become-visible uses [begin+margin, end-margin]).
+# LOD2 end = 0 → visible to the camera far plane. Same ranges for Thin/Medium/Thick.
+const LOD_BEGIN := [0.0, 14.0, 32.0]
+const LOD_END := [26.0, 44.0, 0.0]
 const LOD_MARGIN := 3.0
-# Totem is a unique prop: never fully culled. Overlapping ranges so fade
-# margins cannot open a hole (laguna/dosel sit ~18 m from the post).
+# Totem is a unique prop: never fully culled. Inner ranges abut/overlap
+# under the same hysteresis (laguna/dosel sit ~18 m from the post).
 const TOTEM_LOD_BEGIN := [0.0, 28.0, 58.0]
 const TOTEM_LOD_END := [36.0, 66.0, 0.0]
 const TOTEM_LOD_MARGIN := 4.0
@@ -80,6 +82,7 @@ func _wire_totem(pilot: Node3D) -> void:
 				shared.resource_name = "M_Totem_HP"
 				totem_mats.append(shared)
 		_style_totem_geometry(inst, lod, shared)
+	_share_totem_custom_aabb(anchor)
 
 
 func _wire_trunks(pilot: Node3D) -> void:
@@ -121,6 +124,9 @@ func _wire_trunks(pilot: Node3D) -> void:
 			for xf in xforms:
 				centroid += (xf as Transform3D).origin
 			centroid /= float(xforms.size())
+			var cluster_mmis: Array[MultiMeshInstance3D] = []
+			var shared_aabb := AABB()
+			var have_aabb := false
 			for lod in 3:
 				var mesh_key := "%s_%d" % [variant, lod]
 				if not meshes.has(mesh_key):
@@ -133,6 +139,13 @@ func _wire_trunks(pilot: Node3D) -> void:
 					var world_xf: Transform3D = xforms[i]
 					var local := Transform3D(world_xf.basis, world_xf.origin - centroid)
 					mm.set_instance_transform(i, local)
+					if lod == 0:
+						var inst_aabb := _xform_aabb(local, mm.mesh.get_aabb())
+						if not have_aabb:
+							shared_aabb = inst_aabb
+							have_aabb = true
+						else:
+							shared_aabb = shared_aabb.merge(inst_aabb)
 				var mmi := MultiMeshInstance3D.new()
 				mmi.name = "HP001_Trunk_%s_LOD%d_%d_%d" % [variant, lod, key.x, key.y]
 				mmi.multimesh = mm
@@ -148,7 +161,13 @@ func _wire_trunks(pilot: Node3D) -> void:
 				else:
 					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				root.add_child(mmi)
+				cluster_mmis.append(mmi)
 				mm_count += 1
+			# Same custom AABB on every LOD so Godot's AABB-center distance
+			# cannot open a hole between meshes of different height.
+			if have_aabb:
+				for mmi in cluster_mmis:
+					mmi.custom_aabb = shared_aabb
 	print("HP001 trunks: ", trees.size(), " instances, ", mm_count, " MultiMeshes")
 
 
@@ -214,6 +233,39 @@ func _apply_lod_range(gi: GeometryInstance3D, begin: float, end: float, margin: 
 	gi.visibility_range_end = end
 	gi.visibility_range_begin_margin = margin
 	gi.visibility_range_end_margin = margin
+	gi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+
+
+## Godot 4.2.2 `_visibility_range_check` with FADE_DISABLED.
+## First frame (was_visible=false) uses [begin+margin, end-margin];
+## once visible, hysteresis widens to [begin-margin, end+margin].
+## end=0 means no far cull.
+static func godot422_range_visible(dist: float, begin: float, end: float, margin: float, was_visible: bool) -> bool:
+	var begin_offset := -margin
+	var end_offset := margin
+	if not was_visible:
+		begin_offset = -begin_offset
+		end_offset = -end_offset
+	if end > 0.0 and dist > end + end_offset:
+		return false
+	if begin > 0.0 and dist < begin + begin_offset:
+		return false
+	return true
+
+
+static func lod_stack_holes(begins: Array, ends: Array, margin: float, max_d := 100.0, step := 0.5) -> PackedFloat32Array:
+	var holes := PackedFloat32Array()
+	var d := 0.0
+	while d <= max_d + 0.0001:
+		var any := false
+		for lod in begins.size():
+			if godot422_range_visible(d, float(begins[lod]), float(ends[lod]), margin, false):
+				any = true
+				break
+		if not any:
+			holes.append(d)
+		d += step
+	return holes
 
 
 func _harden_mat(mat: BaseMaterial3D) -> void:
@@ -239,6 +291,45 @@ func _style_totem_geometry(n: Node, lod: int, shared: BaseMaterial3D) -> void:
 			(n as MeshInstance3D).material_override = shared
 	for c in n.get_children():
 		_style_totem_geometry(c, lod, shared)
+
+
+func _xform_aabb(xf: Transform3D, aabb: AABB) -> AABB:
+	var out := AABB(xf * aabb.position, Vector3.ZERO)
+	for i in 8:
+		out = out.expand(xf * aabb.get_endpoint(i))
+	return out
+
+
+func _share_totem_custom_aabb(anchor: Node3D) -> void:
+	var gis: Array[GeometryInstance3D] = []
+	_collect_totem_gi(anchor, gis)
+	if gis.is_empty():
+		return
+	var union_world := AABB()
+	var have := false
+	for gi in gis:
+		var world := _xform_aabb(gi.global_transform, gi.get_aabb())
+		if not have:
+			union_world = world
+			have = true
+		else:
+			union_world = union_world.merge(world)
+	if not have:
+		return
+	for gi in gis:
+		gi.custom_aabb = _xform_aabb(gi.global_transform.affine_inverse(), union_world)
+
+
+func _collect_totem_gi(n: Node, out: Array[GeometryInstance3D]) -> void:
+	if n is GeometryInstance3D:
+		var walk: Node = n
+		while walk:
+			if String(walk.name).begins_with("HP001_Totem"):
+				out.append(n as GeometryInstance3D)
+				break
+			walk = walk.get_parent()
+	for c in n.get_children():
+		_collect_totem_gi(c, out)
 
 
 func _hide_legacy_beam_empties(n: Node) -> void:

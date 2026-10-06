@@ -1060,13 +1060,18 @@ func _build_beam(pilot: Node3D) -> void:
 	else:
 		_beam.position = Vector3(7.5, 3.03, 0.0)
 		add_child(_beam)
-	# BeamOrigin marks the pod cluster (~y 2.278). Lift the cylinder so its
-	# base sits just above the chopped crown (~y 2.61) and rises out of the
-	# cluster instead of piercing the yellow pod / wood.
+	# BeamOrigin is the pod-cluster anchor (~y 2.278). Sit the open cylinder
+	# flush on the chopped crown (~y 2.61) so the shaft is centred between
+	# the pods and does not pierce them. The shader fades the bottom 0.35 m
+	# (alpha 0 → full) so the open end does not read as a hovering disc.
 	var lift := 0.0
-	if spawn:
-		lift = CROWN_TOP_LOCAL_Y - spawn.position.y + 0.04
+	if spawn and spawn.name == "BeamOrigin":
+		lift = CROWN_TOP_LOCAL_Y - spawn.position.y
 		_beam.position = Vector3(0.0, lift, 0.0)
+	if BEAM_GOLD_MAT:
+		BEAM_GOLD_MAT.set_shader_parameter("base_fade_m", 0.35)
+	if BEAM_CYAN_MAT:
+		BEAM_CYAN_MAT.set_shader_parameter("base_fade_m", 0.35)
 	_beam.add_child(_make_beam("Gold", Vector3(0.07, 0.30, 6.2), BEAM_GOLD_MAT, Vector3.ZERO))
 	# Secondary core is Kakaw orange (paint_v03 Y/O/R), not turquoise.
 	_beam.add_child(_make_beam("PodCore", Vector3(0.025, 0.085, 5.0), BEAM_CYAN_MAT, Vector3(0.02, 0.0, 0.02)))

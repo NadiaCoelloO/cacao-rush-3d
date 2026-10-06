@@ -171,13 +171,13 @@ func _run_capture() -> void:
 			var tag := "totem_pods" if s == "pods" else s
 			if hp:
 				if s == "pods":
-					tag = "totem_pods_v3"
+					tag = "totem_pods_v4"
 				elif s == "laguna":
-					tag = "laguna_v2"
+					tag = "laguna_v3"
 				elif s == "dosel":
-					tag = "dosel_v2"
+					tag = "dosel_v3"
 				elif s == "gameplay":
-					tag = "gameplay_v2"
+					tag = "gameplay_v3"
 			elif s == "gameplay":
 				tag = "gameplay_final"
 			var stem := "HP001_E1_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
