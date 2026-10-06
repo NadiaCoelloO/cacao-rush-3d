@@ -713,15 +713,38 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	sock.position = Vector3(0.0, 2.62, 0.0)
 	sock.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	cluster.add_child(sock)
+	# Swallow the baked LOOK001_Totem_Post crown pods + gold blob (they
+	# fan as orange/yellow shards from Cam_TotemPods).
+	var hide_at := [
+		Vector3(0.14, 2.72, -0.04),
+		Vector3(-0.12, 2.70, -0.09),
+		Vector3(0.02, 2.69, 0.15),
+		Vector3(-0.08, 2.80, 0.08),
+		Vector3(0.07, 2.79, -0.15),
+		Vector3(0.01, 2.80, 0.00),
+	]
+	for i in hide_at.size():
+		var cover := MeshInstance3D.new()
+		cover.name = "ShardCover_%d" % i
+		var ball := SphereMesh.new()
+		ball.radius = 0.13
+		ball.height = 0.26
+		ball.radial_segments = 10
+		ball.rings = 6
+		cover.mesh = ball
+		cover.material_override = wood
+		cover.position = hide_at[i]
+		cover.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		cluster.add_child(cover)
 	# At most two broad dark-green cacao leaves (rounded, not spiky) behind
 	# the cluster so leftover GLB shards stay hidden from Cam_TotemPods.
 	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.10, 2.70, -0.22), Vector3(deg_to_rad(-28.0), deg_to_rad(35.0), deg_to_rad(12.0))))
 	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.16, 2.68, -0.20), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
 	# Three whole elongated ribbed ellipsoids, slightly separated, hanging.
 	var specs := [
-		{"pos": Vector3(0.17, 2.90, 0.12), "eul": Vector3(deg_to_rad(42.0), deg_to_rad(28.0), 0.0), "col": CACAO_Y},
-		{"pos": Vector3(-0.18, 2.88, 0.10), "eul": Vector3(deg_to_rad(46.0), deg_to_rad(-55.0), 0.0), "col": CACAO_O},
-		{"pos": Vector3(0.02, 2.86, -0.17), "eul": Vector3(deg_to_rad(50.0), deg_to_rad(168.0), 0.0), "col": CACAO_R},
+		{"pos": Vector3(0.20, 2.96, 0.14), "eul": Vector3(deg_to_rad(38.0), deg_to_rad(32.0), 0.0), "col": CACAO_Y},
+		{"pos": Vector3(-0.20, 2.94, 0.12), "eul": Vector3(deg_to_rad(42.0), deg_to_rad(-58.0), 0.0), "col": CACAO_O},
+		{"pos": Vector3(0.04, 2.92, -0.20), "eul": Vector3(deg_to_rad(46.0), deg_to_rad(170.0), 0.0), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
