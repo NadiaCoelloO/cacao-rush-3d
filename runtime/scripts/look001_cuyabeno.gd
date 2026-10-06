@@ -874,19 +874,19 @@ func _make_cacao_pod_mesh() -> ArrayMesh:
 	var segs := 20
 	var pts: Array[Vector3] = []
 	for i in rings + 1:
-		var t := float(i) / float(rings)
-		var y := lerp(-half, half, t)
-		var ring_r := sin(PI * t) * radius
+		var t: float = float(i) / float(rings)
+		var y: float = lerpf(-half, half, t)
+		var ring_r: float = sin(PI * t) * radius
 		if t > 0.78:
-			var u := (t - 0.78) / 0.22
-			ring_r = lerp(sin(PI * t) * radius, radius * 0.20, u)
+			var u: float = (t - 0.78) / 0.22
+			ring_r = lerpf(sin(PI * t) * radius, radius * 0.20, u)
 		if t >= 0.999:
 			ring_r = radius * 0.18
 		for j in segs:
-			var ang := TAU * float(j) / float(segs)
-			var rr := ring_r
+			var ang: float = TAU * float(j) / float(segs)
+			var rr: float = ring_r
 			if t > 0.14 and t < 0.90:
-				var groove := 0.5 + 0.5 * cos(float(grooves) * ang)
+				var groove: float = 0.5 + 0.5 * cos(float(grooves) * ang)
 				rr = ring_r * (1.0 - groove_k * groove)
 			pts.append(Vector3(cos(ang) * rr, y, sin(ang) * rr))
 	var st := SurfaceTool.new()
