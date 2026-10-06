@@ -1,0 +1,830 @@
+{
+ "blender": "5.2.1 LTS",
+ "seed": 20261006,
+ "warnings": [],
+ "render_magenta_px": {
+  "HP001_totem_front.png": 0,
+  "HP001_totem_34.png": 0,
+  "HP001_totem_pods_closeup.png": 0,
+  "HP001_trunks_front.png": 0,
+  "HP001_trunks_34.png": 0,
+  "HP001_trunks_bark_closeup.png": 0
+ },
+ "greybox_check": "reference constants confirmed (TOTEM_TIP_Z 2.95, base 0.95x0.95x0.20, crown 0.50x0.50x0.12)",
+ "pod_clearance_m": {
+  "Pod_Center_Yellow~Pod_Left_Orange": 0.1395,
+  "Pod_Center_Yellow~Pod_Right_Red": 0.1404,
+  "Pod_Left_Orange~Pod_Right_Red": 0.4031,
+  "post_min": 0.0177,
+  "liana_min": 0.2234,
+  "pods_max_abs_xy": 0.4414,
+  "stem_root_buried_min": 0.0156
+ },
+ "totem_islands_LOD0": 13,
+ "pod_islands_LOD0": 3,
+ "pod_islands_LOD1": 3,
+ "pod_islands_LOD2": 3,
+ "totem_bbox_LOD0": {
+  "min": [
+   -0.475,
+   -0.475,
+   0.0
+  ],
+  "max": [
+   0.475,
+   0.475,
+   2.6098
+  ]
+ },
+ "totem_bbox_LOD1": {
+  "min": [
+   -0.475,
+   -0.475,
+   0.0
+  ],
+  "max": [
+   0.475,
+   0.475,
+   2.6098
+  ]
+ },
+ "totem_bbox_LOD2": {
+  "min": [
+   -0.475,
+   -0.475,
+   0.0
+  ],
+  "max": [
+   0.475,
+   0.475,
+   2.6098
+  ]
+ },
+ "beam_origin": [
+  -0.0009,
+  -0.22,
+  2.2783
+ ],
+ "totem_parts": {
+  "0": {
+   "wood": 2088,
+   "pod": 2880,
+   "stem": 240,
+   "liana": 664
+  },
+  "1": {
+   "wood": 1000,
+   "pod": 1440,
+   "stem": 144,
+   "liana": 320
+  },
+  "2": {
+   "wood": 360,
+   "pod": 480,
+   "stem": 72,
+   "liana": 76
+  }
+ },
+ "totem_rebuilt": false,
+ "bark_colour_atlas": {
+  "atlas_B_dry_bark_all": {
+   "mean_rgb8": [
+    65,
+    60,
+    55
+   ],
+   "hue": 29.2,
+   "sat": 0.164,
+   "val": 0.257,
+   "median_hue": 29.7,
+   "median_sat": 0.164
+  },
+  "atlas_B_bark_without_lichen": {
+   "mean_rgb8": [
+    65,
+    60,
+    55
+   ],
+   "hue": 29.2,
+   "sat": 0.164,
+   "val": 0.257,
+   "median_hue": 29.7,
+   "median_sat": 0.164
+  },
+  "atlas_shaft_rows_300_1792_excl_moss_band": {
+   "mean_rgb8": [
+    66,
+    61,
+    55
+   ],
+   "hue": 29.5,
+   "sat": 0.163,
+   "val": 0.26,
+   "median_hue": 29.7,
+   "median_sat": 0.164
+  },
+  "lichen_cover_B": 0.0,
+  "atlas_A_stain_moss_band": {
+   "mean_rgb8": [
+    46,
+    51,
+    33
+   ],
+   "hue": 76.0,
+   "sat": 0.356,
+   "val": 0.2,
+   "median_hue": 75.3,
+   "median_sat": 0.346
+  }
+ },
+ "trunk_bbox": {
+  "Thin_LOD0": {
+   "min": [
+    -0.5518,
+    -0.4382,
+    -0.5
+   ],
+   "max": [
+    1.0325,
+    0.9865,
+    8.1952
+   ]
+  },
+  "Medium_LOD0": {
+   "min": [
+    -1.3589,
+    -1.5012,
+    -0.5
+   ],
+   "max": [
+    1.5117,
+    1.3537,
+    11.0834
+   ]
+  },
+  "Thick_LOD0": {
+   "min": [
+    -2.6276,
+    -2.6514,
+    -0.5
+   ],
+   "max": [
+    2.3752,
+    2.1528,
+    14.3917
+   ]
+  },
+  "Thin_LOD1": {
+   "min": [
+    -0.5518,
+    -0.4382,
+    -0.5
+   ],
+   "max": [
+    1.0249,
+    0.9817,
+    8.185
+   ]
+  },
+  "Medium_LOD1": {
+   "min": [
+    -1.3585,
+    -1.5012,
+    -0.5
+   ],
+   "max": [
+    1.5117,
+    1.3537,
+    11.0934
+   ]
+  },
+  "Thick_LOD1": {
+   "min": [
+    -2.6088,
+    -2.6514,
+    -0.5
+   ],
+   "max": [
+    2.3752,
+    2.1528,
+    14.3637
+   ]
+  },
+  "Thin_LOD2": {
+   "min": [
+    -0.5518,
+    -0.424,
+    -0.5
+   ],
+   "max": [
+    0.8943,
+    0.9777,
+    8.1721
+   ]
+  },
+  "Medium_LOD2": {
+   "min": [
+    -1.256,
+    -1.5012,
+    -0.5
+   ],
+   "max": [
+    1.5117,
+    1.3537,
+    11.0813
+   ]
+  },
+  "Thick_LOD2": {
+   "min": [
+    -2.5949,
+    -2.6514,
+    -0.5
+   ],
+   "max": [
+    2.3752,
+    2.1528,
+    14.3617
+   ]
+  }
+ },
+ "bark_colour_stills": {
+  "HP001_trunks_front.png": {
+   "mean_rgb8": [
+    90,
+    86,
+    82
+   ],
+   "hue": 30.8,
+   "sat": 0.093,
+   "val": 0.353,
+   "median_hue": 30.0,
+   "median_sat": 0.107,
+   "patches": 24,
+   "occluded_skipped": 0,
+   "patch_xy_top_left_origin": [
+    [
+     304,
+     790
+    ],
+    [
+     308,
+     721
+    ],
+    [
+     315,
+     653
+    ],
+    [
+     322,
+     585
+    ],
+    [
+     1153,
+     790
+    ],
+    [
+     1157,
+     721
+    ],
+    [
+     1161,
+     653
+    ],
+    [
+     1167,
+     585
+    ],
+    [
+     483,
+     739
+    ],
+    [
+     479,
+     645
+    ],
+    [
+     476,
+     551
+    ],
+    [
+     475,
+     457
+    ],
+    [
+     1332,
+     739
+    ],
+    [
+     1326,
+     645
+    ],
+    [
+     1321,
+     551
+    ],
+    [
+     1319,
+     457
+    ],
+    [
+     765,
+     689
+    ],
+    [
+     758,
+     568
+    ],
+    [
+     749,
+     448
+    ],
+    [
+     739,
+     328
+    ],
+    [
+     1615,
+     688
+    ],
+    [
+     1609,
+     568
+    ],
+    [
+     1599,
+     447
+    ],
+    [
+     1587,
+     328
+    ]
+   ]
+  },
+  "HP001_trunks_34.png": {
+   "mean_rgb8": [
+    91,
+    85,
+    78
+   ],
+   "hue": 29.8,
+   "sat": 0.144,
+   "val": 0.359,
+   "median_hue": 30.0,
+   "median_sat": 0.152,
+   "patches": 24,
+   "occluded_skipped": 0,
+   "patch_xy_top_left_origin": [
+    [
+     300,
+     807
+    ],
+    [
+     303,
+     728
+    ],
+    [
+     307,
+     648
+    ],
+    [
+     312,
+     569
+    ],
+    [
+     1082,
+     730
+    ],
+    [
+     1084,
+     669
+    ],
+    [
+     1087,
+     608
+    ],
+    [
+     1088,
+     546
+    ],
+    [
+     500,
+     732
+    ],
+    [
+     492,
+     630
+    ],
+    [
+     486,
+     527
+    ],
+    [
+     482,
+     423
+    ],
+    [
+     1203,
+     675
+    ],
+    [
+     1199,
+     595
+    ],
+    [
+     1195,
+     514
+    ],
+    [
+     1193,
+     433
+    ],
+    [
+     775,
+     660
+    ],
+    [
+     770,
+     540
+    ],
+    [
+     761,
+     418
+    ],
+    [
+     750,
+     295
+    ],
+    [
+     1377,
+     621
+    ],
+    [
+     1375,
+     525
+    ],
+    [
+     1371,
+     429
+    ],
+    [
+     1364,
+     331
+    ]
+   ]
+  },
+  "HP001_trunks_bark_closeup.png": {
+   "mean_rgb8": [
+    93,
+    87,
+    79
+   ],
+   "hue": 34.0,
+   "sat": 0.154,
+   "val": 0.366,
+   "median_hue": 33.8,
+   "median_sat": 0.157,
+   "patches": 3,
+   "occluded_skipped": 6,
+   "patch_xy_top_left_origin": [
+    [
+     868,
+     427
+    ],
+    [
+     871,
+     260
+    ],
+    [
+     873,
+     92
+    ]
+   ]
+  }
+ },
+ "trunk_checks": {
+  "Thin_LOD0": {
+   "rosettes": [
+    {
+     "z": 3.76,
+     "az_deg": -54.4,
+     "across_m": 0.45,
+     "height_m": 0.24
+    },
+    {
+     "z": 4.96,
+     "az_deg": 157.6,
+     "across_m": 0.46,
+     "height_m": 0.23
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.005,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 7.93,
+     "low_z": 2.74,
+     "end_z": 3.04,
+     "min_clearance_m": 0.087,
+     "dia_cm": [
+      4.0,
+      3.2
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 7.66,
+     "low_z": 1.1,
+     "end_z": 1.1,
+     "min_clearance_m": 0.598,
+     "dia_cm": [
+      3.8,
+      3.0
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.674,
+   "tris": 3961,
+   "parts": {
+    "trunk": 2706,
+    "cap": 33,
+    "limb": 130,
+    "epiphyte": 1092
+   }
+  },
+  "Medium_LOD0": {
+   "rosettes": [
+    {
+     "z": 4.95,
+     "az_deg": -65.9,
+     "across_m": 0.51,
+     "height_m": 0.28
+    },
+    {
+     "z": 6.6,
+     "az_deg": -8.6,
+     "across_m": 0.53,
+     "height_m": 0.27
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.005,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 10.78,
+     "low_z": 3.91,
+     "end_z": 4.62,
+     "min_clearance_m": 0.103,
+     "dia_cm": [
+      4.6,
+      3.6
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 10.55,
+     "low_z": 0.45,
+     "end_z": 0.45,
+     "min_clearance_m": 0.239,
+     "dia_cm": [
+      4.4,
+      3.4
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.422,
+   "tris": 3684,
+   "parts": {
+    "trunk": 2288,
+    "cap": 44,
+    "limb": 260,
+    "epiphyte": 1092
+   }
+  },
+  "Thick_LOD0": {
+   "rosettes": [
+    {
+     "z": 5.18,
+     "az_deg": -71.6,
+     "across_m": 0.61,
+     "height_m": 0.31
+    },
+    {
+     "z": 7.84,
+     "az_deg": 2.9,
+     "across_m": 0.56,
+     "height_m": 0.32
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.011,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 13.9,
+     "low_z": 4.67,
+     "end_z": 5.6,
+     "min_clearance_m": 0.131,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 13.41,
+     "low_z": 0.6,
+     "end_z": 0.6,
+     "min_clearance_m": 1.005,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.137,
+   "tris": 3796,
+   "parts": {
+    "trunk": 2392,
+    "cap": 52,
+    "limb": 260,
+    "epiphyte": 1092
+   }
+  },
+  "Thin_LOD1": {
+   "rosettes": [
+    {
+     "z": 3.76,
+     "az_deg": -54.4,
+     "across_m": 0.45,
+     "height_m": 0.24
+    },
+    {
+     "z": 4.96,
+     "az_deg": 157.6,
+     "across_m": 0.45,
+     "height_m": 0.23
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.012,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 7.93,
+     "low_z": 2.74,
+     "end_z": 3.04,
+     "min_clearance_m": 0.133,
+     "dia_cm": [
+      4.0,
+      3.2
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 7.66,
+     "low_z": 1.1,
+     "end_z": 1.1,
+     "min_clearance_m": 0.684,
+     "dia_cm": [
+      3.8,
+      3.0
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.641,
+   "tris": 1967,
+   "parts": {
+    "trunk": 1400,
+    "cap": 25,
+    "limb": 54,
+    "epiphyte": 488
+   }
+  },
+  "Medium_LOD1": {
+   "rosettes": [
+    {
+     "z": 4.95,
+     "az_deg": -65.9,
+     "across_m": 0.49,
+     "height_m": 0.27
+    },
+    {
+     "z": 6.6,
+     "az_deg": -8.6,
+     "across_m": 0.52,
+     "height_m": 0.28
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.01,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 10.78,
+     "low_z": 3.91,
+     "end_z": 4.62,
+     "min_clearance_m": 0.164,
+     "dia_cm": [
+      4.6,
+      3.6
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 10.55,
+     "low_z": 0.45,
+     "end_z": 0.45,
+     "min_clearance_m": 0.231,
+     "dia_cm": [
+      4.4,
+      3.4
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.42,
+   "tris": 1588,
+   "parts": {
+    "trunk": 960,
+    "cap": 32,
+    "limb": 108,
+    "epiphyte": 488
+   }
+  },
+  "Thick_LOD1": {
+   "rosettes": [
+    {
+     "z": 5.18,
+     "az_deg": -71.6,
+     "across_m": 0.6,
+     "height_m": 0.32
+    },
+    {
+     "z": 7.84,
+     "az_deg": 2.9,
+     "across_m": 0.56,
+     "height_m": 0.3
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.022,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 13.9,
+     "low_z": 4.68,
+     "end_z": 5.6,
+     "min_clearance_m": 0.217,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 13.41,
+     "low_z": 0.6,
+     "end_z": 0.6,
+     "min_clearance_m": 1.0,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.183,
+   "tris": 1785,
+   "parts": {
+    "trunk": 1148,
+    "cap": 41,
+    "limb": 108,
+    "epiphyte": 488
+   }
+  },
+  "Thin_LOD2": {
+   "tris": 521,
+   "parts": {
+    "trunk": 480,
+    "cap": 16,
+    "limb": 25
+   }
+  },
+  "Medium_LOD2": {
+   "tris": 563,
+   "parts": {
+    "trunk": 494,
+    "cap": 19,
+    "limb": 50
+   }
+  },
+  "Thick_LOD2": {
+   "tris": 579,
+   "parts": {
+    "trunk": 506,
+    "cap": 23,
+    "limb": 50
+   }
+  }
+ }
+}
