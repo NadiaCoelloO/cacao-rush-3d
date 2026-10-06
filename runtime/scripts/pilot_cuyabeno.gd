@@ -2,6 +2,7 @@ extends Node3D
 ## Pilot vertical slice: world id `selva`, display name **Cuyabeno**.
 ## LOOK-001: instances selva_look001_LOD* (decor + gameplay visuals) and rebuilds
 ## water / fog / sky / warp beam / film grade in `look001_cuyabeno.gd`.
+## HP-001 E1: HP totem + trunk kit replace LOOK equivalents (visual only).
 ## Collisions: CSGFloor + CSGPlatform (x=6, 3×1×3) + CSGOneway plank at the
 ## PR#3 anchor Godot (6, 1, 0) size 4×0.18×2 (use_collision=true). The Assets
 ## oneway baked at Blender (1,0,1.8) is hidden. Tip 5fd45031 selva-1 oneway #0.
@@ -45,6 +46,8 @@ func _ready() -> void:
 				lods.append(child)
 		if _look and _look.has_method("apply"):
 			_look.apply(self, lods)
+		if using_look and _hud_label and _look and _look.get("_hp_ok"):
+			_hud_label.text = "%s  ·  id %s  ·  LOOK-001 + HP-001" % [DISPLAY_NAME, WORLD_ID]
 		if _wants_capture():
 			call_deferred("_run_capture")
 	else:
@@ -161,9 +164,13 @@ func _run_capture() -> void:
 	else:
 		shots = PackedStringArray([shot])
 	if _look and _look.has_method("capture_still"):
+		var hp := false
+		if _look.get("_hp_ok"):
+			hp = true
 		for s in shots:
 			var tag := "totem_pods" if s == "pods" else s
 			if s == "gameplay":
-				tag = "gameplay_final"
-			await _look.capture_still(s, "%sLOOK-001_engine_%s.png" % [out_dir, tag])
+				tag = "gameplay" if hp else "gameplay_final"
+			var stem := "HP001_E1_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
+			await _look.capture_still(s, "%s%s" % [out_dir, stem % tag])
 	get_tree().quit()

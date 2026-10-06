@@ -2,7 +2,10 @@ extends Node3D
 ## LOOK-001 atmosphere reconstructed in Godot (Forward+).
 ## The selva_look001_LOD*.glb files carry geometry + simple PBR/unlit/emissive
 ## only. Water ripples, SSR + probe, volumetric fog banks, sky, warp beam, and
-## filmic grade are built here from LOOK-001_manifest.json. High-poly HOLD.
+## filmic grade are built here from LOOK-001_manifest.json.
+## HP-001 E1: when totem_warp_cuyabeno_hp_LOD0.glb is present, the HP totem and
+## trunk kit replace LOOK totem/post/pods and LOOK001_Trees. Collisions, feel,
+## playable lights and Maya follow fill stay LOOK-001.
 ##
 ## Capture (optional, not used by the feel harness):
 ##   godot --path runtime res://scenes/pilot_cuyabeno.tscn -- --look001-capture=both --look001-out=/path
@@ -10,6 +13,8 @@ extends Node3D
 const WATER_MAT := preload("res://materials/m_blackwater.tres")
 const BEAM_GOLD_MAT := preload("res://materials/m_warp_beam_gold.tres")
 const BEAM_CYAN_MAT := preload("res://materials/m_warp_beam_cyan.tres")
+const HP001_SCRIPT := preload("res://scripts/hp001_cuyabeno.gd")
+const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
 
 const WATER_Y := -0.12
 const TOTEM_XZ := Vector3(7.5, 0.0, 0.0)
@@ -83,6 +88,8 @@ var _lod_roots: Array[Node] = []
 var _maya_fill: OmniLight3D = null
 var _maya_rim: OmniLight3D = null
 var _hero_mats: Array[BaseMaterial3D] = []
+var _hp_ok := false
+var _hp_totem_mats: Array[BaseMaterial3D] = []
 
 
 func apply(pilot: Node3D, lod_roots: Array) -> void:
@@ -90,6 +97,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	for r in lod_roots:
 		if r is Node:
 			_lod_roots.append(r)
+	_hp_ok = ResourceLoader.exists(HP_TOTEM_LOD0)
 	_bind_look_meshes()
 	_grade_platforms()
 	_grade_oneway(pilot)
@@ -101,7 +109,19 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_build_lights(pilot)
 	_build_fog()
 	_build_probe()
-	_build_kakaw_pods(pilot)
+	if _hp_ok:
+		var hp: Node = HP001_SCRIPT.new()
+		hp.name = "HP001"
+		add_child(hp)
+		_hp_ok = bool(hp.call("wire", pilot))
+		var mats = hp.get("totem_mats")
+		_hp_totem_mats.clear()
+		if mats is Array:
+			for m in mats:
+				if m is BaseMaterial3D:
+					_hp_totem_mats.append(m)
+	if not _hp_ok:
+		_build_kakaw_pods(pilot)
 	_build_beam(pilot)
 	set_totem_state(true)
 
@@ -121,6 +141,10 @@ func set_totem_state(active: bool) -> void:
 		if mat == null:
 			continue
 		mat.emission_energy_multiplier = 0.55 if active else 0.32
+	for mat in _hp_totem_mats:
+		if mat == null:
+			continue
+		mat.emission_energy_multiplier = 1.0 if active else 0.55
 	if _totem_light:
 		_totem_light.light_energy = TOTEM_LIGHT_ACTIVE if active else TOTEM_LIGHT_DIM
 	if _beam:
@@ -203,12 +227,26 @@ func capture_still(shot: String, out_path: String) -> void:
 	# More frames so volumetric fog / SSR settle on software rasterizers too.
 	for i in 24:
 		await tree.process_frame
+	var perf := {
+		"shot": shot,
+		"primitives": Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
+		"draw_calls": Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+		"video_mem_bytes": Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED),
+		"objects": Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+	}
+	print("HP001_E1_PERF ", JSON.stringify(perf))
 	var img: Image = vp.get_texture().get_image()
 	if img == null:
 		push_error("LOOK-001 capture: viewport image is null (headless dummy?)")
 		return
 	img.save_png(out_path)
 	print("LOOK-001 wrote ", out_path, " ", img.get_width(), "x", img.get_height())
+	var perf_path := out_path.get_basename() + "_perf.json"
+	var pf := FileAccess.open(perf_path, FileAccess.WRITE)
+	if pf:
+		pf.store_string(JSON.stringify(perf, "\t"))
+		pf.close()
+		print("HP001_E1_PERF wrote ", perf_path)
 	if pods_cam:
 		pods_cam.queue_free()
 
@@ -232,12 +270,17 @@ func _walk_look(n: Node) -> void:
 			# Gold shaft rings are rebuilt as greybox in _build_kakaw_pods.
 			n.visible = false
 		if n.name.begins_with("LOOK001_Totem_Post"):
-			var wood_post := StandardMaterial3D.new()
-			wood_post.albedo_color = Color(0.28, 0.20, 0.13)
-			wood_post.vertex_color_use_as_albedo = false
-			wood_post.emission_enabled = false
-			wood_post.roughness = 0.85
-			mi.material_override = wood_post
+			if _hp_ok:
+				n.visible = false
+			else:
+				var wood_post := StandardMaterial3D.new()
+				wood_post.albedo_color = Color(0.28, 0.20, 0.13)
+				wood_post.vertex_color_use_as_albedo = false
+				wood_post.emission_enabled = false
+				wood_post.roughness = 0.85
+				mi.material_override = wood_post
+		if n.name.begins_with("LOOK001_Trees") and _hp_ok:
+			n.visible = false
 	for c in n.get_children():
 		_walk_look(c)
 
@@ -576,8 +619,10 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.volumetric_fog_density = 0.0020
 	_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
 	_env.volumetric_fog_anisotropy = 0.32
-	_env.volumetric_fog_length = 72.0
-	_env.volumetric_fog_detail_spread = 2.0
+	# Low vol-fog preset (ON by default): shorter volume + less detail spread.
+	# Playable KEY/FILL/RIM/SPOT energies are unchanged.
+	_env.volumetric_fog_length = 48.0
+	_env.volumetric_fog_detail_spread = 1.5
 	_env.volumetric_fog_ambient_inject = 0.55
 	we.environment = _env
 
@@ -972,7 +1017,9 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 
 
 func _build_beam(pilot: Node3D) -> void:
-	var spawn: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor/VFX_WarpBeam_Spawn")
+	var spawn: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor/BeamOrigin")
+	if spawn == null:
+		spawn = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor/VFX_WarpBeam_Spawn")
 	_beam = Node3D.new()
 	_beam.name = "LOOK001_WarpBeam"
 	if spawn:
@@ -987,6 +1034,8 @@ func _build_beam(pilot: Node3D) -> void:
 	var mirror := Node3D.new()
 	mirror.name = "Mirror"
 	var spawn_y := 3.03
+	if spawn:
+		spawn_y = spawn.global_position.y
 	mirror.position = Vector3(0.0, (WATER_Y - spawn_y) * 2.0, 0.0)
 	mirror.scale = Vector3(1.0, -1.0, 1.0)
 	_beam.add_child(mirror)
