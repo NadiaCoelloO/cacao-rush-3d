@@ -1,5 +1,7 @@
 # HP-001 E1 — analytic VRAM estimate (Intel UHD)
 
+E2a (dock + fern/cacao-leaf cover, trunks v4) is in [`HP001_E2a_VRAM_UHD.md`](HP001_E2a_VRAM_UHD.md): **≈ 140 MB** UHD, same method. This file stays the E1 baseline (**≈ 131 MB**).
+
 Lavapipe reports `RENDER_VIDEO_MEM_USED` ≈ **624 MB** / `RENDER_TEXTURE_MEM_USED` ≈ **558 MB**. That is a software-Vulkan host pool (uncompressed staging + extra copies) and must not go to Coordinador as the UHD number.
 
 This note is the UHD estimate: **S3TC/BC compressed textures with mipmaps**, resident mesh buffers, MultiMesh instance buffers, and 1080p Forward+ framebuffers + the directional shadow atlas. Nothing in this file is applied to the project; it is measurement only.

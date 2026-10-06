@@ -1,10 +1,12 @@
 # HP-001 Delivery 1 - Cuyabeno high-poly: totem_warp_cuyabeno_hp + trunk_selva_kit_hp
 
-For Cuyabeno only (world id `selva`). Built by `hp001_e1_cuyabeno.py` in Blender 5.2.1 LTS (background), seed 20261006. Not wired into Godot and not in any repo yet: it waits for Identidad's PASS. **Current version: v3** (totem = v2, PASSED Identidad; trunk kit = v3 after Identidad NO PASA minor on the v2 epiphytes).
+For Cuyabeno only (world id `selva`). Built by `hp001_e1_cuyabeno.py` in Blender 5.2.1 LTS (background), seed 20261006. Wired into Godot on `cursor/hp001-e1-cuyabeno` (PR#6, draft). **Current trunk kit in runtime: v4** (totem = v2, PASSED Identidad, byte-identical; trunks v4 optional polish after v3 ASSET OK). E2a also wires Identidad-passed dock + fern / dry cacao leaves; the E2 canopy is **not** imported and WaterLily is **not** instanced.
 
 Rebuild: `blender --background --python hp001_e1_cuyabeno.py -- --out <dir>` (`--no-render` skips the stills). `--only totem` rebuilds only the totem (textures, GLBs, blend, stills) and leaves every trunk file untouched; `--only trunks` rebuilds only the trunk kit and leaves every totem file byte-identical. The script exits 1 if any LOD is over budget, if the pod count is not 3, if the pods leave the greybox footprint, or if a still/texture has magenta pixels.
 
 ## Revision log
+
+- **v4 (2026-10-06, trunks only; Godot E2a)**. Optional polish after v3 ASSET OK. Totem files byte-identical to v2/v3. Bromeliads ~0.7 m across, muted wine-red heart; buttress crest grain runs straight (no chevron). SHA256 of the wired GLBs: LOD0 `f298a49617ed70aa451fbfe9e5732609c24b0f567c8b4a74fcd5d8ef83331b03`, LOD1 `a224fc18705ba020b39156b92d18f2f21d9401b4991a435ad40ee6cbd87becd1`, LOD2 `644df965c52b5450975b83826f2caf6f081516af49683bf2eef2bee8da1ba2de`. Tri counts unchanged from v3.
 
 - **v3 (2026-10-06, trunks only; built with `--only trunks`)**. Identidad gate on E1 v2: TOTEM PASSES (its files are byte-identical to v2 and were not rebuilt). TRUNKS: NO PASA, minor: bark, lichen, moss, buttresses and lianas approved; the epiphytes failed (fans on the fork tops read as palm/agave; the mid-height clumps stuck out as horizontal fronds).
   - All epiphytes removed from the fork tops and crotches; the broken mossy stubs are bare (the E2 canopy attaches there).

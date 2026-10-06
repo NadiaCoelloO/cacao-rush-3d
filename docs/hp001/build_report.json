@@ -826,5 +826,119 @@
     "limb": 50
    }
   }
+ },
+ "e2a": {
+  "note": "Godot partial integration. Canopy E2 not imported. WaterLily not instanced.",
+  "identidad": {
+   "trunks_v4": "PASA",
+   "dock": "PASA",
+   "fern": "PASA",
+   "cacao_leaves": "PASA",
+   "canopy_e2": "NO PASA — not imported; LOOK dosel kept",
+   "water_lily": "NO PASA — mesh in GLB, never instanced"
+  },
+  "deck_align_m": {
+   "deck_top_local": 0.4011,
+   "collision_top": 0.0,
+   "visual_root_y": -0.4011,
+   "delta_visual_minus_collision": 0.0,
+   "limit": 0.03,
+   "collision_changed": false
+  },
+  "lod": {
+   "trunk": {
+    "begin": [
+     0,
+     14,
+     32
+    ],
+    "end": [
+     26,
+     44,
+     0
+    ],
+    "margin": 3
+   },
+   "totem": {
+    "begin": [
+     0,
+     28,
+     58
+    ],
+    "end": [
+     36,
+     66,
+     0
+    ],
+    "margin": 4
+   },
+   "dock": {
+    "begin": [
+     0,
+     28,
+     58
+    ],
+    "end": [
+     36,
+     66,
+     0
+    ],
+    "margin": 4
+   },
+   "groundcover": {
+    "begin": [
+     0,
+     12
+    ],
+    "end": [
+     18,
+     40
+    ],
+    "margin": 3,
+    "fade_after_m": 37
+   }
+  },
+  "glb_sha256": {
+   "trunk_selva_kit_hp_LOD0.glb": "f298a49617ed70aa451fbfe9e5732609c24b0f567c8b4a74fcd5d8ef83331b03",
+   "trunk_selva_kit_hp_LOD1.glb": "a224fc18705ba020b39156b92d18f2f21d9401b4991a435ad40ee6cbd87becd1",
+   "trunk_selva_kit_hp_LOD2.glb": "644df965c52b5450975b83826f2caf6f081516af49683bf2eef2bee8da1ba2de",
+   "dock_cuyabeno_hp_LOD0.glb": "c1dec955e120c433bed7f8d9533f5488de5d8f758441bc8afdd7efa8b74d9ee3",
+   "dock_cuyabeno_hp_LOD1.glb": "023a9d06804c24e2c01620b2ec8c41bb56ebf8ef9effa5d98a52283918d3dcea",
+   "dock_cuyabeno_hp_LOD2.glb": "12425ca9334d8368a254f219e96f8864d7b374a7378fa19c320169f351759c15",
+   "groundcover_cuyabeno_LOD0.glb": "7d9bdb1e563c434e77a0fad87af157950473994438aca5a76e9ac4f20a87c97a",
+   "groundcover_cuyabeno_LOD1.glb": "6a3ce85ae7607306b402cf30a7049be5406811937f05c7873d2c2b4e501bedc1"
+  },
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 222558,
+    "draw_calls": 146
+   },
+   "laguna": {
+    "primitives": 174230,
+    "draw_calls": 111
+   },
+   "dosel": {
+    "primitives": 283971,
+    "draw_calls": 178,
+    "vs_e1_dosel": 264948,
+    "lod_tightened": false
+   },
+   "dock": {
+    "primitives": 195259,
+    "draw_calls": 125
+   },
+   "pods": null
+  },
+  "uhd_vram_mb": 140,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "canopy_v2_reserve_tris": 45000,
+  "dosel_headroom_vs_350k": 66029,
+  "groundcover_instances": 28,
+  "groundcover_multimeshes": 20,
+  "trunk_instances": 22,
+  "captures": {}
  }
 }
