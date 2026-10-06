@@ -195,12 +195,12 @@ func capture_still(shot: String, out_path: String) -> void:
 			pods_cam.far = 80.0
 			if _hp_ok:
 				# HP cluster is at BeamOrigin (~y 2.28), not the greybox 3.03 tip.
-				# 3/4 from +X/+Z, ~1.9 m; aim slightly below the empty so hanging
-				# pods and curved stalks sit in frame. Capture-only.
-				pods_cam.fov = 38.0
-				pods_cam.position = Vector3(8.96, 2.50, 1.38)
+				# 3/4 from +X/+Z, slightly below the cluster (~1.8 m) so the
+				# carved crown, three hanging pods + stalks, and beam base read.
+				pods_cam.fov = 40.0
+				pods_cam.position = Vector3(8.48, 2.02, 1.70)
 				get_parent().add_child(pods_cam)
-				pods_cam.look_at(Vector3(7.50, 2.18, 0.18), Vector3.UP)
+				pods_cam.look_at(Vector3(7.50, 2.38, 0.20), Vector3.UP)
 				if player:
 					player.visible = false
 				_set_pods_closeup_beam(true)
