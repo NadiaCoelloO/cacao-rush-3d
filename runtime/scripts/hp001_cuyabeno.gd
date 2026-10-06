@@ -16,10 +16,15 @@ const TRUNK := [
 ]
 const TREES_JSON := "res://data/hp001_tree_instances.json"
 const BEAM_ORIGIN_LOCAL := Vector3(-0.0009, 2.2783, 0.220)
-# Tight ranges: LOD0 = play space, LOD2 = far background. Fade margin 3 m.
+# Trunks: tight ranges for the UHD triangle budget.
 const LOD_BEGIN := [0.0, 16.0, 36.0]
 const LOD_END := [20.0, 40.0, 0.0]
 const LOD_MARGIN := 3.0
+# Totem is a unique prop: never fully culled. Overlapping ranges so fade
+# margins cannot open a hole (laguna/dosel sit ~18 m from the post).
+const TOTEM_LOD_BEGIN := [0.0, 28.0, 58.0]
+const TOTEM_LOD_END := [36.0, 66.0, 0.0]
+const TOTEM_LOD_MARGIN := 4.0
 const CELL := 18.0
 const VARIANTS := ["Thin", "Medium", "Thick"]
 
@@ -135,7 +140,7 @@ func _wire_trunks(pilot: Node3D) -> void:
 				if bark:
 					mmi.material_override = bark
 				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-				_apply_lod_range(mmi, LOD_BEGIN[lod], LOD_END[lod])
+				_apply_lod_range(mmi, LOD_BEGIN[lod], LOD_END[lod], LOD_MARGIN)
 				# Shadows: directional key only, and only near LOD0 clusters.
 				var xz := Vector2(centroid.x, centroid.z).length()
 				if lod == 0 and xz <= 24.0:
@@ -204,11 +209,11 @@ func _cluster_key(origin: Vector3) -> Vector2i:
 	return Vector2i(int(floor(origin.x / CELL)), int(floor(origin.z / CELL)))
 
 
-func _apply_lod_range(gi: GeometryInstance3D, begin: float, end: float) -> void:
+func _apply_lod_range(gi: GeometryInstance3D, begin: float, end: float, margin: float = LOD_MARGIN) -> void:
 	gi.visibility_range_begin = begin
 	gi.visibility_range_end = end
-	gi.visibility_range_begin_margin = LOD_MARGIN
-	gi.visibility_range_end_margin = LOD_MARGIN
+	gi.visibility_range_begin_margin = margin
+	gi.visibility_range_end_margin = margin
 
 
 func _harden_mat(mat: BaseMaterial3D) -> void:
@@ -224,7 +229,7 @@ func _harden_mat(mat: BaseMaterial3D) -> void:
 func _style_totem_geometry(n: Node, lod: int, shared: BaseMaterial3D) -> void:
 	if n is GeometryInstance3D:
 		var gi := n as GeometryInstance3D
-		_apply_lod_range(gi, LOD_BEGIN[lod], LOD_END[lod])
+		_apply_lod_range(gi, TOTEM_LOD_BEGIN[lod], TOTEM_LOD_END[lod], TOTEM_LOD_MARGIN)
 		gi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		if lod >= 2:
 			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

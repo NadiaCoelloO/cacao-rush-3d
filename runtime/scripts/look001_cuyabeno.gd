@@ -19,6 +19,7 @@ const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
 const WATER_Y := -0.12
 const TOTEM_XZ := Vector3(7.5, 0.0, 0.0)
 const MAYA_STILL := Vector3(5.55, 1.20, 0.0)
+const CROWN_TOP_LOCAL_Y := 2.61
 const WARP_GOLD_ACTIVE := 3.0
 const WARP_CYAN_ACTIVE := 2.4
 const WARP_GOLD_DIM := 0.55
@@ -229,6 +230,10 @@ func capture_still(shot: String, out_path: String) -> void:
 		return
 	cam.current = true
 	set_totem_state(shot != "dosel")
+	if _hp_ok:
+		var tanchor: Node3D = get_parent().get_node_or_null("WorldRoot/TotemWarpAnchor")
+		if tanchor and cam:
+			print("HP001 totem dist=", cam.global_position.distance_to(tanchor.global_position), " cam=", cam.name)
 	# Follow fill is for the spawn gameplay cam (KEY_Maya does not reach).
 	# Laguna / dosel / pods keep vertex albedo + scene KEY so Maya stays cream.
 	_set_maya_follow_for_shot(player, shot == "gameplay")
@@ -1055,6 +1060,13 @@ func _build_beam(pilot: Node3D) -> void:
 	else:
 		_beam.position = Vector3(7.5, 3.03, 0.0)
 		add_child(_beam)
+	# BeamOrigin marks the pod cluster (~y 2.278). Lift the cylinder so its
+	# base sits just above the chopped crown (~y 2.61) and rises out of the
+	# cluster instead of piercing the yellow pod / wood.
+	var lift := 0.0
+	if spawn:
+		lift = CROWN_TOP_LOCAL_Y - spawn.position.y + 0.04
+		_beam.position = Vector3(0.0, lift, 0.0)
 	_beam.add_child(_make_beam("Gold", Vector3(0.07, 0.30, 6.2), BEAM_GOLD_MAT, Vector3.ZERO))
 	# Secondary core is Kakaw orange (paint_v03 Y/O/R), not turquoise.
 	_beam.add_child(_make_beam("PodCore", Vector3(0.025, 0.085, 5.0), BEAM_CYAN_MAT, Vector3(0.02, 0.0, 0.02)))
@@ -1063,7 +1075,7 @@ func _build_beam(pilot: Node3D) -> void:
 	mirror.name = "Mirror"
 	var spawn_y := 3.03
 	if spawn:
-		spawn_y = spawn.global_position.y
+		spawn_y = spawn.global_position.y + lift
 	mirror.position = Vector3(0.0, (WATER_Y - spawn_y) * 2.0, 0.0)
 	mirror.scale = Vector3(1.0, -1.0, 1.0)
 	_beam.add_child(mirror)
