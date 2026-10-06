@@ -35,6 +35,14 @@ const PLAT_EMIT_ENERGY := 0.14
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
+## Gameplay-cam Maya-only fill (layer 20). Scene lights keep default layer 1.
+## Does not change KEY/FILL/RIM/SPOT energy or fog.
+const MAYA_FOLLOW_LAYER := 1 << 19
+const MAYA_BACK_FILL_ENERGY := 3.6
+const MAYA_BACK_FILL_RANGE := 3.4
+const MAYA_BACK_FILL_ATTEN := 1.35
+const MAYA_RIM_ENERGY := 1.15
+const MAYA_RIM_RANGE := 3.0
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
 ## volumetric fog on the Environment covers that role in Forward+).
@@ -81,6 +89,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_grade_oneway(pilot)
 	_grade_csg_playable(pilot)
 	_grade_hero(pilot)
+	_attach_maya_follow_fill(pilot)
 	_thicken_canopy()
 	_build_environment(pilot)
 	_build_lights(pilot)
@@ -258,6 +267,50 @@ func _grade_hero_node(n: Node) -> void:
 				mi.mesh.surface_set_material(s, d)
 	for c in n.get_children():
 		_grade_hero_node(c)
+
+
+func _attach_maya_follow_fill(pilot: Node3D) -> void:
+	var player: Node3D = pilot.get_node_or_null("PlayerMaya")
+	if player == null:
+		return
+	_tag_maya_follow_layer(player)
+	# Parent to PlayerMaya so the fill rides spawn / run / mantle with her.
+	# cull_mask = layer 20 only: lights Maya, not floor / canopy / totem.
+	var fill := OmniLight3D.new()
+	fill.name = "LOOK001_FILL_MayaBack"
+	fill.light_color = Color(1.0, 0.90, 0.76)
+	fill.light_energy = MAYA_BACK_FILL_ENERGY
+	fill.light_specular = 0.0
+	fill.omni_range = MAYA_BACK_FILL_RANGE
+	fill.omni_attenuation = MAYA_BACK_FILL_ATTEN
+	fill.shadow_enabled = false
+	fill.light_volumetric_fog_energy = 0.0
+	fill.light_cull_mask = MAYA_FOLLOW_LAYER
+	# Behind/above her back relative to PlayerMaya/Camera3D (+Z follow-cam).
+	fill.position = Vector3(0.0, 1.48, 1.72)
+	player.add_child(fill)
+	var rim := OmniLight3D.new()
+	rim.name = "LOOK001_RIM_MayaFollow"
+	rim.light_color = Color(1.0, 0.86, 0.68)
+	rim.light_energy = MAYA_RIM_ENERGY
+	rim.light_specular = 0.0
+	rim.omni_range = MAYA_RIM_RANGE
+	rim.omni_attenuation = 1.5
+	rim.shadow_enabled = false
+	rim.light_volumetric_fog_energy = 0.0
+	rim.light_cull_mask = MAYA_FOLLOW_LAYER
+	rim.position = Vector3(-0.45, 1.62, -0.85)
+	player.add_child(rim)
+
+
+func _tag_maya_follow_layer(n: Node) -> void:
+	if n is Camera3D or n is Light3D:
+		pass
+	elif n is VisualInstance3D:
+		var vi := n as VisualInstance3D
+		vi.layers = vi.layers | MAYA_FOLLOW_LAYER
+	for c in n.get_children():
+		_tag_maya_follow_layer(c)
 
 
 func _grade_platforms() -> void:
@@ -810,6 +863,59 @@ func _make_cacao_leaf(leaf_name: String, pos: Vector3, face_dir: Vector3) -> Mes
 	return mi
 
 
+func _make_cacao_pod_mesh() -> ArrayMesh:
+	# Local +Y = hanging tip (blunt). Local −Y = stalk (rounded sphere pole).
+	# Five longitudinal grooves are radius indents, not stuck-on slats.
+	var radius := 0.092
+	var half := 0.145
+	var grooves := 5
+	var groove_k := 0.17
+	var rings := 10
+	var segs := 20
+	var pts: Array[Vector3] = []
+	for i in rings + 1:
+		var t := float(i) / float(rings)
+		var y := lerp(-half, half, t)
+		var ring_r := sin(PI * t) * radius
+		if t > 0.78:
+			var u := (t - 0.78) / 0.22
+			ring_r = lerp(sin(PI * t) * radius, radius * 0.20, u)
+		if t >= 0.999:
+			ring_r = radius * 0.18
+		for j in segs:
+			var ang := TAU * float(j) / float(segs)
+			var rr := ring_r
+			if t > 0.14 and t < 0.90:
+				var groove := 0.5 + 0.5 * cos(float(grooves) * ang)
+				rr = ring_r * (1.0 - groove_k * groove)
+			pts.append(Vector3(cos(ang) * rr, y, sin(ang) * rr))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_smooth_group(0)
+	for i in rings:
+		for j in segs:
+			var a: int = i * segs + j
+			var b: int = i * segs + ((j + 1) % segs)
+			var c: int = (i + 1) * segs + j
+			var d: int = (i + 1) * segs + ((j + 1) % segs)
+			st.add_vertex(pts[a])
+			st.add_vertex(pts[c])
+			st.add_vertex(pts[b])
+			st.add_vertex(pts[b])
+			st.add_vertex(pts[c])
+			st.add_vertex(pts[d])
+	var cap := Vector3(0.0, half + 0.010, 0.0)
+	var last := rings * segs
+	for j in segs:
+		var b: int = last + ((j + 1) % segs)
+		var a: int = last + j
+		st.add_vertex(pts[a])
+		st.add_vertex(cap)
+		st.add_vertex(pts[b])
+	st.generate_normals()
+	return st.commit()
+
+
 func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Color) -> Node3D:
 	var root := Node3D.new()
 	root.name = pod_name
@@ -824,44 +930,25 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	mat.roughness = 0.78
 	mat.metallic = 0.0
 	_pod_mats.append(mat)
-	# Whole elongated ribbed ellipsoid along local Y, pointed ends — not a disc.
 	var body := MeshInstance3D.new()
-	var sph := SphereMesh.new()
-	sph.radius = 0.090
-	sph.height = 0.28
-	sph.radial_segments = 12
-	sph.rings = 8
-	body.mesh = sph
+	body.name = "Body"
+	body.mesh = _make_cacao_pod_mesh()
 	body.material_override = mat
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(body)
-	for sign in [-1.0, 1.0]:
-		var tip := MeshInstance3D.new()
-		var cone := CylinderMesh.new()
-		cone.top_radius = 0.0
-		cone.bottom_radius = 0.038
-		cone.height = 0.050
-		cone.radial_segments = 10
-		tip.mesh = cone
-		tip.material_override = mat
-		tip.position = Vector3(0.0, sign * 0.152, 0.0)
-		if sign < 0.0:
-			tip.rotation.x = PI
-		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		root.add_child(tip)
-	for k in 5:
-		var ang := TAU * float(k) / 5.0
-		var rib := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.top_radius = 0.007
-		cyl.bottom_radius = 0.007
-		cyl.height = 0.16
-		cyl.radial_segments = 6
-		rib.mesh = cyl
-		rib.material_override = mat
-		rib.position = Vector3(cos(ang) * 0.086, 0.0, sin(ang) * 0.086)
-		rib.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		root.add_child(rib)
+	# Rounded stalk nub at local −Y (world top when hanging).
+	var nub := MeshInstance3D.new()
+	nub.name = "Stalk"
+	var nub_mesh := SphereMesh.new()
+	nub_mesh.radius = 0.020
+	nub_mesh.height = 0.032
+	nub_mesh.radial_segments = 8
+	nub_mesh.rings = 4
+	nub.mesh = nub_mesh
+	nub.material_override = mat
+	nub.position = Vector3(0.0, -0.148, 0.0)
+	nub.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(nub)
 	return root
 
 
