@@ -507,7 +507,8 @@ func _build_lights(pilot: Node3D) -> void:
 	path_spot.shadow_enabled = false
 	path_spot.light_volumetric_fog_energy = 0.06
 	add_child(path_spot)
-	path_spot.look_at(Vector3(5.3, 0.4, 0.2), Vector3.UP)
+	# Spot looks down local -Z; look_at(straight down, UP) is degenerate.
+	path_spot.rotation = Vector3(deg_to_rad(-90.0), 0.0, 0.0)
 
 	var anchor: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
 	_totem_light = OmniLight3D.new()
