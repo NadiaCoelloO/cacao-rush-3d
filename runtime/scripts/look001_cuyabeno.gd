@@ -718,23 +718,23 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	var nest := MeshInstance3D.new()
 	nest.name = "Nest"
 	var nest_mesh := SphereMesh.new()
-	nest_mesh.radius = 0.26
-	nest_mesh.height = 0.42
+	nest_mesh.radius = 0.32
+	nest_mesh.height = 0.50
 	nest_mesh.radial_segments = 14
 	nest_mesh.rings = 8
 	nest.mesh = nest_mesh
 	nest.material_override = wood
-	nest.position = Vector3(0.0, 2.68, 0.0)
+	nest.position = Vector3(0.0, 2.66, 0.0)
 	nest.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	cluster.add_child(nest)
 	# At most two broad dark-green cacao leaves (rounded, not spiky).
-	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.12, 2.78, -0.24), Vector3(deg_to_rad(-28.0), deg_to_rad(35.0), deg_to_rad(12.0))))
-	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.18, 2.76, -0.22), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
-	# Three whole elongated ribbed ellipsoids, slightly separated, sitting on the nest.
+	cluster.add_child(_make_cacao_leaf("Leaf_0", Vector3(-0.14, 2.72, -0.28), Vector3(deg_to_rad(-28.0), deg_to_rad(35.0), deg_to_rad(12.0))))
+	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.20, 2.70, -0.26), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
+	# Hang outward (not up) so they read as cacao, not a torch.
 	var specs := [
-		{"pos": Vector3(0.18, 3.02, 0.14), "eul": Vector3(deg_to_rad(32.0), deg_to_rad(30.0), 0.0), "col": CACAO_Y},
-		{"pos": Vector3(-0.18, 3.00, 0.12), "eul": Vector3(deg_to_rad(36.0), deg_to_rad(-56.0), 0.0), "col": CACAO_O},
-		{"pos": Vector3(0.04, 2.98, -0.18), "eul": Vector3(deg_to_rad(40.0), deg_to_rad(172.0), 0.0), "col": CACAO_R},
+		{"pos": Vector3(0.28, 2.78, 0.16), "eul": Vector3(deg_to_rad(78.0), deg_to_rad(28.0), 0.0), "col": CACAO_Y},
+		{"pos": Vector3(-0.26, 2.76, 0.14), "eul": Vector3(deg_to_rad(80.0), deg_to_rad(-62.0), 0.0), "col": CACAO_O},
+		{"pos": Vector3(0.06, 2.74, -0.28), "eul": Vector3(deg_to_rad(76.0), deg_to_rad(174.0), 0.0), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
