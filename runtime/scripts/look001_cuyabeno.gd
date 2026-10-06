@@ -718,8 +718,8 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	var nest := MeshInstance3D.new()
 	nest.name = "Nest"
 	var nest_mesh := SphereMesh.new()
-	nest_mesh.radius = 0.32
-	nest_mesh.height = 0.50
+	nest_mesh.radius = 0.30
+	nest_mesh.height = 0.56
 	nest_mesh.radial_segments = 14
 	nest_mesh.rings = 8
 	nest.mesh = nest_mesh
@@ -732,9 +732,9 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	cluster.add_child(_make_cacao_leaf("Leaf_1", Vector3(0.20, 2.70, -0.26), Vector3(deg_to_rad(-22.0), deg_to_rad(-40.0), deg_to_rad(-8.0))))
 	# Hang outward (not up) so they read as cacao, not a torch.
 	var specs := [
-		{"pos": Vector3(0.28, 2.78, 0.16), "eul": Vector3(deg_to_rad(78.0), deg_to_rad(28.0), 0.0), "col": CACAO_Y},
-		{"pos": Vector3(-0.26, 2.76, 0.14), "eul": Vector3(deg_to_rad(80.0), deg_to_rad(-62.0), 0.0), "col": CACAO_O},
-		{"pos": Vector3(0.06, 2.74, -0.28), "eul": Vector3(deg_to_rad(76.0), deg_to_rad(174.0), 0.0), "col": CACAO_R},
+		{"pos": Vector3(0.40, 2.82, 0.22), "eul": Vector3(deg_to_rad(80.0), deg_to_rad(28.0), 0.0), "col": CACAO_Y},
+		{"pos": Vector3(-0.38, 2.80, 0.20), "eul": Vector3(deg_to_rad(82.0), deg_to_rad(-62.0), 0.0), "col": CACAO_O},
+		{"pos": Vector3(0.10, 2.78, -0.42), "eul": Vector3(deg_to_rad(78.0), deg_to_rad(174.0), 0.0), "col": CACAO_R},
 	]
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
