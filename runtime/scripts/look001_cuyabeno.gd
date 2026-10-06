@@ -25,9 +25,13 @@ const TOTEM_LIGHT_DIM := 0.35
 const MAYA_BODY := Color("8f8578")
 const MAYA_HAIR := Color("6b5a46")
 const MAYA_PACK := Color("8a7358")
-const ONEWAY_SLAB := Color("7e7058")
+const ONEWAY_SLAB := Color("8a7c64")
 const ONEWAY_CUE := Color("4a3a2a")
-const PLAT_ALBEDO := Color(0.58, 0.54, 0.46)
+const PLAT_ALBEDO := Color(0.68, 0.63, 0.54)
+## Soft top-edge lift on greybox platforms only (not Maya). Keeps tops in
+## mid-tone when the canopy key puts the strip in shadow.
+const PLAT_EMIT := Color(0.50, 0.46, 0.38)
+const PLAT_EMIT_ENERGY := 0.42
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -52,13 +56,11 @@ const FOG_BANKS := [
 ## Mid-height haze between trunks (not over landing tops). Fills the air the
 ## ground-hugging banks leave empty, matching the Blender stills.
 const FOG_TRUNKS := [
-	{"pos": Vector3(3.0, 3.4, -11.0), "size": Vector3(16.0, 7.5, 11.0), "yaw": 18.0},
-	{"pos": Vector3(-7.5, 4.0, -13.0), "size": Vector3(14.0, 8.5, 13.0), "yaw": 42.0},
-	{"pos": Vector3(12.0, 3.2, -9.5), "size": Vector3(12.0, 7.0, 10.0), "yaw": -8.0},
-	{"pos": Vector3(0.5, 5.5, -20.0), "size": Vector3(24.0, 11.0, 16.0), "yaw": 10.0},
-	# Lighting pass: camera-side trunk at z=9.5 omitted — it sat on the
-	# playable corridor / Cam_Dosel and crushed Maya, floor, and mantle edges.
-	{"pos": Vector3(8.0, 4.2, -15.5), "size": Vector3(14.0, 8.0, 12.0), "yaw": 55.0},
+	# light2: volumes that sat between Cam_Laguna and Maya (z≈-11 / -9.5)
+	# dropped; remaining banks live deeper in the lagoon, above playable y.
+	{"pos": Vector3(-8.5, 5.5, -18.0), "size": Vector3(14.0, 8.5, 11.0), "yaw": 42.0},
+	{"pos": Vector3(0.5, 7.0, -26.0), "size": Vector3(24.0, 11.0, 14.0), "yaw": 10.0},
+	{"pos": Vector3(11.0, 6.0, -24.0), "size": Vector3(14.0, 8.0, 12.0), "yaw": 55.0},
 ]
 
 var _env: Environment
@@ -76,6 +78,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_bind_look_meshes()
 	_grade_platforms()
 	_grade_oneway(pilot)
+	_grade_csg_playable(pilot)
 	_grade_hero(pilot)
 	_thicken_canopy()
 	_build_environment(pilot)
@@ -200,7 +203,7 @@ func _grade_hero_node(n: Node) -> void:
 				d.emission_enabled = false
 				d.emission_energy_multiplier = 0.0
 				d.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-				d.roughness = 0.72
+				d.roughness = 0.48
 				if slot.begins_with("Maya_Body"):
 					d.albedo_color = MAYA_BODY
 				elif slot.begins_with("Maya_Hair"):
@@ -231,8 +234,7 @@ func _grade_platform_node(n: Node) -> void:
 						var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
 						d.albedo_color = PLAT_ALBEDO
 						d.vertex_color_use_as_albedo = true
-						d.emission_enabled = false
-						d.roughness = 0.82
+						_rim_platform_mat(d)
 						mi.set_surface_override_material(s, d)
 	for c in n.get_children():
 		_grade_platform_node(c)
@@ -254,18 +256,43 @@ func _grade_oneway_node(n: Node) -> void:
 				if not (mat is BaseMaterial3D):
 					continue
 				var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
-				d.emission_enabled = false
-				d.emission_energy_multiplier = 0.0
 				d.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-				d.roughness = 0.78
 				var slot := String(d.resource_name)
 				if slot.find("Cue") >= 0:
 					d.albedo_color = ONEWAY_CUE
+					d.emission_enabled = false
+					d.emission_energy_multiplier = 0.0
+					d.roughness = 0.78
 				else:
 					d.albedo_color = ONEWAY_SLAB
+					_rim_platform_mat(d)
 				mi.mesh.surface_set_material(s, d)
 	for c in n.get_children():
 		_grade_oneway_node(c)
+
+
+func _rim_platform_mat(d: BaseMaterial3D) -> void:
+	d.emission_enabled = true
+	d.emission = PLAT_EMIT
+	d.emission_energy_multiplier = PLAT_EMIT_ENERGY
+	d.roughness = 0.50
+	d.metallic = 0.0
+
+
+func _grade_csg_playable(pilot: Node3D) -> void:
+	# Collision CSGs can still draw if the LOD floor doesn't cover them.
+	for path in [
+		"WorldRoot/FloorPlaceholder/CSGFloor",
+		"WorldRoot/FloorPlaceholder/CSGPlatform",
+		"WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder/CSGOneway",
+	]:
+		var n: Node = pilot.get_node_or_null(path)
+		if not (n is CSGPrimitive3D):
+			continue
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = PLAT_ALBEDO
+		_rim_platform_mat(mat)
+		(n as CSGPrimitive3D).material = mat
 
 
 func _thicken_canopy() -> void:
@@ -328,11 +355,11 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.sky = sky
 	_env.background_energy_multiplier = 0.55
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_env.ambient_light_color = Color("5a6e68")
-	_env.ambient_light_energy = 0.52
+	_env.ambient_light_color = Color("6a7c74")
+	_env.ambient_light_energy = 0.72
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.tonemap_exposure = 0.94
+	_env.tonemap_exposure = 1.06
 	_env.ssr_enabled = true
 	_env.ssr_max_steps = 64
 	_env.ssr_fade_in = 0.15
@@ -352,16 +379,16 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.set("glow_levels/6", 0.0)
 	_env.set("glow_levels/7", 0.0)
 	_env.adjustment_enabled = true
-	_env.adjustment_brightness = 1.05
-	_env.adjustment_contrast = 1.01
+	_env.adjustment_brightness = 1.10
+	_env.adjustment_contrast = 0.97
 	_env.adjustment_saturation = 0.92
 	_env.volumetric_fog_enabled = true
-	_env.volumetric_fog_density = 0.0034
+	_env.volumetric_fog_density = 0.0020
 	_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
 	_env.volumetric_fog_anisotropy = 0.32
 	_env.volumetric_fog_length = 72.0
 	_env.volumetric_fog_detail_spread = 2.0
-	_env.volumetric_fog_ambient_inject = 0.42
+	_env.volumetric_fog_ambient_inject = 0.55
 	we.environment = _env
 
 
@@ -387,7 +414,7 @@ func _build_lights(pilot: Node3D) -> void:
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
 	fill.light_color = Color("8a9a88")
-	fill.light_energy = 0.44
+	fill.light_energy = 0.88
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.2
@@ -406,30 +433,81 @@ func _build_lights(pilot: Node3D) -> void:
 	lateral.shadow_enabled = false
 	add_child(lateral)
 
-	# Lighting pass: local fill + rim so Maya, floor, solid/oneway @ (6,1,0)
-	# and mantle edges read along the playable route. No shadows (keep the
-	# closed-canopy key), low vol-fog energy so banks/haze stay on the lagoon.
+	# light2: local fill + rim + path spot so Maya, floor, solid/oneway @ (6,1,0)
+	# and mantle edges read as mid-tones. No shadows (keep the closed-canopy
+	# key), low vol-fog energy so banks/haze stay on the lagoon.
 	var route_fill := OmniLight3D.new()
 	route_fill.name = "LOOK001_FILL_Route"
-	route_fill.position = Vector3(2.0, 3.7, -0.6)
-	route_fill.light_color = Color(1.0, 0.86, 0.68)
-	route_fill.light_energy = 0.88
-	route_fill.light_specular = 0.12
-	route_fill.omni_range = 11.0
-	route_fill.light_volumetric_fog_energy = 0.12
+	route_fill.position = Vector3(4.2, 3.6, 0.0)
+	route_fill.light_color = Color(1.0, 0.88, 0.70)
+	route_fill.light_energy = 1.7
+	route_fill.light_specular = 0.22
+	route_fill.omni_range = 13.0
+	route_fill.omni_attenuation = 0.9
+	route_fill.light_volumetric_fog_energy = 0.08
 	route_fill.shadow_enabled = false
 	add_child(route_fill)
 
 	var route_rim := OmniLight3D.new()
 	route_rim.name = "LOOK001_RIM_Route"
-	route_rim.position = Vector3(6.2, 3.4, 2.5)
-	route_rim.light_color = Color(0.82, 0.90, 0.86)
-	route_rim.light_energy = 0.62
-	route_rim.light_specular = 0.08
-	route_rim.omni_range = 9.0
-	route_rim.light_volumetric_fog_energy = 0.1
+	route_rim.position = Vector3(6.2, 3.2, 2.6)
+	route_rim.light_color = Color(0.90, 0.94, 0.88)
+	route_rim.light_energy = 1.45
+	route_rim.light_specular = 0.35
+	route_rim.omni_range = 10.0
+	route_rim.omni_attenuation = 1.1
+	route_rim.light_volumetric_fog_energy = 0.06
 	route_rim.shadow_enabled = false
 	add_child(route_rim)
+
+	var maya_key := OmniLight3D.new()
+	maya_key.name = "LOOK001_KEY_Maya"
+	maya_key.position = Vector3(5.7, 2.55, -1.5)
+	maya_key.light_color = Color(1.0, 0.90, 0.74)
+	maya_key.light_energy = 2.6
+	maya_key.light_specular = 0.40
+	maya_key.omni_range = 5.5
+	maya_key.omni_attenuation = 1.5
+	maya_key.light_volumetric_fog_energy = 0.04
+	maya_key.shadow_enabled = false
+	add_child(maya_key)
+
+	var maya_rim := OmniLight3D.new()
+	maya_rim.name = "LOOK001_RIM_Maya"
+	maya_rim.position = Vector3(5.2, 2.45, 1.8)
+	maya_rim.light_color = Color(0.95, 0.96, 0.90)
+	maya_rim.light_energy = 2.2
+	maya_rim.light_specular = 0.55
+	maya_rim.omni_range = 5.0
+	maya_rim.omni_attenuation = 1.6
+	maya_rim.light_volumetric_fog_energy = 0.03
+	maya_rim.shadow_enabled = false
+	add_child(maya_rim)
+
+	var laguna_face := OmniLight3D.new()
+	laguna_face.name = "LOOK001_FILL_LagunaFace"
+	laguna_face.position = Vector3(8.5, 2.8, -7.5)
+	laguna_face.light_color = Color(1.0, 0.86, 0.68)
+	laguna_face.light_energy = 1.8
+	laguna_face.light_specular = 0.28
+	laguna_face.omni_range = 14.0
+	laguna_face.omni_attenuation = 1.0
+	laguna_face.light_volumetric_fog_energy = 0.05
+	laguna_face.shadow_enabled = false
+	add_child(laguna_face)
+
+	var path_spot := SpotLight3D.new()
+	path_spot.name = "LOOK001_SPOT_Path"
+	path_spot.position = Vector3(5.3, 7.4, 0.2)
+	path_spot.light_color = Color(1.0, 0.91, 0.76)
+	path_spot.light_energy = 3.4
+	path_spot.spot_range = 12.0
+	path_spot.spot_angle = 40.0
+	path_spot.light_specular = 0.45
+	path_spot.shadow_enabled = false
+	path_spot.light_volumetric_fog_energy = 0.06
+	add_child(path_spot)
+	path_spot.look_at(Vector3(5.3, 0.4, 0.2), Vector3.UP)
 
 	var anchor: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
 	_totem_light = OmniLight3D.new()
@@ -494,13 +572,13 @@ func _build_fog() -> void:
 	var clear := FogVolume.new()
 	clear.name = "LOOK001_PlayableClear"
 	clear.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	clear.size = Vector3(18.0, 5.5, 8.0)
-	clear.position = Vector3(4.5, 2.2, 0.2)
+	clear.size = Vector3(22.0, 6.5, 10.0)
+	clear.position = Vector3(4.8, 2.4, 0.0)
 	var clear_mat := FogMaterial.new()
-	clear_mat.density = -0.1
+	clear_mat.density = -0.24
 	clear_mat.albedo = Color(0.72, 0.75, 0.70)
 	clear_mat.height_falloff = 0.0
-	clear_mat.edge_fade = 0.85
+	clear_mat.edge_fade = 0.7
 	clear.material = clear_mat
 	add_child(clear)
 
