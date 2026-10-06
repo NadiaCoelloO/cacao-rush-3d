@@ -67,7 +67,7 @@ Hard 350k tris, target 250k, ≤250 draws. Dosel did **not** exceed 300k, so tru
 | gameplay | 222 558 | 146 | OK | OK |
 | laguna | 174 230 | 111 | OK | OK |
 | dosel | 283 971 | 178 | OK (under 300k; +19k vs E1 dosel 264 948) | OK |
-| pods | *(filled after recapture)* | | | |
-| dock closeup | 195 259 | 125 | OK | OK |
+| pods | 223 105 | 113 | OK | OK |
+| dock closeup | 228 495 | 155 | OK | OK |
 
 Trunk LOD kept **0–26 / 14–44 / 32–∞**, margin 3. Groundcover LOD0/1 **0–18 / 12–40**, margin 3 (fade after ~37 m). Dock same hysteresis as the totem: **0–36 / 28–66 / 58–∞**, margin 4.

@@ -188,19 +188,19 @@ func capture_still(shot: String, out_path: String) -> void:
 		# existing CSGFloor (no new collision) east of the pier so her feet
 		# and the visual deck top share the same height in frame.
 		if player:
-			player.global_position = Vector3(11.35, 1.2, -3.15)
+			player.global_position = Vector3(11.15, 1.2, -3.05)
 			player.rotation = Vector3.ZERO
-			player.rotation.y = deg_to_rad(-28.0)
+			player.rotation.y = deg_to_rad(-48.0)
 			player.set_physics_process(true)
 			if play_cam:
 				play_cam.current = false
 		pods_cam = Camera3D.new()
 		pods_cam.name = "Cam_DockCloseup"
 		pods_cam.far = 80.0
-		pods_cam.fov = 48.0
-		pods_cam.position = Vector3(13.55, 0.78, -5.55)
+		pods_cam.fov = 50.0
+		pods_cam.position = Vector3(13.05, 1.22, -2.15)
 		get_parent().add_child(pods_cam)
-		pods_cam.look_at(Vector3(10.55, 0.18, -4.05), Vector3.UP)
+		pods_cam.look_at(Vector3(10.35, 0.12, -5.35), Vector3.UP)
 		cam = pods_cam
 	else:
 		if player:

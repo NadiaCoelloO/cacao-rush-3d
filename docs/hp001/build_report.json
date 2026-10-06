@@ -923,11 +923,14 @@
     "vs_e1_dosel": 264948,
     "lod_tightened": false
    },
-   "dock": {
-    "primitives": 195259,
-    "draw_calls": 125
+   "pods": {
+    "primitives": 223105,
+    "draw_calls": 113
    },
-   "pods": null
+   "dock": {
+    "primitives": 228495,
+    "draw_calls": 155
+   }
   },
   "uhd_vram_mb": 140,
   "uhd_vram_cap_mb": 192,
@@ -939,6 +942,13 @@
   "groundcover_instances": 28,
   "groundcover_multimeshes": 20,
   "trunk_instances": 22,
-  "captures": {}
+  "captures": {
+   "HP001_E2a_engine_gameplay.png": "5eae3c36abc6896a80d1f3cf091d4eeb3063e546d0c4d0a16f39e2f589646cd7",
+   "HP001_E2a_engine_laguna.png": "78073ad5b8b520abec074c5f700274eae3510c105d2ea94ea98fdc9f89af861d",
+   "HP001_E2a_engine_dosel.png": "7539fa1cab6158285beba11fc299328c0e0f1afb8397ad058d4e88ead555af81",
+   "HP001_E2a_engine_dock_closeup.png": "36a9d30586c61bbfcab2a756d7930202b8f3cb8e776bdeda21a75a5214d6146f"
+  },
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS"
  }
 }
