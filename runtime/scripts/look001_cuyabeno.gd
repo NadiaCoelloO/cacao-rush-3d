@@ -25,13 +25,13 @@ const TOTEM_LIGHT_DIM := 0.35
 const MAYA_BODY := Color("8f8578")
 const MAYA_HAIR := Color("6b5a46")
 const MAYA_PACK := Color("8a7358")
-const ONEWAY_SLAB := Color("8a7c64")
+const ONEWAY_SLAB := Color("847866")
 const ONEWAY_CUE := Color("4a3a2a")
-const PLAT_ALBEDO := Color(0.68, 0.63, 0.54)
-## Soft top-edge lift on greybox platforms only (not Maya). Keeps tops in
-## mid-tone when the canopy key puts the strip in shadow.
-const PLAT_EMIT := Color(0.50, 0.46, 0.38)
-const PLAT_EMIT_ENERGY := 0.42
+const PLAT_ALBEDO := Color(0.62, 0.57, 0.48)
+## Soft top-edge lift on greybox platforms only (not Maya). Keep this low —
+## combined with the path lights, 0.4+ reads as white puro.
+const PLAT_EMIT := Color(0.42, 0.38, 0.32)
+const PLAT_EMIT_ENERGY := 0.14
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -356,10 +356,10 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.background_energy_multiplier = 0.55
 	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	_env.ambient_light_color = Color("6a7c74")
-	_env.ambient_light_energy = 0.72
+	_env.ambient_light_energy = 0.62
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.tonemap_exposure = 1.06
+	_env.tonemap_exposure = 1.00
 	_env.ssr_enabled = true
 	_env.ssr_max_steps = 64
 	_env.ssr_fade_in = 0.15
@@ -379,7 +379,7 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.set("glow_levels/6", 0.0)
 	_env.set("glow_levels/7", 0.0)
 	_env.adjustment_enabled = true
-	_env.adjustment_brightness = 1.10
+	_env.adjustment_brightness = 1.06
 	_env.adjustment_contrast = 0.97
 	_env.adjustment_saturation = 0.92
 	_env.volumetric_fog_enabled = true
@@ -414,7 +414,7 @@ func _build_lights(pilot: Node3D) -> void:
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
 	fill.light_color = Color("8a9a88")
-	fill.light_energy = 0.88
+	fill.light_energy = 0.70
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.2
@@ -440,7 +440,7 @@ func _build_lights(pilot: Node3D) -> void:
 	route_fill.name = "LOOK001_FILL_Route"
 	route_fill.position = Vector3(4.2, 3.6, 0.0)
 	route_fill.light_color = Color(1.0, 0.88, 0.70)
-	route_fill.light_energy = 1.7
+	route_fill.light_energy = 1.15
 	route_fill.light_specular = 0.22
 	route_fill.omni_range = 13.0
 	route_fill.omni_attenuation = 0.9
@@ -488,9 +488,9 @@ func _build_lights(pilot: Node3D) -> void:
 	laguna_face.name = "LOOK001_FILL_LagunaFace"
 	laguna_face.position = Vector3(8.5, 2.8, -7.5)
 	laguna_face.light_color = Color(1.0, 0.86, 0.68)
-	laguna_face.light_energy = 1.8
+	laguna_face.light_energy = 1.15
 	laguna_face.light_specular = 0.28
-	laguna_face.omni_range = 14.0
+	laguna_face.omni_range = 11.0
 	laguna_face.omni_attenuation = 1.0
 	laguna_face.light_volumetric_fog_energy = 0.05
 	laguna_face.shadow_enabled = false
@@ -500,7 +500,7 @@ func _build_lights(pilot: Node3D) -> void:
 	path_spot.name = "LOOK001_SPOT_Path"
 	path_spot.position = Vector3(5.3, 7.4, 0.2)
 	path_spot.light_color = Color(1.0, 0.91, 0.76)
-	path_spot.light_energy = 3.4
+	path_spot.light_energy = 1.85
 	path_spot.spot_range = 12.0
 	path_spot.spot_angle = 40.0
 	path_spot.light_specular = 0.45
