@@ -38,10 +38,12 @@ const CACAO_R := Color("a64b36")
 ## Gameplay-cam Maya-only fill (visual layer 2). Scene lights keep default layer 1.
 ## Does not change KEY/FILL/RIM/SPOT energy or fog.
 const MAYA_FOLLOW_LAYER := 2
-const MAYA_BACK_FILL_ENERGY := 0.42
+## Neutral-warm (#FFF4E6): orange (1,0.40,0.12) read hue 18° / sat 0.50 on the back.
+const MAYA_FOLLOW_LIGHT := Color(1.0, 0.957, 0.902)
+const MAYA_BACK_FILL_ENERGY := 0.24
 const MAYA_BACK_FILL_RANGE := 3.0
 const MAYA_BACK_FILL_ATTEN := 1.5
-const MAYA_RIM_ENERGY := 0.12
+const MAYA_RIM_ENERGY := 0.08
 const MAYA_RIM_RANGE := 2.6
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
@@ -290,7 +292,7 @@ func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	# cull_mask = layer 2 only: lights Maya, not floor / canopy / totem.
 	_maya_fill = OmniLight3D.new()
 	_maya_fill.name = "LOOK001_FILL_MayaBack"
-	_maya_fill.light_color = Color(1.0, 0.40, 0.12)
+	_maya_fill.light_color = MAYA_FOLLOW_LIGHT
 	_maya_fill.light_energy = MAYA_BACK_FILL_ENERGY
 	_maya_fill.light_specular = 0.0
 	_maya_fill.omni_range = MAYA_BACK_FILL_RANGE
@@ -303,7 +305,7 @@ func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	player.add_child(_maya_fill)
 	_maya_rim = OmniLight3D.new()
 	_maya_rim.name = "LOOK001_RIM_MayaFollow"
-	_maya_rim.light_color = Color(1.0, 0.38, 0.12)
+	_maya_rim.light_color = MAYA_FOLLOW_LIGHT
 	_maya_rim.light_energy = MAYA_RIM_ENERGY
 	_maya_rim.light_specular = 0.0
 	_maya_rim.omni_range = MAYA_RIM_RANGE
