@@ -23,8 +23,8 @@ const Y_SHIFT := 13.333333
 ## player_maya.gd default kill_y (−3.33) is 80 px under y=0; play overrides it.
 const PIT_KILL_Y := -18.4167
 const MAYA_LAYER := 2
-const COL_EARTH := Color(0.42, 0.30, 0.18)
-const COL_EARTH_LIP := Color(0.50, 0.36, 0.22)
+const COL_EARTH := Color(0.50, 0.36, 0.20)
+const COL_EARTH_LIP := Color(0.58, 0.42, 0.24)
 const COL_WET := Color(0.10, 0.08, 0.06)
 const COL_CRATE := Color(0.36, 0.24, 0.14)
 const COL_CRUMBLE := Color(0.16, 0.11, 0.07)
@@ -215,18 +215,29 @@ func _build_world() -> void:
 	var play := Node3D.new()
 	play.name = "Selva1Geo"
 	_root.add_child(play)
-	# The 40×22.5 side cam sees ~11 m below y=0. P00's 2.7 m depth reads as a
-	# thin lip; fill the lower frame with wet earth so it cannot go black.
+	# The 40×22.5 side cam sees ~11 m below y=0. Blackwater is a y≈0 plane
+	# toward the lens, so P00's 13 m box reads as a thin lip. A +Z fascia
+	# in front of the water (below Maya's feet) keeps the floor wet-earth.
 	var dirt := MeshInstance3D.new()
 	dirt.name = "P00_EarthFill"
 	var dirt_q := QuadMesh.new()
 	dirt_q.size = Vector2(220.0, 22.0)
 	dirt.mesh = dirt_q
-	# Top at y=0, z behind the 2.7 m boxes, so Maya and lips stay in front.
 	dirt.position = Vector3(100.0, -11.0, -1.55)
 	dirt.material_override = _earth(COL_EARTH, 0.9)
 	dirt.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	play.add_child(dirt)
+	var fascia := MeshInstance3D.new()
+	fascia.name = "P00_EarthFascia"
+	var fascia_q := QuadMesh.new()
+	fascia_q.size = Vector2(28.0, 14.0)
+	fascia.mesh = fascia_q
+	# Top at y≈−0.35 so Maya (y≥0) and platform tops stay clear. z=6 sits
+	# between the follow cam (~24) and the water hit, covering P00's face.
+	fascia.position = Vector3(6.67, -7.35, 6.0)
+	fascia.material_override = _earth(COL_EARTH, 0.9)
+	fascia.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	play.add_child(fascia)
 	for raw in _layout["platforms"]:
 		var p: Dictionary = raw
 		var kind := String(p["kind"])
@@ -453,7 +464,7 @@ func _add_rock(visual: Node3D, h: Dictionary) -> MeshInstance3D:
 	mesh.rings = 6
 	mi.mesh = mesh
 	mi.position = _vec(h["center_m"])
-	var mat := _mat(Color(0.42, 0.24, 0.12), 0.78)
+	var mat := _mat(Color(0.52, 0.34, 0.18), 0.78)
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mi.material_override = mat
 	visual.add_child(mi)
@@ -486,14 +497,18 @@ void fragment() {
 	visual.add_child(mi)
 
 
-func _earth(color: Color, rough: float) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = rough
-	mat.metallic = 0.0
-	# Unshaded so P00's tall side face stays wet-earth brown, not a black slab.
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.disable_receive_shadows = true
+func _earth(color: Color, _rough: float) -> ShaderMaterial:
+	# Custom unshaded + fog_disabled: StandardMaterial still takes vol-fog,
+	# which turned P00's tall face into a black slab behind the water plane.
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, fog_disabled, shadows_disabled, cull_disabled;
+uniform vec4 albedo : source_color;
+void fragment() { ALBEDO = albedo.rgb; }
+"""
+	mat.shader = sh
+	mat.set_shader_parameter("albedo", color)
 	return mat
 
 

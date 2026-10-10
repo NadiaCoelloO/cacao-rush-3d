@@ -45,6 +45,7 @@ const PLAT_WET_EDGE := Color(0.16, 0.11, 0.08)
 const PLAT_EMIT := Color(0.22, 0.16, 0.10)
 const PLAT_EMIT_ENERGY := 0.22
 const DOSEL_CARD_LAYER := 10
+const WATER_LAYER := 12
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -113,6 +114,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_grade_hero(pilot)
 	_add_maya_outline(pilot)
 	_attach_maya_follow_fill(pilot)
+	_hide_water_on_follow_cam(pilot)
 	_thicken_canopy()
 	_build_environment(pilot)
 	_build_lights(pilot)
@@ -350,6 +352,9 @@ func _walk_look(n: Node) -> void:
 		if n.name.begins_with("LOOK001_Blackwater"):
 			mi.material_override = WATER_MAT
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			# Follow cam culls this layer so P00's earth face is not a black
+			# water plane. Laguna / dosel / dock still see the lagoon.
+			mi.layers = 1 << (WATER_LAYER - 1)
 		if n.name.begins_with("LOOK001_Totem_Warp"):
 			# Hide baked cone + gold blob (they read as fire from Cam_TotemPods).
 			# Gold shaft rings are rebuilt as greybox in _build_kakaw_pods.
@@ -1012,8 +1017,8 @@ func _build_fog() -> void:
 	var clear := FogVolume.new()
 	clear.name = "LOOK001_PlayableClear"
 	clear.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	clear.size = Vector3(22.0, 6.5, 10.0)
-	clear.position = Vector3(4.8, 2.4, 0.0)
+	clear.size = Vector3(220.0, 10.0, 12.0)
+	clear.position = Vector3(100.0, 3.0, 0.0)
 	var clear_mat := FogMaterial.new()
 	clear_mat.density = -0.24
 	clear_mat.albedo = Color(0.72, 0.75, 0.70)
@@ -1049,6 +1054,42 @@ func _scissor_card(tex: Texture2D, tint: Color, cutoff: float) -> StandardMateri
 	return mat
 
 
+func _hide_water_on_follow_cam(pilot: Node3D) -> void:
+	var play_cam: Camera3D = pilot.get_node_or_null("PlayerMaya/Camera3D") as Camera3D
+	if play_cam:
+		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
+
+
+func _add_cumulus_blobs(hold: Node3D) -> void:
+	# Guaranteed readable puffs if the panorama sample reads as flat haze.
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(0.78, 0.74, 0.62)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.disable_receive_shadows = true
+	for spec in [
+		{"n": "A", "pos": Vector3(-8.5, 7.2, -34.0), "s": Vector3(6.4, 2.1, 2.4)},
+		{"n": "B", "pos": Vector3(-1.2, 8.4, -33.0), "s": Vector3(7.8, 2.4, 2.6)},
+		{"n": "C", "pos": Vector3(7.6, 7.6, -35.0), "s": Vector3(6.8, 2.0, 2.2)},
+		{"n": "D", "pos": Vector3(14.0, 6.4, -36.0), "s": Vector3(5.2, 1.7, 2.0)},
+		{"n": "E", "pos": Vector3(-15.0, 6.0, -36.5), "s": Vector3(5.0, 1.6, 1.8)},
+	]:
+		var mi := MeshInstance3D.new()
+		mi.name = "HP001_Cumulus_%s" % spec["n"]
+		var sph := SphereMesh.new()
+		sph.radius = 0.5
+		sph.height = 1.0
+		sph.radial_segments = 10
+		sph.rings = 6
+		mi.mesh = sph
+		mi.scale = spec["s"]
+		mi.position = spec["pos"]
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		hold.add_child(mi)
+
+
 func _add_card(parent: Node, card_name: String, pos: Vector3, size: Vector2, eul: Vector3, mat: Material) -> MeshInstance3D:
 	# QuadMesh lives in XY and faces +Z. Camera looks down local −Z, so a child
 	# at z<0 with identity rotation faces the lens. PlaneMesh is XZ / +Y and
@@ -1074,12 +1115,13 @@ func _cloud_card_mat() -> ShaderMaterial:
 render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 uniform sampler2D sky : source_color;
 void fragment() {
-	vec2 uv = vec2(fract(UV.x * 1.35 + 0.08), mix(0.42, 0.06, UV.y));
+	// Only the painted cumulus band of jungle-sky (not the dark water half).
+	vec2 uv = vec2(fract(UV.x * 0.72 + 0.04), mix(0.36, 0.02, UV.y));
 	vec3 cloud = texture(sky, uv).rgb;
-	// Play band (lower card) is darker / more saturated so cream Maya ≥4.4:1.
-	float play = smoothstep(0.62, 0.18, UV.y);
-	vec3 dusk = vec3(0.16, 0.24, 0.28);
-	ALBEDO = mix(cloud * vec3(0.48, 0.54, 0.50), dusk, play * 0.72);
+	float play = smoothstep(0.78, 0.22, UV.y);
+	vec3 sat = cloud * vec3(0.62, 0.70, 0.58);
+	vec3 dusk = vec3(0.13, 0.20, 0.24);
+	ALBEDO = mix(sat, mix(sat, dusk, 0.55), play);
 }
 """
 	mat.shader = sh
@@ -1101,27 +1143,31 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	var hold := Node3D.new()
 	hold.name = "HP001_SideFollow"
 	cam.add_child(hold)
-	# Level with the view plane (no extra euler) so the top edge is not a slant.
-	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 4.8, -40.0), Vector2(68.0, 18.0), Vector3.ZERO, _cloud_card_mat())
-	# Unshaded veil so the play band stays dark even if the sky shader fails.
+	var play_cam := cam as Camera3D
+	if play_cam:
+		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
+	# Fill the 40×22.5 view so cumulus is not a postage stamp on the skybox.
+	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 1.4, -38.0), Vector2(78.0, 34.0), Vector3.ZERO, _cloud_card_mat())
 	var dim := StandardMaterial3D.new()
 	dim.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dim.albedo_color = Color(0.18, 0.24, 0.26, 0.42)
+	dim.albedo_color = Color(0.12, 0.18, 0.20, 0.28)
 	dim.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	dim.cull_mode = BaseMaterial3D.CULL_DISABLED
 	dim.disable_receive_shadows = true
-	_add_card(hold, "HP001_PlayDim", Vector3(0.0, 1.2, -36.0), Vector2(72.0, 22.0), Vector3.ZERO, dim)
+	_add_card(hold, "HP001_PlayDim", Vector3(0.0, -0.4, -36.0), Vector2(78.0, 18.0), Vector3.ZERO, dim)
+	_add_cumulus_blobs(hold)
 	if ResourceLoader.exists(HP_SIL_TEX):
 		var tex: Texture2D = load(HP_SIL_TEX)
-		var near_mat := _scissor_card(tex, Color(0.14, 0.18, 0.10), 0.32)
-		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -2.4, -32.0), Vector2(70.0, 7.2), Vector3.ZERO, near_mat)
-		var far_mat := _scissor_card(tex, Color(0.32, 0.36, 0.28), 0.32)
-		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -1.6, -48.0), Vector2(82.0, 8.0), Vector3.ZERO, far_mat)
+		var near_mat := _scissor_card(tex, Color(0.18, 0.24, 0.12), 0.28)
+		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -3.6, -30.0), Vector2(74.0, 6.4), Vector3.ZERO, near_mat)
+		var far_mat := _scissor_card(tex, Color(0.30, 0.36, 0.22), 0.28)
+		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -2.2, -46.0), Vector2(88.0, 7.2), Vector3.ZERO, far_mat)
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var liana: Texture2D = load(HP_LIANA_TEX)
-		var lmat := _scissor_card(liana, Color(0.78, 0.86, 0.62), 0.22)
-		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.32, 0.55, -3.20), Vector2(1.50, 2.40), Vector3.ZERO, lmat)
-		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.58, 0.95, -3.60), Vector2(1.10, 1.70), Vector3.ZERO, lmat)
+		var lmat := _scissor_card(liana, Color(0.70, 0.78, 0.48), 0.18)
+		# Hang from the top-left like the 2D still — outside Maya's hitbox.
+		_add_card(hold, "HP001_FG_Liana_L", Vector3(-1.95, 1.55, -3.35), Vector2(2.35, 4.10), Vector3.ZERO, lmat)
+		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.25, 1.15, -3.85), Vector2(1.70, 3.20), Vector3.ZERO, lmat)
 	# Laguna still keeps a world-space curtain over the water (art camera).
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.78, 0.86, 0.62), 0.22)
@@ -1153,13 +1199,15 @@ func _build_dosel_cap_cards(pilot: Node3D) -> void:
 	var hold := Node3D.new()
 	hold.name = "HP001_DoselCap"
 	cam.add_child(hold)
-	# Level band at the top of the frame only — not a solid black curtain.
+	# Wavy edge at the BOTTOM of a thin fringe (texture flipped on Y) so the
+	# top of Cam_Dosel is a leafy cut, not a solid black bar and not a slant.
 	for spec in [
-		{"n": "C", "pos": Vector3(0.0, 5.15, -10.5), "size": Vector2(16.0, 2.4)},
-		{"n": "L", "pos": Vector3(-5.2, 4.55, -9.2), "size": Vector2(8.0, 2.2)},
-		{"n": "R", "pos": Vector3(5.4, 4.75, -9.6), "size": Vector2(8.5, 2.2)},
+		{"n": "C", "pos": Vector3(0.0, 6.35, -10.2), "size": Vector2(18.0, 2.8)},
+		{"n": "L", "pos": Vector3(-6.4, 6.05, -9.4), "size": Vector2(9.0, 2.4)},
+		{"n": "R", "pos": Vector3(6.6, 6.15, -9.8), "size": Vector2(9.5, 2.5)},
 	]:
 		var mi := _add_card(hold, "HP001_DoselCap_%s" % spec["n"], spec["pos"], spec["size"], Vector3.ZERO, mat)
+		mi.scale.y = -1.0
 		mi.layers = bit
 
 

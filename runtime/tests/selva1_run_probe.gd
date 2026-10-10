@@ -21,6 +21,10 @@ var _deaths := 0
 var _last_lives := 5
 var _air := 0
 var _jump_armed := false
+var _phase := "intro"
+var _did_double := false
+var _repress := 0
+var _wait := 0
 
 
 func _initialize() -> void:
@@ -58,7 +62,9 @@ func _run() -> void:
 			if lives < _last_lives:
 				_deaths += _last_lives - lives
 				_last_lives = lives
-				print("SELVA_RUN death n=%d lives=%d feet=%s" % [_deaths, lives, _p.global_position])
+				print("SELVA_RUN death n=%d lives=%d phase=%s feet=%s" % [
+					_deaths, lives, _phase, _p.global_position
+				])
 			if lives <= 0 and String(_play.get("_status")) == "over":
 				print("SELVA_RUN FAIL game_over ticks=%d far_x=%.2f feet=%s deaths=%d goal=0" % [
 					tick, _far_x, _p.global_position, _deaths
@@ -85,14 +91,58 @@ func _run() -> void:
 			quit(0)
 			return
 		if (tick < 1800 and tick % 120 == 119) or tick % 600 == 599:
-			print("SELVA_RUN progress t=%.1f x=%.2f y=%.2f far=%.2f stuck=%d hang=%s lives=%s" % [
-				tick / 60.0, x, _p.global_position.y, _far_x, _stuck,
+			print("SELVA_RUN progress t=%.1f x=%.2f y=%.2f far=%.2f phase=%s stuck=%d hang=%s lives=%s" % [
+				tick / 60.0, x, _p.global_position.y, _far_x, _phase, _stuck,
 				str(_p.get("_hanging")), str(_play.get("_lives")) if _play else "?"
 			])
 	print("SELVA_RUN FAIL ticks=%d far_x=%.2f feet=%s deaths=%d goal=0" % [
 		MAX_TICKS, _far_x, _p.global_position, _deaths
 	])
 	quit(1)
+
+
+func _advance_phase(x: float, y: float, on: bool) -> void:
+	# Only retarget on the floor so a mid-air jump cannot change the script.
+	if not on:
+		return
+	if x < 20.0 and y < 4.0:
+		_phase = "intro"
+	elif x < 52.4 and y < 8.5:
+		_phase = "p04"
+	elif x < 63.4 and y < 5.0:
+		_phase = "crawl"
+	elif x < 81.5 and y < 10.0:
+		_phase = "spikes"
+	elif x < 91.2 and y < 12.0:
+		_phase = "frog"
+	elif x < 101.0:
+		_phase = "column"
+	elif x < 114.8 and y < 8.0:
+		_phase = "squeeze"
+	elif x < 127.5:
+		_phase = "lift"
+	elif x < 149.0:
+		_phase = "wind"
+	elif x < 160.0:
+		_phase = "frog2"
+	elif x < 184.0:
+		_phase = "ride"
+	else:
+		_phase = "goal"
+	if on:
+		_did_double = false
+
+
+func _pulse_double() -> float:
+	# just_pressed is required for the second jump. Hold, release 2 frames, repress.
+	if _repress > 0:
+		_repress -= 1
+		return 0.0 if _repress > 0 else 1.0
+	if (not _p.is_on_floor()) and _air > 16 and _p.velocity.y < 0.0 and not _did_double:
+		_did_double = true
+		_repress = 2
+		return 0.0
+	return 1.0
 
 
 func _plan() -> Vector3:
@@ -105,73 +155,121 @@ func _plan() -> Vector3:
 		_air = 0
 	else:
 		_air += 1
+	_advance_phase(x, y, on)
 
-	# Mantle: let the 0.28 s pull-up finish. Jump-from-hang kicks backward.
 	if hanging:
 		_jump_armed = false
 		return Vector3(0.0, 0.0, 0.0)
 
-	# P04 (moving, top ≈ 4): walk to P02's lip, hop when the deck overlaps,
-	# ride it right, then jump to P05 (50.67).
-	if x > 24.0 and x < 52.5 and y < 8.5:
-		var m := _nearest_mover(x, y)
-		if not on and x > 34.0:
-			_jump_armed = true
-			return Vector3(1.0, 1.0, 0.0)
-		if y < 3.15:
-			var under := m.x < 0.8 and m.y > x + 0.5
-			if under:
+	match _phase:
+		"intro":
+			# Full-hold first jump from ~11.9 lands on P02. No double — that overshoots.
+			if on and x > 11.7:
 				_jump_armed = true
-				return Vector3(0.0, 1.0, 0.0)
-			_jump_armed = false
-			if x < 27.6:
-				return Vector3(1.0, 0.0, 0.0)
-			return Vector3(0.0, 0.0, 0.0)
-		if x > 43.6:
-			_jump_armed = true
-			return Vector3(1.0, 1.0, 0.0)
-		return Vector3(1.0, 0.0, 0.0)
-
-	# After the crawl, stay ducked until the body clears P06 (right 62.67 + 0.54).
-	# Double-jump the spikes, then release so we land on P09 past frog H01 (84.4).
-	if x > 61.8 and x < 96.0 and y < 16.0:
-		var duck := x < 63.35 and y < 4.0
-		if duck:
+			elif not on:
+				_jump_armed = true
+			else:
+				_jump_armed = false
+			return Vector3(1.0, 1.0 if _jump_armed else 0.0, 0.0)
+		"p04":
+			var m := _nearest_mover(x, y)
+			if not on and x > 34.0:
+				return Vector3(1.0, 1.0, 0.0)
+			if y < 3.15:
+				var under := m.x < 0.8 and m.y > x + 0.5
+				if under:
+					return Vector3(0.0, 1.0, 0.0)
+				if x < 27.6:
+					return Vector3(1.0, 0.0, 0.0)
+				return Vector3(0.0, 0.0, 0.0)
+			if x > 43.6:
+				return Vector3(1.0, 1.0, 0.0)
+			# Hop the K00 pole (saves spawn) before the crawl lip.
+			if on and x > 51.8 and x < 53.1:
+				return Vector3(1.0, 1.0, 0.0)
+			return Vector3(1.0, 0.0, 0.0)
+		"crawl":
 			return Vector3(1.0, 0.0, 1.0)
-		var hop := x > 63.95 or not on
-		if (not on) and _air > 18 and _p.velocity.y < 0.0 and x < 82.0 and _held:
-			hop = false
-		if x > 84.0:
-			hop = false
-		return Vector3(1.0, 1.0 if hop else 0.0, 0.0)
-
-	var crouch := _in_low_cover(x)
-	var jump := false
-	var move := 1.0
-
-	if on:
-		var mount := _higher_ahead(x, y)
-		var wait := _mover_too_far(x, y)
-		if wait and mount < 0.0:
-			move = 0.0
-			_jump_armed = false
-		elif mount >= 0.0 and mount < 3.2:
-			# Walk under a higher deck (P04) and hop up — a running 8 m jump overshoots.
-			move = 0.0 if mount < 1.4 else 1.0
-			_jump_armed = mount < 2.0
-		else:
-			_jump_armed = (not crouch) and (_gap_ahead(x, y) or _hazard_hop(x, y) or _stuck > 40)
-		jump = _jump_armed
-	else:
-		# Hold the whole airtime. Releasing cuts vy and shortens the jump.
-		jump = _jump_armed
-
-	if _stuck > 90 and _stuck < 120:
-		move = -1.0
-	if crouch:
-		jump = false
-		_jump_armed = false
-	return Vector3(move, 1.0 if jump else 0.0, 1.0 if crouch else 0.0)
+		"spikes":
+			# Clear H00, land on P08, then a short hop onto P09 past H01 (84.4).
+			if y < 4.2 and x < 70.5:
+				var hop := (on and x > 63.95) or not on
+				if hop and not on:
+					return Vector3(1.0, _pulse_double(), 0.0)
+				return Vector3(1.0, 1.0 if hop else 0.0, 0.0)
+			if on and x > 76.8 and x < 79.0 and y > 4.5:
+				_did_double = false
+				return Vector3(1.0, 1.0, 0.0)
+			if not on and x < 86.2:
+				# Hold until we are past the frog, then cut so we do not fly the P09/P11 gap.
+				return Vector3(1.0, 1.0 if x < 85.4 else 0.0, 0.0)
+			return Vector3(1.0, 0.0, 0.0)
+		"frog":
+			# Stand on P09 right of H01, double-jump onto P11 (top 14.67).
+			if on and x < 87.6:
+				return Vector3(1.0, 0.0, 0.0)
+			if on and x >= 87.6:
+				_did_double = false
+				return Vector3(1.0, 1.0, 0.0)
+			return Vector3(1.0, _pulse_double() if x < 96.5 else 0.0, 0.0)
+		"column":
+			if on and y > 12.0 and x < 96.8:
+				return Vector3(1.0, 0.0, 0.0)
+			if on and y > 12.0:
+				return Vector3(1.0, 1.0, 0.0)
+			if not on:
+				return Vector3(1.0, 1.0 if _p.velocity.y > 0.0 else 0.0, 0.0)
+			return Vector3(1.0, 0.0, 0.0)
+		"squeeze":
+			var duck := x < 113.2 and y < 4.2
+			if duck:
+				return Vector3(1.0, 0.0, 1.0)
+			return Vector3(1.0, 0.0, 0.0)
+		"lift":
+			var m2 := _nearest_mover(x, y)
+			var left := m2.x
+			var right := m2.y
+			if y < 8.0:
+				if left >= 0.0 and left < 3.4:
+					return Vector3(1.0 if left > 0.4 else 0.0, 1.0, 0.0)
+				if left > 3.4:
+					return Vector3(0.0, 0.0, 0.0)
+				return Vector3(1.0, 0.0, 0.0)
+			if y < 15.4:
+				var go := 1.0 if x < (right - 1.2) else 0.0
+				return Vector3(go, 0.0, 0.0)
+			return Vector3(1.0, 1.0, 0.0)
+		"wind":
+			if on and x > 136.6:
+				return Vector3(1.0, 1.0, 0.0)
+			if not on:
+				return Vector3(1.0, 1.0 if _p.velocity.y > 2.0 else 0.0, 0.0)
+			return Vector3(1.0, 0.0, 0.0)
+		"frog2":
+			# P16 → P17, land right of H02 (151.0).
+			if on and x < 146.4:
+				return Vector3(1.0, 0.0, 0.0)
+			if on:
+				_did_double = false
+				return Vector3(1.0, 1.0, 0.0)
+			return Vector3(1.0, 1.0 if x < 154.2 else 0.0, 0.0)
+		"ride":
+			if y < 12.8 and x < 166.5:
+				if on and x > 157.6:
+					return Vector3(1.0, 1.0, 0.0)
+				if not on:
+					return Vector3(1.0, 1.0 if x < 164.0 else 0.0, 0.0)
+				return Vector3(1.0, 0.0, 0.0)
+			var m3 := _nearest_mover(x, y)
+			if y < 14.0 and m3.x > 3.6:
+				return Vector3(0.0, 0.0, 0.0)
+			if on and x > 176.8:
+				return Vector3(1.0, 1.0, 0.0)
+			if not on and x > 166.0:
+				return Vector3(1.0, 1.0 if x < 182.0 else 0.0, 0.0)
+			return Vector3(1.0, 0.0, 0.0)
+		_:
+			return Vector3(1.0, 0.0, 0.0)
 
 
 func _in_low_cover(x: float) -> bool:
