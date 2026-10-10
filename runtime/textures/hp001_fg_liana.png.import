@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhp001fgliana"
-path="res://.godot/imported/hp001_fg_liana.png-e2e003.ctex"
+path="res://.godot/imported/hp001_fg_liana.png-a7c484651b7f2e2da03ea08e5934901a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://textures/hp001_fg_liana.png"
-dest_files=["res://.godot/imported/hp001_fg_liana.png-e2e003.ctex"]
+dest_files=["res://.godot/imported/hp001_fg_liana.png-a7c484651b7f2e2da03ea08e5934901a.ctex"]
 
 [params]
 

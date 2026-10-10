@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhp001junglesky2d"
-path="res://.godot/imported/hp001_jungle_sky_2d.jpg-e2e001.ctex"
+uid="uid://5oj3hku57kir"
+path="res://.godot/imported/hp001_jungle_sky_2d.jpg-4f753b980a77c61f6d51062e5439818c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://textures/hp001_jungle_sky_2d.jpg"
-dest_files=["res://.godot/imported/hp001_jungle_sky_2d.jpg-e2e001.ctex"]
+dest_files=["res://.godot/imported/hp001_jungle_sky_2d.jpg-4f753b980a77c61f6d51062e5439818c.ctex"]
 
 [params]
 

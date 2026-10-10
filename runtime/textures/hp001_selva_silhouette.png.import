@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhp001selvasil"
-path="res://.godot/imported/hp001_selva_silhouette.png-e2e004.ctex"
+uid="uid://c2xb4762781wx"
+path="res://.godot/imported/hp001_selva_silhouette.png-a9910cbabf2f1f66e99a3b49926b3614.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://textures/hp001_selva_silhouette.png"
-dest_files=["res://.godot/imported/hp001_selva_silhouette.png-e2e004.ctex"]
+dest_files=["res://.godot/imported/hp001_selva_silhouette.png-a9910cbabf2f1f66e99a3b49926b3614.ctex"]
 
 [params]
 

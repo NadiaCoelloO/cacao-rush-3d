@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhp001cumulusband"
-path="res://.godot/imported/hp001_cumulus_band.jpg-e2e002.ctex"
+uid="uid://5hj2vlc5wt3r"
+path="res://.godot/imported/hp001_cumulus_band.jpg-2b73990ee6f55da4fa01575b40d5021a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://textures/hp001_cumulus_band.jpg"
-dest_files=["res://.godot/imported/hp001_cumulus_band.jpg-e2e002.ctex"]
+dest_files=["res://.godot/imported/hp001_cumulus_band.jpg-2b73990ee6f55da4fa01575b40d5021a.ctex"]
 
 [params]
 
