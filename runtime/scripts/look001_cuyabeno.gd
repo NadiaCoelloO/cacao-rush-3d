@@ -181,6 +181,13 @@ func capture_still(shot: String, out_path: String) -> void:
 	vp.size = Vector2i(1920, 1080)
 	DisplayServer.window_set_size(Vector2i(1920, 1080))
 	force_lod0()
+	# Laguna / dosel / dock / pods / cmp_bg are art cameras. Hide the 200 m
+	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
+	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
+	if shot != "gameplay":
+		var geo: Node = get_parent().get_node_or_null("WorldRoot/Selva1Geo")
+		if geo:
+			geo.visible = false
 	var hud := get_parent().get_node_or_null("UI")
 	if hud:
 		hud.visible = false
