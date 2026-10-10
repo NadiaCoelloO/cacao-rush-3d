@@ -1032,5 +1032,97 @@
   },
   "2d_source": "https://raw.githubusercontent.com/NadiaCoelloO/Cacao.Game/main/public/game/maps/jungle-sky.jpg",
   "2d_source_note": "sand-vivid-dawn-sail @ 5fd45031 returned 404; Cacao.Game main used (identical jungle-sky)."
+ },
+ "e2c": {
+  "pass": "E2c",
+  "note": "Full selva-1 1:1 (Cacao.Game; sand-vivid 404) + 40x22.5 camera + real 2D/3D cmp. Art cameras hide Selva1Geo.",
+  "source": "NadiaCoelloO/Cacao.Game levels.ts/sim.ts selva-1",
+  "source_requested": "NadiaCoelloO/sand-vivid-dawn-sail@5fd45031 (404)",
+  "platforms": 21,
+  "hazards": 6,
+  "pickups": 24,
+  "checkpoints": 2,
+  "goal": 1,
+  "p01_top_m": 6.6667,
+  "camera_offset": [
+   0.0,
+   1.0,
+   24.1256
+  ],
+  "view_m_measured": [
+   40.0342,
+   22.547
+  ],
+  "maya_px_at_720p": 55.68,
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS (constants + instantiated pilot_cuyabeno.tscn)",
+  "selva_check": "platforms=21 hazards=6 pickups=24 checks=2 goal=1",
+  "player_maya_gd": "untouched",
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 109037,
+    "draw_calls": 190
+   },
+   "laguna": {
+    "primitives": 100554,
+    "draw_calls": 141
+   },
+   "dosel": {
+    "primitives": 234869,
+    "draw_calls": 193
+   },
+   "dock": {
+    "primitives": 71275,
+    "draw_calls": 79
+   },
+   "pods": {
+    "primitives": 81472,
+    "draw_calls": 83
+   },
+   "cmp_bg": {
+    "primitives": 120966,
+    "draw_calls": 62
+   }
+  },
+  "selva_capture_perf": {
+   "entrance": {
+    "primitives": 44757,
+    "draw_calls": 84
+   },
+   "hazard": {
+    "primitives": 5480,
+    "draw_calls": 42
+   },
+   "cacao": {
+    "primitives": 4346,
+    "draw_calls": 42
+   }
+  },
+  "uhd_vram_mb": 147,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "captures": {
+   "3d_entrance.png": "0268a7876740fc903671855af1e1794c95001179da1dcdcb120285740579e4fe",
+   "3d_hazard.png": "743370b1de6aaa02ef8d73187dcca8275c9ef7ebc26885e5a003e6abc4df01d8",
+   "3d_cacao.png": "e3b7ece05a6507afada8bb3973b4b5c1f99b0eab72911a256d27cf6cf86f6bfd",
+   "2d_entrance.png": "da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39",
+   "2d_hazard.png": "e7350d1c326b25d6f929b7ee5d263071010ce49b7a9d454025e505c2f35d1fd0",
+   "2d_cacao.png": "497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598",
+   "cmp_cuyabeno_2d_3d.png": "4ebc36a30197cfdc997c27045e77a79b83c223be6945037bd4177c6e4c7228a1",
+   "HP001_E2c_engine_gameplay.png": "ddc3c6aaa85e1ad6cc3c5f84f0cd0bb607b2915f8d60600f1af8f3f6ef8bc153",
+   "HP001_E2c_engine_laguna.png": "6b5ecc523b05762c9a1423bbaa421afeaecc8c9b748fedd5468bca4a0938f37c",
+   "HP001_E2c_engine_dosel.png": "e6c2daa60c92137738910d16147e1e0c36fc9db4416c58e680a0d7990fd205c7",
+   "HP001_E2c_engine_dock_closeup.png": "c1c2bc660a19977b926e3fb93e3eab29d107de02f5ed2e2e5fce257408169b88",
+   "HP001_E2c_engine_totem_pods_v4.png": "791a727f247d1af2ed42ebf10187ac0c2ac0085534798de89124dff1f7a1469f",
+   "HP001_E2c_engine_cmp_bg.png": "f5ece443287daf62a7e166bfce2ad2f01ffe7293339628867b6909dc15bba803"
+  },
+  "textures": {
+   "hp001_cuyabeno_sky_2k.png": "5bb9b19567cec3f1131e4121b73a0b59722e9f1350abbd12a0b6995144edbeb3",
+   "hp001_selva_silhouette.png": "0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157",
+   "hp001_fg_liana.png": "c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90",
+   "hp001_jungle_sky_2d.jpg": "1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac"
+  }
  }
 }
