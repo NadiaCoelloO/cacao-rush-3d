@@ -4,7 +4,7 @@
 Maya: samples 3d_x*.png sweep (8 x along selva-1) plus entrance/hazard/cacao.
 Body vs immediate non-Maya neighbors (play-jungle band). Outline vs dawn/wind.
 Cacao: HP001_*_engine_totem_pods*.png pods vs their neighbors.
-Does not change pixels.
+Does not change pixels. Numpy so a 1280×720 scan finishes in milliseconds.
 """
 from __future__ import annotations
 
@@ -12,30 +12,32 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 from PIL import Image
 
 DOCS = Path(__file__).resolve().parents[1] / "docs" / "hp001"
 
 SWEEP = [
-    ("3d_x04.png", None),
-    ("3d_x36.png", None),
-    ("3d_x66.png", None),
-    ("3d_x87.png", None),
-    ("3d_x95.png", None),
-    ("3d_x133.png", None),
-    ("3d_x163.png", None),
-    ("3d_x193.png", None),
+    ("3d_x04.png", 4.54),
+    ("3d_x36.png", 36.0),
+    ("3d_x66.png", 66.0),
+    ("3d_x87.png", 86.67),
+    ("3d_x95.png", 95.33),
+    ("3d_x133.png", 133.33),
+    ("3d_x163.png", 162.67),
+    ("3d_x193.png", 193.33),
 ]
 
 
-def lin(c: float) -> float:
+def lin(c: np.ndarray) -> np.ndarray:
     c = c / 255.0
-    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
 
 
 def rel_lum(rgb) -> float:
-    r, g, b = rgb[:3]
-    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+    r, g, b = (float(x) for x in rgb[:3])
+    arr = lin(np.array([r, g, b], dtype=np.float64))
+    return float(0.2126 * arr[0] + 0.7152 * arr[1] + 0.0722 * arr[2])
 
 
 def wcag(a, b) -> float:
@@ -44,190 +46,190 @@ def wcag(a, b) -> float:
     return (hi + 0.05) / (lo + 0.05)
 
 
-def median_rgb(samples: list[tuple[int, int, int]]) -> tuple[int, int, int]:
-    if not samples:
+def median_rgb(samples: np.ndarray) -> tuple[int, int, int]:
+    if samples.size == 0:
         return (0, 0, 0)
-    rs = sorted(p[0] for p in samples)
-    gs = sorted(p[1] for p in samples)
-    bs = sorted(p[2] for p in samples)
-    mid = len(samples) // 2
-    return (rs[mid], gs[mid], bs[mid])
+    return tuple(int(x) for x in np.median(samples, axis=0))
 
 
-def is_cream(rgb) -> bool:
-    r, g, b = rgb[:3]
-    if r < 95 or r > 210 or g < 80 or g > 195 or b < 60 or b > 175:
-        return False
-    if r < g + 4 or r < b:
-        return False
-    mx, mn = max(r, g, b), min(r, g, b)
-    if mx - mn < 12:
-        return False
-    return 0.70 * r <= g <= 1.05 * r and 0.50 * r <= b <= 0.95 * r
+def cream_mask(im: np.ndarray) -> np.ndarray:
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    mx = np.maximum(np.maximum(r, g), b)
+    mn = np.minimum(np.minimum(r, g), b)
+    return (
+        (r >= 130)
+        & (r <= 215)
+        & (g >= 100)
+        & (g <= 185)
+        & (b >= 70)
+        & (b <= 140)
+        & (r >= g + 8)
+        & (r >= b + 10)
+        & ((mx - mn) >= 20)
+        & (g >= (0.68 * r))
+        & (g <= (0.98 * r))
+        & (b >= (0.42 * r))
+        & (b <= (0.72 * r))
+    )
 
 
-def is_outline(rgb) -> bool:
-    r, g, b = rgb[:3]
-    if r > 70 or g > 55 or b > 48:
-        return False
-    return r >= g >= b and r + g + b < 150
+def outline_mask(im: np.ndarray) -> np.ndarray:
+    r = im[:, :, 0]
+    g = im[:, :, 1]
+    b = im[:, :, 2]
+    return (r <= 70) & (g <= 55) & (b <= 48) & (r >= g) & (g >= b) & ((r.astype(np.int16) + g + b) < 150)
 
 
-def is_platform(rgb) -> bool:
-    r, g, b = rgb[:3]
-    return r < 95 and g < 75 and b < 60 and r > 28 and abs(r - 2 * b) < 40
+def platform_mask(im: np.ndarray) -> np.ndarray:
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    return (r < 95) & (g < 75) & (b < 60) & (r > 28) & (np.abs(r - 2 * b) < 40)
 
 
-def is_sky_or_wind(rgb) -> bool:
-    r, g, b = rgb[:3]
-    if r < 130 or g < 100 or b < 50:
-        return False
-    return r >= g - 6 and g >= b - 8 and r + g + b > 300
+def sky_mask(im: np.ndarray) -> np.ndarray:
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    return (r >= 130) & (g >= 100) & (b >= 50) & (r >= g - 6) & (g >= b - 8) & ((r + g + b) > 300)
 
 
-def is_cacao(rgb) -> bool:
-    r, g, b = rgb[:3]
-    if r < 140 or r < g + 8:
-        return False
-    if g < 40 or b > 120:
-        return False
-    return r - b > 40 and r > 150
+def cacao_mask(im: np.ndarray) -> np.ndarray:
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    return (r >= 140) & (r >= g + 8) & (g >= 40) & (b <= 120) & ((r - b) > 40) & (r > 150)
 
 
-def measure_maya(path: Path, region=None) -> dict:
-    im = Image.open(path).convert("RGB")
-    w, h = im.size
-    px = im.load()
-    x0, y0, x1, y1 = region if region else (0, 0, w, h)
-    cream = []
-    for y in range(y0, y1):
-        for x in range(x0, x1):
-            if is_cream(px[x, y]):
-                cream.append((x, y, px[x, y]))
-    if len(cream) > 400:
-        best = []
-        step = 8
-        for cy in range(y0, y1, step):
-            for cx in range(x0, x1, step):
-                bunch = [p for p in cream if abs(p[0] - cx) < 28 and abs(p[1] - cy) < 40]
-                if len(bunch) > len(best) and 20 < len(bunch) < 900:
-                    best = bunch
-        if best:
-            cream = best
-    if len(cream) < 12:
-        return {"file": path.name, "error": "maya body not found", "cream_n": len(cream)}
-    xs = [p[0] for p in cream]
-    ys = [p[1] for p in cream]
-    body_rgb = [p[2] for p in cream]
-    outline_rgb = []
-    body_bg = []
-    outline_bg = []
-    for x, y, _ in cream:
-        for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-3, -1), (3, 1), (-1, 3), (1, -3)):
-            nx, ny = x + dx, y + dy
-            if not (0 <= nx < w and 0 <= ny < h):
-                continue
-            rgb = px[nx, ny]
-            if is_outline(rgb):
-                outline_rgb.append(rgb)
-            elif not is_cream(rgb) and not is_platform(rgb):
-                body_bg.append(rgb)
-    for y in range(max(y0, int(min(ys)) - 12), min(y1, int(max(ys)) + 13)):
-        for x in range(max(x0, int(min(xs)) - 12), min(x1, int(max(xs)) + 13)):
-            rgb = px[x, y]
-            if is_cream(rgb) or is_outline(rgb) or is_platform(rgb):
-                continue
-            if min(abs(x - min(xs)), abs(x - max(xs)), abs(y - min(ys)), abs(y - max(ys))) <= 12:
-                if is_sky_or_wind(rgb):
-                    outline_bg.append(rgb)
-                else:
-                    body_bg.append(rgb)
-    if len(outline_bg) < 16:
-        for rad in (16, 22):
-            for y in range(max(y0, int(min(ys)) - rad), min(y1, int(max(ys)) + rad + 1)):
-                for x in range(max(x0, int(min(xs)) - rad), min(x1, int(max(xs)) + rad + 1)):
-                    rgb = px[x, y]
-                    if is_sky_or_wind(rgb):
-                        outline_bg.append(rgb)
-            if len(outline_bg) >= 16:
-                break
+def densest_window(mask: np.ndarray, ww: int, hh: int, lo: int, hi: int) -> np.ndarray:
+    h, w = mask.shape
+    integral = np.pad(mask.astype(np.int32), ((1, 0), (1, 0))).cumsum(0).cumsum(1)
+    best_n = -1
+    best = (0, 0, w, h)
+    step_y = max(1, hh // 4)
+    step_x = max(1, ww // 4)
+    for y0 in range(0, max(1, h - hh + 1), step_y):
+        y1 = min(h, y0 + hh)
+        for x0 in range(0, max(1, w - ww + 1), step_x):
+            x1 = min(w, x0 + ww)
+            n = int(integral[y1, x1] - integral[y0, x1] - integral[y1, x0] + integral[y0, x0])
+            if lo < n < hi and n > best_n:
+                best_n = n
+                best = (x0, y0, x1, y1)
+    out = np.zeros_like(mask)
+    if best_n > 0:
+        x0, y0, x1, y1 = best
+        out[y0:y1, x0:x1] = mask[y0:y1, x0:x1]
+        return out
+    return mask
+
+
+def neighbor_ring(mask: np.ndarray, rad: int) -> np.ndarray:
+    from numpy.lib.stride_tricks import sliding_window_view
+
+    h, w = mask.shape
+    pad = np.pad(mask, rad, mode="constant", constant_values=False)
+    win = sliding_window_view(pad, (2 * rad + 1, 2 * rad + 1))
+    near = win.any(axis=(-1, -2))
+    return near & ~mask
+
+
+def measure_maya(path: Path, x_m=None) -> dict:
+    im = np.array(Image.open(path).convert("RGB"))
+    cream = cream_mask(im)
+    n_cream = int(cream.sum())
+    if n_cream > 400:
+        cream = densest_window(cream, 56, 80, 20, 900)
+        n_cream = int(cream.sum())
+    if n_cream < 12:
+        return {"file": path.name, "x_m": x_m, "error": "maya body not found", "cream_n": n_cream}
+    ys, xs = np.where(cream)
+    body_rgb = im[cream]
+    outline = outline_mask(im)
+    plat = platform_mask(im)
+    sky = sky_mask(im)
+    near = neighbor_ring(cream, 3)
+    outline_rgb = im[near & outline]
+    body_bg = im[near & ~cream & ~outline & ~plat]
+    ring = neighbor_ring(cream, 12)
+    outline_bg = im[ring & sky]
+    extra_body = im[ring & ~cream & ~outline & ~plat & ~sky]
+    if extra_body.size:
+        body_bg = extra_body if body_bg.size == 0 else np.concatenate([body_bg, extra_body], axis=0)
+    if outline_bg.shape[0] < 16:
+        ring2 = neighbor_ring(cream, 22)
+        outline_bg = im[ring2 & sky]
     body = median_rgb(body_rgb)
-    outline = median_rgb(outline_rgb) if outline_rgb else (18, 12, 8)
-    bg_body = median_rgb(body_bg) if body_bg else (200, 190, 150)
-    bg_out = median_rgb(outline_bg) if outline_bg else bg_body
+    ol = median_rgb(outline_rgb) if outline_rgb.size else (18, 12, 8)
+    bg_body = median_rgb(body_bg) if body_bg.size else (200, 190, 150)
+    bg_out = median_rgb(outline_bg) if outline_bg.size else bg_body
+    br = wcag(body, bg_body)
+    o_r = wcag(ol, bg_out)
     return {
         "file": path.name,
-        "cream_n": len(cream),
-        "outline_n": len(outline_rgb),
-        "body_bg_n": len(body_bg),
-        "center_px": [round(sum(xs) / len(xs), 1), round(sum(ys) / len(ys), 1)],
+        "x_m": x_m,
+        "cream_n": n_cream,
+        "outline_n": int(outline_rgb.shape[0]) if outline_rgb.size else 0,
+        "body_bg_n": int(body_bg.shape[0]) if body_bg.size else 0,
+        "center_px": [round(float(xs.mean()), 1), round(float(ys.mean()), 1)],
         "body_rgb": list(body),
         "body_bg_rgb": list(bg_body),
-        "outline_rgb": list(outline),
+        "outline_rgb": list(ol),
         "outline_bg_rgb": list(bg_out),
-        "body_ratio": round(wcag(body, bg_body), 2),
-        "outline_ratio": round(wcag(outline, bg_out), 2),
-        "body_pass": wcag(body, bg_body) >= 4.4,
-        "outline_pass": wcag(outline, bg_out) >= 4.4,
+        "body_ratio": round(br, 2),
+        "outline_ratio": round(o_r, 2),
+        "body_pass": br >= 4.4,
+        "outline_pass": o_r >= 4.4,
     }
 
 
 def measure_cacao(path: Path) -> dict:
-    im = Image.open(path).convert("RGB")
-    w, h = im.size
-    px = im.load()
-    pods = []
-    for y in range(h):
-        for x in range(w):
-            if is_cacao(px[x, y]):
-                pods.append((x, y, px[x, y]))
-    if len(pods) < 20:
-        return {"file": path.name, "error": "cacao pods not found", "pod_n": len(pods)}
-    if len(pods) > 800:
-        best = []
-        for cy in range(0, h, 10):
-            for cx in range(0, w, 10):
-                bunch = [p for p in pods if abs(p[0] - cx) < 36 and abs(p[1] - cy) < 48]
-                if len(bunch) > len(best) and 30 < len(bunch) < 1200:
-                    best = bunch
-        if best:
-            pods = best
-    xs = [p[0] for p in pods]
-    ys = [p[1] for p in pods]
-    pod_rgb = [p[2] for p in pods]
-    bg = []
-    for x, y, _ in pods:
-        for dx, dy in ((-3, 0), (3, 0), (0, -3), (0, 3), (-4, -2), (4, 2)):
-            nx, ny = x + dx, y + dy
-            if 0 <= nx < w and 0 <= ny < h:
-                rgb = px[nx, ny]
-                if not is_cacao(rgb):
-                    bg.append(rgb)
+    im = np.array(Image.open(path).convert("RGB"))
+    pods = cacao_mask(im)
+    n = int(pods.sum())
+    if n < 20:
+        return {"file": path.name, "error": "cacao pods not found", "pod_n": n}
+    if n > 800:
+        pods = densest_window(pods, 72, 96, 30, 1200)
+        n = int(pods.sum())
+    ys, xs = np.where(pods)
+    pod_rgb = im[pods]
+    near = neighbor_ring(pods, 4)
+    bg = im[near & ~pods]
     pod = median_rgb(pod_rgb)
-    bgm = median_rgb(bg) if bg else (20, 16, 10)
+    bgm = median_rgb(bg) if bg.size else (20, 16, 10)
+    ratio = wcag(pod, bgm)
     return {
         "file": path.name,
-        "pod_n": len(pods),
-        "center_px": [round(sum(xs) / len(xs), 1), round(sum(ys) / len(ys), 1)],
+        "pod_n": n,
+        "center_px": [round(float(xs.mean()), 1), round(float(ys.mean()), 1)],
         "pod_rgb": list(pod),
         "bg_rgb": list(bgm),
-        "ratio": round(wcag(pod, bgm), 2),
-        "pass": wcag(pod, bgm) >= 4.4,
+        "ratio": round(ratio, 2),
+        "pass": ratio >= 4.4,
     }
 
 
 def main() -> int:
     maya = []
-    files = [(DOCS / n, r) for n, r in SWEEP]
-    for extra in ("3d_entrance.png", "3d_hazard.png", "3d_cacao.png"):
-        p = DOCS / extra
-        if p.exists() and p not in [f for f, _ in files]:
-            files.append((p, None))
-    for path, region in files:
+    files = [(DOCS / n, x) for n, x in SWEEP]
+    extras = {
+        "3d_entrance.png": 4.54,
+        "3d_hazard.png": 133.33,
+        "3d_cacao.png": 65.88,
+    }
+    seen = {p.name for p, _ in files}
+    for name, x in extras.items():
+        p = DOCS / name
+        if p.exists() and name not in seen:
+            files.append((p, x))
+    for path, x_m in files:
         if not path.exists():
-            maya.append({"file": path.name, "error": "missing"})
+            maya.append({"file": path.name, "x_m": x_m, "error": "missing"})
             continue
-        maya.append(measure_maya(path, region))
+        maya.append(measure_maya(path, x_m))
     cacao = []
     for p in sorted(DOCS.glob("HP001_*engine_totem_pods*.png")):
         cacao.append(measure_cacao(p))

@@ -1240,6 +1240,7 @@ func _play_jungle_mat() -> ShaderMaterial:
 	# Mid-jungle play band: desaturated olive / dark brown, foliage mottling,
 	# warm haze only on the irregular crown. Opaque in the play strip so the
 	# clear color never shows. No disk on Maya — this IS the body backdrop.
+	# QuadMesh UV.y = 0 is the TOP of the card (Godot 4).
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
@@ -1248,31 +1249,39 @@ uniform sampler2D sil : source_color;
 void fragment() {
 	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	float par = eye.x * 0.010;
-	float u = fract(UV.x * 1.85 + par);
-	float u2 = fract(UV.x * 1.85 + par + 0.37);
-	float wrap = smoothstep(0.0, 0.10, u) * smoothstep(1.0, 0.90, u);
-	vec3 s1 = texture(sil, vec2(u, mix(0.08, 0.92, UV.y))).rgb;
-	vec3 s2 = texture(sil, vec2(u2, mix(0.08, 0.92, fract(UV.y * 0.7 + 0.15)))).rgb;
+	float vx = UV.x;
+	float vy = UV.y;
+	float u = fract(vx * 1.85 + par);
+	float u2 = fract(vx * 1.85 + par + 0.37);
+	float wrap = smoothstep(0.0, 0.12, u) * smoothstep(1.0, 0.88, u);
+	vec3 s1 = texture(sil, vec2(u, mix(0.06, 0.94, 1.0 - vy))).rgb;
+	vec3 s2 = texture(sil, vec2(u2, mix(0.06, 0.94, fract((1.0 - vy) * 0.68 + 0.16)))).rgb;
 	vec3 silc = mix(s2, s1, wrap);
-	float leaf = 1.0 - smoothstep(0.20, 0.78, dot(silc, vec3(0.30, 0.59, 0.11)));
-	float n = 0.50 + 0.28 * sin((UV.x + par) * 23.0) * sin(UV.y * 17.0 + 1.1);
-	n += 0.18 * sin((UV.x * 0.5 + par * 0.4) * 9.0 + UV.y * 11.0);
-	float clump = smoothstep(0.32, 0.78, n);
-	vec3 earth = vec3(0.012, 0.010, 0.005);
-	vec3 olive = vec3(0.016, 0.022, 0.009);
-	vec3 moss = vec3(0.020, 0.028, 0.011);
+	float leaf = 1.0 - smoothstep(0.16, 0.82, dot(silc, vec3(0.30, 0.59, 0.11)));
+	float n = 0.48 + 0.34 * sin((vx + par) * 17.0) * sin(vy * 13.0 + 1.1);
+	n += 0.22 * sin((vx * 0.52 + par * 0.4) * 7.2 + vy * 9.4);
+	n += 0.14 * sin((vx + par * 0.22) * 39.0 + vy * 27.0);
+	float clump = smoothstep(0.26, 0.84, n);
+	vec3 earth = vec3(0.048, 0.036, 0.018);
+	vec3 olive = vec3(0.090, 0.118, 0.046);
+	vec3 moss = vec3(0.125, 0.158, 0.064);
 	vec3 col = mix(earth, olive, leaf);
-	col = mix(col, moss, clump * 0.45);
-	// Crown well above platform tops: wavy + diffuse. Warm fog only there.
-	float wave = 0.84 + 0.09 * sin((UV.x + par * 0.3) * 9.5) + 0.055 * sin(UV.x * 23.0 + 1.6) + 0.03 * sin(UV.x * 47.0);
-	float top = smoothstep(wave + 0.11, wave - 0.14, UV.y);
-	float haze = smoothstep(wave - 0.20, wave + 0.03, UV.y);
-	col = mix(col, vec3(0.22, 0.16, 0.08), haze * 0.16 * top);
-	if (top < 0.02) {
+	col = mix(col, moss, clump * 0.58);
+	col *= mix(0.70, 1.06, smoothstep(1.0, 0.32, vy));
+	float scallop = 0.052 * sin((vx + par * 0.28) * 7.0);
+	scallop += 0.034 * sin(vx * 14.8 + 0.9);
+	scallop += 0.020 * sin(vx * 29.0 + 2.2);
+	scallop += 0.012 * sin(vx * 61.0 + par);
+	scallop -= 0.038 * smoothstep(0.60, 0.94, sin(vx * 21.0 + par) * sin(vx * 9.2));
+	float wave = 0.09 + scallop;
+	float foliage = smoothstep(wave - 0.11, wave + 0.18, vy);
+	float haze = 1.0 - smoothstep(wave - 0.02, wave + 0.24, vy);
+	col = mix(col, vec3(0.32, 0.23, 0.10), haze * 0.30);
+	if (foliage < 0.02) {
 		discard;
 	}
 	ALBEDO = col;
-	ALPHA = top;
+	ALPHA = foliage;
 }
 """
 	mat.shader = sh
@@ -1297,9 +1306,10 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (HANG_BEAD_LAYER - 1))
 	# Sky lives in the upper third. Overscan so the wrap never hits the frame.
 	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 8.4, -42.0), Vector2(100.0, 28.0), Vector3.ZERO, _cloud_card_mat())
-	# Play band: NDC ≈ −1.2 … +0.45 at z=−28. Crown well above platform tops
-	# so pits do not read a false floor. Opaque — covers the old clear stripe.
-	_add_card(hold, "HP001_PlayJungle", Vector3(0.0, -5.2, -28.0), Vector2(92.0, 26.0), Vector3.ZERO, _play_jungle_mat())
+	# Play band: NDC ≈ −1.3 … +0.72 at z=−28 after the wavy crown cut
+	# (QuadMesh UV.y=0 is the card TOP). Crown well above platform tops so
+	# pits do not read a false floor. Opaque — covers the old clear stripe.
+	_add_card(hold, "HP001_PlayJungle", Vector3(0.0, -3.6, -28.0), Vector2(92.0, 28.0), Vector3.ZERO, _play_jungle_mat())
 	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-5.15, 2.35, -7.80), Vector2(3.10, 5.10), Vector3.ZERO, _curved_liana_mat())
 	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-4.35, 2.45, -8.40), Vector2(2.20, 4.20), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
 	_add_card(hold, "HP001_FG_Liana_Curve3", Vector3(-5.85, 2.05, -8.60), Vector2(2.00, 4.40), Vector3(0.0, 0.0, deg_to_rad(6.0)), _curved_liana_mat())
