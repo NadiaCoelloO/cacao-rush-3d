@@ -55,7 +55,7 @@ Valores copiados de `sim.ts`. Nada de esto toca `player_maya.gd`.
 | one-way | la colisión se apaga si los pies están bajo `top−0.06`, y también mientras `_drop_timer > 0` (abajo+salto, 0.18 s) |
 | crumble / móviles | 0.46 s / 2.7 s, y `sin`/`cos` del 2D |
 
-En play, `CSGFloor`, `CSGPlatform` y `CSGOneway` tienen `use_collision = false`. El harness de feel los enciende (piso 24 m + ledge 1 m + labio del oneway) y no construye selva-1, para no mezclar la colisión 1:1 con las 54/54.
+En play, `CSGFloor`, `CSGPlatform` y `CSGOneway` tienen `use_collision = false`. El harness de feel enciende el piso 24 m y el `CSGPlatform` de 1 m (cara izquierda 4.5, caja 4 m para que el salto desde x=0 aterrice) y no construye selva-1. `CSGOneway` sigue apagado: es una caja sólida y taparía el mantle.
 
 ## Equivalencias
 

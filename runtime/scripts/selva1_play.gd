@@ -164,16 +164,19 @@ func _load_layout() -> Dictionary:
 
 
 func _disable_slice_boxes(pilot: Node3D, keep_feel_ledge: bool) -> void:
-	# Feel: CSGFloor (24 m, top y=0) + CSGPlatform (1 m ledge) + CSGOneway lip.
+	# Feel: CSGFloor (24 m, top y=0) + CSGPlatform (1 m ledge, left face 4.5).
+	# CSGOneway stays off — it is a solid box at y≈1 whose left face is x=4,
+	# and that blocks the mantle test (Maya jumps from x=4.05).
 	# Play/capture: all three off. P00 is the floor; P01 is the real drop-through.
-	for path in [
-		"WorldRoot/FloorPlaceholder/CSGFloor",
-		"WorldRoot/FloorPlaceholder/CSGPlatform",
-		"WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder/CSGOneway",
-	]:
-		var n: Node = pilot.get_node_or_null(path)
-		if n is CSGShape3D:
-			(n as CSGShape3D).use_collision = keep_feel_ledge
+	var floor_csg: Node = pilot.get_node_or_null("WorldRoot/FloorPlaceholder/CSGFloor")
+	if floor_csg is CSGShape3D:
+		(floor_csg as CSGShape3D).use_collision = keep_feel_ledge
+	var ledge: Node = pilot.get_node_or_null("WorldRoot/FloorPlaceholder/CSGPlatform")
+	if ledge is CSGShape3D:
+		(ledge as CSGShape3D).use_collision = keep_feel_ledge
+	var oneway: Node = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder/CSGOneway")
+	if oneway is CSGShape3D:
+		(oneway as CSGShape3D).use_collision = false
 
 
 func _build_world() -> void:
