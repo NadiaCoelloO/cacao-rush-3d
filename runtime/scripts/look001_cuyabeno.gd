@@ -1224,7 +1224,7 @@ void fragment() {
 	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(1.05, 1.15);
 	float r = length(d);
 	float a = pow(clamp(1.0 - r * 1.25, 0.0, 1.0), 0.60);
-	ALBEDO = vec3(0.040, 0.026, 0.014);
+	ALBEDO = vec3(0.028, 0.018, 0.010);
 	ALPHA = a;
 }
 """
