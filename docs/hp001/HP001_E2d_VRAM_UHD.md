@@ -39,7 +39,7 @@ All views under 350k / 250 draws.
 
 `selva1_run_probe` **PASS** ticks=1556 far_x=194.32 G00=1 deaths=0. Pit line verified (feet y=−18.45 on earlier fail). `player_maya.gd` not modified.
 
-HEAD: stamped next to this file after the stills commit. Draft PR, no merge.
+HEAD: `ac7ee84eb85a9f703d94c7049fc1a506c0eebaa0` (`cursor/hp001-e1-cuyabeno`). Draft PR, no merge.
 
 ## 6. sha256
 
