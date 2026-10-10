@@ -6,20 +6,22 @@ Piloto greybox Godot 4.2. Escala **24 px = 1 m**. Y 2D hacia abajo; Y Godot haci
 
 El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` no se pudo leer desde aquí (404). El layout y los timings salen de `NadiaCoelloO/Cacao.Game@77e55b5278` `levels.ts` / `sim.ts` (`ruinas-1`, `linkSecrets`, `sitSpikes`, `freeCoins`). QA confirmó que ese pin coincide con lo usado: geometría con 0 faltantes. Los oneways de `selva-1` de ese archivo coinciden con `docs/ONEWAY_DELTA_selva.md`.
 
-`jardin-1` y `pichincha-1` no existen en este proyecto. El warp deja un log y no cambia de escena.
+`jardin-1` y `pichincha-1` no existen en este proyecto. El warp deja un log y devuelve a Maya al último spawn. No congela la escena.
 
 ## Cámara
 
-Solo en `pilot_ruinas.tscn`, sobre el `PlayerMaya` de esta escena. `player_maya.gd` no se tocó. El script sigue usando el `@export camera_offset` y el `fov` del nodo.
+El `@export camera_offset` de Godot se descarta si está escrito **antes** de `script =`. En esa posición el runtime se quedaba en el default `(0, 1, 12)` (~20 × 11 m) mientras el clampeo ya estaba armado para 22.5 m. En `pilot_ruinas.tscn` el valor quedó debajo de `script =`, y `_ready` de la escena lo vuelve a asignar. `player_maya.gd` no se tocó. El `fov` sigue en 50.
 
 | | valor |
 |---|---|
-| fov | 50° vertical (sin cambio) |
-| camera_offset | (0, 1, **24.1256**) m |
-| antes | (0, 1, 12) m → ~20 × 11 m |
-| ahora | 2 × 24.1256 × tan(25°) = **22.5 m** de alto; ancho 22.5 × 1280/720 = **40 m** |
+| fov | 50° vertical |
+| camera_offset | (0, 1, **24.1256**) m, leído en runtime |
+| alto de fórmula | 2 × 24.1256 × tan(25°) = **22.50 m** |
+| alto en el plano z = 0 | **22.55 m** (el offset sube 1 m, el rayo no es perpendicular al plano de juego) |
+| ancho en z = 0 | **40.03 m** |
+| Maya, hitbox 1.75 m (42 px) | patio, h00 y h04 **55.7 px**; jardín **54.1 px** (queda abajo del cuadro); mantle **56.7 px**. Viewport 1280×720 |
 
-Eso iguala la ventana 2D de 960×540 px. Además, después del follow, la escena clampea el foco a la misma ventana que `followCam`: x en [20, 180] m y y en [11.25, 36.75] m (el borde del nivel). El look-ahead de 2 m sigue siendo el del script.
+Eso iguala la ventana 2D de 960×540 px (1 m = 32 px, 42 px × 720/540 = 56 px). Después del follow, la escena clampea el foco a x en [20, 180] m y y en [11.25, 36.75] m: la misma ventana de 40 × 22.5 m pegada al borde del nivel. El look-ahead de 2 m sigue siendo el del script.
 
 ## Tomas
 
@@ -49,13 +51,13 @@ Misma pose en los dos renders. 2D: `renderGame`, 960×540, `camLook = 48`, `time
 
 | toma | tris | draws | tris mundo | draws mundo |
 |---|---:|---:|---:|---:|
-| patio | 1949 | 136 | 594 | 91 |
-| jardin | 606 | 129 | 606 | 102 |
-| mantle | 1567 | 72 | 212 | 27 |
-| h00 | 2069 | 111 | 714 | 66 |
-| h04 | 2081 | 116 | 726 | 71 |
+| patio | 2295 | 141 | 940 | 105 |
+| jardin | 2381 | 154 | 1026 | 118 |
+| mantle | 2093 | 108 | 738 | 72 |
+| h00 | 2443 | 118 | 1088 | 82 |
+| h04 | 2363 | 119 | 1008 | 83 |
 
-Los granos van por instancia para poder ocultarlos al recogerlos. Por eso el draw count sube respecto del merge anterior. El mundo de mantle, sin Maya y con poco en cuadro, queda en 27 draws.
+Los granos van por instancia para poder ocultarlos al recogerlos. El bisel, las lianas y el núcleo del láser suman draws. Sigue muy por debajo del techo de 180k tris. El draw count queda por encima de 80 porque cada grano y cada adorno es su propio mesh.
 
 ## Jugabilidad cableada
 
@@ -66,10 +68,11 @@ Valores copiados de `sim.ts`. Nada de esto toca `player_maya.gd`.
 | pinchos H00–H03 | overlap del hurtbox `(x+4, y+8, w-8, h-10)` → `kill` |
 | láseres H04–H06 | igual, solo si `(time+phase) % period < period*0.42` |
 | kill | vidas 5, `invuln` 0.8, `hitstop` 0.08, `deathT` 0.55, respawn con `invuln` 1.1. A 0 vidas, `over` |
+| caída del nivel | pies bajo `-(80+42)/24` m (−5.08 m). Resta una vida, igual que `p.y > level.height + 80`. El `kill_y` de Maya en esta escena está en −1000 para que ese respawn instantáneo (sin vida) no dispare |
 | monedas | distancia al centro < 28 px. Se ocultan |
 | K01 | salto lo activa, guarda el spawn (`x+4`, pies en la base del poste), `poleLock` 0.35 s, texto «Partida guardada» |
-| K00 | primer salto guarda y avisa «Tótem guardado — W otra vez». El siguiente warp loguea `pichincha-1` y no cambia de escena |
-| F00 | overlap loguea `jardin-1` y frena. No hay escena destino |
+| K00 | primer salto guarda y avisa «Tótem guardado — W otra vez». El siguiente loguea `pichincha-1` y reaparece en el último spawn. No congela |
+| F00 | overlap loguea `jardin-1`, marca la caída como usada y reaparece en el último spawn. No resta vida y no congela |
 | G00 | overlap marca la meta, oculta el grano y deja `win` 1.35 s |
 | one-way | la colisión se apaga si los pies están bajo `top−0.06`, y también mientras `_drop_timer > 0` (abajo+salto, 0.18 s). El timer lo arma Maya; la escena lo lee al inicio del tick siguiente, todavía dentro de esa ventana |
 | crumble / móviles | sin cambio: 0.46 s / 2.7 s, y `sin`/`cos` del 2D |
@@ -174,7 +177,7 @@ En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. 
 
 ## Look
 
-Fondo `#1E1714` con siluetas oscuras detrás del plano. Piedra `#4A382C`, labio `#6B5440`. Sol cenital cálido, energía 0.42, sombras. Niebla de profundidad `#24302A` densidad 0.035, y niebla baja en el pozo. El jardín no tiene cubo translúcido: haz verde desde abajo, lianas en quads con alpha-scissor, musgo en la base de los muros. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
+Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC`, sin emisión. Láser: franja roja `#C41418` de 0.16 m con núcleo `#FFF0D2`. Cacao `#8B4A2B` con emisión cálida `#C46A3A`. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
 
 ## Pendiente
 
@@ -182,7 +185,8 @@ Fondo `#1E1714` con siluetas oscuras detrás del plano. Piedra `#4A382C`, labio 
 |---|---|
 | geometría del 2D | completa |
 | pinchos, láser, monedas, K01, G00, drop-through | cableados |
-| warp K00 / F00 | stub con log. No hay `pichincha-1` ni `jardin-1` |
+| warp K00 / F00 | stub con log y respawn al último spawn. No hay `pichincha-1` ni `jardin-1`. No congela |
+| caída fuera del nivel | resta una vida |
 | caja P09 pound | no. Maya no tiene pound |
 | escalada Nix en P01/P02 | no. Diferencia de personaje |
 | wall-jump | no. Haría falta el OK de Nadia para tocar `player_maya.gd` |

@@ -11,6 +11,8 @@ extends Node3D
 ## sim.ts values used here: hazard inset (x+4, y+8, w-8, h-10), coin radius 28 px,
 ## laser duty 0.42, kill invuln 0.8 / hitstop 0.08 / deathT 0.55 / respawn invuln
 ## 1.1 / MAX_LIVES 5, checkpoint poleLock 0.35, goal winT 1.35, fall warpT 0.28.
+## K00 / F00 log the missing destination and respawn at the last spawn (no freeze,
+## no life lost). Dropping below the 2D kill line (level height + 80 px) costs a life.
 
 const LAYOUT := "res://data/ruinas1_layout.json"
 const LEVEL_H_PX := 1152.0
@@ -28,15 +30,19 @@ const COL_STONE_LIP := Color("6b5440")
 const COL_STONE_WET := Color("3a2e28")
 const COL_WOOD := Color("5c4030")
 const COL_MOSS := Color("4a5a38")
-const COL_SPIKE := Color("a34d36")
-const COL_LASER := Color("e85a3a")
+const COL_SPIKE := Color("c9c4bc")
+const COL_LASER := Color("c41418")
+const COL_LASER_CORE := Color("fff0d2")
 const COL_BEAN := Color("8b4a2b")
+const COL_BEVEL := Color("d8cbb8")
 const COL_POLE := Color("6a5a4a")
 const COL_POLE_ON := Color("3d8a72")
 const COL_ROOT := Color("3a2a22")
 const COL_VINE := Color("2c3a28")
 const COL_SKY := Color("1e1714")
-const COL_FOG := Color("24302a")
+const COL_FOG := Color("2c241e")
+## sim.ts: kill when p.y > level.height + 80. Feet are PH below that top.
+const FALL_Y := -(80.0 + 42.0) * PX
 
 var _layout: Dictionary = {}
 var _player: CharacterBody3D
@@ -67,6 +73,7 @@ var _pole_lock := 0.0
 var _message := ""
 var _message_t := 0.0
 var _hint: Label
+var _fade_mats: Array = []
 
 @onready var _hud: Control = $UI/Hud
 @onready var _hud_label: Label = $UI/Hud/WorldLabel
@@ -74,6 +81,9 @@ var _hint: Label
 
 func _ready() -> void:
 	_player = $PlayerMaya as CharacterBody3D
+	# The tscn export is ignored if it sits above `script =`. Set it here too.
+	_player.camera_offset = Vector3(0.0, 1.0, CAM_DOLLY)
+	_player.kill_y = -1000.0
 	_layout = _load_layout()
 	if _layout.is_empty():
 		return
@@ -116,6 +126,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_push_fade()
 	if _message_t > 0.0:
 		_message_t = maxf(0.0, _message_t - delta)
 		_show_hud()
@@ -131,6 +142,7 @@ func late_physics(delta: float) -> void:
 		_player.global_position = _shot_feet
 	else:
 		_tick_freeze(delta)
+		_tick_void()
 	_match_framing()
 
 
@@ -165,7 +177,7 @@ func _style_light() -> void:
 		env.fog_density = 0.035
 		env.volumetric_fog_enabled = true
 		env.volumetric_fog_density = 0.015
-		env.volumetric_fog_albedo = Color("2a3328")
+		env.volumetric_fog_albedo = Color("3a3028")
 	_add_pit_fog()
 
 
@@ -185,14 +197,15 @@ func _add_pit_fog() -> void:
 func _build_world() -> void:
 	var root := $WorldRoot as Node3D
 	var mats := {
-		"solid": _mat(COL_STONE, 0.92),
-		"lip": _mat(COL_STONE_LIP, 0.84),
-		"oneway": _mat(COL_STONE, 0.9),
-		"moving": _mat(COL_STONE, 0.88),
-		"crate": _mat(COL_WOOD, 0.86),
-		"crumble": _mat(COL_STONE_WET, 0.72),
-		"spike": _mat(COL_SPIKE, 0.75),
-		"laser": _mat(COL_LASER, 0.45, true),
+		"solid": _stone_mat(COL_STONE, 0.92),
+		"lip": _stone_mat(COL_STONE_LIP, 0.84),
+		"bevel": _stone_mat(COL_BEVEL, 0.7),
+		"oneway": _stone_mat(COL_STONE, 0.9),
+		"moving": _stone_mat(COL_STONE, 0.88),
+		"crate": _stone_mat(COL_WOOD, 0.86),
+		"crumble": _stone_mat(COL_STONE_WET, 0.72),
+		"spike": _flat(COL_SPIKE),
+		"laser": _mat(COL_LASER, 0.4, true),
 		"moss": _mat(COL_MOSS, 0.9),
 		"root": _mat(COL_ROOT, 0.9),
 	}
@@ -211,7 +224,10 @@ func _build_world() -> void:
 			_add_lip(body, _vec(p["size_m"]), mats["lip"])
 		root.add_child(body)
 		if not dynamic:
-			_stamp_stone(_tool(stamps, mat_key), _tool(stamps, "lip"), _vec(p["center_m"]), _vec(p["size_m"]))
+			var center := _vec(p["center_m"])
+			var size := _vec(p["size_m"])
+			_stamp_stone(_tool(stamps, mat_key), _tool(stamps, "lip"), center, size)
+			_stamp_bevel(_tool(stamps, "bevel"), center, size)
 		if kind == "oneway":
 			_oneways.append(body)
 		elif kind == "crumble":
@@ -227,16 +243,15 @@ func _build_world() -> void:
 	for raw_h in _layout["hazards"]:
 		var h: Dictionary = raw_h
 		if String(h["kind"]) == "spikes":
-			_add_spikes(visual, h, mats["spike"], _tool(stamps, "spike"))
+			_add_spikes(visual, h, _tool(stamps, "spike"))
 		else:
 			var beam := Node3D.new()
 			beam.name = String(h["id"])
 			beam.set_meta("period", float(h["period"]))
 			beam.set_meta("phase", float(h["phase"]))
 			_add_box(beam, h["center_m"], h["size_m"], mats["laser"], false)
-			# Keep the beam readable and narrow in Z; XY stays the 2D AABB.
 			var mesh := beam.get_node("Mesh") as MeshInstance3D
-			_set_depth(mesh, 0.25)
+			_thin_laser(mesh)
 			visual.add_child(beam)
 			_lasers.append(mesh)
 	var bean_mat := _bean_mat()
@@ -343,7 +358,94 @@ func _add_box(host: Node3D, center: Array, size: Array, mat: Material, collide: 
 		host.add_child(shape)
 
 
-func _add_spikes(_visual: Node3D, h: Dictionary, _mat: Material, st: SurfaceTool) -> void:
+func _stone_mat(color: Color, rough: float) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://materials/m_ruinas_stone.gdshader")
+	mat.set_shader_parameter("albedo", color)
+	mat.set_shader_parameter("roughness_value", rough)
+	mat.set_shader_parameter("maya_pos", Vector3.ZERO)
+	_fade_mats.append(mat)
+	return mat
+
+
+func _flat(color: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.roughness = 1.0
+	return mat
+
+
+func _push_fade() -> void:
+	if _player == null or _fade_mats.is_empty():
+		return
+	var mid := _player.global_position + Vector3(0.0, float(_player._h) * 0.5, 0.0)
+	for mat in _fade_mats:
+		(mat as ShaderMaterial).set_shader_parameter("maya_pos", mid)
+
+
+func _stamp_wedge(st: SurfaceTool, x: float, w: float, bottom: float, h: float) -> void:
+	# Pale triangle, thin in Z. Gameplay still uses the hazard AABB.
+	var z := 0.08
+	var bl := Vector3(x, bottom, z)
+	var br := Vector3(x + w, bottom, z)
+	var ap := Vector3(x + w * 0.5, bottom + h, z)
+	var bl2 := Vector3(x, bottom, -z)
+	var br2 := Vector3(x + w, bottom, -z)
+	var ap2 := Vector3(x + w * 0.5, bottom + h, -z)
+	_tri(st, bl, br, ap)
+	_tri(st, bl2, ap2, br2)
+	_tri(st, bl, ap, bl2)
+	_tri(st, bl2, ap, ap2)
+	_tri(st, br, br2, ap)
+	_tri(st, br2, ap2, ap)
+	_tri(st, bl, bl2, br)
+	_tri(st, br, bl2, br2)
+
+
+func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3) -> void:
+	st.add_vertex(a)
+	st.add_vertex(b)
+	st.add_vertex(c)
+
+
+func _stamp_bevel(st: SurfaceTool, c: Vector3, s: Vector3) -> void:
+	if s.y < 0.22 or s.x < 0.3:
+		return
+	var bh := 0.16
+	var bd := 0.22
+	var inset := minf(0.06, s.x * 0.03)
+	var top := c.y + s.y * 0.5
+	var front := c.z + s.z * 0.5
+	# Proud of the front face so it does not z-fight the stone.
+	var bc := Vector3(c.x, top - bh * 0.5, front + 0.025 - bd * 0.5)
+	var bs := Vector3(maxf(0.2, s.x - inset * 2.0), bh, bd)
+	_stamp_box(st, bc, bs)
+
+
+func _thin_laser(mesh: MeshInstance3D) -> void:
+	var box := mesh.mesh as BoxMesh
+	var sz := box.size
+	sz.x = 0.16
+	sz.z = 0.05
+	box.size = sz
+	var red := StandardMaterial3D.new()
+	red.albedo_color = COL_LASER
+	red.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mesh.material_override = red
+	var core := MeshInstance3D.new()
+	core.name = "Core"
+	var core_box := BoxMesh.new()
+	core_box.size = Vector3(0.048, sz.y, 0.06)
+	core.mesh = core_box
+	var core_mat := StandardMaterial3D.new()
+	core_mat.albedo_color = COL_LASER_CORE
+	core_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	core.material_override = core_mat
+	mesh.add_child(core)
+
+
+func _add_spikes(_visual: Node3D, h: Dictionary, st: SurfaceTool) -> void:
 	var px: Dictionary = h["px"]
 	var tooth := 16.0
 	var n := maxi(1, int(round(float(px["w"]) / tooth)))
@@ -351,8 +453,9 @@ func _add_spikes(_visual: Node3D, h: Dictionary, _mat: Material, st: SurfaceTool
 	var center: Array = h["center_m"]
 	var size: Array = h["size_m"]
 	var origin_x := float(center[0]) - float(size[0]) * 0.5
+	var bottom := float(center[1]) - float(size[1]) * 0.5
 	for i in n:
-		_stamp_box(st, Vector3(origin_x + (float(i) + 0.5) * bw * PX, float(center[1]), 0.0), Vector3(bw * PX, float(size[1]), 0.45))
+		_stamp_wedge(st, origin_x + float(i) * bw * PX, bw * PX, bottom, float(size[1]))
 
 
 func _vec(a: Array) -> Vector3:
@@ -468,8 +571,8 @@ func _bean_mat() -> StandardMaterial3D:
 	mat.metallic = 0.04
 	mat.metallic_specular = 0.35
 	mat.emission_enabled = true
-	mat.emission = COL_BEAN
-	mat.emission_energy_multiplier = 0.12
+	mat.emission = Color("c46a3a")
+	mat.emission_energy_multiplier = 0.8
 	return mat
 
 
@@ -478,26 +581,30 @@ func _aabb_of(center: Vector3, size: Vector3) -> AABB:
 
 
 func _dress_pit(visual: Node3D, mats: Dictionary) -> void:
-	# Vines in the secret shaft. Quads, alpha-scissor, not a blocking volume.
+	# Vines hang on the shaft walls, gapped around x≈17.3 so jardin Maya stays visible.
 	var vine_mat := _vine_mat()
-	for i in 6:
+	var vine_x := [15.35, 15.95, 16.45, 18.75, 19.3, 19.85]
+	for i in vine_x.size():
 		var quad := MeshInstance3D.new()
 		quad.name = "Vine%d" % i
 		var mesh := QuadMesh.new()
-		mesh.size = Vector2(0.16, 6.4)
+		mesh.size = Vector2(0.5, 7.6)
 		quad.mesh = mesh
 		quad.material_override = vine_mat
-		var x := 16.15 + float(i) * 0.42
-		quad.position = Vector3(x, 3.3, 0.35 if i % 2 == 0 else -0.35)
+		quad.position = Vector3(vine_x[i], 3.6, 0.28 if i % 2 == 0 else -0.28)
 		visual.add_child(quad)
 	# Moss along the inner base of the climb walls. Visual only.
+	var moss_mat := _mat(COL_MOSS, 0.85)
+	moss_mat.emission_enabled = true
+	moss_mat.emission = Color("5d7a48")
+	moss_mat.emission_energy_multiplier = 0.35
 	for side in [15.7, 19.5]:
 		var moss := MeshInstance3D.new()
 		var box := BoxMesh.new()
 		box.size = Vector3(0.55, 1.15, 2.4)
 		moss.mesh = box
 		moss.position = Vector3(side, 0.55, 0.0)
-		moss.material_override = mats["moss"]
+		moss.material_override = moss_mat
 		visual.add_child(moss)
 	# A few roots hugging the stone at the shaft mouth. Not colliders.
 	for i in 4:
@@ -509,19 +616,34 @@ func _dress_pit(visual: Node3D, mats: Dictionary) -> void:
 		root.rotation_degrees = Vector3(0.0, 18.0 * float(i), 8.0)
 		root.material_override = mats["root"]
 		visual.add_child(root)
+	# Local green only: a short beam and an emissive sheet on the pit floor.
+	var glow := MeshInstance3D.new()
+	glow.name = "PitGlow"
+	var glow_mesh := BoxMesh.new()
+	glow_mesh.size = Vector3(2.1, 0.06, 1.4)
+	glow.mesh = glow_mesh
+	glow.position = Vector3(17.35, 0.18, 0.0)
+	var glow_mat := StandardMaterial3D.new()
+	glow_mat.albedo_color = Color("6a9a62")
+	glow_mat.emission_enabled = true
+	glow_mat.emission = Color("8fce86")
+	glow_mat.emission_energy_multiplier = 0.9
+	glow_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.material_override = glow_mat
+	visual.add_child(glow)
 	var beam := SpotLight3D.new()
 	beam.name = "JardinBeam"
-	beam.position = Vector3(17.4, 0.35, 0.0)
+	beam.position = Vector3(17.35, 0.45, 0.0)
 	beam.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
-	beam.light_color = Color("6a9a62")
-	beam.light_energy = 1.6
-	beam.spot_range = 14.0
-	beam.spot_angle = 38.0
-	beam.spot_attenuation = 1.1
+	beam.light_color = Color("8fce86")
+	beam.light_energy = 2.2
+	beam.spot_range = 6.5
+	beam.spot_angle = 18.0
+	beam.spot_attenuation = 0.8
 	beam.shadow_enabled = false
 	visual.add_child(beam)
 	_add_mist(visual)
-	_add_dust(visual, Vector3(17.4, 2.4, 0.4), Color(0.75, 0.85, 0.62, 0.28))
+	_add_dust(visual, Vector3(17.35, 2.2, 0.2), Color(0.75, 0.9, 0.62, 0.35))
 	_add_silhouettes(visual)
 
 
@@ -529,15 +651,18 @@ func _vine_mat() -> StandardMaterial3D:
 	var img := Image.create(8, 32, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	for y in 32:
-		img.set_pixel(2, y, Color("4a6240"))
-		img.set_pixel(3, y, Color("6d8a58"))
+		img.set_pixel(1, y, Color("c6e6a8"))
+		img.set_pixel(2, y, Color("a8d48a"))
+		img.set_pixel(3, y, Color("7fbf6a"))
+		if y % 3 != 0:
+			img.set_pixel(5, y, Color("d4f0bc"))
 	var tex := ImageTexture.create_from_image(img)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = tex
-	mat.albedo_color = Color(1, 1, 1, 1)
+	mat.albedo_color = Color("d4f0bc")
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	mat.alpha_scissor_threshold = 0.4
-	mat.roughness = 0.9
+	mat.alpha_scissor_threshold = 0.35
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	return mat
@@ -567,13 +692,15 @@ func _add_silhouettes(visual: Node3D) -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.roughness = 1.0
 	var heights := [18.0, 26.0, 14.0, 22.0, 16.0, 28.0]
+	# Kept off the patio gap (x 4–16) and far behind the play plane.
+	var xs := [-18.0, 26.0, 44.0, 62.0, 80.0, 98.0]
 	for i in heights.size():
 		var quad := MeshInstance3D.new()
 		var mesh := QuadMesh.new()
 		mesh.size = Vector2(7.0, heights[i])
 		quad.mesh = mesh
 		quad.material_override = mat
-		quad.position = Vector3(-6.0 + float(i) * 14.0, heights[i] * 0.45, -8.0)
+		quad.position = Vector3(xs[i], heights[i] * 0.45, -16.0)
 		visual.add_child(quad)
 
 
@@ -777,6 +904,7 @@ func _touch_poles() -> void:
 		if not press or _status == "warp":
 			continue
 		if ready:
+			_pole_lock = 0.35
 			_begin_warp(secret)
 			continue
 		pole["active"] = true
@@ -826,11 +954,19 @@ func _touch_falls() -> void:
 
 
 func _begin_warp(world: String) -> void:
-	_status = "warp"
-	_hold_pos = _player.global_position
 	var level := "%s-1" % world
 	print("RUINAS_WARP world=%s level=%s stub=no 3D scene" % [world, level])
 	_say("Warp %s (sin escena 3D)" % level, 2.4)
+	# No destination scene: back to the last spawn. Lives stay put.
+	_player._respawn()
+
+
+func _tick_void() -> void:
+	if _capturing or _status != "playing":
+		return
+	# sim.ts: p.y > level.height + 80. Feet sit PH below the 2D top.
+	if _player.global_position.y < FALL_Y:
+		_kill()
 
 
 func _bob_coins() -> void:
@@ -985,6 +1121,7 @@ func _print_counts() -> void:
 	print("RUINAS_CHECK platforms=%d hazards=%d pickups=%d checks=%d falls=%d goal=1" % [
 		plats.size(), hazards.size(), picks.size(), _layout["checkpoints"].size(), _layout["falls"].size()
 	])
+	print("RUINAS_CAM offset=%s kill_y=%.1f" % [_player.camera_offset, _player.kill_y])
 
 
 func _run_capture() -> void:
@@ -1000,6 +1137,7 @@ func _run_capture() -> void:
 		for _i in 60:
 			await get_tree().physics_frame
 		await RenderingServer.frame_post_draw
+		_log_framing(String(shot["id"]))
 		var img := get_viewport().get_texture().get_image()
 		var path := "%s3d_%s.png" % [out, String(shot["id"])]
 		img.save_png(path)
@@ -1010,6 +1148,34 @@ func _run_capture() -> void:
 		_player.visible = true
 		print("RUINAS_SHOT %s" % path)
 	get_tree().quit()
+
+
+func _log_framing(shot: String) -> void:
+	var cam := _player.get_node_or_null("Camera3D") as Camera3D
+	if cam == null:
+		return
+	var dolly := float(_player.camera_offset.z)
+	var fov := cam.fov
+	var vis_h := 2.0 * dolly * tan(deg_to_rad(fov * 0.5))
+	var vp := get_viewport().get_visible_rect().size
+	var origin_top := cam.project_ray_origin(Vector2(vp.x * 0.5, 0.0))
+	var dir_top := cam.project_ray_normal(Vector2(vp.x * 0.5, 0.0))
+	var origin_bot := cam.project_ray_origin(Vector2(vp.x * 0.5, vp.y))
+	var dir_bot := cam.project_ray_normal(Vector2(vp.x * 0.5, vp.y))
+	var origin_l := cam.project_ray_origin(Vector2(0.0, vp.y * 0.5))
+	var dir_l := cam.project_ray_normal(Vector2(0.0, vp.y * 0.5))
+	var origin_r := cam.project_ray_origin(Vector2(vp.x, vp.y * 0.5))
+	var dir_r := cam.project_ray_normal(Vector2(vp.x, vp.y * 0.5))
+	var top := origin_top + dir_top * ((0.0 - origin_top.z) / dir_top.z)
+	var bot := origin_bot + dir_bot * ((0.0 - origin_bot.z) / dir_bot.z)
+	var left := origin_l + dir_l * ((0.0 - origin_l.z) / dir_l.z)
+	var right := origin_r + dir_r * ((0.0 - origin_r.z) / dir_r.z)
+	var feet := cam.unproject_position(_player.global_position)
+	var head := cam.unproject_position(_player.global_position + Vector3(0.0, 42.0 * PX, 0.0))
+	print("RUINAS_CAM shot=%s offset=%s fov=%.2f formula_h=%.4f plane_h=%.4f plane_w=%.4f vp=%sx%s maya_px=%.2f" % [
+		shot, _player.camera_offset, fov, vis_h, absf(top.y - bot.y), absf(right.x - left.x),
+		vp.x, vp.y, absf(feet.y - head.y)
+	])
 
 
 func _write_perf(out: String, shot: String, _with_player := true) -> void:
