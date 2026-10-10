@@ -23,8 +23,8 @@ const Y_SHIFT := 13.333333
 ## player_maya.gd default kill_y (−3.33) is 80 px under y=0; play overrides it.
 const PIT_KILL_Y := -18.4167
 const MAYA_LAYER := 2
-const COL_EARTH := Color(0.50, 0.36, 0.20)
-const COL_EARTH_LIP := Color(0.58, 0.42, 0.24)
+const COL_EARTH := Color("3e2c20")
+const COL_EARTH_LIP := Color(0.337, 0.243, 0.141)
 const COL_WET := Color(0.10, 0.08, 0.06)
 const COL_CRATE := Color(0.36, 0.24, 0.14)
 const COL_CRUMBLE := Color(0.16, 0.11, 0.07)
@@ -247,8 +247,7 @@ func _build_world() -> void:
 		body.set_meta("kind", kind)
 		body.set_meta("top_m", float(p["top_m"]))
 		_add_box(body, p["center_m"], p["size_m"], mats[mat_key], true)
-		if kind == "moving" or kind == "crumble" or kind == "oneway":
-			_add_lip(body, _vec(p["size_m"]), mats["lip"])
+		_add_lip(body, _vec(p["size_m"]), mats["lip"])
 		play.add_child(body)
 		if kind == "oneway":
 			_oneways.append(body)
@@ -472,7 +471,7 @@ func _add_rock(visual: Node3D, h: Dictionary) -> MeshInstance3D:
 
 
 func _add_wind_card(visual: Node3D, h: Dictionary) -> void:
-	# 2D: clipped cream dashes drifting with vx. Shader stripes, no collision.
+	# 2D: 4 thin curved cream strokes. Readable zone, not a UI grid.
 	var mi := MeshInstance3D.new()
 	mi.name = String(h["id"])
 	var box := BoxMesh.new()
@@ -486,10 +485,18 @@ func _add_wind_card(visual: Node3D, h: Dictionary) -> void:
 	sh.code = """shader_type spatial;
 render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled;
 void fragment() {
-	float dash = step(0.62, fract(UV.x * 18.0 + UV.y * 0.35 + TIME * 1.4));
-	float row = step(0.45, fract(UV.y * 16.0));
-	ALBEDO = vec3(0.95, 0.90, 0.80);
-	ALPHA = dash * row * 0.42;
+	float a = 0.0;
+	for (int i = 0; i < 4; i++) {
+		float fi = float(i);
+		float y0 = 0.20 + fi * 0.18;
+		float wave = 0.055 * sin(UV.x * 6.4 + fi * 1.35 + TIME * 0.85);
+		float d = abs(UV.y - (y0 + wave));
+		float stroke = smoothstep(0.016, 0.0035, d);
+		float fade = smoothstep(0.0, 0.07, UV.x) * smoothstep(1.0, 0.93, UV.x);
+		a += stroke * fade * 0.40;
+	}
+	ALBEDO = vec3(0.96, 0.90, 0.76);
+	ALPHA = clamp(a, 0.0, 0.48);
 }
 """
 	mat.shader = sh
@@ -500,15 +507,21 @@ void fragment() {
 func _earth(color: Color, _rough: float) -> ShaderMaterial:
 	# Custom unshaded + fog_disabled: StandardMaterial still takes vol-fog,
 	# which turned P00's tall face into a black slab behind the water plane.
+	# Top faces lift to the light earth lip so boxes are not flat sand.
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
 render_mode unshaded, fog_disabled, shadows_disabled, cull_disabled;
 uniform vec4 albedo : source_color;
-void fragment() { ALBEDO = albedo.rgb; }
+uniform vec4 lip : source_color;
+void fragment() {
+	float top = smoothstep(0.28, 0.82, NORMAL.y);
+	ALBEDO = mix(albedo.rgb, lip.rgb, top);
+}
 """
 	mat.shader = sh
 	mat.set_shader_parameter("albedo", color)
+	mat.set_shader_parameter("lip", COL_EARTH_LIP)
 	return mat
 
 

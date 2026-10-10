@@ -104,12 +104,15 @@ def draw_shot(layout, shot, out_path: Path) -> None:
         elif kind == "rock":
             d.ellipse([sx, sy, sx + w, sy + hh], fill=ROCK)
         elif kind == "wind":
-            d.rectangle([sx, sy, sx + w, sy + hh], fill=(200, 220, 184, 28))
-            for row in range(8, int(hh), 24):
-                for col in range(-20, int(w) + 20, 48):
-                    x0 = sx + col + (row % 36)
-                    y0 = sy + row
-                    d.line([(x0, y0), (x0 + 14, y0)], fill=(243, 230, 208, 150), width=2)
+            for i, yoff in enumerate((0.22, 0.40, 0.58, 0.74)):
+                pts = []
+                steps = 32
+                for t in range(steps + 1):
+                    u = t / steps
+                    x = sx + u * w
+                    y = sy + hh * (yoff + 0.045 * math.sin(u * 6.4 + i * 1.3))
+                    pts.append((x, y))
+                d.line(pts, fill=(243, 230, 208, 145), width=2)
 
     for c in layout["pickups"]:
         x, y, r = c["px"]["x"], c["px"]["y"], c["px"]["r"]

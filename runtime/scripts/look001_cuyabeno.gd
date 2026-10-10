@@ -17,6 +17,7 @@ const HP001_SCRIPT := preload("res://scripts/hp001_cuyabeno.gd")
 const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
 const HP_CANOPY_LOD0 := "res://models/hp001/canopy_cuyabeno_hp_LOD0.glb"
 const HP_SKY_TEX := "res://textures/hp001_cuyabeno_sky_2k.png"
+const HP_JUNGLE_SKY := "res://textures/hp001_jungle_sky_2d.jpg"
 const HP_SIL_TEX := "res://textures/hp001_selva_silhouette.png"
 const HP_LIANA_TEX := "res://textures/hp001_fg_liana.png"
 
@@ -37,13 +38,13 @@ const MAYA_HAIR := Color("6b5a46")
 const MAYA_PACK := Color("8a7358")
 const ONEWAY_SLAB := Color("3a2a1c")
 const ONEWAY_CUE := Color("4a3a2a")
-## Wet várzea earth — dark brown, not the old light-grey slabs.
-const PLAT_ALBEDO := Color(0.42, 0.30, 0.18)
+## Wet várzea earth — #3E2C20, not sand ochre.
+const PLAT_ALBEDO := Color("3e2c20")
 const PLAT_WET_EDGE := Color(0.16, 0.11, 0.08)
 ## Soft top-edge lift on greybox platforms only (not Maya). Keep this low —
 ## combined with the path lights, 0.4+ reads as white puro.
-const PLAT_EMIT := Color(0.22, 0.16, 0.10)
-const PLAT_EMIT_ENERGY := 0.22
+const PLAT_EMIT := Color(0.34, 0.24, 0.14)
+const PLAT_EMIT_ENERGY := 0.28
 const DOSEL_CARD_LAYER := 10
 const WATER_LAYER := 12
 const CACAO_Y := Color("d6ab3d")
@@ -55,10 +56,10 @@ const MAYA_FOLLOW_LAYER := 2
 ## Warm white near #FFF4E6. Slightly less G/B than 1/0.957/0.902 so the
 ## lit back sits in hue 28–35° against Maya_Body albedo (pure #FFF4E6 → ~37°).
 const MAYA_FOLLOW_LIGHT := Color(1.0, 0.86, 0.70)
-const MAYA_BACK_FILL_ENERGY := 0.34
+const MAYA_BACK_FILL_ENERGY := 0.46
 const MAYA_BACK_FILL_RANGE := 3.0
 const MAYA_BACK_FILL_ATTEN := 1.5
-const MAYA_RIM_ENERGY := 0.10
+const MAYA_RIM_ENERGY := 0.14
 const MAYA_RIM_RANGE := 2.6
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
@@ -419,30 +420,80 @@ func _grade_hero_node(n: Node) -> void:
 		_grade_hero_node(c)
 
 
+func _outline_mat(grow: float) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, cull_front, fog_disabled, shadows_disabled, specular_disabled;
+uniform vec4 albedo : source_color;
+uniform float grow;
+void vertex() {
+	VERTEX += NORMAL * grow;
+}
+void fragment() {
+	ALBEDO = albedo.rgb;
+}
+"""
+	mat.shader = sh
+	mat.set_shader_parameter("albedo", Color(0.07, 0.045, 0.028))
+	mat.set_shader_parameter("grow", grow)
+	return mat
+
+
+func _add_outline_mesh(parent: Node3D, mesh_name: String, mesh: Mesh, pos: Vector3, grow: float) -> void:
+	var mi := MeshInstance3D.new()
+	mi.name = mesh_name
+	mi.mesh = mesh
+	mi.position = pos
+	mi.material_override = _outline_mat(grow)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	mi.layers = MAYA_FOLLOW_LAYER
+	parent.add_child(mi)
+
+
+func _outline_hero_meshes(n: Node) -> void:
+	if n is Camera3D:
+		return
+	var nm := String(n.name)
+	if nm.begins_with("LOOK001") or nm.begins_with("MayaOutline") or nm.begins_with("HP001"):
+		return
+	if nm.find("LOD1") >= 0 or nm.find("LOD2") >= 0:
+		return
+	if n is MeshInstance3D:
+		var src := n as MeshInstance3D
+		if src.mesh and src.get_node_or_null("MayaOutline") == null:
+			_add_outline_mesh(src, "MayaOutline", src.mesh, Vector3.ZERO, 0.070)
+	for c in n.get_children():
+		_outline_hero_meshes(c)
+
+
 func _add_maya_outline(pilot: Node3D) -> void:
-	# Subtle dark-cream shell so Maya holds ≥4.4:1 against the pale sky.
-	# Visual only — no collision, cream albedo on the hero stays.
-	var player: Node = pilot.get_node_or_null("PlayerMaya")
+	# Inverted hull on the hero mesh so the stroke covers head and hands,
+	# plus extra capsules for the T-pose extremities. Visual only.
+	var player: Node3D = pilot.get_node_or_null("PlayerMaya") as Node3D
 	if player == null:
 		return
 	if player.get_node_or_null("MayaOutline") != null:
 		return
-	var mi := MeshInstance3D.new()
-	mi.name = "MayaOutline"
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.40
-	cap.height = 1.92
-	mi.mesh = cap
-	mi.position = Vector3(0.0, 0.90, 0.0)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.cull_mode = BaseMaterial3D.CULL_FRONT
-	mat.albedo_color = Color(0.20, 0.15, 0.10)
-	mat.disable_receive_shadows = true
-	mi.material_override = mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	player.add_child(mi)
+	_outline_hero_meshes(player)
+	var body := CapsuleMesh.new()
+	body.radius = 0.38
+	body.height = 1.62
+	_add_outline_mesh(player, "MayaOutline", body, Vector3(0.0, 0.82, 0.0), 0.055)
+	var head := SphereMesh.new()
+	head.radius = 0.20
+	head.height = 0.40
+	head.radial_segments = 10
+	head.rings = 6
+	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.055)
+	var hand := SphereMesh.new()
+	hand.radius = 0.13
+	hand.height = 0.26
+	hand.radial_segments = 8
+	hand.rings = 4
+	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.050)
+	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.050)
 
 
 func _attach_maya_follow_fill(pilot: Node3D) -> void:
@@ -710,33 +761,24 @@ func _build_environment(pilot: Node3D) -> void:
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_SKY
 	var sky := Sky.new()
-	if ResourceLoader.exists(HP_SKY_TEX):
-		var pano := PanoramaSkyMaterial.new()
-		pano.panorama = load(HP_SKY_TEX)
-		sky.sky_material = pano
-		_env.background_energy_multiplier = 0.78
-		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		_env.ambient_light_color = Color("a3ad92")
-		_env.ambient_light_energy = 0.36
-		_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-		_env.tonemap_exposure = 1.02
-	else:
-		var sky_mat := ProceduralSkyMaterial.new()
-		sky_mat.sky_top_color = Color("3a4844")
-		sky_mat.sky_horizon_color = Color("6a655c")
-		sky_mat.ground_horizon_color = Color("4a5048")
-		sky_mat.ground_bottom_color = Color("10191a")
-		sky_mat.sky_energy_multiplier = 0.32
-		sky_mat.ground_energy_multiplier = 0.18
-		sky_mat.sun_angle_max = 14.0
-		sky_mat.sun_curve = 0.15
-		sky.sky_material = sky_mat
-		_env.background_energy_multiplier = 0.55
-		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		_env.ambient_light_color = Color("6a7c74")
-		_env.ambient_light_energy = 0.62
-		_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-		_env.tonemap_exposure = 1.00
+	# Warm golden dawn. Painted cumulus lives on the follow-cam card
+	# (jungle-sky.jpg). Do not cool the sky to get Maya contrast.
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.98, 0.72, 0.36)
+	sky_mat.sky_horizon_color = Color(1.0, 0.86, 0.58)
+	sky_mat.ground_horizon_color = Color(0.62, 0.42, 0.24)
+	sky_mat.ground_bottom_color = Color(0.14, 0.09, 0.05)
+	sky_mat.sky_energy_multiplier = 0.92
+	sky_mat.ground_energy_multiplier = 0.22
+	sky_mat.sun_angle_max = 18.0
+	sky_mat.sun_curve = 0.12
+	sky.sky_material = sky_mat
+	_env.background_energy_multiplier = 0.88
+	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	_env.ambient_light_color = Color(0.86, 0.68, 0.42)
+	_env.ambient_light_energy = 0.40
+	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	_env.tonemap_exposure = 1.00
 	_env.sky = sky
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	_env.ssr_enabled = true
@@ -762,17 +804,16 @@ func _build_environment(pilot: Node3D) -> void:
 		_env.adjustment_brightness = 1.02
 		_env.adjustment_contrast = 1.04
 		_env.adjustment_saturation = 1.02
-		# Low vol-fog. Olive-grey albedo so mid-distance crowns stay dark
-		# olive, not an ochre cutout. Depth lives in the far haze volumes.
+		# Low vol-fog. Warm amber so the dawn sky does not go teal.
 		_env.volumetric_fog_enabled = true
-		_env.volumetric_fog_density = 0.00105
-		_env.volumetric_fog_albedo = Color(0.52, 0.56, 0.46)
-		_env.volumetric_fog_emission = Color(0.62, 0.64, 0.52)
+		_env.volumetric_fog_density = 0.00095
+		_env.volumetric_fog_albedo = Color(0.90, 0.76, 0.50)
+		_env.volumetric_fog_emission = Color(0.82, 0.64, 0.36)
 		_env.volumetric_fog_emission_energy = 0.0
 		_env.volumetric_fog_anisotropy = 0.28
 		_env.volumetric_fog_length = 52.0
 		_env.volumetric_fog_detail_spread = 1.5
-		_env.volumetric_fog_ambient_inject = 0.38
+		_env.volumetric_fog_ambient_inject = 0.32
 	else:
 		_env.adjustment_brightness = 1.06
 		_env.adjustment_contrast = 0.97
@@ -824,11 +865,11 @@ func _build_lights(pilot: Node3D) -> void:
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		fill.light_color = Color("a3ad92")
-		fill.light_energy = 0.40
+		fill.light_color = Color(1.0, 0.82, 0.56)
+		fill.light_energy = 0.36
 	else:
-		fill.light_color = Color("8a9a88")
-		fill.light_energy = 0.70
+		fill.light_color = Color(0.90, 0.74, 0.52)
+		fill.light_energy = 0.64
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.2
@@ -1060,62 +1101,38 @@ func _hide_water_on_follow_cam(pilot: Node3D) -> void:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
 
 
-func _add_fg_vine_stems(hold: Node3D) -> void:
-	# Texture strands are thin at 40×22.5; a few unshaded stems read like the 2D.
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = Color(0.22, 0.30, 0.12)
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.disable_receive_shadows = true
-	for spec in [
-		{"n": "1", "pos": Vector3(-2.18, 1.55, -3.05), "h": 3.4, "r": 0.035},
-		{"n": "2", "pos": Vector3(-2.02, 1.25, -3.25), "h": 2.7, "r": 0.028},
-		{"n": "3", "pos": Vector3(-2.32, 1.70, -3.45), "h": 3.1, "r": 0.022},
-	]:
-		var mi := MeshInstance3D.new()
-		mi.name = "HP001_FG_Vine_%s" % spec["n"]
-		var cyl := CylinderMesh.new()
-		cyl.top_radius = spec["r"]
-		cyl.bottom_radius = spec["r"] * 0.85
-		cyl.height = spec["h"]
-		cyl.radial_segments = 6
-		cyl.rings = 1
-		mi.mesh = cyl
-		mi.position = spec["pos"]
-		mi.material_override = mat
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-		hold.add_child(mi)
-
-
-func _add_cumulus_blobs(hold: Node3D) -> void:
-	# Guaranteed readable puffs if the panorama sample reads as flat haze.
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = Color(0.78, 0.74, 0.62)
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.disable_receive_shadows = true
-	for spec in [
-		{"n": "A", "pos": Vector3(-8.5, 7.2, -34.0), "s": Vector3(6.4, 2.1, 2.4)},
-		{"n": "B", "pos": Vector3(-1.2, 8.4, -33.0), "s": Vector3(7.8, 2.4, 2.6)},
-		{"n": "C", "pos": Vector3(7.6, 7.6, -35.0), "s": Vector3(6.8, 2.0, 2.2)},
-		{"n": "D", "pos": Vector3(14.0, 6.4, -36.0), "s": Vector3(5.2, 1.7, 2.0)},
-		{"n": "E", "pos": Vector3(-15.0, 6.0, -36.5), "s": Vector3(5.0, 1.6, 1.8)},
-	]:
-		var mi := MeshInstance3D.new()
-		mi.name = "HP001_Cumulus_%s" % spec["n"]
-		var sph := SphereMesh.new()
-		sph.radius = 0.5
-		sph.height = 1.0
-		sph.radial_segments = 10
-		sph.rings = 6
-		mi.mesh = sph
-		mi.scale = spec["s"]
-		mi.position = spec["pos"]
-		mi.material_override = mat
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-		hold.add_child(mi)
+func _curved_liana_mat() -> ShaderMaterial:
+	# Thin greenish-brown catenaries + leaf nubs. No straight rods.
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+void fragment() {
+	vec2 p = UV;
+	float a = 0.0;
+	for (int i = 0; i < 7; i++) {
+		float fi = float(i);
+		float x0 = 0.07 + fi * 0.135;
+		float sag = 0.16 + 0.07 * sin(fi * 1.7 + 0.4);
+		float len = 0.62 + 0.30 * fract(fi * 0.37 + 0.15);
+		float cx = x0 + sag * p.y * p.y + 0.035 * sin(p.y * 8.5 + fi * 1.1);
+		float d = abs(p.x - cx);
+		float thick = mix(0.011, 0.0045, p.y);
+		float along = step(p.y, len) * smoothstep(len, len - 0.10, p.y);
+		a += smoothstep(thick, thick * 0.22, d) * along;
+		float leaf_row = step(0.62, fract(p.y * 16.0 + fi * 0.31));
+		float leaf = leaf_row * step(d, 0.030) * step(abs(p.x - cx - mix(-0.016, 0.016, fract(fi * 0.5))), 0.011);
+		a += leaf * along * 0.90;
+	}
+	if (a < 0.14) {
+		discard;
+	}
+	ALBEDO = vec3(0.30, 0.26, 0.12);
+	ALPHA = clamp(a, 0.0, 1.0);
+}
+"""
+	mat.shader = sh
+	return mat
 
 
 func _add_card(parent: Node, card_name: String, pos: Vector3, size: Vector2, eul: Vector3, mat: Material) -> MeshInstance3D:
@@ -1143,20 +1160,58 @@ func _cloud_card_mat() -> ShaderMaterial:
 render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 uniform sampler2D sky : source_color;
 void fragment() {
-	// Only the painted cumulus band of jungle-sky (not the dark water half).
-	vec2 uv = vec2(fract(UV.x * 0.72 + 0.04), mix(0.36, 0.02, UV.y));
+	// Painted jungle-sky cumulus only (crop hills / waterfalls).
+	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+	float par = eye.x * 0.0038;
+	vec2 uv = vec2(fract(UV.x * 0.82 + par + 0.05), mix(0.34, 0.03, UV.y));
 	vec3 cloud = texture(sky, uv).rgb;
-	float play = smoothstep(0.78, 0.22, UV.y);
-	vec3 sat = cloud * vec3(0.62, 0.70, 0.58);
-	vec3 dusk = vec3(0.13, 0.20, 0.24);
-	ALBEDO = mix(sat, mix(sat, dusk, 0.55), play);
+	cloud *= vec3(1.08, 0.96, 0.78);
+	float haze = smoothstep(0.62, 0.08, UV.y);
+	vec3 warm = vec3(0.98, 0.84, 0.54);
+	ALBEDO = mix(cloud, warm, haze * 0.28);
 }
 """
 	mat.shader = sh
-	if ResourceLoader.exists(HP_SKY_TEX):
+	if ResourceLoader.exists(HP_JUNGLE_SKY):
+		mat.set_shader_parameter("sky", load(HP_JUNGLE_SKY))
+	elif ResourceLoader.exists(HP_SKY_TEX):
 		mat.set_shader_parameter("sky", load(HP_SKY_TEX))
-	elif ResourceLoader.exists("res://textures/hp001_jungle_sky_2d.jpg"):
-		mat.set_shader_parameter("sky", load("res://textures/hp001_jungle_sky_2d.jpg"))
+	return mat
+
+
+func _maya_body_vignette_mat() -> ShaderMaterial:
+	# Opaque warm dark cushion immediately behind Maya so her BODY (cream)
+	# holds ≥4.4:1 against the local background. Edges fade so the dawn sky stays.
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+void fragment() {
+	vec2 d = (UV - vec2(0.50, 0.52)) * vec2(1.02, 1.22);
+	float r = length(d);
+	float a = pow(clamp(1.0 - r * 1.12, 0.0, 1.0), 1.25);
+	ALBEDO = vec3(0.055, 0.036, 0.022);
+	ALPHA = a;
+}
+"""
+	mat.shader = sh
+	return mat
+
+
+func _play_band_dim_mat() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+void fragment() {
+	vec2 d = vec2((UV.x - 0.5) * 0.55, (UV.y - 0.40) * 1.05);
+	float r = length(d);
+	float a = smoothstep(0.98, 0.22, r) * 0.18;
+	ALBEDO = vec3(0.16, 0.10, 0.055);
+	ALPHA = a;
+}
+"""
+	mat.shader = sh
 	return mat
 
 
@@ -1174,32 +1229,29 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	var play_cam := cam as Camera3D
 	if play_cam:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
-	# Fill the 40×22.5 view so cumulus is not a postage stamp on the skybox.
+	# Fill the 40×22.5 view so painted cumulus is not a postage stamp.
 	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 1.4, -38.0), Vector2(78.0, 34.0), Vector3.ZERO, _cloud_card_mat())
-	var dim := StandardMaterial3D.new()
-	dim.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dim.albedo_color = Color(0.12, 0.18, 0.20, 0.28)
-	dim.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	dim.cull_mode = BaseMaterial3D.CULL_DISABLED
-	dim.disable_receive_shadows = true
-	_add_card(hold, "HP001_PlayDim", Vector3(0.0, -0.4, -36.0), Vector2(78.0, 18.0), Vector3.ZERO, dim)
-	_add_cumulus_blobs(hold)
+	_add_card(hold, "HP001_PlayDim", Vector3(0.0, -0.4, -36.0), Vector2(78.0, 18.0), Vector3.ZERO, _play_band_dim_mat())
+	# Tight warm cushion just behind Maya's torso (play plane z ≈ −24.1).
+	# Body reads against this; the outline sits on the fade / sky.
+	_add_card(hold, "HP001_MayaVignette", Vector3(0.0, -0.06, -25.20), Vector2(2.35, 2.85), Vector3.ZERO, _maya_body_vignette_mat())
 	if ResourceLoader.exists(HP_SIL_TEX):
 		var tex: Texture2D = load(HP_SIL_TEX)
 		var near_mat := _scissor_card(tex, Color(0.18, 0.24, 0.12), 0.28)
 		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -3.6, -30.0), Vector2(74.0, 6.4), Vector3.ZERO, near_mat)
 		var far_mat := _scissor_card(tex, Color(0.30, 0.36, 0.22), 0.28)
 		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -2.2, -46.0), Vector2(88.0, 7.2), Vector3.ZERO, far_mat)
+	# Hanging curtain: painted leaves + curved brown-green strands. No rods.
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var liana: Texture2D = load(HP_LIANA_TEX)
-		var lmat := _scissor_card(liana, Color(0.62, 0.70, 0.38), 0.12)
-		# Hang from the top-left like the 2D still — outside Maya's hitbox.
+		var lmat := _scissor_card(liana, Color(0.40, 0.34, 0.16), 0.12)
 		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.05, 1.85, -3.15), Vector2(2.80, 4.60), Vector3.ZERO, lmat)
 		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.35, 1.35, -3.55), Vector2(2.10, 3.80), Vector3.ZERO, lmat)
-	_add_fg_vine_stems(hold)
+	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-2.12, 1.95, -3.05), Vector2(3.20, 5.10), Vector3.ZERO, _curved_liana_mat())
+	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-1.55, 2.10, -3.40), Vector2(2.40, 4.40), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
 	# Laguna still keeps a world-space curtain over the water (art camera).
 	if ResourceLoader.exists(HP_LIANA_TEX):
-		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.78, 0.86, 0.62), 0.22)
+		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.42, 0.36, 0.18), 0.22)
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
 
 
