@@ -69,6 +69,8 @@ Dosel is under the 350k ceiling with ~115k headroom. All views under 250 draws.
 
 `player_maya.gd` was not modified.
 
+HEAD: `06fcdb9e5579d9981aabd8f0bdbf98489b8d04cc` (`cursor/hp001-e1-cuyabeno`). Draft PR, no merge.
+
 ## 6. sha256
 
 See [`COMPARATIVO_2D_3D.md`](COMPARATIVO_2D_3D.md) and `build_report.json` `e2c.captures`.
