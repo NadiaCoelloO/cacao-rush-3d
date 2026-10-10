@@ -75,6 +75,9 @@ func _ready() -> void:
 		return
 	# The tscn export is ignored if it sits above `script =`. Set it here too.
 	_player.camera_offset = Vector3(0.0, 1.0, CAM_DOLLY)
+	var follow_cam := _player.get_node_or_null("Camera3D") as Camera3D
+	if follow_cam:
+		follow_cam.far = 220.0
 	_layout = _load_layout()
 	if _layout.is_empty():
 		return
@@ -212,6 +215,18 @@ func _build_world() -> void:
 	var play := Node3D.new()
 	play.name = "Selva1Geo"
 	_root.add_child(play)
+	# The 40×22.5 side cam sees ~11 m below y=0. P00's 2.7 m depth reads as a
+	# thin lip; fill the lower frame with wet earth so it cannot go black.
+	var dirt := MeshInstance3D.new()
+	dirt.name = "P00_EarthFill"
+	var dirt_q := QuadMesh.new()
+	dirt_q.size = Vector2(220.0, 22.0)
+	dirt.mesh = dirt_q
+	# Top at y=0, z behind the 2.7 m boxes, so Maya and lips stay in front.
+	dirt.position = Vector3(100.0, -11.0, -1.55)
+	dirt.material_override = _earth(COL_EARTH, 0.9)
+	dirt.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	play.add_child(dirt)
 	for raw in _layout["platforms"]:
 		var p: Dictionary = raw
 		var kind := String(p["kind"])
@@ -476,9 +491,8 @@ func _earth(color: Color, rough: float) -> StandardMaterial3D:
 	mat.albedo_color = color
 	mat.roughness = rough
 	mat.metallic = 0.0
-	mat.emission_enabled = true
-	mat.emission = Color(0.28, 0.20, 0.12)
-	mat.emission_energy_multiplier = 0.34
+	# Unshaded so P00's tall side face stays wet-earth brown, not a black slab.
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.disable_receive_shadows = true
 	return mat
 

@@ -162,26 +162,29 @@ La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyaben
 | `maya_feel_check` | **54/54 PASS** |
 | `hp001_lod_hole_check` | **PASS** (constantes + escena instanciada) |
 | `SELVA_CHECK` | 21 / 6 / 24 / 2 / 1 · offset (0, 1, 24.1256) · P01 6.6667 |
-| `selva1_run_probe` | pendiente (este commit) |
+| `selva1_run_probe` | **FAIL** far_x=93.31 · G00=0 · 5 muertes. Pozo verificado y=−18.45 |
 | `player_maya.gd` | no tocado |
+| capturas | Vulkan 1.4 Forward+ (llvmpipe), no OpenGL |
 
 ## sha256
 
+SHA viejos de E2c: **reemplazados** (ver `build_report.json`).
+
 | archivo | sha256 |
 |---|---|
-| `3d_entrance.png` | `0268a7876740fc903671855af1e1794c95001179da1dcdcb120285740579e4fe` |
-| `3d_hazard.png` | `743370b1de6aaa02ef8d73187dcca8275c9ef7ebc26885e5a003e6abc4df01d8` |
-| `3d_cacao.png` | `e3b7ece05a6507afada8bb3973b4b5c1f99b0eab72911a256d27cf6cf86f6bfd` |
+| `3d_entrance.png` | `1132f2e63eadf22df9c04d8d1c3ee281bc45f2a66e62f55bc9276b38b403e46b` |
+| `3d_hazard.png` | `4f40a139c01e24b6d9dfae5dc72a9fd411aac35bacc0b481d193d193347cbc84` |
+| `3d_cacao.png` | `f5b78450d799d5836f86605781e07f13c54e52d727f54d30d17cc94edf207ec7` |
 | `2d_entrance.png` | `da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39` |
-| `2d_hazard.png` | `e7350d1c326b25d6f929b7ee5d263071010ce49b7a9d454025e505c2f35d1fd0` |
+| `2d_hazard.png` | `3b564cbec2ffdd2cde853050ef8295876098692502e90d8e784313f73ae2889d` |
 | `2d_cacao.png` | `497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598` |
-| `cmp_cuyabeno_2d_3d.png` | `4ebc36a30197cfdc997c27045e77a79b83c223be6945037bd4177c6e4c7228a1` |
-| `HP001_E2c_engine_gameplay.png` | `ddc3c6aaa85e1ad6cc3c5f84f0cd0bb607b2915f8d60600f1af8f3f6ef8bc153` |
-| `HP001_E2c_engine_laguna.png` | `6b5ecc523b05762c9a1423bbaa421afeaecc8c9b748fedd5468bca4a0938f37c` |
-| `HP001_E2c_engine_dosel.png` | `e6c2daa60c92137738910d16147e1e0c36fc9db4416c58e680a0d7990fd205c7` |
-| `HP001_E2c_engine_dock_closeup.png` | `c1c2bc660a19977b926e3fb93e3eab29d107de02f5ed2e2e5fce257408169b88` |
-| `HP001_E2c_engine_totem_pods_v4.png` | `791a727f247d1af2ed42ebf10187ac0c2ac0085534798de89124dff1f7a1469f` |
-| `HP001_E2c_engine_cmp_bg.png` | `f5ece443287daf62a7e166bfce2ad2f01ffe7293339628867b6909dc15bba803` |
+| `cmp_cuyabeno_2d_3d.png` | `8e66af66e6f70fa6bf752b930477e457b6f5b85d23069307dee58157c4d1d7d6` |
+| `HP001_E2d_engine_gameplay.png` | `3c4958a8005eb2aee17cdb7f6f615bd23973c9b1387049a86d56705aa7044f0d` |
+| `HP001_E2d_engine_laguna.png` | `3628c2567ddfe2f79b1cc2033abc7ec281b5e6c8a3c60fc54dea6118d38e0981` |
+| `HP001_E2d_engine_dosel.png` | `3f61c63d1622eacc02c4bb730d071c7d353656921f86c116ba652d71ce35ded1` |
+| `HP001_E2d_engine_dock_closeup.png` | `1fac76295ef7c6fe2e08b7d10396c3860c143f2a6a36f871d2565dcdc193435b` |
+| `HP001_E2d_engine_totem_pods_v4.png` | `523431c8a6c627cd78867f6071116baba2863c7e85d95930560bce4f1d2aa913` |
+| `HP001_E2d_engine_cmp_bg.png` | `720e0f85e73cd5afda929db7dfd1b97b361a0c00cba93aea9ddb3400de4c889c` |
 | `hp001_cuyabeno_sky_2k.png` | `5bb9b19567cec3f1131e4121b73a0b59722e9f1350abbd12a0b6995144edbeb3` |
 | `hp001_selva_silhouette.png` | `0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157` |
 | `hp001_fg_liana.png` | `c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90` |

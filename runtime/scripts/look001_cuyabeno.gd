@@ -118,10 +118,10 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_build_lights(pilot)
 	_build_fog()
 	_build_probe()
-		if ResourceLoader.exists(HP_CANOPY_LOD0):
-			_build_side_follow_art(pilot)
-			_build_dosel_cap_cards(pilot)
-			_build_wet_earth_edge(pilot)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		_build_side_follow_art(pilot)
+		_build_dosel_cap_cards(pilot)
+		_build_wet_earth_edge(pilot)
 	if _hp_ok:
 		var hp: Node = HP001_SCRIPT.new()
 		hp.name = "HP001"
@@ -1078,8 +1078,8 @@ void fragment() {
 	vec3 cloud = texture(sky, uv).rgb;
 	// Play band (lower card) is darker / more saturated so cream Maya ≥4.4:1.
 	float play = smoothstep(0.62, 0.18, UV.y);
-	vec3 dusk = vec3(0.28, 0.36, 0.40);
-	ALBEDO = mix(cloud * vec3(0.72, 0.78, 0.70), dusk, play * 0.55);
+	vec3 dusk = vec3(0.16, 0.24, 0.28);
+	ALBEDO = mix(cloud * vec3(0.48, 0.54, 0.50), dusk, play * 0.72);
 }
 """
 	mat.shader = sh
@@ -1103,6 +1103,14 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	cam.add_child(hold)
 	# Level with the view plane (no extra euler) so the top edge is not a slant.
 	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 4.8, -40.0), Vector2(68.0, 18.0), Vector3.ZERO, _cloud_card_mat())
+	# Unshaded veil so the play band stays dark even if the sky shader fails.
+	var dim := StandardMaterial3D.new()
+	dim.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dim.albedo_color = Color(0.18, 0.24, 0.26, 0.42)
+	dim.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dim.cull_mode = BaseMaterial3D.CULL_DISABLED
+	dim.disable_receive_shadows = true
+	_add_card(hold, "HP001_PlayDim", Vector3(0.0, 1.2, -36.0), Vector2(72.0, 22.0), Vector3.ZERO, dim)
 	if ResourceLoader.exists(HP_SIL_TEX):
 		var tex: Texture2D = load(HP_SIL_TEX)
 		var near_mat := _scissor_card(tex, Color(0.14, 0.18, 0.10), 0.32)
@@ -1132,18 +1140,24 @@ func _build_dosel_cap_cards(pilot: Node3D) -> void:
 	var play_cam: Camera3D = pilot.get_node_or_null("PlayerMaya/Camera3D") as Camera3D
 	if play_cam:
 		play_cam.cull_mask = play_cam.cull_mask & ~bit
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.albedo_color = Color(0.10, 0.14, 0.08)
-	mat.disable_receive_shadows = true
+	var mat: Material
+	if ResourceLoader.exists(HP_SIL_TEX):
+		mat = _scissor_card(load(HP_SIL_TEX), Color(0.10, 0.14, 0.08), 0.28)
+	else:
+		var solid := StandardMaterial3D.new()
+		solid.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		solid.cull_mode = BaseMaterial3D.CULL_DISABLED
+		solid.albedo_color = Color(0.10, 0.14, 0.08)
+		solid.disable_receive_shadows = true
+		mat = solid
 	var hold := Node3D.new()
 	hold.name = "HP001_DoselCap"
 	cam.add_child(hold)
+	# Level band at the top of the frame only — not a solid black curtain.
 	for spec in [
-		{"n": "C", "pos": Vector3(0.0, 4.55, -11.0), "size": Vector2(20.0, 4.0)},
-		{"n": "L", "pos": Vector3(-5.6, 3.85, -9.4), "size": Vector2(10.0, 3.4)},
-		{"n": "R", "pos": Vector3(5.8, 4.15, -10.2), "size": Vector2(10.5, 3.6)},
+		{"n": "C", "pos": Vector3(0.0, 5.15, -10.5), "size": Vector2(16.0, 2.4)},
+		{"n": "L", "pos": Vector3(-5.2, 4.55, -9.2), "size": Vector2(8.0, 2.2)},
+		{"n": "R", "pos": Vector3(5.4, 4.75, -9.6), "size": Vector2(8.5, 2.2)},
 	]:
 		var mi := _add_card(hold, "HP001_DoselCap_%s" % spec["n"], spec["pos"], spec["size"], Vector3.ZERO, mat)
 		mi.layers = bit
