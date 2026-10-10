@@ -191,9 +191,10 @@ func capture_still(shot: String, out_path: String) -> void:
 	var cam: Camera3D
 	var pods_cam: Camera3D = null
 	if shot == "gameplay":
-		# Actual follow-cam at scene spawn. Do not teleport to MAYA_STILL.
+		# Follow-cam at the 1:1 selva-1 spawn on P00. Do not use MAYA_STILL
+		# and do not put Maya on the tscn feel spawn (x=0 is the P00 lip).
 		if player:
-			player.global_position = Vector3(2.0, 1.2, 0.0)
+			player.global_position = Vector3(4.5417, 1.2, 0.0)
 			player.rotation = Vector3.ZERO
 			player.set_physics_process(true)
 		cam = play_cam

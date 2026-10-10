@@ -3,7 +3,7 @@ extends Node3D
 ## LOOK-001 + HP-001 art stay at y=0 (totem, dock, lagoon). Gameplay geometry is
 ## the full selva-1 port (21 platforms, real drop-through oneways, 6 hazards,
 ## pickups, 2 poles, goal) from `selva1_play.gd`. CSGPlatform at (6, 0.5, 0)
-## stays as the 1 m feel ledge; CSGFloor and CSGOneway collision are off.
+## stays as the 1 m feel ledge (CSGFloor + CSGOneway also on during feel only).
 ## Side camera 40×22.5 m (`camera_offset` after `script =`, set again in play
 ## `_ready`). player_maya.gd timings and Maya's capsule are not touched.
 

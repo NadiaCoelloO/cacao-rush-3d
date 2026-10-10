@@ -61,6 +61,7 @@ var _message := ""
 var _message_t := 0.0
 var _hint: Label
 var _root: Node3D
+var _feel := false
 
 
 func _ready() -> void:
@@ -73,18 +74,22 @@ func _ready() -> void:
 	_layout = _load_layout()
 	if _layout.is_empty():
 		return
-	_disable_slice_boxes(pilot)
+	_feel = _is_feel_harness()
+	_disable_slice_boxes(pilot, _feel)
 	_root = pilot.get_node_or_null("WorldRoot") as Node3D
 	if _root == null:
 		return
+	# Feel harness keeps the 24 m CSG floor + 1 m ledge + CSGOneway lip.
+	# Play/capture builds the real selva-1 strip and uses the 1:1 spawn.
+	if _feel:
+		return
 	_build_world()
-	if not _is_feel_harness():
-		var spawn: Array = _layout["meta"]["spawn_feet_m"]
-		var feet := Vector3(float(spawn[0]), float(spawn[1]), float(spawn[2]))
-		_player.global_position = feet
-		var xf: Transform3D = _player._spawn
-		xf.origin = feet
-		_player._spawn = xf
+	var spawn: Array = _layout["meta"]["spawn_feet_m"]
+	var feet := Vector3(float(spawn[0]), float(spawn[1]), float(spawn[2]))
+	_player.global_position = feet
+	var xf: Transform3D = _player._spawn
+	xf.origin = feet
+	_player._spawn = xf
 	_hint = pilot.get_node_or_null("UI/Hud/HintLabel") as Label
 	var hud_label := pilot.get_node_or_null("UI/Hud/WorldLabel") as Label
 	if hud_label:
@@ -107,7 +112,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _player == null:
+	if _player == null or _feel:
 		return
 	if not _capturing and _status == "playing" and _hitstop <= 0.0:
 		_time += delta
@@ -126,7 +131,7 @@ func _process(delta: float) -> void:
 
 
 func late_physics(delta: float) -> void:
-	if _player == null:
+	if _player == null or _feel:
 		return
 	_tick_crumbles(delta)
 	if _capturing:
@@ -139,16 +144,12 @@ func late_physics(delta: float) -> void:
 
 
 func _is_feel_harness() -> bool:
-	if not OS.has_feature("headless"):
-		return false
-	if OS.get_environment("LOOK001_CAPTURE") != "" or OS.get_environment("SELVA_CAPTURE") != "":
-		return false
-	if OS.get_environment("SELVA_CHECK") != "":
-		return false
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--look001-capture") or a.begins_with("--selva-capture") or a == "--selva-check":
-			return false
-	return true
+	# maya_feel_check instantiates the packed scene into its own SceneTree.
+	# OS.has_feature("headless") is not set for `--headless -s` on 4.2.2.
+	var tree := get_tree()
+	if tree == null:
+		return true
+	return tree.current_scene != get_parent()
 
 
 func _load_layout() -> Dictionary:
@@ -162,16 +163,17 @@ func _load_layout() -> Dictionary:
 	return parsed
 
 
-func _disable_slice_boxes(pilot: Node3D) -> void:
-	# Keep CSGPlatform (6, 0.5, 0) for the 1 m feel ledge. Kill the 24 m floor
-	# and the solid oneway box so selva-1 one-ways are the real drop-throughs.
+func _disable_slice_boxes(pilot: Node3D, keep_feel_ledge: bool) -> void:
+	# Feel: CSGFloor (24 m, top y=0) + CSGPlatform (1 m ledge) + CSGOneway lip.
+	# Play/capture: all three off. P00 is the floor; P01 is the real drop-through.
 	for path in [
 		"WorldRoot/FloorPlaceholder/CSGFloor",
+		"WorldRoot/FloorPlaceholder/CSGPlatform",
 		"WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder/CSGOneway",
 	]:
 		var n: Node = pilot.get_node_or_null(path)
 		if n is CSGShape3D:
-			(n as CSGShape3D).use_collision = false
+			(n as CSGShape3D).use_collision = keep_feel_ledge
 
 
 func _build_world() -> void:
