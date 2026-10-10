@@ -1223,10 +1223,10 @@ func _maya_body_vignette_mat() -> ShaderMaterial:
 	sh.code = """shader_type spatial;
 render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 void fragment() {
-	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(1.08, 0.98);
+	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(1.04, 0.96);
 	float r = length(d);
-	float a = 1.0 - smoothstep(0.28, 0.56, r);
-	ALBEDO = vec3(0.012, 0.007, 0.003);
+	float a = 1.0 - smoothstep(0.32, 0.58, r);
+	ALBEDO = vec3(0.007, 0.004, 0.002);
 	ALPHA = a;
 }
 """
@@ -1288,7 +1288,7 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	# Parent to Maya so level-edge cam clamp (entrance x=20) cannot miss her.
 	var player: Node3D = pilot.get_node_or_null("PlayerMaya") as Node3D
 	if player:
-		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.86, -0.85), Vector2(2.15, 2.75), Vector3.ZERO, _maya_body_vignette_mat())
+		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.86, -0.85), Vector2(2.30, 2.90), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
