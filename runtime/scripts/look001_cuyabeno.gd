@@ -1244,7 +1244,7 @@ func _play_jungle_mat() -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
-render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled, ambient_light_disabled, depth_draw_opaque;
 uniform sampler2D sil : source_color;
 void fragment() {
 	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
@@ -1258,30 +1258,30 @@ void fragment() {
 	vec3 s2 = texture(sil, vec2(u2, mix(0.06, 0.94, fract((1.0 - vy) * 0.68 + 0.16)))).rgb;
 	vec3 silc = mix(s2, s1, wrap);
 	float leaf = 1.0 - smoothstep(0.16, 0.82, dot(silc, vec3(0.30, 0.59, 0.11)));
-	float n = 0.48 + 0.34 * sin((vx + par) * 17.0) * sin(vy * 13.0 + 1.1);
-	n += 0.22 * sin((vx * 0.52 + par * 0.4) * 7.2 + vy * 9.4);
-	n += 0.14 * sin((vx + par * 0.22) * 39.0 + vy * 27.0);
-	float clump = smoothstep(0.26, 0.84, n);
-	vec3 earth = vec3(0.048, 0.036, 0.018);
-	vec3 olive = vec3(0.090, 0.118, 0.046);
-	vec3 moss = vec3(0.125, 0.158, 0.064);
+	float n = 0.48 + 0.36 * sin((vx + par) * 15.0) * sin(vy * 11.0 + 1.1);
+	n += 0.24 * sin((vx * 0.50 + par * 0.4) * 6.4 + vy * 8.2);
+	n += 0.16 * sin((vx + par * 0.22) * 33.0 + vy * 23.0);
+	float clump = smoothstep(0.24, 0.86, n);
+	vec3 earth = vec3(0.014, 0.011, 0.006);
+	vec3 olive = vec3(0.022, 0.030, 0.012);
+	vec3 moss = vec3(0.030, 0.038, 0.016);
 	vec3 col = mix(earth, olive, leaf);
-	col = mix(col, moss, clump * 0.58);
-	col *= mix(0.70, 1.06, smoothstep(1.0, 0.32, vy));
-	float scallop = 0.052 * sin((vx + par * 0.28) * 7.0);
-	scallop += 0.034 * sin(vx * 14.8 + 0.9);
-	scallop += 0.020 * sin(vx * 29.0 + 2.2);
-	scallop += 0.012 * sin(vx * 61.0 + par);
-	scallop -= 0.038 * smoothstep(0.60, 0.94, sin(vx * 21.0 + par) * sin(vx * 9.2));
-	float wave = 0.09 + scallop;
-	float foliage = smoothstep(wave - 0.11, wave + 0.18, vy);
-	float haze = 1.0 - smoothstep(wave - 0.02, wave + 0.24, vy);
-	col = mix(col, vec3(0.32, 0.23, 0.10), haze * 0.30);
-	if (foliage < 0.02) {
+	col = mix(col, moss, clump * 0.62);
+	col *= mix(0.72, 1.08, smoothstep(1.0, 0.30, vy));
+	float scallop = 0.058 * sin((vx + par * 0.28) * 6.6);
+	scallop += 0.038 * sin(vx * 13.5 + 0.9);
+	scallop += 0.024 * sin(vx * 27.0 + 2.2);
+	scallop += 0.014 * sin(vx * 55.0 + par);
+	scallop -= 0.042 * smoothstep(0.58, 0.94, sin(vx * 19.0 + par) * sin(vx * 8.6));
+	float wave = 0.10 + scallop;
+	float edge = (vy - (wave - 0.03)) / 0.16;
+	float dither = fract(sin(dot(UV * vec2(97.0, 53.0), vec2(12.9898, 78.233))) * 43758.5453);
+	if (edge + dither * 0.62 < 0.48) {
 		discard;
 	}
+	float haze = 1.0 - smoothstep(wave, wave + 0.22, vy);
+	col = mix(col, vec3(0.16, 0.12, 0.05), haze * 0.20);
 	ALBEDO = col;
-	ALPHA = foliage;
 }
 """
 	mat.shader = sh

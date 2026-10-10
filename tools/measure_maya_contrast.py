@@ -59,19 +59,19 @@ def cream_mask(im: np.ndarray) -> np.ndarray:
     mx = np.maximum(np.maximum(r, g), b)
     mn = np.minimum(np.minimum(r, g), b)
     return (
-        (r >= 130)
-        & (r <= 215)
-        & (g >= 100)
+        (r >= 150)
+        & (r <= 225)
+        & (g >= 105)
         & (g <= 185)
-        & (b >= 70)
-        & (b <= 140)
-        & (r >= g + 8)
-        & (r >= b + 10)
-        & ((mx - mn) >= 20)
-        & (g >= (0.68 * r))
-        & (g <= (0.98 * r))
-        & (b >= (0.42 * r))
-        & (b <= (0.72 * r))
+        & (b >= 60)
+        & (b <= 130)
+        & (r >= g + 18)
+        & (r >= b + 28)
+        & ((mx - mn) >= 28)
+        & (g >= (0.62 * r))
+        & (g <= (0.90 * r))
+        & (b >= (0.32 * r))
+        & (b <= (0.62 * r))
     )
 
 
@@ -140,8 +140,8 @@ def measure_maya(path: Path, x_m=None) -> dict:
     im = np.array(Image.open(path).convert("RGB"))
     cream = cream_mask(im)
     n_cream = int(cream.sum())
-    if n_cream > 400:
-        cream = densest_window(cream, 56, 80, 20, 900)
+    if n_cream > 200:
+        cream = densest_window(cream, 40, 72, 30, 400)
         n_cream = int(cream.sum())
     if n_cream < 12:
         return {"file": path.name, "x_m": x_m, "error": "maya body not found", "cream_n": n_cream}
