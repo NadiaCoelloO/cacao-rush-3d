@@ -17,7 +17,8 @@ const HP001_SCRIPT := preload("res://scripts/hp001_cuyabeno.gd")
 const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
 const HP_CANOPY_LOD0 := "res://models/hp001/canopy_cuyabeno_hp_LOD0.glb"
 const HP_SKY_TEX := "res://textures/hp001_cuyabeno_sky_2k.png"
-const HP_FALLS_TEX := "res://textures/hp001_waterfall_card.png"
+const HP_SIL_TEX := "res://textures/hp001_selva_silhouette.png"
+const HP_LIANA_TEX := "res://textures/hp001_fg_liana.png"
 
 const WATER_Y := -0.12
 const TOTEM_XZ := Vector3(7.5, 0.0, 0.0)
@@ -34,13 +35,15 @@ const TOTEM_LIGHT_DIM := 0.35
 const MAYA_BODY := Color("8f8578")
 const MAYA_HAIR := Color("6b5a46")
 const MAYA_PACK := Color("8a7358")
-const ONEWAY_SLAB := Color("847866")
+const ONEWAY_SLAB := Color("3a2a1c")
 const ONEWAY_CUE := Color("4a3a2a")
-const PLAT_ALBEDO := Color(0.62, 0.57, 0.48)
+## Wet várzea earth — dark brown, not the old light-grey slabs.
+const PLAT_ALBEDO := Color(0.20, 0.14, 0.09)
+const PLAT_WET_EDGE := Color(0.10, 0.08, 0.06)
 ## Soft top-edge lift on greybox platforms only (not Maya). Keep this low —
 ## combined with the path lights, 0.4+ reads as white puro.
-const PLAT_EMIT := Color(0.42, 0.38, 0.32)
-const PLAT_EMIT_ENERGY := 0.14
+const PLAT_EMIT := Color(0.16, 0.12, 0.08)
+const PLAT_EMIT_ENERGY := 0.05
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -114,7 +117,9 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_build_fog()
 	_build_probe()
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		_build_distant_falls(pilot)
+		_build_distant_selva(pilot)
+		_build_fg_curtains(pilot)
+		_build_wet_earth_edge(pilot)
 	if _hp_ok:
 		var hp: Node = HP001_SCRIPT.new()
 		hp.name = "HP001"
@@ -188,7 +193,7 @@ func capture_still(shot: String, out_path: String) -> void:
 	if shot == "gameplay":
 		# Actual follow-cam at scene spawn. Do not teleport to MAYA_STILL.
 		if player:
-			player.global_position = Vector3(0.0, 1.2, 0.0)
+			player.global_position = Vector3(2.0, 1.2, 0.0)
 			player.rotation = Vector3.ZERO
 			player.set_physics_process(true)
 		cam = play_cam
@@ -530,7 +535,7 @@ func _rim_platform_mat(d: BaseMaterial3D) -> void:
 	d.emission_enabled = true
 	d.emission = PLAT_EMIT
 	d.emission_energy_multiplier = PLAT_EMIT_ENERGY
-	d.roughness = 0.50
+	d.roughness = 0.78
 	d.metallic = 0.0
 
 
@@ -710,18 +715,18 @@ func _build_environment(pilot: Node3D) -> void:
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
 		_env.adjustment_brightness = 1.02
 		_env.adjustment_contrast = 1.04
-		_env.adjustment_saturation = 1.04
-		# Low vol-fog preset kept (detail_spread 1.5). Warm gold + longer
-		# length for depth; density held so the scene does not milk out.
+		_env.adjustment_saturation = 1.02
+		# Low vol-fog. Olive-grey albedo so mid-distance crowns stay dark
+		# olive, not an ochre cutout. Depth lives in the far haze volumes.
 		_env.volumetric_fog_enabled = true
-		_env.volumetric_fog_density = 0.0016
-		_env.volumetric_fog_albedo = Color("f0d49a")
-		_env.volumetric_fog_emission = Color("ead8aa")
-		_env.volumetric_fog_emission_energy = 0.03
-		_env.volumetric_fog_anisotropy = 0.42
-		_env.volumetric_fog_length = 80.0
+		_env.volumetric_fog_density = 0.00105
+		_env.volumetric_fog_albedo = Color(0.52, 0.56, 0.46)
+		_env.volumetric_fog_emission = Color(0.62, 0.64, 0.52)
+		_env.volumetric_fog_emission_energy = 0.0
+		_env.volumetric_fog_anisotropy = 0.28
+		_env.volumetric_fog_length = 52.0
 		_env.volumetric_fog_detail_spread = 1.5
-		_env.volumetric_fog_ambient_inject = 0.50
+		_env.volumetric_fog_ambient_inject = 0.38
 	else:
 		_env.adjustment_brightness = 1.06
 		_env.adjustment_contrast = 0.97
@@ -751,8 +756,8 @@ func _build_lights(pilot: Node3D) -> void:
 		var to_sun := Vector3(cos(el) * cos(az), sin(el), cos(el) * sin(az))
 		key.position = to_sun * 42.0
 		key.light_color = Color(1.0, 0.78, 0.45)
-		key.light_energy = 1.45
-		key.light_volumetric_fog_energy = 1.55
+		key.light_energy = 1.35
+		key.light_volumetric_fog_energy = 0.85
 		key.light_specular = 0.28
 		if key.get("light_angular_distance") != null:
 			key.set("light_angular_distance", 2.0)
@@ -797,7 +802,7 @@ func _build_lights(pilot: Node3D) -> void:
 		canopy_rim.light_energy = 0.38
 		canopy_rim.light_specular = 0.15
 		canopy_rim.shadow_enabled = false
-		canopy_rim.light_volumetric_fog_energy = 0.85
+		canopy_rim.light_volumetric_fog_energy = 0.25
 		add_child(canopy_rim)
 		canopy_rim.look_at(Vector3(0.0, 10.0, -6.0), Vector3.UP)
 
@@ -919,8 +924,8 @@ func _build_fog() -> void:
 	var bank_mat := FogMaterial.new()
 	bank_mat.density = 0.62
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		bank_mat.albedo = Color("f0d49a")
-		bank_mat.density = 0.48
+		bank_mat.albedo = Color(0.58, 0.62, 0.50)
+		bank_mat.density = 0.36
 	else:
 		bank_mat.albedo = Color(0.74, 0.76, 0.70)
 	bank_mat.height_falloff = 0.55
@@ -932,8 +937,8 @@ func _build_fog() -> void:
 	var trunk_mat := FogMaterial.new()
 	trunk_mat.density = 0.18
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		trunk_mat.albedo = Color("ead8aa")
-		trunk_mat.density = 0.14
+		trunk_mat.albedo = Color(0.50, 0.54, 0.44)
+		trunk_mat.density = 0.10
 	else:
 		trunk_mat.albedo = Color(0.68, 0.72, 0.66)
 	trunk_mat.height_falloff = 0.25
@@ -950,10 +955,10 @@ func _build_fog() -> void:
 	haze.position = Vector3(0.0, 14.0, -18.0)
 	var haze_mat := FogMaterial.new()
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		haze.size = Vector3(180.0, 36.0, 140.0)
-		haze.position = Vector3(0.0, 16.0, -42.0)
-		haze_mat.density = 0.018
-		haze_mat.albedo = Color("ead8aa")
+		haze.size = Vector3(180.0, 14.0, 140.0)
+		haze.position = Vector3(0.0, 7.0, -48.0)
+		haze_mat.density = 0.014
+		haze_mat.albedo = Color(0.48, 0.52, 0.42)
 	else:
 		haze_mat.density = 0.032
 		haze_mat.albedo = Color(0.66, 0.70, 0.64)
@@ -980,51 +985,103 @@ func _build_fog() -> void:
 		var ridge := FogVolume.new()
 		ridge.name = "HP001_RidgeHaze"
 		ridge.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-		ridge.size = Vector3(220.0, 48.0, 90.0)
-		ridge.position = Vector3(-8.0, 22.0, -95.0)
+		ridge.size = Vector3(220.0, 16.0, 80.0)
+		ridge.position = Vector3(-8.0, 8.0, -92.0)
 		var ridge_mat := FogMaterial.new()
-		ridge_mat.density = 0.022
-		ridge_mat.albedo = Color("d2cdb4")
+		ridge_mat.density = 0.016
+		ridge_mat.albedo = Color(0.56, 0.58, 0.50)
 		ridge_mat.height_falloff = 0.03
 		ridge_mat.edge_fade = 0.35
 		ridge.material = ridge_mat
 		add_child(ridge)
 
 
-func _build_distant_falls(pilot: Node3D) -> void:
-	if not ResourceLoader.exists(HP_FALLS_TEX):
-		return
-	var tex: Texture2D = load(HP_FALLS_TEX)
+func _scissor_card(tex: Texture2D, tint: Color, cutoff: float) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	mat.alpha_scissor_threshold = 0.22
+	mat.alpha_scissor_threshold = cutoff
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_texture = tex
-	mat.albedo_color = Color(0.92, 0.90, 0.82)
+	mat.albedo_color = tint
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
+	return mat
+
+
+func _add_card(parent: Node, card_name: String, pos: Vector3, size: Vector2, eul: Vector3, mat: Material) -> MeshInstance3D:
+	var plane := PlaneMesh.new()
+	plane.size = size
+	var mi := MeshInstance3D.new()
+	mi.name = card_name
+	mi.mesh = plane
+	mi.material_override = mat
+	mi.position = pos
+	mi.rotation = eul
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	parent.add_child(mi)
+	return mi
+
+
+func _build_distant_selva(pilot: Node3D) -> void:
+	# Flat várzea: 3 receding treeline strips + aerial haze. No hills, no falls.
 	var root := Node3D.new()
-	root.name = "HP001_DistantFalls"
+	root.name = "HP001_DistantSelva"
 	pilot.add_child(root)
-	# Silhouettes on the far −Z ridge, upper-left of Cam_Laguna / cmp_bg.
-	var cards := [
-		{"pos": Vector3(-38.0, 14.0, -118.0), "size": Vector2(22.0, 38.0), "yaw": 18.0},
-		{"pos": Vector3(-22.0, 11.5, -132.0), "size": Vector2(16.0, 30.0), "yaw": -8.0},
-		{"pos": Vector3(18.0, 13.0, -140.0), "size": Vector2(14.0, 26.0), "yaw": 6.0},
-	]
-	for i in cards.size():
-		var spec: Dictionary = cards[i]
-		var plane := PlaneMesh.new()
-		plane.size = spec["size"]
-		var mi := MeshInstance3D.new()
-		mi.name = "HP001_Falls_%02d" % i
-		mi.mesh = plane
-		mi.material_override = mat
-		mi.position = spec["pos"]
-		mi.rotation.y = deg_to_rad(spec["yaw"])
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-		root.add_child(mi)
+	if ResourceLoader.exists(HP_SIL_TEX):
+		var tex: Texture2D = load(HP_SIL_TEX)
+		var strips := [
+			{"pos": Vector3(0.0, 4.1, -48.0), "size": Vector2(130.0, 9.0), "tint": Color(0.16, 0.20, 0.11), "yaw": 0.0},
+			{"pos": Vector3(-6.0, 4.6, -70.0), "size": Vector2(160.0, 8.2), "tint": Color(0.28, 0.32, 0.22), "yaw": 4.0},
+			{"pos": Vector3(4.0, 5.0, -96.0), "size": Vector2(190.0, 7.4), "tint": Color(0.42, 0.44, 0.36), "yaw": -3.0},
+		]
+		for i in strips.size():
+			var spec: Dictionary = strips[i]
+			var mat := _scissor_card(tex, spec["tint"], 0.35)
+			_add_card(root, "HP001_SelvaSil_%02d" % i, spec["pos"], spec["size"], Vector3(0.0, deg_to_rad(spec["yaw"]), 0.0), mat)
+	# Extra strip pair on +Z so gameplay looking −Z still has a far bank.
+	if ResourceLoader.exists(HP_SIL_TEX):
+		var tex2: Texture2D = load(HP_SIL_TEX)
+		var mat_b := _scissor_card(tex2, Color(0.22, 0.26, 0.16), 0.35)
+		_add_card(root, "HP001_SelvaSil_back", Vector3(0.0, 4.4, 36.0), Vector2(110.0, 8.0), Vector3(0.0, PI, 0.0), mat_b)
+
+
+func _build_fg_curtains(pilot: Node3D) -> void:
+	if not ResourceLoader.exists(HP_LIANA_TEX):
+		return
+	var tex: Texture2D = load(HP_LIANA_TEX)
+	var mat := _scissor_card(tex, Color(0.85, 0.92, 0.70), 0.28)
+	# Parent to the follow cam: stays in the top/side of the gameplay frame,
+	# outside the walkable strip, no collision.
+	var cam: Node = pilot.get_node_or_null("PlayerMaya/Camera3D")
+	if cam:
+		_add_card(cam, "HP001_FG_Liana_L", Vector3(-1.62, 1.22, -2.28), Vector2(2.35, 3.15), Vector3(deg_to_rad(10.0), deg_to_rad(16.0), deg_to_rad(-4.0)), mat)
+		_add_card(cam, "HP001_FG_Liana_R", Vector3(1.95, 1.38, -2.50), Vector2(1.70, 2.45), Vector3(deg_to_rad(8.0), deg_to_rad(-22.0), deg_to_rad(6.0)), mat)
+	# Laguna still: one curtain near Cam_Laguna, upper-left, over the water.
+	_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), mat)
+
+
+func _build_wet_earth_edge(pilot: Node3D) -> void:
+	# Visual only: darker wet lip where the playable earth meets black water.
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = PLAT_WET_EDGE
+	mat.roughness = 0.82
+	mat.metallic = 0.0
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(24.0, 0.85)
+	var mi := MeshInstance3D.new()
+	mi.name = "HP001_WetEarthEdge"
+	mi.mesh = plane
+	mi.material_override = mat
+	mi.position = Vector3(0.0, 0.012, -3.85)
+	mi.rotation.x = deg_to_rad(-90.0)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	var world: Node = pilot.get_node_or_null("WorldRoot")
+	if world:
+		world.add_child(mi)
+	else:
+		pilot.add_child(mi)
 
 
 func _make_fog_volume(vol_name: String, spec: Dictionary, mat: FogMaterial) -> FogVolume:

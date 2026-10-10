@@ -93,6 +93,7 @@ func wire(pilot: Node3D) -> bool:
 	_wire_totem(pilot)
 	_wire_trunks(pilot)
 	_wire_canopy(pilot)
+	_wire_hanging(pilot)
 	_wire_dock(pilot)
 	_wire_groundcover(pilot)
 	print("HP001 wired totem + trunks + canopy v2 + dock + groundcover")
@@ -233,8 +234,8 @@ func _wire_canopy(pilot: Node3D) -> void:
 	var mat: BaseMaterial3D = kit["mat"]
 	if mat:
 		_harden_mat(mat, 0.5, true)
-		# Leaf grade toward sunlit yellow-green (README sat↑ hue− val↑), not olive.
-		mat.albedo_color = Color(1.10, 1.16, 0.80)
+		# Dark olive — mid-distance crowns must not pick up ochre fog.
+		mat.albedo_color = Color(0.86, 0.96, 0.72)
 	var placements := _canopy_placements()
 	var world: Node3D = pilot.get_node_or_null("WorldRoot")
 	var root := Node3D.new()
@@ -304,6 +305,74 @@ func _wire_canopy(pilot: Node3D) -> void:
 	print("HP001 canopy: ", placements.size(), " crowns, ", mm_count, " MultiMeshes")
 
 
+func _wire_hanging(pilot: Node3D) -> void:
+	var kit := _load_named_kit(CANOPY, ["Short", "Long"], "Canopy_Hanging_%s_LOD%d", "M_Canopy_HP")
+	var meshes: Dictionary = kit["meshes"]
+	if meshes.is_empty():
+		return
+	var mat: BaseMaterial3D = kit["mat"]
+	if mat:
+		_harden_mat(mat, 0.5, true)
+		mat.albedo_color = Color(0.86, 0.96, 0.72)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261011
+	var xforms: Array = []
+	for t in _load_trees():
+		if typeof(t) != TYPE_DICTIONARY:
+			continue
+		if rng.randf() > 0.55:
+			continue
+		var variant := String(t.get("variant", "Medium"))
+		if not CANOPY_KIND.has(variant):
+			continue
+		var xf := _xform_from(t)
+		var off: Vector3 = CANOPY_LOCAL_OFF[variant]
+		off.y *= 0.92
+		off.x += rng.randf_range(-0.6, 0.6)
+		off.z += rng.randf_range(-0.5, 0.5)
+		var origin := xf * off
+		var yaw := rng.randf() * TAU
+		var s := rng.randf_range(0.9, 1.25)
+		xforms.append({"kind": "Long" if rng.randf() < 0.5 else "Short", "xf": Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3(s, s, s)), origin)})
+	if xforms.is_empty():
+		return
+	var world: Node3D = pilot.get_node_or_null("WorldRoot")
+	var root := Node3D.new()
+	root.name = "HP001_Hanging"
+	if world:
+		world.add_child(root)
+	else:
+		add_child(root)
+	for kind in ["Short", "Long"]:
+		var bunch: Array = []
+		for p in xforms:
+			if String(p["kind"]) == kind:
+				bunch.append(p["xf"])
+		if bunch.is_empty() or not meshes.has("%s_0" % kind):
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = meshes["%s_0" % kind]
+		mm.instance_count = bunch.size()
+		var centroid := Vector3.ZERO
+		for xf in bunch:
+			centroid += (xf as Transform3D).origin
+		centroid /= float(bunch.size())
+		for i in bunch.size():
+			var world_xf: Transform3D = bunch[i]
+			mm.set_instance_transform(i, Transform3D(world_xf.basis, world_xf.origin - centroid))
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "HP001_Hanging_%s" % kind
+		mmi.multimesh = mm
+		mmi.position = centroid
+		if mat:
+			mmi.material_override = mat
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		root.add_child(mmi)
+	print("HP001 hanging strands: ", xforms.size())
+
+
 func _canopy_placements() -> Array:
 	var out: Array = []
 	var rng := RandomNumberGenerator.new()
@@ -347,6 +416,10 @@ func _canopy_placements() -> Array:
 		{"kind": "Small", "origin": Vector3(10.5, 17.0, -30.0)},
 		{"kind": "Large", "origin": Vector3(-16.0, 16.6, -8.5)},
 		{"kind": "Medium", "origin": Vector3(4.2, 18.0, -34.0)},
+		# Overhead layer that enters the top of the gameplay frame (cam at z≈6.5, look −Z).
+		{"kind": "Large", "origin": Vector3(0.6, 15.1, 1.8)},
+		{"kind": "Medium", "origin": Vector3(-3.2, 14.6, 2.6)},
+		{"kind": "Large", "origin": Vector3(3.8, 15.6, 0.4)},
 	]
 	for spec in fillers:
 		var yaw := rng.randf() * TAU
@@ -598,7 +671,50 @@ func _scatter_groundcover() -> Array:
 		n_lily += 1
 		if flower:
 			n_flower += 1
+	# Forced flower in the laguna/gameplay water so Identidad sees at least one.
+	if LILY_FLOWER_ENABLED:
+		out.append({"kind": "WaterLily", "xf": _gc_xform(Vector3(12.05, -0.12, -13.15), rng)})
+		out.append({"kind": "WaterLily", "xf": _gc_xform(Vector3(9.40, -0.12, -9.60), rng)})
+	# Hojarasca / fern / cacao on platform edges — not on the walk lane or pickups.
+	out.append_array(_scatter_platform_cover(rng))
 	return out
+
+
+func _scatter_platform_cover(rng: RandomNumberGenerator) -> Array:
+	var out: Array = []
+	# Floor-edge litter (wet earth toward the lagoon and the +Z bank).
+	var n := 0
+	var tries := 0
+	while n < 18 and tries < 160:
+		tries += 1
+		var shore := -1.0 if rng.randf() < 0.55 else 1.0
+		var p := Vector3(rng.randf_range(-8.5, 9.5), 0.02, shore * rng.randf_range(2.25, 3.55))
+		if _gc_on_path(p) or _gc_blocked(p):
+			continue
+		var kind := "CacaoLeaves" if rng.randf() < 0.62 else "Fern"
+		out.append({"kind": kind, "xf": _gc_xform(p, rng)})
+		n += 1
+	# Raised solid (6,1,0) — corners only.
+	var corners := [
+		Vector3(4.85, 1.02, -1.15), Vector3(7.15, 1.02, -1.15),
+		Vector3(4.85, 1.02, 1.15), Vector3(7.15, 1.02, 1.15),
+	]
+	for c in corners:
+		var jitter := Vector3(rng.randf_range(-0.18, 0.18), 0.0, rng.randf_range(-0.18, 0.18))
+		var kind := "Fern" if rng.randf() < 0.5 else "CacaoLeaves"
+		out.append({"kind": kind, "xf": _gc_xform(c + jitter, rng)})
+	return out
+
+
+func _gc_on_path(p: Vector3) -> bool:
+	# Walking lane and totem/pickup keep-out (visual only; no collision change).
+	if abs(p.z) < 1.20 and p.x > -2.2 and p.x < 8.6:
+		return true
+	if Vector2(p.x - 7.5, p.z).length() < 1.7:
+		return true
+	if p.x > 5.2 and p.x < 6.8 and abs(p.z) < 0.55:
+		return true
+	return false
 
 
 func _gc_xform(origin: Vector3, rng: RandomNumberGenerator) -> Transform3D:

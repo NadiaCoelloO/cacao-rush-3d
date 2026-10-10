@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://hp001canlod2"
-path="res://.godot/imported/canopy_cuyabeno_hp_LOD2.glb-c2a0e2b102.scn"
+path="res://.godot/imported/canopy_cuyabeno_hp_LOD2.glb-1200f11a128807e045423ac95dc5069b.scn"
 
 [deps]
 
 source_file="res://models/hp001/canopy_cuyabeno_hp_LOD2.glb"
-dest_files=["res://.godot/imported/canopy_cuyabeno_hp_LOD2.glb-c2a0e2b102.scn"]
+dest_files=["res://.godot/imported/canopy_cuyabeno_hp_LOD2.glb-1200f11a128807e045423ac95dc5069b.scn"]
 
 [params]
 

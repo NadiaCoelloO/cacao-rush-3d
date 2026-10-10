@@ -1,14 +1,11 @@
 extends Node3D
-## Pilot vertical slice: world id `selva`, display name **Cuyabeno**.
-## LOOK-001: instances selva_look001_LOD* (decor + gameplay visuals) and rebuilds
-## water / fog / sky / warp beam / film grade in `look001_cuyabeno.gd`.
-## HP-001 E1: HP totem + trunk kit replace LOOK equivalents (visual only).
-## Collisions: CSGFloor + CSGPlatform (x=6, 3×1×3) + CSGOneway plank at the
-## PR#3 anchor Godot (6, 1, 0) size 4×0.18×2 (use_collision=true). The Assets
-## oneway baked at Blender (1,0,1.8) is hidden. Tip 5fd45031 selva-1 oneway #0.
-## High-poly HOLD. player_maya.gd timings are not touched.
-##
-## Fallback if LOOK GLBs are missing: original greybox floor + CIN-001 totem.
+## Pilot vertical slice: world id `selva`, display name **Cuyabeno**, level `selva-1`.
+## LOOK-001 + HP-001 art stay at y=0 (totem, dock, lagoon). Gameplay geometry is
+## the full selva-1 port (21 platforms, real drop-through oneways, 6 hazards,
+## pickups, 2 poles, goal) from `selva1_play.gd`. CSGPlatform at (6, 0.5, 0)
+## stays as the 1 m feel ledge; CSGFloor and CSGOneway collision are off.
+## Side camera 40×22.5 m (`camera_offset` after `script =`, set again in play
+## `_ready`). player_maya.gd timings and Maya's capsule are not touched.
 
 const LOOK_LOD0 := "res://models/selva_look001_LOD0.glb"
 const LOOK_LOD1 := "res://models/selva_look001_LOD1.glb"
@@ -47,7 +44,8 @@ func _ready() -> void:
 		if _look and _look.has_method("apply"):
 			_look.apply(self, lods)
 		if using_look and _hud_label and _look and _look.get("_hp_ok"):
-			_hud_label.text = "%s  ·  id %s  ·  LOOK-001 + HP-001" % [DISPLAY_NAME, WORLD_ID]
+			_hud_label.text = "%s  ·  id %s  ·  LOOK-001 + HP-001 · selva-1" % [DISPLAY_NAME, WORLD_ID]
+		_attach_selva1_play()
 		if _wants_capture():
 			call_deferred("_run_capture")
 	else:
@@ -56,6 +54,7 @@ func _ready() -> void:
 		_try_load_floor()
 		_try_load_totem()
 		_try_load_oneway()
+		_attach_selva1_play()
 
 
 func _try_load_look() -> bool:
@@ -119,11 +118,18 @@ func _try_load_totem() -> void:
 			_totem_placeholder.visible = false
 
 
+func _attach_selva1_play() -> void:
+	if has_node("Selva1Play"):
+		return
+	var play := Node.new()
+	play.name = "Selva1Play"
+	play.set_script(load("res://scripts/selva1_play.gd"))
+	add_child(play)
+
+
 func _try_load_oneway() -> void:
-	# PR#3 / tip 5fd45031 oneway #0: Godot (6, 1, 0), box 4×0.18×2.
-	# CSGOneway keeps use_collision=true even when the placeholder is hidden
-	# (visibility does not disable CSG collision). 3D oneway is not a true
-	# one-way collider yet (same risk as PR#3).
+	# Visual only. Real oneway #0 is selva-1 P01 (top 6.67 m, drop-through).
+	# CSGOneway collision is off in the tscn and again in selva1_play.
 	if _oneway_placeholder:
 		_oneway_placeholder.visible = false
 	if not ResourceLoader.exists(ONEWAY_GLB) or _oneway_anchor == null:
@@ -184,6 +190,6 @@ func _run_capture() -> void:
 					tag = "cmp_bg"
 			elif s == "gameplay":
 				tag = "gameplay_final"
-			var stem := "HP001_E2b_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
+			var stem := "HP001_E2c_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
 			await _look.capture_still(s, "%s%s" % [out_dir, stem % tag])
 	get_tree().quit()
