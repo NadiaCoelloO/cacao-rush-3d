@@ -18,6 +18,7 @@ const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
 const HP_CANOPY_LOD0 := "res://models/hp001/canopy_cuyabeno_hp_LOD0.glb"
 const HP_SKY_TEX := "res://textures/hp001_cuyabeno_sky_2k.png"
 const HP_JUNGLE_SKY := "res://textures/hp001_jungle_sky_2d.jpg"
+const HP_CUMULUS := "res://textures/hp001_cumulus_band.jpg"
 const HP_SIL_TEX := "res://textures/hp001_selva_silhouette.png"
 const HP_LIANA_TEX := "res://textures/hp001_fg_liana.png"
 
@@ -1083,6 +1084,17 @@ func _build_fog() -> void:
 		add_child(ridge)
 
 
+func _load_tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		var loaded: Resource = load(path)
+		if loaded is Texture2D:
+			return loaded
+	var img := Image.new()
+	if img.load(path) == OK:
+		return ImageTexture.create_from_image(img)
+	return null
+
+
 func _liana_tex_mat(tex: Texture2D, tint: Color) -> ShaderMaterial:
 	# The PNG is dark vines on opaque white — luminance-scissor, not alpha.
 	var mat := ShaderMaterial.new()
@@ -1187,19 +1199,22 @@ void fragment() {
 	// Painted jungle-sky cumulus only (crop hills / waterfalls).
 	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	float par = eye.x * 0.0038;
-	vec2 uv = vec2(fract(UV.x * 0.90 + par + 0.04), mix(0.50, 0.07, UV.y));
+	vec2 uv = vec2(fract(UV.x * 0.92 + par + 0.03), clamp(1.0 - UV.y, 0.0, 1.0));
 	vec3 cloud = texture(sky, uv).rgb;
-	cloud *= vec3(1.04, 0.94, 0.72);
-	float haze = smoothstep(0.38, 0.00, UV.y);
-	vec3 warm = vec3(0.96, 0.80, 0.48);
-	ALBEDO = mix(cloud, warm, haze * 0.55);
+	cloud *= vec3(1.06, 0.93, 0.70);
+	float haze = smoothstep(0.28, 0.00, UV.y);
+	vec3 warm = vec3(0.97, 0.80, 0.46);
+	ALBEDO = mix(cloud, warm, haze * 0.42);
 }
 """
 	mat.shader = sh
-	if ResourceLoader.exists(HP_JUNGLE_SKY):
-		mat.set_shader_parameter("sky", load(HP_JUNGLE_SKY))
-	elif ResourceLoader.exists(HP_SKY_TEX):
-		mat.set_shader_parameter("sky", load(HP_SKY_TEX))
+	var sky_tex := _load_tex(HP_CUMULUS)
+	if sky_tex == null:
+		sky_tex = _load_tex(HP_JUNGLE_SKY)
+	if sky_tex == null:
+		sky_tex = _load_tex(HP_SKY_TEX)
+	if sky_tex:
+		mat.set_shader_parameter("sky", sky_tex)
 	return mat
 
 
@@ -1211,10 +1226,10 @@ func _maya_body_vignette_mat() -> ShaderMaterial:
 	sh.code = """shader_type spatial;
 render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 void fragment() {
-	vec2 d = (UV - vec2(0.50, 0.52)) * vec2(1.02, 1.22);
+	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(0.92, 1.05);
 	float r = length(d);
-	float a = pow(clamp(1.0 - r * 1.12, 0.0, 1.0), 1.25);
-	ALBEDO = vec3(0.055, 0.036, 0.022);
+	float a = pow(clamp(1.0 - r * 0.98, 0.0, 1.0), 0.70);
+	ALBEDO = vec3(0.045, 0.030, 0.016);
 	ALPHA = a;
 }
 """
@@ -1256,28 +1271,29 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	# Fill the 40×22.5 view so painted cumulus is not a postage stamp.
 	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 1.4, -38.0), Vector2(78.0, 34.0), Vector3.ZERO, _cloud_card_mat())
 	_add_card(hold, "HP001_PlayDim", Vector3(0.0, -0.4, -36.0), Vector2(78.0, 18.0), Vector3.ZERO, _play_band_dim_mat())
-	if ResourceLoader.exists(HP_SIL_TEX):
-		var tex: Texture2D = load(HP_SIL_TEX)
+	var sil_tex := _load_tex(HP_SIL_TEX)
+	if sil_tex:
+		var tex: Texture2D = sil_tex
 		var near_mat := _scissor_card(tex, Color(0.18, 0.24, 0.12), 0.28)
 		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -3.6, -30.0), Vector2(74.0, 6.4), Vector3.ZERO, near_mat)
 		var far_mat := _scissor_card(tex, Color(0.30, 0.36, 0.22), 0.28)
 		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -2.2, -46.0), Vector2(88.0, 7.2), Vector3.ZERO, far_mat)
 	# Hanging curtain: painted leaves + curved brown-green strands. No rods.
-	if ResourceLoader.exists(HP_LIANA_TEX):
-		var liana: Texture2D = load(HP_LIANA_TEX)
-		var lmat := _liana_tex_mat(liana, Color(0.40, 0.34, 0.16))
+	var liana_tex := _load_tex(HP_LIANA_TEX)
+	if liana_tex:
+		var lmat := _liana_tex_mat(liana_tex, Color(0.40, 0.34, 0.16))
 		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.05, 1.85, -3.15), Vector2(2.80, 4.60), Vector3.ZERO, lmat)
 		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.35, 1.35, -3.55), Vector2(2.10, 3.80), Vector3.ZERO, lmat)
 	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-2.12, 1.95, -3.05), Vector2(3.20, 5.10), Vector3.ZERO, _curved_liana_mat())
 	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-1.55, 2.10, -3.40), Vector2(2.40, 4.40), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
 	# Laguna still keeps a world-space curtain over the water (art camera).
-	if ResourceLoader.exists(HP_LIANA_TEX):
-		var lmat2 := _liana_tex_mat(load(HP_LIANA_TEX), Color(0.42, 0.36, 0.18))
+	if liana_tex:
+		var lmat2 := _liana_tex_mat(liana_tex, Color(0.42, 0.36, 0.18))
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
 	# Cushion follows Maya. Look-ahead (+2 m) puts camera-center off her body.
 	var player: Node = pilot.get_node_or_null("PlayerMaya")
 	if player:
-		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.92, -1.15), Vector2(1.85, 2.70), Vector3.ZERO, _maya_body_vignette_mat())
+		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.95, -0.85), Vector2(4.20, 5.10), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
