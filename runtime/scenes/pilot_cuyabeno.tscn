@@ -17,13 +17,18 @@ script = ExtResource("1_pilot")
 
 [node name="CSGFloor" type="CSGBox3D" parent="WorldRoot/FloorPlaceholder"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
-use_collision = true
+use_collision = false
 size = Vector3(24, 0.5, 8)
 
 [node name="CSGPlatform" type="CSGBox3D" parent="WorldRoot/FloorPlaceholder"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 0.5, 0)
 use_collision = true
-size = Vector3(3, 1, 3)
+size = Vector3(4, 1, 3)
+
+[node name="PlatformSolidAnchor" type="Node3D" parent="WorldRoot"]
+; Feel harness: 1 m CSGPlatform ledge. Left face stays 4.5 (SolidAnchor x-1.5).
+; Box is 4 m wide so a full-hold jump from x=0 lands on it (~7.84), not past 7.5.
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.5, 0)
 
 [node name="PlatformOnewayAnchor" type="Node3D" parent="WorldRoot"]
 ; LOOK-001 / PR#3 / tip 5fd45031 selva-1 oneway #0 — Godot (6, 1, 0), NOT Assets Blender (1,0,1.8)
@@ -33,7 +38,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 0)
 
 [node name="CSGOneway" type="CSGBox3D" parent="WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
-use_collision = true
+use_collision = false
 size = Vector3(4, 0.18, 2)
 
 [node name="TotemWarpAnchor" type="Node3D" parent="WorldRoot"]
@@ -79,6 +84,7 @@ far = 250.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 floor_stop_on_slope = true
 script = ExtResource("2_maya")
+camera_offset = Vector3(0, 1, 24.1256)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerMaya"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

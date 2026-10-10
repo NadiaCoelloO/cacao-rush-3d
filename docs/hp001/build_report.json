@@ -1,0 +1,1128 @@
+{
+ "blender": "5.2.1 LTS",
+ "seed": 20261006,
+ "warnings": [],
+ "render_magenta_px": {
+  "HP001_totem_front.png": 0,
+  "HP001_totem_34.png": 0,
+  "HP001_totem_pods_closeup.png": 0,
+  "HP001_trunks_front.png": 0,
+  "HP001_trunks_34.png": 0,
+  "HP001_trunks_bark_closeup.png": 0
+ },
+ "greybox_check": "reference constants confirmed (TOTEM_TIP_Z 2.95, base 0.95x0.95x0.20, crown 0.50x0.50x0.12)",
+ "pod_clearance_m": {
+  "Pod_Center_Yellow~Pod_Left_Orange": 0.1395,
+  "Pod_Center_Yellow~Pod_Right_Red": 0.1404,
+  "Pod_Left_Orange~Pod_Right_Red": 0.4031,
+  "post_min": 0.0177,
+  "liana_min": 0.2234,
+  "pods_max_abs_xy": 0.4414,
+  "stem_root_buried_min": 0.0156
+ },
+ "totem_islands_LOD0": 13,
+ "pod_islands_LOD0": 3,
+ "pod_islands_LOD1": 3,
+ "pod_islands_LOD2": 3,
+ "totem_bbox_LOD0": {
+  "min": [
+   -0.475,
+   -0.475,
+   0.0
+  ],
+  "max": [
+   0.475,
+   0.475,
+   2.6098
+  ]
+ },
+ "totem_bbox_LOD1": {
+  "min": [
+   -0.475,
+   -0.475,
+   0.0
+  ],
+  "max": [
+   0.475,
+   0.475,
+   2.6098
+  ]
+ },
+ "totem_bbox_LOD2": {
+  "min": [
+   -0.475,
+   -0.475,
+   0.0
+  ],
+  "max": [
+   0.475,
+   0.475,
+   2.6098
+  ]
+ },
+ "beam_origin": [
+  -0.0009,
+  -0.22,
+  2.2783
+ ],
+ "totem_parts": {
+  "0": {
+   "wood": 2088,
+   "pod": 2880,
+   "stem": 240,
+   "liana": 664
+  },
+  "1": {
+   "wood": 1000,
+   "pod": 1440,
+   "stem": 144,
+   "liana": 320
+  },
+  "2": {
+   "wood": 360,
+   "pod": 480,
+   "stem": 72,
+   "liana": 76
+  }
+ },
+ "totem_rebuilt": false,
+ "bark_colour_atlas": {
+  "atlas_B_dry_bark_all": {
+   "mean_rgb8": [
+    65,
+    60,
+    55
+   ],
+   "hue": 29.2,
+   "sat": 0.164,
+   "val": 0.257,
+   "median_hue": 29.7,
+   "median_sat": 0.164
+  },
+  "atlas_B_bark_without_lichen": {
+   "mean_rgb8": [
+    65,
+    60,
+    55
+   ],
+   "hue": 29.2,
+   "sat": 0.164,
+   "val": 0.257,
+   "median_hue": 29.7,
+   "median_sat": 0.164
+  },
+  "atlas_shaft_rows_300_1792_excl_moss_band": {
+   "mean_rgb8": [
+    66,
+    61,
+    55
+   ],
+   "hue": 29.5,
+   "sat": 0.163,
+   "val": 0.26,
+   "median_hue": 29.7,
+   "median_sat": 0.164
+  },
+  "lichen_cover_B": 0.0,
+  "atlas_A_stain_moss_band": {
+   "mean_rgb8": [
+    46,
+    51,
+    33
+   ],
+   "hue": 76.0,
+   "sat": 0.356,
+   "val": 0.2,
+   "median_hue": 75.3,
+   "median_sat": 0.346
+  }
+ },
+ "trunk_bbox": {
+  "Thin_LOD0": {
+   "min": [
+    -0.5518,
+    -0.4382,
+    -0.5
+   ],
+   "max": [
+    1.0325,
+    0.9865,
+    8.1952
+   ]
+  },
+  "Medium_LOD0": {
+   "min": [
+    -1.3589,
+    -1.5012,
+    -0.5
+   ],
+   "max": [
+    1.5117,
+    1.3537,
+    11.0834
+   ]
+  },
+  "Thick_LOD0": {
+   "min": [
+    -2.6276,
+    -2.6514,
+    -0.5
+   ],
+   "max": [
+    2.3752,
+    2.1528,
+    14.3917
+   ]
+  },
+  "Thin_LOD1": {
+   "min": [
+    -0.5518,
+    -0.4382,
+    -0.5
+   ],
+   "max": [
+    1.0249,
+    0.9817,
+    8.185
+   ]
+  },
+  "Medium_LOD1": {
+   "min": [
+    -1.3585,
+    -1.5012,
+    -0.5
+   ],
+   "max": [
+    1.5117,
+    1.3537,
+    11.0934
+   ]
+  },
+  "Thick_LOD1": {
+   "min": [
+    -2.6088,
+    -2.6514,
+    -0.5
+   ],
+   "max": [
+    2.3752,
+    2.1528,
+    14.3637
+   ]
+  },
+  "Thin_LOD2": {
+   "min": [
+    -0.5518,
+    -0.424,
+    -0.5
+   ],
+   "max": [
+    0.8943,
+    0.9777,
+    8.1721
+   ]
+  },
+  "Medium_LOD2": {
+   "min": [
+    -1.256,
+    -1.5012,
+    -0.5
+   ],
+   "max": [
+    1.5117,
+    1.3537,
+    11.0813
+   ]
+  },
+  "Thick_LOD2": {
+   "min": [
+    -2.5949,
+    -2.6514,
+    -0.5
+   ],
+   "max": [
+    2.3752,
+    2.1528,
+    14.3617
+   ]
+  }
+ },
+ "bark_colour_stills": {
+  "HP001_trunks_front.png": {
+   "mean_rgb8": [
+    90,
+    86,
+    82
+   ],
+   "hue": 30.8,
+   "sat": 0.093,
+   "val": 0.353,
+   "median_hue": 30.0,
+   "median_sat": 0.107,
+   "patches": 24,
+   "occluded_skipped": 0,
+   "patch_xy_top_left_origin": [
+    [
+     304,
+     790
+    ],
+    [
+     308,
+     721
+    ],
+    [
+     315,
+     653
+    ],
+    [
+     322,
+     585
+    ],
+    [
+     1153,
+     790
+    ],
+    [
+     1157,
+     721
+    ],
+    [
+     1161,
+     653
+    ],
+    [
+     1167,
+     585
+    ],
+    [
+     483,
+     739
+    ],
+    [
+     479,
+     645
+    ],
+    [
+     476,
+     551
+    ],
+    [
+     475,
+     457
+    ],
+    [
+     1332,
+     739
+    ],
+    [
+     1326,
+     645
+    ],
+    [
+     1321,
+     551
+    ],
+    [
+     1319,
+     457
+    ],
+    [
+     765,
+     689
+    ],
+    [
+     758,
+     568
+    ],
+    [
+     749,
+     448
+    ],
+    [
+     739,
+     328
+    ],
+    [
+     1615,
+     688
+    ],
+    [
+     1609,
+     568
+    ],
+    [
+     1599,
+     447
+    ],
+    [
+     1587,
+     328
+    ]
+   ]
+  },
+  "HP001_trunks_34.png": {
+   "mean_rgb8": [
+    91,
+    85,
+    78
+   ],
+   "hue": 29.8,
+   "sat": 0.144,
+   "val": 0.359,
+   "median_hue": 30.0,
+   "median_sat": 0.152,
+   "patches": 24,
+   "occluded_skipped": 0,
+   "patch_xy_top_left_origin": [
+    [
+     300,
+     807
+    ],
+    [
+     303,
+     728
+    ],
+    [
+     307,
+     648
+    ],
+    [
+     312,
+     569
+    ],
+    [
+     1082,
+     730
+    ],
+    [
+     1084,
+     669
+    ],
+    [
+     1087,
+     608
+    ],
+    [
+     1088,
+     546
+    ],
+    [
+     500,
+     732
+    ],
+    [
+     492,
+     630
+    ],
+    [
+     486,
+     527
+    ],
+    [
+     482,
+     423
+    ],
+    [
+     1203,
+     675
+    ],
+    [
+     1199,
+     595
+    ],
+    [
+     1195,
+     514
+    ],
+    [
+     1193,
+     433
+    ],
+    [
+     775,
+     660
+    ],
+    [
+     770,
+     540
+    ],
+    [
+     761,
+     418
+    ],
+    [
+     750,
+     295
+    ],
+    [
+     1377,
+     621
+    ],
+    [
+     1375,
+     525
+    ],
+    [
+     1371,
+     429
+    ],
+    [
+     1364,
+     331
+    ]
+   ]
+  },
+  "HP001_trunks_bark_closeup.png": {
+   "mean_rgb8": [
+    93,
+    87,
+    79
+   ],
+   "hue": 34.0,
+   "sat": 0.154,
+   "val": 0.366,
+   "median_hue": 33.8,
+   "median_sat": 0.157,
+   "patches": 3,
+   "occluded_skipped": 6,
+   "patch_xy_top_left_origin": [
+    [
+     868,
+     427
+    ],
+    [
+     871,
+     260
+    ],
+    [
+     873,
+     92
+    ]
+   ]
+  }
+ },
+ "trunk_checks": {
+  "Thin_LOD0": {
+   "rosettes": [
+    {
+     "z": 3.76,
+     "az_deg": -54.4,
+     "across_m": 0.45,
+     "height_m": 0.24
+    },
+    {
+     "z": 4.96,
+     "az_deg": 157.6,
+     "across_m": 0.46,
+     "height_m": 0.23
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.005,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 7.93,
+     "low_z": 2.74,
+     "end_z": 3.04,
+     "min_clearance_m": 0.087,
+     "dia_cm": [
+      4.0,
+      3.2
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 7.66,
+     "low_z": 1.1,
+     "end_z": 1.1,
+     "min_clearance_m": 0.598,
+     "dia_cm": [
+      3.8,
+      3.0
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.674,
+   "tris": 3961,
+   "parts": {
+    "trunk": 2706,
+    "cap": 33,
+    "limb": 130,
+    "epiphyte": 1092
+   }
+  },
+  "Medium_LOD0": {
+   "rosettes": [
+    {
+     "z": 4.95,
+     "az_deg": -65.9,
+     "across_m": 0.51,
+     "height_m": 0.28
+    },
+    {
+     "z": 6.6,
+     "az_deg": -8.6,
+     "across_m": 0.53,
+     "height_m": 0.27
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.005,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 10.78,
+     "low_z": 3.91,
+     "end_z": 4.62,
+     "min_clearance_m": 0.103,
+     "dia_cm": [
+      4.6,
+      3.6
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 10.55,
+     "low_z": 0.45,
+     "end_z": 0.45,
+     "min_clearance_m": 0.239,
+     "dia_cm": [
+      4.4,
+      3.4
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.422,
+   "tris": 3684,
+   "parts": {
+    "trunk": 2288,
+    "cap": 44,
+    "limb": 260,
+    "epiphyte": 1092
+   }
+  },
+  "Thick_LOD0": {
+   "rosettes": [
+    {
+     "z": 5.18,
+     "az_deg": -71.6,
+     "across_m": 0.61,
+     "height_m": 0.31
+    },
+    {
+     "z": 7.84,
+     "az_deg": 2.9,
+     "across_m": 0.56,
+     "height_m": 0.32
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.011,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 13.9,
+     "low_z": 4.67,
+     "end_z": 5.6,
+     "min_clearance_m": 0.131,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 13.41,
+     "low_z": 0.6,
+     "end_z": 0.6,
+     "min_clearance_m": 1.005,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.137,
+   "tris": 3796,
+   "parts": {
+    "trunk": 2392,
+    "cap": 52,
+    "limb": 260,
+    "epiphyte": 1092
+   }
+  },
+  "Thin_LOD1": {
+   "rosettes": [
+    {
+     "z": 3.76,
+     "az_deg": -54.4,
+     "across_m": 0.45,
+     "height_m": 0.24
+    },
+    {
+     "z": 4.96,
+     "az_deg": 157.6,
+     "across_m": 0.45,
+     "height_m": 0.23
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.012,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 7.93,
+     "low_z": 2.74,
+     "end_z": 3.04,
+     "min_clearance_m": 0.133,
+     "dia_cm": [
+      4.0,
+      3.2
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 7.66,
+     "low_z": 1.1,
+     "end_z": 1.1,
+     "min_clearance_m": 0.684,
+     "dia_cm": [
+      3.8,
+      3.0
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.641,
+   "tris": 1967,
+   "parts": {
+    "trunk": 1400,
+    "cap": 25,
+    "limb": 54,
+    "epiphyte": 488
+   }
+  },
+  "Medium_LOD1": {
+   "rosettes": [
+    {
+     "z": 4.95,
+     "az_deg": -65.9,
+     "across_m": 0.49,
+     "height_m": 0.27
+    },
+    {
+     "z": 6.6,
+     "az_deg": -8.6,
+     "across_m": 0.52,
+     "height_m": 0.28
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.01,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 10.78,
+     "low_z": 3.91,
+     "end_z": 4.62,
+     "min_clearance_m": 0.164,
+     "dia_cm": [
+      4.6,
+      3.6
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 10.55,
+     "low_z": 0.45,
+     "end_z": 0.45,
+     "min_clearance_m": 0.231,
+     "dia_cm": [
+      4.4,
+      3.4
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.42,
+   "tris": 1588,
+   "parts": {
+    "trunk": 960,
+    "cap": 32,
+    "limb": 108,
+    "epiphyte": 488
+   }
+  },
+  "Thick_LOD1": {
+   "rosettes": [
+    {
+     "z": 5.18,
+     "az_deg": -71.6,
+     "across_m": 0.6,
+     "height_m": 0.32
+    },
+    {
+     "z": 7.84,
+     "az_deg": 2.9,
+     "across_m": 0.56,
+     "height_m": 0.3
+    }
+   ],
+   "leaf_points_deeper_than_3cm_in_bark": 0,
+   "leaf_min_gap_m": -0.022,
+   "lianas": [
+    {
+     "kind": "loop",
+     "top_z": 13.9,
+     "low_z": 4.68,
+     "end_z": 5.6,
+     "min_clearance_m": 0.217,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    },
+    {
+     "kind": "hang",
+     "top_z": 13.41,
+     "low_z": 0.6,
+     "end_z": 0.6,
+     "min_clearance_m": 1.0,
+     "dia_cm": [
+      5.0,
+      3.8
+     ]
+    }
+   ],
+   "liana_to_leaf_min_m": 0.183,
+   "tris": 1785,
+   "parts": {
+    "trunk": 1148,
+    "cap": 41,
+    "limb": 108,
+    "epiphyte": 488
+   }
+  },
+  "Thin_LOD2": {
+   "tris": 521,
+   "parts": {
+    "trunk": 480,
+    "cap": 16,
+    "limb": 25
+   }
+  },
+  "Medium_LOD2": {
+   "tris": 563,
+   "parts": {
+    "trunk": 494,
+    "cap": 19,
+    "limb": 50
+   }
+  },
+  "Thick_LOD2": {
+   "tris": 579,
+   "parts": {
+    "trunk": 506,
+    "cap": 23,
+    "limb": 50
+   }
+  }
+ },
+ "e2a": {
+  "note": "Godot partial integration. Canopy E2 not imported. WaterLily not instanced.",
+  "identidad": {
+   "trunks_v4": "PASA",
+   "dock": "PASA",
+   "fern": "PASA",
+   "cacao_leaves": "PASA",
+   "canopy_e2": "NO PASA \u2014 not imported; LOOK dosel kept",
+   "water_lily": "NO PASA \u2014 mesh in GLB, never instanced"
+  },
+  "deck_align_m": {
+   "deck_top_local": 0.4011,
+   "collision_top": 0.0,
+   "visual_root_y": -0.4011,
+   "delta_visual_minus_collision": 0.0,
+   "limit": 0.03,
+   "collision_changed": false
+  },
+  "lod": {
+   "trunk": {
+    "begin": [
+     0,
+     14,
+     32
+    ],
+    "end": [
+     26,
+     44,
+     0
+    ],
+    "margin": 3
+   },
+   "totem": {
+    "begin": [
+     0,
+     28,
+     58
+    ],
+    "end": [
+     36,
+     66,
+     0
+    ],
+    "margin": 4
+   },
+   "dock": {
+    "begin": [
+     0,
+     28,
+     58
+    ],
+    "end": [
+     36,
+     66,
+     0
+    ],
+    "margin": 4
+   },
+   "groundcover": {
+    "begin": [
+     0,
+     12
+    ],
+    "end": [
+     18,
+     40
+    ],
+    "margin": 3,
+    "fade_after_m": 37
+   }
+  },
+  "glb_sha256": {
+   "trunk_selva_kit_hp_LOD0.glb": "f298a49617ed70aa451fbfe9e5732609c24b0f567c8b4a74fcd5d8ef83331b03",
+   "trunk_selva_kit_hp_LOD1.glb": "a224fc18705ba020b39156b92d18f2f21d9401b4991a435ad40ee6cbd87becd1",
+   "trunk_selva_kit_hp_LOD2.glb": "644df965c52b5450975b83826f2caf6f081516af49683bf2eef2bee8da1ba2de",
+   "dock_cuyabeno_hp_LOD0.glb": "c1dec955e120c433bed7f8d9533f5488de5d8f758441bc8afdd7efa8b74d9ee3",
+   "dock_cuyabeno_hp_LOD1.glb": "023a9d06804c24e2c01620b2ec8c41bb56ebf8ef9effa5d98a52283918d3dcea",
+   "dock_cuyabeno_hp_LOD2.glb": "12425ca9334d8368a254f219e96f8864d7b374a7378fa19c320169f351759c15",
+   "groundcover_cuyabeno_LOD0.glb": "7d9bdb1e563c434e77a0fad87af157950473994438aca5a76e9ac4f20a87c97a",
+   "groundcover_cuyabeno_LOD1.glb": "6a3ce85ae7607306b402cf30a7049be5406811937f05c7873d2c2b4e501bedc1"
+  },
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 222558,
+    "draw_calls": 146
+   },
+   "laguna": {
+    "primitives": 174230,
+    "draw_calls": 111
+   },
+   "dosel": {
+    "primitives": 283971,
+    "draw_calls": 178,
+    "vs_e1_dosel": 264948,
+    "lod_tightened": false
+   },
+   "pods": {
+    "primitives": 223105,
+    "draw_calls": 113
+   },
+   "dock": {
+    "primitives": 228495,
+    "draw_calls": 155
+   }
+  },
+  "uhd_vram_mb": 140,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "canopy_v2_reserve_tris": 45000,
+  "dosel_headroom_vs_350k": 66029,
+  "groundcover_instances": 28,
+  "groundcover_multimeshes": 20,
+  "trunk_instances": 22,
+  "captures": {
+   "HP001_E2a_engine_gameplay.png": "5eae3c36abc6896a80d1f3cf091d4eeb3063e546d0c4d0a16f39e2f589646cd7",
+   "HP001_E2a_engine_laguna.png": "78073ad5b8b520abec074c5f700274eae3510c105d2ea94ea98fdc9f89af861d",
+   "HP001_E2a_engine_dosel.png": "7539fa1cab6158285beba11fc299328c0e0f1afb8397ad058d4e88ead555af81",
+   "HP001_E2a_engine_dock_closeup.png": "36a9d30586c61bbfcab2a756d7930202b8f3cb8e776bdeda21a75a5214d6146f"
+  },
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS"
+ },
+ "e2b": {
+  "pass": "E2b",
+  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 \u2192 Cacao.Game jungle-sky.jpg.",
+  "bundle_sha256_ok": true,
+  "canopy_instances": 36,
+  "canopy_multimeshes": 69,
+  "trunk_instances": 22,
+  "groundcover_instances": 38,
+  "lily_flower_enabled": true,
+  "lily_flower_ratio": 0.22,
+  "dock_deck_delta_m": 0.0,
+  "dock_deck_top_local_m": 0.3889,
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS (canopy + totem + trunks + dock + gc)",
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 100207,
+    "draw_calls": 144
+   },
+   "laguna": {
+    "primitives": 96066,
+    "draw_calls": 136
+   },
+   "dosel": {
+    "primitives": 225277,
+    "draw_calls": 190
+   },
+   "dock": {
+    "primitives": 70305,
+    "draw_calls": 93
+   },
+   "pods": {
+    "primitives": 75216,
+    "draw_calls": 77
+   },
+   "cmp_bg": {
+    "primitives": 93300,
+    "draw_calls": 61
+   }
+  },
+  "uhd_vram_mb": 147,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "glb_sha256": {
+   "canopy_cuyabeno_hp_LOD0.glb": "0efc525f248bb9edc2a062fa739a443aac8b643a148a743a44af6e13a04fa415",
+   "canopy_cuyabeno_hp_LOD1.glb": "8ea1e5004852bca394f6c7993e5dfc05cbfc9913f2ec0bcc23b7f319a6866d4d",
+   "canopy_cuyabeno_hp_LOD2.glb": "597aa8548c78f8c012b75efa5c0b1fb5625dbdef63617fd9a83e17d6fae450b2",
+   "dock_cuyabeno_hp_LOD0.glb": "b4cc5132aa0350363d113237b663f1605658ef81118de0d1cd1c6f14ffda2325",
+   "dock_cuyabeno_hp_LOD1.glb": "89eb8c282810a5cf51404b463baed44a47faf9e31c51369e004bc44f8fc55a90",
+   "dock_cuyabeno_hp_LOD2.glb": "37ba8d4dd094805808a8f305b3ab0d366c248a023457d088551ff2dd8a5e0602",
+   "groundcover_cuyabeno_LOD0.glb": "a11a1444d4a75a8814e09b5850d39c4c56d3983cef925238802f2c9deef4714a",
+   "groundcover_cuyabeno_LOD1.glb": "01f7770db9d26aedbbaa6aa05e5d5d68008d9201ac19d3066b478a10e3ab3889"
+  },
+  "captures": {
+   "HP001_E2b_engine_gameplay.png": "90a213d23381042118d1da703eaab6a921c52dc71e7d5a47809ccd5a8823adc9",
+   "HP001_E2b_engine_laguna.png": "a76135749210bfb939de92c12b010f07383b0d36f2d059a4616ac3ce025ddccb",
+   "HP001_E2b_engine_dosel.png": "8374530fb271c1ab13f4f4547f3b01eca33aef927e72e1f25c25eab04f5f38ad",
+   "HP001_E2b_engine_dock_closeup.png": "1e34357dd1c5e98518af49a312f05e01fd829c9df4783e737ac352dc1005a2fd",
+   "HP001_E2b_engine_totem_pods_v4.png": "c394d674b8ce71e388a104ebc5dffdab4507ea0e4df38f1259ef171df0344b56",
+   "HP001_E2b_engine_cmp_bg.png": "12b52cee969852dc8ae961c229f554077d0e9242db94ef6bcfaf94611b49fa2f",
+   "cmp_cuyabeno_2d_3d.png": "c9a3a041e8f329f2054a540fe182123218712e5ad2f4b59de0caaf207b79dba7"
+  },
+  "light": {
+   "sun_elevation_deg": 18,
+   "sun_azimuth_deg": 160,
+   "sun_color": [
+    1.0,
+    0.78,
+    0.45
+   ],
+   "sun_energy": 1.45,
+   "vol_fog_density": 0.0016,
+   "vol_fog_length": 80,
+   "vol_fog_albedo": "f0d49a",
+   "maya_follow_cull_mask": 2,
+   "sdfgi": false
+  },
+  "2d_source": "https://raw.githubusercontent.com/NadiaCoelloO/Cacao.Game/main/public/game/maps/jungle-sky.jpg",
+  "2d_source_note": "sand-vivid-dawn-sail @ 5fd45031 returned 404; Cacao.Game main used (identical jungle-sky)."
+ },
+ "e2c": {
+  "pass": "E2c",
+  "note": "Full selva-1 1:1 (Cacao.Game; sand-vivid 404) + 40x22.5 camera + real 2D/3D cmp. Art cameras hide Selva1Geo.",
+  "source": "NadiaCoelloO/Cacao.Game levels.ts/sim.ts selva-1",
+  "source_requested": "NadiaCoelloO/sand-vivid-dawn-sail@5fd45031 (404)",
+  "platforms": 21,
+  "hazards": 6,
+  "pickups": 24,
+  "checkpoints": 2,
+  "goal": 1,
+  "p01_top_m": 6.6667,
+  "camera_offset": [
+   0.0,
+   1.0,
+   24.1256
+  ],
+  "view_m_measured": [
+   40.0342,
+   22.547
+  ],
+  "maya_px_at_720p": 55.68,
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS (constants + instantiated pilot_cuyabeno.tscn)",
+  "selva_check": "platforms=21 hazards=6 pickups=24 checks=2 goal=1",
+  "player_maya_gd": "untouched",
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 109037,
+    "draw_calls": 190
+   },
+   "laguna": {
+    "primitives": 100554,
+    "draw_calls": 141
+   },
+   "dosel": {
+    "primitives": 234869,
+    "draw_calls": 193
+   },
+   "dock": {
+    "primitives": 71275,
+    "draw_calls": 79
+   },
+   "pods": {
+    "primitives": 81472,
+    "draw_calls": 83
+   },
+   "cmp_bg": {
+    "primitives": 120966,
+    "draw_calls": 62
+   }
+  },
+  "selva_capture_perf": {
+   "entrance": {
+    "primitives": 44757,
+    "draw_calls": 84
+   },
+   "hazard": {
+    "primitives": 5480,
+    "draw_calls": 42
+   },
+   "cacao": {
+    "primitives": 4346,
+    "draw_calls": 42
+   }
+  },
+  "uhd_vram_mb": 147,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "captures": {
+   "3d_entrance.png": "0268a7876740fc903671855af1e1794c95001179da1dcdcb120285740579e4fe",
+   "3d_hazard.png": "743370b1de6aaa02ef8d73187dcca8275c9ef7ebc26885e5a003e6abc4df01d8",
+   "3d_cacao.png": "e3b7ece05a6507afada8bb3973b4b5c1f99b0eab72911a256d27cf6cf86f6bfd",
+   "2d_entrance.png": "da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39",
+   "2d_hazard.png": "e7350d1c326b25d6f929b7ee5d263071010ce49b7a9d454025e505c2f35d1fd0",
+   "2d_cacao.png": "497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598",
+   "cmp_cuyabeno_2d_3d.png": "4ebc36a30197cfdc997c27045e77a79b83c223be6945037bd4177c6e4c7228a1",
+   "HP001_E2c_engine_gameplay.png": "ddc3c6aaa85e1ad6cc3c5f84f0cd0bb607b2915f8d60600f1af8f3f6ef8bc153",
+   "HP001_E2c_engine_laguna.png": "6b5ecc523b05762c9a1423bbaa421afeaecc8c9b748fedd5468bca4a0938f37c",
+   "HP001_E2c_engine_dosel.png": "e6c2daa60c92137738910d16147e1e0c36fc9db4416c58e680a0d7990fd205c7",
+   "HP001_E2c_engine_dock_closeup.png": "c1c2bc660a19977b926e3fb93e3eab29d107de02f5ed2e2e5fce257408169b88",
+   "HP001_E2c_engine_totem_pods_v4.png": "791a727f247d1af2ed42ebf10187ac0c2ac0085534798de89124dff1f7a1469f",
+   "HP001_E2c_engine_cmp_bg.png": "f5ece443287daf62a7e166bfce2ad2f01ffe7293339628867b6909dc15bba803"
+  },
+  "textures": {
+   "hp001_cuyabeno_sky_2k.png": "5bb9b19567cec3f1131e4121b73a0b59722e9f1350abbd12a0b6995144edbeb3",
+   "hp001_selva_silhouette.png": "0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157",
+   "hp001_fg_liana.png": "c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90",
+   "hp001_jungle_sky_2d.jpg": "1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac"
+  }
+ }
+}

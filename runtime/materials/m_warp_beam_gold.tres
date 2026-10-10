@@ -11,3 +11,4 @@ shader_parameter/strength = 3.2
 shader_parameter/height_m = 6.2
 shader_parameter/height_fade_pow = 1.6
 shader_parameter/facing_gain = 0.85
+shader_parameter/base_fade_m = 0.35

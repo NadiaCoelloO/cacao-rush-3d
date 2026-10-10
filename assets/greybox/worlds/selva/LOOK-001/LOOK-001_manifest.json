@@ -1272,9 +1272,18 @@
       "Mobile/Compatibility fallback (do not change the project renderer): Environment depth fog (density 0.012, light colour (0.55,0.60,0.66), aerial_perspective 0.3) + 6-10 soft unshaded alpha cards (alpha 0.15-0.3) at the bank positions."
     ],
     "sky": [
-      "ProceduralSkyMaterial: sky_top_color #5C6B7C, sky_horizon_color #6E6A63, faint warm band toward the sun azimuth (or a PanoramaSkyMaterial baked from W_SELVA_LOOK001), ground_bottom_color #10191A, energy ~0.5.",
-      "Residual sky only reads through the irregular canopy openings (75-90% cover target)."
+      "HP-001 E2d: the 40×22.5 side camera parents QuadMesh cards (not PlaneMesh/XZ) so every gameplay still shows cumulus + 2 hazy jungle strips + left-edge lianas. Skybox-above is not enough.",
+      "Cloud band card samples hp001_cuyabeno_sky_2k.png UV y 0.03–0.46 (clouds only; no hills/falls). Two low silhouette strips from hp001_selva_silhouette.png sit behind the play plane (local z < −24).",
+      "Foreground lianas: hp001_fg_liana.png, camera children on the left frame edge, no collision, outside Maya's hitbox.",
+      "Corridor MultiMesh trunks/crowns (LOD) run the full selva-1 length at z < 0. Hidden on laguna/dosel/dock/pods art cameras.",
+      "Optional 2D source still: runtime/textures/hp001_jungle_sky_2d.jpg (Cacao.Game jungle-sky, cropped to the cloud band)."
     ],
+    "hp001_e2c_textures": {
+      "sky_panorama": "runtime/textures/hp001_cuyabeno_sky_2k.png",
+      "selva_silhouette": "runtime/textures/hp001_selva_silhouette.png",
+      "fg_liana": "runtime/textures/hp001_fg_liana.png",
+      "jungle_sky_2d_source": "runtime/textures/hp001_jungle_sky_2d.jpg"
+    },
     "post": [
       "Tonemap AgX (Godot 4.4+) or Filmic on 4.2; exposure tuned once (Blender exposure 0.75) and identical across shots.",
       "Glow minimal: intensity 0.25, strength 0.8, bloom 0.0, hdr_threshold 1.2, levels 3-5 only; keep pod contours readable.",

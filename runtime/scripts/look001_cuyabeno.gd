@@ -2,7 +2,10 @@ extends Node3D
 ## LOOK-001 atmosphere reconstructed in Godot (Forward+).
 ## The selva_look001_LOD*.glb files carry geometry + simple PBR/unlit/emissive
 ## only. Water ripples, SSR + probe, volumetric fog banks, sky, warp beam, and
-## filmic grade are built here from LOOK-001_manifest.json. High-poly HOLD.
+## filmic grade are built here from LOOK-001_manifest.json.
+## HP-001 E1: when totem_warp_cuyabeno_hp_LOD0.glb is present, the HP totem and
+## trunk kit replace LOOK totem/post/pods and LOOK001_Trees. Collisions, feel,
+## playable lights and Maya follow fill stay LOOK-001.
 ##
 ## Capture (optional, not used by the feel harness):
 ##   godot --path runtime res://scenes/pilot_cuyabeno.tscn -- --look001-capture=both --look001-out=/path
@@ -10,10 +13,17 @@ extends Node3D
 const WATER_MAT := preload("res://materials/m_blackwater.tres")
 const BEAM_GOLD_MAT := preload("res://materials/m_warp_beam_gold.tres")
 const BEAM_CYAN_MAT := preload("res://materials/m_warp_beam_cyan.tres")
+const HP001_SCRIPT := preload("res://scripts/hp001_cuyabeno.gd")
+const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
+const HP_CANOPY_LOD0 := "res://models/hp001/canopy_cuyabeno_hp_LOD0.glb"
+const HP_SKY_TEX := "res://textures/hp001_cuyabeno_sky_2k.png"
+const HP_SIL_TEX := "res://textures/hp001_selva_silhouette.png"
+const HP_LIANA_TEX := "res://textures/hp001_fg_liana.png"
 
 const WATER_Y := -0.12
 const TOTEM_XZ := Vector3(7.5, 0.0, 0.0)
 const MAYA_STILL := Vector3(5.55, 1.20, 0.0)
+const CROWN_TOP_LOCAL_Y := 2.61
 const WARP_GOLD_ACTIVE := 3.0
 const WARP_CYAN_ACTIVE := 2.4
 const WARP_GOLD_DIM := 0.55
@@ -25,13 +35,16 @@ const TOTEM_LIGHT_DIM := 0.35
 const MAYA_BODY := Color("8f8578")
 const MAYA_HAIR := Color("6b5a46")
 const MAYA_PACK := Color("8a7358")
-const ONEWAY_SLAB := Color("847866")
+const ONEWAY_SLAB := Color("3a2a1c")
 const ONEWAY_CUE := Color("4a3a2a")
-const PLAT_ALBEDO := Color(0.62, 0.57, 0.48)
+## Wet várzea earth — dark brown, not the old light-grey slabs.
+const PLAT_ALBEDO := Color(0.42, 0.30, 0.18)
+const PLAT_WET_EDGE := Color(0.16, 0.11, 0.08)
 ## Soft top-edge lift on greybox platforms only (not Maya). Keep this low —
 ## combined with the path lights, 0.4+ reads as white puro.
-const PLAT_EMIT := Color(0.42, 0.38, 0.32)
-const PLAT_EMIT_ENERGY := 0.14
+const PLAT_EMIT := Color(0.22, 0.16, 0.10)
+const PLAT_EMIT_ENERGY := 0.22
+const DOSEL_CARD_LAYER := 10
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -83,6 +96,8 @@ var _lod_roots: Array[Node] = []
 var _maya_fill: OmniLight3D = null
 var _maya_rim: OmniLight3D = null
 var _hero_mats: Array[BaseMaterial3D] = []
+var _hp_ok := false
+var _hp_totem_mats: Array[BaseMaterial3D] = []
 
 
 func apply(pilot: Node3D, lod_roots: Array) -> void:
@@ -90,18 +105,38 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	for r in lod_roots:
 		if r is Node:
 			_lod_roots.append(r)
+	_hp_ok = ResourceLoader.exists(HP_TOTEM_LOD0)
 	_bind_look_meshes()
 	_grade_platforms()
 	_grade_oneway(pilot)
 	_grade_csg_playable(pilot)
 	_grade_hero(pilot)
+	_add_maya_outline(pilot)
 	_attach_maya_follow_fill(pilot)
 	_thicken_canopy()
 	_build_environment(pilot)
 	_build_lights(pilot)
 	_build_fog()
 	_build_probe()
-	_build_kakaw_pods(pilot)
+		if ResourceLoader.exists(HP_CANOPY_LOD0):
+			_build_side_follow_art(pilot)
+			_build_dosel_cap_cards(pilot)
+			_build_wet_earth_edge(pilot)
+	if _hp_ok:
+		var hp: Node = HP001_SCRIPT.new()
+		hp.name = "HP001"
+		add_child(hp)
+		_hp_ok = bool(hp.call("wire", pilot))
+		var mats = hp.get("totem_mats")
+		_hp_totem_mats.clear()
+		if mats is Array:
+			for m in mats:
+				if m is BaseMaterial3D:
+					_hp_totem_mats.append(m)
+		if ResourceLoader.exists(HP_CANOPY_LOD0):
+			_hide_look_dosel(pilot)
+	if not _hp_ok:
+		_build_kakaw_pods(pilot)
 	_build_beam(pilot)
 	set_totem_state(true)
 
@@ -121,6 +156,10 @@ func set_totem_state(active: bool) -> void:
 		if mat == null:
 			continue
 		mat.emission_energy_multiplier = 0.55 if active else 0.32
+	for mat in _hp_totem_mats:
+		if mat == null:
+			continue
+		mat.emission_energy_multiplier = 1.0 if active else 0.55
 	if _totem_light:
 		_totem_light.light_energy = TOTEM_LIGHT_ACTIVE if active else TOTEM_LIGHT_DIM
 	if _beam:
@@ -134,6 +173,8 @@ func force_lod0() -> void:
 		root.visible = keep
 		if keep:
 			_clear_visibility_range(root)
+			if ResourceLoader.exists(HP_CANOPY_LOD0):
+				_hide_look_dosel(root)
 
 
 func capture_still(shot: String, out_path: String) -> void:
@@ -142,6 +183,17 @@ func capture_still(shot: String, out_path: String) -> void:
 	vp.size = Vector2i(1920, 1080)
 	DisplayServer.window_set_size(Vector2i(1920, 1080))
 	force_lod0()
+	# Laguna / dosel / dock / pods / cmp_bg are art cameras. Hide the 200 m
+	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
+	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
+	if shot != "gameplay":
+		for path in [
+			"WorldRoot/Selva1Geo",
+			"WorldRoot/HP001_CorridorBank",
+		]:
+			var geo: Node = get_parent().get_node_or_null(path)
+			if geo:
+				geo.visible = false
 	var hud := get_parent().get_node_or_null("UI")
 	if hud:
 		hud.visible = false
@@ -152,12 +204,47 @@ func capture_still(shot: String, out_path: String) -> void:
 	var cam: Camera3D
 	var pods_cam: Camera3D = null
 	if shot == "gameplay":
-		# Actual follow-cam at scene spawn. Do not teleport to MAYA_STILL.
+		# Follow-cam at the 1:1 selva-1 spawn on P00. Do not use MAYA_STILL
+		# and do not put Maya on the tscn feel spawn (x=0 is the P00 lip).
 		if player:
-			player.global_position = Vector3(0.0, 1.2, 0.0)
+			player.global_position = Vector3(4.5417, 1.2, 0.0)
 			player.rotation = Vector3.ZERO
 			player.set_physics_process(true)
 		cam = play_cam
+	elif shot == "dock":
+		# Capture-only: side view of the bank/deck joint. Maya stands on the
+		# existing CSGFloor (no new collision) east of the pier so her feet
+		# and the visual deck top share the same height in frame.
+		if player:
+			player.global_position = Vector3(11.15, 1.2, -3.05)
+			player.rotation = Vector3.ZERO
+			player.rotation.y = deg_to_rad(-48.0)
+			player.set_physics_process(true)
+			if play_cam:
+				play_cam.current = false
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_DockCloseup"
+		pods_cam.far = 80.0
+		pods_cam.fov = 50.0
+		pods_cam.position = Vector3(13.05, 1.22, -2.15)
+		get_parent().add_child(pods_cam)
+		pods_cam.look_at(Vector3(10.35, 0.12, -5.35), Vector3.UP)
+		cam = pods_cam
+	elif shot == "cmp_bg":
+		# Same framing as HP001_canopy_2d_vs_3d: eye 22.5 m, +5.4° so the
+		# horizon sits ~63 % down. Capture-only; gameplay cam unchanged.
+		if player:
+			player.visible = false
+			if play_cam:
+				play_cam.current = false
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_CmpBg"
+		pods_cam.far = 280.0
+		pods_cam.fov = 42.0
+		pods_cam.position = Vector3(6.0, 14.5, 4.0)
+		get_parent().add_child(pods_cam)
+		pods_cam.look_at(Vector3(-8.0, 13.2, -48.0), Vector3.UP)
+		cam = pods_cam
 	else:
 		if player:
 			player.global_position = MAYA_STILL
@@ -168,11 +255,23 @@ func capture_still(shot: String, out_path: String) -> void:
 		if shot == "pods":
 			pods_cam = Camera3D.new()
 			pods_cam.name = "Cam_TotemPods"
-			pods_cam.fov = 32.0
 			pods_cam.far = 80.0
-			pods_cam.position = Vector3(8.85, 3.08, 1.25)
-			get_parent().add_child(pods_cam)
-			pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
+			if _hp_ok:
+				# HP cluster is at BeamOrigin (~y 2.28), not the greybox 3.03 tip.
+				# 3/4 from +X/+Z, slightly below the cluster (~1.8 m) so the
+				# carved crown, three hanging pods + stalks, and beam base read.
+				pods_cam.fov = 40.0
+				pods_cam.position = Vector3(8.48, 2.02, 1.70)
+				get_parent().add_child(pods_cam)
+				pods_cam.look_at(Vector3(7.50, 2.38, 0.20), Vector3.UP)
+				if player:
+					player.visible = false
+				_set_pods_closeup_beam(true)
+			else:
+				pods_cam.fov = 32.0
+				pods_cam.position = Vector3(8.85, 3.08, 1.25)
+				get_parent().add_child(pods_cam)
+				pods_cam.look_at(Vector3(7.50, 2.86, 0.0), Vector3.UP)
 			cam = pods_cam
 		else:
 			var cam_name := "Cam_Laguna" if shot == "laguna" else "Cam_Dosel"
@@ -180,7 +279,7 @@ func capture_still(shot: String, out_path: String) -> void:
 		if cam == null:
 			push_error("LOOK-001 capture: missing camera for " + shot)
 			return
-		if player and shot != "pods":
+		if player and shot != "pods" and shot != "dock":
 			if shot == "dosel":
 				# 3/4 toward Cam_Dosel so she reads as a character, not a blade.
 				var aim := Vector3(cam.global_position.x, player.global_position.y, cam.global_position.z)
@@ -193,22 +292,46 @@ func capture_still(shot: String, out_path: String) -> void:
 		return
 	cam.current = true
 	set_totem_state(shot != "dosel")
+	if _hp_ok:
+		var tanchor: Node3D = get_parent().get_node_or_null("WorldRoot/TotemWarpAnchor")
+		if tanchor and cam:
+			print("HP001 totem dist=", cam.global_position.distance_to(tanchor.global_position), " cam=", cam.name)
 	# Follow fill is for the spawn gameplay cam (KEY_Maya does not reach).
 	# Laguna / dosel / pods keep vertex albedo + scene KEY so Maya stays cream.
 	_set_maya_follow_for_shot(player, shot == "gameplay")
-	if shot == "gameplay":
-		# Let Maya land from spawn y=1.2 so followCam is the in-game view.
-		for i in 40:
+	if shot == "gameplay" or shot == "dock":
+		# Let Maya land from y=1.2 so feet sit on the existing collision.
+		for i in 50:
 			await tree.physics_frame
 	# More frames so volumetric fog / SSR settle on software rasterizers too.
 	for i in 24:
 		await tree.process_frame
+	var perf := {
+		"shot": shot,
+		"primitives": Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
+		"draw_calls": Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+		"video_mem_bytes": Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED),
+		"texture_mem_bytes": Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),
+		"buffer_mem_bytes": Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED),
+		"objects": Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+	}
+	print("HP001_E1_PERF ", JSON.stringify(perf))
 	var img: Image = vp.get_texture().get_image()
-	if img == null:
+	if img:
+		img.save_png(out_path)
+		print("LOOK-001 wrote ", out_path, " ", img.get_width(), "x", img.get_height())
+		var perf_path := out_path.get_basename() + "_perf.json"
+		var pf := FileAccess.open(perf_path, FileAccess.WRITE)
+		if pf:
+			pf.store_string(JSON.stringify(perf, "\t"))
+			pf.close()
+			print("HP001_E1_PERF wrote ", perf_path)
+	else:
 		push_error("LOOK-001 capture: viewport image is null (headless dummy?)")
-		return
-	img.save_png(out_path)
-	print("LOOK-001 wrote ", out_path, " ", img.get_width(), "x", img.get_height())
+	if shot == "pods" and _hp_ok:
+		_set_pods_closeup_beam(false)
+		if player:
+			player.visible = true
 	if pods_cam:
 		pods_cam.queue_free()
 
@@ -232,12 +355,19 @@ func _walk_look(n: Node) -> void:
 			# Gold shaft rings are rebuilt as greybox in _build_kakaw_pods.
 			n.visible = false
 		if n.name.begins_with("LOOK001_Totem_Post"):
-			var wood_post := StandardMaterial3D.new()
-			wood_post.albedo_color = Color(0.28, 0.20, 0.13)
-			wood_post.vertex_color_use_as_albedo = false
-			wood_post.emission_enabled = false
-			wood_post.roughness = 0.85
-			mi.material_override = wood_post
+			if _hp_ok:
+				n.visible = false
+			else:
+				var wood_post := StandardMaterial3D.new()
+				wood_post.albedo_color = Color(0.28, 0.20, 0.13)
+				wood_post.vertex_color_use_as_albedo = false
+				wood_post.emission_enabled = false
+				wood_post.roughness = 0.85
+				mi.material_override = wood_post
+		if n.name.begins_with("LOOK001_Trees") and _hp_ok:
+			n.visible = false
+		if ResourceLoader.exists(HP_CANOPY_LOD0) and (n.name.begins_with("LOOK001_Canopy") or String(n.name).find("Canopy") >= 0):
+			n.visible = false
 	for c in n.get_children():
 		_walk_look(c)
 
@@ -282,6 +412,32 @@ func _grade_hero_node(n: Node) -> void:
 				_hero_mats.append(d)
 	for c in n.get_children():
 		_grade_hero_node(c)
+
+
+func _add_maya_outline(pilot: Node3D) -> void:
+	# Subtle dark-cream shell so Maya holds ≥4.4:1 against the pale sky.
+	# Visual only — no collision, cream albedo on the hero stays.
+	var player: Node = pilot.get_node_or_null("PlayerMaya")
+	if player == null:
+		return
+	if player.get_node_or_null("MayaOutline") != null:
+		return
+	var mi := MeshInstance3D.new()
+	mi.name = "MayaOutline"
+	var cap := CapsuleMesh.new()
+	cap.radius = 0.40
+	cap.height = 1.92
+	mi.mesh = cap
+	mi.position = Vector3(0.0, 0.90, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_FRONT
+	mat.albedo_color = Color(0.20, 0.15, 0.10)
+	mat.disable_receive_shadows = true
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	player.add_child(mi)
 
 
 func _attach_maya_follow_fill(pilot: Node3D) -> void:
@@ -419,8 +575,9 @@ func _rim_platform_mat(d: BaseMaterial3D) -> void:
 	d.emission_enabled = true
 	d.emission = PLAT_EMIT
 	d.emission_energy_multiplier = PLAT_EMIT_ENERGY
-	d.roughness = 0.50
+	d.roughness = 0.78
 	d.metallic = 0.0
+	d.disable_receive_shadows = true
 
 
 func _grade_csg_playable(pilot: Node3D) -> void:
@@ -439,7 +596,23 @@ func _grade_csg_playable(pilot: Node3D) -> void:
 		(n as CSGPrimitive3D).material = mat
 
 
+func _hide_look_dosel(from: Node) -> void:
+	# LOOK canopy / understory / backdrop trees stay in the GLB; HP v2 is the dosel.
+	if from == null:
+		return
+	if from is MeshInstance3D:
+		var nm := String(from.name)
+		if nm.begins_with("LOOK001_Canopy") or nm.begins_with("LOOK001_Understory") \
+				or nm.begins_with("LOOK001_Backdrop") or nm.find("LOOK001_Canopy") >= 0:
+			from.visible = false
+	for c in from.get_children():
+		_hide_look_dosel(c)
+
+
 func _thicken_canopy() -> void:
+	# HP canopy v2 replaces LOOK clumps and the extra gap cards.
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		return
 	# Reuse the LOD canopy mesh (not a new high-poly) to close sky holes.
 	for root in _lod_roots:
 		var canopy := _find_named(root, "LOOK001_Canopy")
@@ -531,25 +704,36 @@ func _build_environment(pilot: Node3D) -> void:
 		pilot.add_child(we)
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_SKY
-	var sky_mat := ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = Color("3a4844")
-	sky_mat.sky_horizon_color = Color("6a655c")
-	sky_mat.ground_horizon_color = Color("4a5048")
-	sky_mat.ground_bottom_color = Color("10191a")
-	sky_mat.sky_energy_multiplier = 0.32
-	sky_mat.ground_energy_multiplier = 0.18
-	sky_mat.sun_angle_max = 14.0
-	sky_mat.sun_curve = 0.15
 	var sky := Sky.new()
-	sky.sky_material = sky_mat
+	if ResourceLoader.exists(HP_SKY_TEX):
+		var pano := PanoramaSkyMaterial.new()
+		pano.panorama = load(HP_SKY_TEX)
+		sky.sky_material = pano
+		_env.background_energy_multiplier = 0.78
+		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		_env.ambient_light_color = Color("a3ad92")
+		_env.ambient_light_energy = 0.36
+		_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+		_env.tonemap_exposure = 1.02
+	else:
+		var sky_mat := ProceduralSkyMaterial.new()
+		sky_mat.sky_top_color = Color("3a4844")
+		sky_mat.sky_horizon_color = Color("6a655c")
+		sky_mat.ground_horizon_color = Color("4a5048")
+		sky_mat.ground_bottom_color = Color("10191a")
+		sky_mat.sky_energy_multiplier = 0.32
+		sky_mat.ground_energy_multiplier = 0.18
+		sky_mat.sun_angle_max = 14.0
+		sky_mat.sun_curve = 0.15
+		sky.sky_material = sky_mat
+		_env.background_energy_multiplier = 0.55
+		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		_env.ambient_light_color = Color("6a7c74")
+		_env.ambient_light_energy = 0.62
+		_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+		_env.tonemap_exposure = 1.00
 	_env.sky = sky
-	_env.background_energy_multiplier = 0.55
-	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_env.ambient_light_color = Color("6a7c74")
-	_env.ambient_light_energy = 0.62
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.tonemap_exposure = 1.00
 	_env.ssr_enabled = true
 	_env.ssr_max_steps = 64
 	_env.ssr_fade_in = 0.15
@@ -569,16 +753,32 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.set("glow_levels/6", 0.0)
 	_env.set("glow_levels/7", 0.0)
 	_env.adjustment_enabled = true
-	_env.adjustment_brightness = 1.06
-	_env.adjustment_contrast = 0.97
-	_env.adjustment_saturation = 0.92
-	_env.volumetric_fog_enabled = true
-	_env.volumetric_fog_density = 0.0020
-	_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
-	_env.volumetric_fog_anisotropy = 0.32
-	_env.volumetric_fog_length = 72.0
-	_env.volumetric_fog_detail_spread = 2.0
-	_env.volumetric_fog_ambient_inject = 0.55
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		_env.adjustment_brightness = 1.02
+		_env.adjustment_contrast = 1.04
+		_env.adjustment_saturation = 1.02
+		# Low vol-fog. Olive-grey albedo so mid-distance crowns stay dark
+		# olive, not an ochre cutout. Depth lives in the far haze volumes.
+		_env.volumetric_fog_enabled = true
+		_env.volumetric_fog_density = 0.00105
+		_env.volumetric_fog_albedo = Color(0.52, 0.56, 0.46)
+		_env.volumetric_fog_emission = Color(0.62, 0.64, 0.52)
+		_env.volumetric_fog_emission_energy = 0.0
+		_env.volumetric_fog_anisotropy = 0.28
+		_env.volumetric_fog_length = 52.0
+		_env.volumetric_fog_detail_spread = 1.5
+		_env.volumetric_fog_ambient_inject = 0.38
+	else:
+		_env.adjustment_brightness = 1.06
+		_env.adjustment_contrast = 0.97
+		_env.adjustment_saturation = 0.92
+		_env.volumetric_fog_enabled = true
+		_env.volumetric_fog_density = 0.0020
+		_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
+		_env.volumetric_fog_anisotropy = 0.32
+		_env.volumetric_fog_length = 48.0
+		_env.volumetric_fog_detail_spread = 1.5
+		_env.volumetric_fog_ambient_inject = 0.55
 	we.environment = _env
 
 
@@ -590,27 +790,62 @@ func _build_lights(pilot: Node3D) -> void:
 			(old as Light3D).light_energy = 0.0
 	var key := DirectionalLight3D.new()
 	key.name = "LOOK001_KEY_SunDawn_Filtered"
-	key.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(-35.0), deg_to_rad(70.0), 0.0)), Vector3(0, 8, 4))
-	key.light_color = Color(1.0, 0.78, 0.56)
-	key.light_energy = 1.35
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		# README table: elevation 18°, azimuth 160° from +X, colour (1, 0.78, 0.45).
+		var el := deg_to_rad(18.0)
+		var az := deg_to_rad(160.0)
+		var to_sun := Vector3(cos(el) * cos(az), sin(el), cos(el) * sin(az))
+		key.position = to_sun * 42.0
+		key.light_color = Color(1.0, 0.78, 0.45)
+		key.light_energy = 1.35
+		key.light_volumetric_fog_energy = 0.85
+		key.light_specular = 0.28
+		if key.get("light_angular_distance") != null:
+			key.set("light_angular_distance", 2.0)
+	else:
+		key.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(-35.0), deg_to_rad(70.0), 0.0)), Vector3(0, 8, 4))
+		key.light_color = Color(1.0, 0.78, 0.56)
+		key.light_energy = 1.35
+		key.light_volumetric_fog_energy = 1.35
+		key.light_specular = 0.35
+		if key.get("light_angular_distance") != null:
+			key.set("light_angular_distance", 4.0)
 	key.shadow_enabled = true
 	key.shadow_blur = 1.8
-	key.light_volumetric_fog_energy = 1.35
-	key.light_specular = 0.35
-	if key.get("light_angular_distance") != null:
-		key.set("light_angular_distance", 4.0)
 	add_child(key)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		key.look_at(Vector3.ZERO, Vector3.UP)
 
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
-	fill.light_color = Color("8a9a88")
-	fill.light_energy = 0.70
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		fill.light_color = Color("a3ad92")
+		fill.light_energy = 0.40
+	else:
+		fill.light_color = Color("8a9a88")
+		fill.light_energy = 0.70
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.2
 	add_child(fill)
 	fill.position = Vector3(-8.0, 8.5, 6.0)
 	fill.look_at(Vector3(5.0, 1.0, 0.0), Vector3.UP)
+
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		# Cheap rim on the crowns (not Maya — default cull, no follow layer).
+		var canopy_rim := DirectionalLight3D.new()
+		canopy_rim.name = "HP001_RIM_Canopy"
+		var el_r := deg_to_rad(14.0)
+		var az_r := deg_to_rad(340.0)
+		var to_rim := Vector3(cos(el_r) * cos(az_r), sin(el_r), cos(el_r) * sin(az_r))
+		canopy_rim.position = to_rim * 36.0
+		canopy_rim.light_color = Color(1.0, 0.92, 0.62)
+		canopy_rim.light_energy = 0.38
+		canopy_rim.light_specular = 0.15
+		canopy_rim.shadow_enabled = false
+		canopy_rim.light_volumetric_fog_energy = 0.25
+		add_child(canopy_rim)
+		canopy_rim.look_at(Vector3(0.0, 10.0, -6.0), Vector3.UP)
 
 	var lateral := OmniLight3D.new()
 	lateral.name = "LOOK001_KEY_Soft_Lateral"
@@ -729,7 +964,11 @@ func _build_fog() -> void:
 	tex.noise = noise
 	var bank_mat := FogMaterial.new()
 	bank_mat.density = 0.62
-	bank_mat.albedo = Color(0.74, 0.76, 0.70)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		bank_mat.albedo = Color(0.58, 0.62, 0.50)
+		bank_mat.density = 0.36
+	else:
+		bank_mat.albedo = Color(0.74, 0.76, 0.70)
 	bank_mat.height_falloff = 0.55
 	bank_mat.edge_fade = 0.5
 	bank_mat.density_texture = tex
@@ -738,7 +977,11 @@ func _build_fog() -> void:
 		add_child(_make_fog_volume("LOOK001_FogBank_%02d" % i, spec, bank_mat))
 	var trunk_mat := FogMaterial.new()
 	trunk_mat.density = 0.18
-	trunk_mat.albedo = Color(0.68, 0.72, 0.66)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		trunk_mat.albedo = Color(0.50, 0.54, 0.44)
+		trunk_mat.density = 0.10
+	else:
+		trunk_mat.albedo = Color(0.68, 0.72, 0.66)
 	trunk_mat.height_falloff = 0.25
 	trunk_mat.edge_fade = 0.45
 	trunk_mat.density_texture = tex
@@ -752,8 +995,14 @@ func _build_fog() -> void:
 	haze.size = Vector3(120.0, 20.0, 80.0)
 	haze.position = Vector3(0.0, 14.0, -18.0)
 	var haze_mat := FogMaterial.new()
-	haze_mat.density = 0.032
-	haze_mat.albedo = Color(0.66, 0.70, 0.64)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		haze.size = Vector3(180.0, 14.0, 140.0)
+		haze.position = Vector3(0.0, 7.0, -48.0)
+		haze_mat.density = 0.014
+		haze_mat.albedo = Color(0.48, 0.52, 0.42)
+	else:
+		haze_mat.density = 0.032
+		haze_mat.albedo = Color(0.66, 0.70, 0.64)
 	haze_mat.height_falloff = 0.04
 	haze_mat.edge_fade = 0.3
 	haze.material = haze_mat
@@ -772,6 +1021,155 @@ func _build_fog() -> void:
 	clear_mat.edge_fade = 0.7
 	clear.material = clear_mat
 	add_child(clear)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		# Second haze layer on the far ridges (README k 0.0022 /m, warmer far).
+		var ridge := FogVolume.new()
+		ridge.name = "HP001_RidgeHaze"
+		ridge.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+		ridge.size = Vector3(220.0, 16.0, 80.0)
+		ridge.position = Vector3(-8.0, 8.0, -92.0)
+		var ridge_mat := FogMaterial.new()
+		ridge_mat.density = 0.016
+		ridge_mat.albedo = Color(0.56, 0.58, 0.50)
+		ridge_mat.height_falloff = 0.03
+		ridge_mat.edge_fade = 0.35
+		ridge.material = ridge_mat
+		add_child(ridge)
+
+
+func _scissor_card(tex: Texture2D, tint: Color, cutoff: float) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = cutoff
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_texture = tex
+	mat.albedo_color = tint
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
+	return mat
+
+
+func _add_card(parent: Node, card_name: String, pos: Vector3, size: Vector2, eul: Vector3, mat: Material) -> MeshInstance3D:
+	# QuadMesh lives in XY and faces +Z. Camera looks down local −Z, so a child
+	# at z<0 with identity rotation faces the lens. PlaneMesh is XZ / +Y and
+	# was invisible in the 40×22.5 side camera.
+	var quad := QuadMesh.new()
+	quad.size = size
+	var mi := MeshInstance3D.new()
+	mi.name = card_name
+	mi.mesh = quad
+	mi.material_override = mat
+	mi.position = pos
+	mi.rotation = eul
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	parent.add_child(mi)
+	return mi
+
+
+func _cloud_card_mat() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+uniform sampler2D sky : source_color;
+void fragment() {
+	vec2 uv = vec2(fract(UV.x * 1.35 + 0.08), mix(0.42, 0.06, UV.y));
+	vec3 cloud = texture(sky, uv).rgb;
+	// Play band (lower card) is darker / more saturated so cream Maya ≥4.4:1.
+	float play = smoothstep(0.62, 0.18, UV.y);
+	vec3 dusk = vec3(0.28, 0.36, 0.40);
+	ALBEDO = mix(cloud * vec3(0.72, 0.78, 0.70), dusk, play * 0.55);
+}
+"""
+	mat.shader = sh
+	if ResourceLoader.exists(HP_SKY_TEX):
+		mat.set_shader_parameter("sky", load(HP_SKY_TEX))
+	elif ResourceLoader.exists("res://textures/hp001_jungle_sky_2d.jpg"):
+		mat.set_shader_parameter("sky", load("res://textures/hp001_jungle_sky_2d.jpg"))
+	return mat
+
+
+func _build_side_follow_art(pilot: Node3D) -> void:
+	# Locked to the follow cam so every gameplay still (entrance / hazard /
+	# cacao) shows cumulus + two low jungle strips + left-edge lianas.
+	# Cards sit in camera space: play plane is local z ≈ −24.1; behind it is
+	# z < −24. No collision. Flat várzea — no hills, no waterfalls.
+	var cam: Node = pilot.get_node_or_null("PlayerMaya/Camera3D")
+	if cam == null:
+		return
+	var hold := Node3D.new()
+	hold.name = "HP001_SideFollow"
+	cam.add_child(hold)
+	# Level with the view plane (no extra euler) so the top edge is not a slant.
+	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 4.8, -40.0), Vector2(68.0, 18.0), Vector3.ZERO, _cloud_card_mat())
+	if ResourceLoader.exists(HP_SIL_TEX):
+		var tex: Texture2D = load(HP_SIL_TEX)
+		var near_mat := _scissor_card(tex, Color(0.14, 0.18, 0.10), 0.32)
+		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -2.4, -32.0), Vector2(70.0, 7.2), Vector3.ZERO, near_mat)
+		var far_mat := _scissor_card(tex, Color(0.32, 0.36, 0.28), 0.32)
+		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -1.6, -48.0), Vector2(82.0, 8.0), Vector3.ZERO, far_mat)
+	if ResourceLoader.exists(HP_LIANA_TEX):
+		var liana: Texture2D = load(HP_LIANA_TEX)
+		var lmat := _scissor_card(liana, Color(0.78, 0.86, 0.62), 0.22)
+		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.32, 0.55, -3.20), Vector2(1.50, 2.40), Vector3.ZERO, lmat)
+		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.58, 0.95, -3.60), Vector2(1.10, 1.70), Vector3.ZERO, lmat)
+	# Laguna still keeps a world-space curtain over the water (art camera).
+	if ResourceLoader.exists(HP_LIANA_TEX):
+		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.78, 0.86, 0.62), 0.22)
+		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
+
+
+func _build_dosel_cap_cards(pilot: Node3D) -> void:
+	# Cam_Dosel saw a slanted crown cut at the top of the frame. Screen-aligned
+	# quads (identity euler, camera children) put a level olive band up there.
+	# Layer 10 is only in Cam_Dosel’s cull mask so gameplay does not see them.
+	var cam: Camera3D = pilot.get_node_or_null("Cam_Dosel") as Camera3D
+	if cam == null:
+		return
+	var bit := 1 << DOSEL_CARD_LAYER
+	cam.cull_mask = cam.cull_mask | bit
+	var play_cam: Camera3D = pilot.get_node_or_null("PlayerMaya/Camera3D") as Camera3D
+	if play_cam:
+		play_cam.cull_mask = play_cam.cull_mask & ~bit
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.albedo_color = Color(0.10, 0.14, 0.08)
+	mat.disable_receive_shadows = true
+	var hold := Node3D.new()
+	hold.name = "HP001_DoselCap"
+	cam.add_child(hold)
+	for spec in [
+		{"n": "C", "pos": Vector3(0.0, 4.55, -11.0), "size": Vector2(20.0, 4.0)},
+		{"n": "L", "pos": Vector3(-5.6, 3.85, -9.4), "size": Vector2(10.0, 3.4)},
+		{"n": "R", "pos": Vector3(5.8, 4.15, -10.2), "size": Vector2(10.5, 3.6)},
+	]:
+		var mi := _add_card(hold, "HP001_DoselCap_%s" % spec["n"], spec["pos"], spec["size"], Vector3.ZERO, mat)
+		mi.layers = bit
+
+
+func _build_wet_earth_edge(pilot: Node3D) -> void:
+	# Visual only: darker wet lip where the playable earth meets black water.
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = PLAT_WET_EDGE
+	mat.roughness = 0.82
+	mat.metallic = 0.0
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(24.0, 0.85)
+	var mi := MeshInstance3D.new()
+	mi.name = "HP001_WetEarthEdge"
+	mi.mesh = plane
+	mi.material_override = mat
+	mi.position = Vector3(0.0, 0.012, -3.85)
+	mi.rotation.x = deg_to_rad(-90.0)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	var world: Node = pilot.get_node_or_null("WorldRoot")
+	if world:
+		world.add_child(mi)
+	else:
+		pilot.add_child(mi)
 
 
 func _make_fog_volume(vol_name: String, spec: Dictionary, mat: FogMaterial) -> FogVolume:
@@ -971,8 +1369,20 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	return root
 
 
+func _set_pods_closeup_beam(dim: bool) -> void:
+	# Capture-only: keep the beam origin readable without additive wash on the pods.
+	if BEAM_GOLD_MAT:
+		BEAM_GOLD_MAT.set_shader_parameter("strength", 1.35 if dim else 3.2)
+	if BEAM_CYAN_MAT:
+		BEAM_CYAN_MAT.set_shader_parameter("strength", 1.10 if dim else 2.6)
+	if _env:
+		_env.glow_intensity = 0.10 if dim else 0.25
+
+
 func _build_beam(pilot: Node3D) -> void:
-	var spawn: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor/VFX_WarpBeam_Spawn")
+	var spawn: Node3D = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor/BeamOrigin")
+	if spawn == null:
+		spawn = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor/VFX_WarpBeam_Spawn")
 	_beam = Node3D.new()
 	_beam.name = "LOOK001_WarpBeam"
 	if spawn:
@@ -980,6 +1390,18 @@ func _build_beam(pilot: Node3D) -> void:
 	else:
 		_beam.position = Vector3(7.5, 3.03, 0.0)
 		add_child(_beam)
+	# BeamOrigin is the pod-cluster anchor (~y 2.278). Sit the open cylinder
+	# flush on the chopped crown (~y 2.61) so the shaft is centred between
+	# the pods and does not pierce them. The shader fades the bottom 0.35 m
+	# (alpha 0 → full) so the open end does not read as a hovering disc.
+	var lift := 0.0
+	if spawn and spawn.name == "BeamOrigin":
+		lift = CROWN_TOP_LOCAL_Y - spawn.position.y
+		_beam.position = Vector3(0.0, lift, 0.0)
+	if BEAM_GOLD_MAT:
+		BEAM_GOLD_MAT.set_shader_parameter("base_fade_m", 0.35)
+	if BEAM_CYAN_MAT:
+		BEAM_CYAN_MAT.set_shader_parameter("base_fade_m", 0.35)
 	_beam.add_child(_make_beam("Gold", Vector3(0.07, 0.30, 6.2), BEAM_GOLD_MAT, Vector3.ZERO))
 	# Secondary core is Kakaw orange (paint_v03 Y/O/R), not turquoise.
 	_beam.add_child(_make_beam("PodCore", Vector3(0.025, 0.085, 5.0), BEAM_CYAN_MAT, Vector3(0.02, 0.0, 0.02)))
@@ -987,6 +1409,8 @@ func _build_beam(pilot: Node3D) -> void:
 	var mirror := Node3D.new()
 	mirror.name = "Mirror"
 	var spawn_y := 3.03
+	if spawn:
+		spawn_y = spawn.global_position.y + lift
 	mirror.position = Vector3(0.0, (WATER_Y - spawn_y) * 2.0, 0.0)
 	mirror.scale = Vector3(1.0, -1.0, 1.0)
 	_beam.add_child(mirror)
