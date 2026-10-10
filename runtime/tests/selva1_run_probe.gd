@@ -25,6 +25,9 @@ var _phase := "intro"
 var _did_double := false
 var _repress := 0
 var _wait := 0
+var _k00 := false
+var _k01 := false
+var _p14_top := -99.0
 
 
 func _initialize() -> void:
@@ -107,9 +110,9 @@ func _advance_phase(x: float, y: float, on: bool) -> void:
 		return
 	if x < 20.0 and y < 4.0:
 		_phase = "intro"
-	elif x < 52.4 and y < 8.5:
+	elif x < 49.5 and y < 8.5:
 		_phase = "p04"
-	elif x < 63.4 and y < 5.0:
+	elif x < 63.5 and y < 5.5:
 		_phase = "crawl"
 	elif x < 81.5 and y < 10.0:
 		_phase = "spikes"
@@ -117,7 +120,7 @@ func _advance_phase(x: float, y: float, on: bool) -> void:
 		_phase = "frog"
 	elif x < 101.0:
 		_phase = "column"
-	elif x < 114.8 and y < 8.0:
+	elif x < 112.8 and y < 8.0:
 		_phase = "squeeze"
 	elif x < 127.5:
 		_phase = "lift"
@@ -138,7 +141,7 @@ func _pulse_double() -> float:
 	if _repress > 0:
 		_repress -= 1
 		return 0.0 if _repress > 0 else 1.0
-	if (not _p.is_on_floor()) and _air > 16 and _p.velocity.y < 0.0 and not _did_double:
+	if (not _p.is_on_floor()) and _air > 14 and _p.velocity.y < 0.0 and not _did_double:
 		_did_double = true
 		_repress = 2
 		return 0.0
@@ -160,6 +163,8 @@ func _plan() -> Vector3:
 	if hanging:
 		_jump_armed = false
 		return Vector3(0.0, 0.0, 0.0)
+	if _stuck > 160 and _phase != "p04":
+		return Vector3(1.0, 1.0 if (_stuck % 50) < 10 else 0.0, 0.0)
 
 	match _phase:
 		"intro":
@@ -184,31 +189,38 @@ func _plan() -> Vector3:
 				return Vector3(0.0, 0.0, 0.0)
 			if x > 43.6:
 				return Vector3(1.0, 1.0, 0.0)
-			# Hop the K00 pole (saves spawn) before the crawl lip.
-			if on and x > 51.8 and x < 53.1:
-				return Vector3(1.0, 1.0, 0.0)
 			return Vector3(1.0, 0.0, 0.0)
 		"crawl":
+			if (not _k00) and on and x > 51.7 and x < 52.7:
+				_k00 = true
+				return Vector3(1.0, 1.0, 0.0)
 			return Vector3(1.0, 0.0, 1.0)
 		"spikes":
-			# Clear H00, land on P08, then a short hop onto P09 past H01 (84.4).
-			if y < 4.2 and x < 70.5:
-				var hop := (on and x > 63.95) or not on
-				if hop and not on:
+			# Double-jump H00. Release over P08 (hold+fall = hang on the
+			# crumble), then hold again to grab P09's left lip — mantle
+			# stands at ~82.8, left of frog H01 (84.0–84.75).
+			if x < 71.5:
+				if on and x > 63.9:
+					_did_double = false
+					return Vector3(1.0, 1.0, 0.0)
+				if not on:
 					return Vector3(1.0, _pulse_double(), 0.0)
-				return Vector3(1.0, 1.0 if hop else 0.0, 0.0)
-			if on and x > 76.8 and x < 79.0 and y > 4.5:
-				_did_double = false
+				return Vector3(1.0, 0.0, 0.0)
+			if x < 81.3:
+				return Vector3(1.0, 0.0, 0.0)
+			if not on:
 				return Vector3(1.0, 1.0, 0.0)
-			if not on and x < 86.2:
-				# Hold until we are past the frog, then cut so we do not fly the P09/P11 gap.
-				return Vector3(1.0, 1.0 if x < 85.4 else 0.0, 0.0)
 			return Vector3(1.0, 0.0, 0.0)
 		"frog":
-			# Stand on P09 right of H01, double-jump onto P11 (top 14.67).
-			if on and x < 87.6:
+			# After the P09 mantle we stand left of H01. Short-hop the frog,
+			# then double-jump from ~88 onto P11 (top 14.67).
+			if on and x < 83.8:
+				return Vector3(1.0, 1.0, 0.0)
+			if not on and x < 86.4:
+				return Vector3(1.0, 1.0 if _air < 10 else 0.0, 0.0)
+			if on and x < 87.8:
 				return Vector3(1.0, 0.0, 0.0)
-			if on and x >= 87.6:
+			if on:
 				_did_double = false
 				return Vector3(1.0, 1.0, 0.0)
 			return Vector3(1.0, _pulse_double() if x < 96.5 else 0.0, 0.0)
@@ -221,53 +233,75 @@ func _plan() -> Vector3:
 				return Vector3(1.0, 1.0 if _p.velocity.y > 0.0 else 0.0, 0.0)
 			return Vector3(1.0, 0.0, 0.0)
 		"squeeze":
-			var duck := x < 113.2 and y < 4.2
-			if duck:
-				return Vector3(1.0, 0.0, 1.0)
-			return Vector3(1.0, 0.0, 0.0)
+			if x >= 113.2:
+				return Vector3(0.0, 0.0, 0.0)
+			return Vector3(1.0, 0.0, 1.0)
 		"lift":
-			var m2 := _nearest_mover(x, y)
-			var left := m2.x
-			var right := m2.y
-			if y < 8.0:
-				if left >= 0.0 and left < 3.4:
-					return Vector3(1.0 if left > 0.4 else 0.0, 1.0, 0.0)
-				if left > 3.4:
+			var p14 := _mover_at(120.0)
+			var left := p14.x
+			var right := p14.y
+			var top := p14.z
+			var riding := on and x > 116.4 and y > 3.05
+			if riding or (not on and x > 116.4 and y > 3.5):
+				if y < 15.7:
+					if x > right - 0.75:
+						return Vector3(-1.0, 0.0, 0.0)
+					if x < left + 0.75:
+						return Vector3(1.0, 0.0, 0.0)
 					return Vector3(0.0, 0.0, 0.0)
-				return Vector3(1.0, 0.0, 0.0)
-			if y < 15.4:
-				var go := 1.0 if x < (right - 1.2) else 0.0
-				return Vector3(go, 0.0, 0.0)
-			return Vector3(1.0, 1.0, 0.0)
-		"wind":
-			if on and x > 136.6:
 				return Vector3(1.0, 1.0, 0.0)
-			if not on:
-				return Vector3(1.0, 1.0 if _p.velocity.y > 2.0 else 0.0, 0.0)
+			var sampled := _p14_top > -50.0
+			var rising := sampled and top > _p14_top + 0.01
+			_p14_top = top
+			# P14 is fast (±9 m). Catch it by grabbing the lip while we fall,
+			# or by walking off P12 onto the deck near the bottom of the stroke.
+			var grab := top > 4.8 and top < 11.2 and left < 3.8 and left > -0.8
+			var step_on := rising and top > 1.1 and top < 3.4 and left < 3.8
+			if grab:
+				return Vector3(1.0, 1.0, 0.0)
+			if step_on:
+				return Vector3(1.0, 0.0, 0.0)
+			if x > 113.5:
+				return Vector3(0.0, 0.0, 0.0)
 			return Vector3(1.0, 0.0, 0.0)
+		"wind":
+			if (not _k01) and on and x > 129.4 and x < 130.9:
+				_k01 = true
+				return Vector3(1.0, 1.0, 0.0)
+			# Walk off P15 (wind already adds +x). A full jump overshoots into H02.
+			if on:
+				return Vector3(1.0, 0.0, 0.0)
+			if x < 147.8:
+				return Vector3(1.0, 0.0, 0.0)
+			return Vector3(1.0, 1.0, 0.0)
 		"frog2":
-			# P16 → P17, land right of H02 (151.0).
-			if on and x < 146.4:
+			# Stand left of H02 (151.0) after the P17 mantle, then short-hop.
+			if on and x < 150.4:
+				return Vector3(1.0, 1.0, 0.0)
+			if not on and x < 153.4:
+				return Vector3(1.0, 1.0 if _air < 8 else 0.0, 0.0)
+			if on and x < 156.8:
 				return Vector3(1.0, 0.0, 0.0)
 			if on:
-				_did_double = false
 				return Vector3(1.0, 1.0, 0.0)
-			return Vector3(1.0, 1.0 if x < 154.2 else 0.0, 0.0)
+			return Vector3(1.0, 1.0 if x < 164.5 else 0.0, 0.0)
 		"ride":
-			if y < 12.8 and x < 166.5:
+			var p19 := _mover_at(170.7)
+			var left19 := p19.x
+			var right19 := p19.y
+			if x < 166.2 and y < 13.8:
 				if on and x > 157.6:
 					return Vector3(1.0, 1.0, 0.0)
 				if not on:
-					return Vector3(1.0, 1.0 if x < 164.0 else 0.0, 0.0)
+					return Vector3(1.0, 1.0 if x < 164.8 else 0.0, 0.0)
 				return Vector3(1.0, 0.0, 0.0)
-			var m3 := _nearest_mover(x, y)
-			if y < 14.0 and m3.x > 3.6:
-				return Vector3(0.0, 0.0, 0.0)
-			if on and x > 176.8:
+			if on and right19 > 176.8 and x > 172.5:
 				return Vector3(1.0, 1.0, 0.0)
-			if not on and x > 166.0:
-				return Vector3(1.0, 1.0 if x < 182.0 else 0.0, 0.0)
-			return Vector3(1.0, 0.0, 0.0)
+			if on:
+				if x > right19 - 0.55:
+					return Vector3(0.0, 0.0, 0.0)
+				return Vector3(1.0, 0.0, 0.0)
+			return Vector3(1.0, 1.0 if x < 184.2 else 0.0, 0.0)
 		_:
 			return Vector3(1.0, 0.0, 0.0)
 
@@ -298,6 +332,26 @@ func _hazard_hop(x: float, y: float) -> bool:
 	if absf(x - 151.0) < 1.6 and absf(y - 13.67) < 1.4:
 		return true
 	return false
+
+
+func _mover_at(around_x: float) -> Vector3:
+	# left, right, top of the mover whose centre is nearest around_x.
+	var best := Vector3(-99.0, -99.0, -99.0)
+	var best_dx := 99.0
+	for body in _movers:
+		if body == null or not (body is Node3D):
+			continue
+		var mesh := body.get_node_or_null("Mesh") as MeshInstance3D
+		if mesh == null or not (mesh.mesh is BoxMesh):
+			continue
+		var pos: Vector3 = (body as Node3D).global_position
+		var sz: Vector3 = (mesh.mesh as BoxMesh).size
+		var dx := absf(pos.x - around_x)
+		if dx < best_dx:
+			best_dx = dx
+			best = Vector3(pos.x - sz.x * 0.5 - _p.global_position.x, \
+					pos.x + sz.x * 0.5, pos.y + sz.y * 0.5)
+	return best
 
 
 func _nearest_mover(x: float, y: float) -> Vector3:
