@@ -1176,7 +1176,7 @@ void fragment() {
 	if (a < 0.14) {
 		discard;
 	}
-	ALBEDO = vec3(0.14, 0.16, 0.06);
+	ALBEDO = vec3(0.07, 0.09, 0.035);
 	ALPHA = 1.0;
 }
 """
@@ -1258,16 +1258,16 @@ void fragment() {
 	float n = 0.50 + 0.28 * sin((UV.x + par) * 23.0) * sin(UV.y * 17.0 + 1.1);
 	n += 0.18 * sin((UV.x * 0.5 + par * 0.4) * 9.0 + UV.y * 11.0);
 	float clump = smoothstep(0.32, 0.78, n);
-	vec3 earth = vec3(0.034, 0.026, 0.014);
-	vec3 olive = vec3(0.040, 0.052, 0.024);
-	vec3 moss = vec3(0.048, 0.062, 0.028);
+	vec3 earth = vec3(0.012, 0.010, 0.005);
+	vec3 olive = vec3(0.016, 0.022, 0.009);
+	vec3 moss = vec3(0.020, 0.028, 0.011);
 	vec3 col = mix(earth, olive, leaf);
-	col = mix(col, moss, clump * 0.55);
+	col = mix(col, moss, clump * 0.45);
 	// Crown well above platform tops: wavy + diffuse. Warm fog only there.
-	float wave = 0.86 + 0.055 * sin((UV.x + par * 0.3) * 13.0) + 0.035 * sin(UV.x * 29.0 + 1.6);
-	float top = smoothstep(wave + 0.08, wave - 0.10, UV.y);
-	float haze = smoothstep(wave - 0.16, wave + 0.02, UV.y);
-	col = mix(col, vec3(0.36, 0.26, 0.12), haze * 0.20 * top);
+	float wave = 0.84 + 0.09 * sin((UV.x + par * 0.3) * 9.5) + 0.055 * sin(UV.x * 23.0 + 1.6) + 0.03 * sin(UV.x * 47.0);
+	float top = smoothstep(wave + 0.11, wave - 0.14, UV.y);
+	float haze = smoothstep(wave - 0.20, wave + 0.03, UV.y);
+	col = mix(col, vec3(0.22, 0.16, 0.08), haze * 0.16 * top);
 	if (top < 0.02) {
 		discard;
 	}

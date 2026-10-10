@@ -58,7 +58,7 @@ def is_cream(rgb) -> bool:
     r, g, b = rgb[:3]
     if r < 95 or r > 210 or g < 80 or g > 195 or b < 60 or b > 175:
         return False
-    if r < g - 8 or r < b:
+    if r < g + 4 or r < b:
         return False
     mx, mn = max(r, g, b), min(r, g, b)
     if mx - mn < 12:
