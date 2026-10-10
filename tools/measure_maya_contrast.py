@@ -59,14 +59,14 @@ def cream_mask(im: np.ndarray) -> np.ndarray:
     mx = np.maximum(np.maximum(r, g), b)
     mn = np.minimum(np.minimum(r, g), b)
     return (
-        (r >= 150)
-        & (r <= 225)
-        & (g >= 105)
-        & (g <= 185)
-        & (b >= 60)
+        (r >= 175)
+        & (r <= 230)
+        & (g >= 125)
+        & (g <= 190)
+        & (b >= 65)
         & (b <= 130)
         & (r >= g + 18)
-        & (r >= b + 28)
+        & (r >= b + 35)
         & ((mx - mn) >= 28)
         & (g >= (0.62 * r))
         & (g <= (0.90 * r))
@@ -86,7 +86,10 @@ def platform_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    return (r < 95) & (g < 75) & (b < 60) & (r > 28) & (np.abs(r - 2 * b) < 40)
+    brown = (r >= g + 6) & (r > 28) & (b < 90)
+    dark_side = (r < 110) & (g < 85) & (b < 60)
+    tan_top = (r >= 130) & (r <= 190) & (g >= 85) & (g <= 150) & (b <= 90)
+    return brown & (dark_side | tan_top)
 
 
 def sky_mask(im: np.ndarray) -> np.ndarray:
@@ -106,20 +109,27 @@ def cacao_mask(im: np.ndarray) -> np.ndarray:
 def densest_window(mask: np.ndarray, ww: int, hh: int, lo: int, hi: int) -> np.ndarray:
     h, w = mask.shape
     integral = np.pad(mask.astype(np.int32), ((1, 0), (1, 0))).cumsum(0).cumsum(1)
-    best_n = -1
+    best_score = -1.0
     best = (0, 0, w, h)
-    step_y = max(1, hh // 4)
-    step_x = max(1, ww // 4)
+    step_y = max(2, hh // 8)
+    step_x = max(2, ww // 8)
     for y0 in range(0, max(1, h - hh + 1), step_y):
         y1 = min(h, y0 + hh)
         for x0 in range(0, max(1, w - ww + 1), step_x):
             x1 = min(w, x0 + ww)
             n = int(integral[y1, x1] - integral[y0, x1] - integral[y1, x0] + integral[y0, x0])
-            if lo < n < hi and n > best_n:
-                best_n = n
+            if not (lo < n < hi):
+                continue
+            ys, xs = np.where(mask[y0:y1, x0:x1])
+            if ys.size < lo:
+                continue
+            compact = n / (1.0 + float(xs.std()) + float(ys.std()))
+            score = compact * (1.0 + 0.35 * (ys.max() - ys.min()) / max(1.0, float(xs.max() - xs.min())))
+            if score > best_score:
+                best_score = score
                 best = (x0, y0, x1, y1)
     out = np.zeros_like(mask)
-    if best_n > 0:
+    if best_score > 0:
         x0, y0, x1, y1 = best
         out[y0:y1, x0:x1] = mask[y0:y1, x0:x1]
         return out
@@ -140,9 +150,8 @@ def measure_maya(path: Path, x_m=None) -> dict:
     im = np.array(Image.open(path).convert("RGB"))
     cream = cream_mask(im)
     n_cream = int(cream.sum())
-    if n_cream > 200:
-        cream = densest_window(cream, 40, 72, 30, 400)
-        n_cream = int(cream.sum())
+    cream = densest_window(cream, 32, 60, 18, 280)
+    n_cream = int(cream.sum())
     if n_cream < 12:
         return {"file": path.name, "x_m": x_m, "error": "maya body not found", "cream_n": n_cream}
     ys, xs = np.where(cream)
@@ -150,12 +159,16 @@ def measure_maya(path: Path, x_m=None) -> dict:
     outline = outline_mask(im)
     plat = platform_mask(im)
     sky = sky_mask(im)
-    near = neighbor_ring(cream, 3)
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    jungle = (r < 90) & (g < 105) & (b < 75) & (g >= r - 8) & ~cream & ~outline & ~plat
+    near = neighbor_ring(cream, 8)
     outline_rgb = im[near & outline]
-    body_bg = im[near & ~cream & ~outline & ~plat]
-    ring = neighbor_ring(cream, 12)
+    body_bg = im[near & jungle]
+    ring = neighbor_ring(cream, 16)
     outline_bg = im[ring & sky]
-    extra_body = im[ring & ~cream & ~outline & ~plat & ~sky]
+    extra_body = im[ring & jungle]
     if extra_body.size:
         body_bg = extra_body if body_bg.size == 0 else np.concatenate([body_bg, extra_body], axis=0)
     if outline_bg.shape[0] < 16:
@@ -231,7 +244,10 @@ def main() -> int:
             continue
         maya.append(measure_maya(path, x_m))
     cacao = []
-    for p in sorted(DOCS.glob("HP001_*engine_totem_pods*.png")):
+    pods = sorted(DOCS.glob("HP001_E2f_engine_totem_pods*.png"))
+    if not pods:
+        pods = sorted(DOCS.glob("HP001_*engine_totem_pods*.png"))[-1:]
+    for p in pods:
         cacao.append(measure_cacao(p))
     report = {"maya": maya, "cacao": cacao}
     print(json.dumps(report, indent=2))

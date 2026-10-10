@@ -1266,8 +1266,11 @@ void fragment() {
 	vec3 olive = vec3(0.022, 0.030, 0.012);
 	vec3 moss = vec3(0.030, 0.038, 0.016);
 	vec3 col = mix(earth, olive, leaf);
-	col = mix(col, moss, clump * 0.62);
-	col *= mix(0.72, 1.08, smoothstep(1.0, 0.30, vy));
+	col = mix(col, moss, clump * 0.70);
+	col = mix(col * 0.78, col * 1.10, clump);
+	col *= mix(0.70, 1.04, smoothstep(1.0, 0.30, vy));
+	col *= 0.86;
+	col *= mix(0.80, 1.0, smoothstep(10.0, 28.0, eye.x));
 	float scallop = 0.058 * sin((vx + par * 0.28) * 6.6);
 	scallop += 0.038 * sin(vx * 13.5 + 0.9);
 	scallop += 0.024 * sin(vx * 27.0 + 2.2);
