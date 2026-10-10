@@ -314,7 +314,7 @@ func _wire_hanging(pilot: Node3D) -> void:
 	var mat: BaseMaterial3D = kit["mat"]
 	if mat:
 		_harden_mat(mat, 0.5, true)
-		mat.albedo_color = Color(0.86, 0.96, 0.72)
+		mat.albedo_color = Color(0.32, 0.28, 0.14)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20261011
 	var xforms: Array = []

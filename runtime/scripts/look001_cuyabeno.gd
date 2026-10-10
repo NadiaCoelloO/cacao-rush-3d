@@ -1083,6 +1083,30 @@ func _build_fog() -> void:
 		add_child(ridge)
 
 
+func _liana_tex_mat(tex: Texture2D, tint: Color) -> ShaderMaterial:
+	# The PNG is dark vines on opaque white — luminance-scissor, not alpha.
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+uniform sampler2D liana : source_color;
+uniform vec4 tint : source_color;
+void fragment() {
+	vec4 s = texture(liana, UV);
+	float lum = dot(s.rgb, vec3(0.30, 0.59, 0.11));
+	if (lum > 0.78) {
+		discard;
+	}
+	ALBEDO = mix(s.rgb, tint.rgb, 0.55);
+	ALPHA = 1.0;
+}
+"""
+	mat.shader = sh
+	mat.set_shader_parameter("liana", tex)
+	mat.set_shader_parameter("tint", tint)
+	return mat
+
+
 func _scissor_card(tex: Texture2D, tint: Color, cutoff: float) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
@@ -1163,12 +1187,12 @@ void fragment() {
 	// Painted jungle-sky cumulus only (crop hills / waterfalls).
 	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	float par = eye.x * 0.0038;
-	vec2 uv = vec2(fract(UV.x * 0.82 + par + 0.05), mix(0.34, 0.03, UV.y));
+	vec2 uv = vec2(fract(UV.x * 0.90 + par + 0.04), mix(0.50, 0.07, UV.y));
 	vec3 cloud = texture(sky, uv).rgb;
-	cloud *= vec3(1.08, 0.96, 0.78);
-	float haze = smoothstep(0.62, 0.08, UV.y);
-	vec3 warm = vec3(0.98, 0.84, 0.54);
-	ALBEDO = mix(cloud, warm, haze * 0.28);
+	cloud *= vec3(1.04, 0.94, 0.72);
+	float haze = smoothstep(0.38, 0.00, UV.y);
+	vec3 warm = vec3(0.96, 0.80, 0.48);
+	ALBEDO = mix(cloud, warm, haze * 0.55);
 }
 """
 	mat.shader = sh
@@ -1232,9 +1256,6 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	# Fill the 40×22.5 view so painted cumulus is not a postage stamp.
 	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 1.4, -38.0), Vector2(78.0, 34.0), Vector3.ZERO, _cloud_card_mat())
 	_add_card(hold, "HP001_PlayDim", Vector3(0.0, -0.4, -36.0), Vector2(78.0, 18.0), Vector3.ZERO, _play_band_dim_mat())
-	# Tight warm cushion just behind Maya's torso (play plane z ≈ −24.1).
-	# Body reads against this; the outline sits on the fade / sky.
-	_add_card(hold, "HP001_MayaVignette", Vector3(0.0, -0.06, -25.20), Vector2(2.35, 2.85), Vector3.ZERO, _maya_body_vignette_mat())
 	if ResourceLoader.exists(HP_SIL_TEX):
 		var tex: Texture2D = load(HP_SIL_TEX)
 		var near_mat := _scissor_card(tex, Color(0.18, 0.24, 0.12), 0.28)
@@ -1244,15 +1265,19 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	# Hanging curtain: painted leaves + curved brown-green strands. No rods.
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var liana: Texture2D = load(HP_LIANA_TEX)
-		var lmat := _scissor_card(liana, Color(0.40, 0.34, 0.16), 0.12)
+		var lmat := _liana_tex_mat(liana, Color(0.40, 0.34, 0.16))
 		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.05, 1.85, -3.15), Vector2(2.80, 4.60), Vector3.ZERO, lmat)
 		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.35, 1.35, -3.55), Vector2(2.10, 3.80), Vector3.ZERO, lmat)
 	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-2.12, 1.95, -3.05), Vector2(3.20, 5.10), Vector3.ZERO, _curved_liana_mat())
 	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-1.55, 2.10, -3.40), Vector2(2.40, 4.40), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
 	# Laguna still keeps a world-space curtain over the water (art camera).
 	if ResourceLoader.exists(HP_LIANA_TEX):
-		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.42, 0.36, 0.18), 0.22)
+		var lmat2 := _liana_tex_mat(load(HP_LIANA_TEX), Color(0.42, 0.36, 0.18))
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
+	# Cushion follows Maya. Look-ahead (+2 m) puts camera-center off her body.
+	var player: Node = pilot.get_node_or_null("PlayerMaya")
+	if player:
+		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.92, -1.15), Vector2(1.85, 2.70), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:

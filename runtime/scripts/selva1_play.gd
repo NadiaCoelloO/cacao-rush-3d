@@ -24,7 +24,7 @@ const Y_SHIFT := 13.333333
 const PIT_KILL_Y := -18.4167
 const MAYA_LAYER := 2
 const COL_EARTH := Color("3e2c20")
-const COL_EARTH_LIP := Color(0.337, 0.243, 0.141)
+const COL_EARTH_LIP := Color(0.48, 0.36, 0.20)
 const COL_WET := Color(0.10, 0.08, 0.06)
 const COL_CRATE := Color(0.36, 0.24, 0.14)
 const COL_CRUMBLE := Color(0.16, 0.11, 0.07)
@@ -375,7 +375,7 @@ func _add_box(host: Node3D, center: Array, size: Array, mat: Material, collide: 
 
 
 func _add_lip(host: Node3D, size: Vector3, mat: Material) -> void:
-	var lip_h := minf(0.12, size.y * 0.35)
+	var lip_h := minf(0.16, size.y * 0.40)
 	var mesh := MeshInstance3D.new()
 	mesh.name = "Lip"
 	var box := BoxMesh.new()
@@ -471,14 +471,13 @@ func _add_rock(visual: Node3D, h: Dictionary) -> MeshInstance3D:
 
 
 func _add_wind_card(visual: Node3D, h: Dictionary) -> void:
-	# 2D: 4 thin curved cream strokes. Readable zone, not a UI grid.
+	# 2D: 4 thin curved cream strokes on a camera-facing quad. Not a UI grid.
 	var mi := MeshInstance3D.new()
 	mi.name = String(h["id"])
-	var box := BoxMesh.new()
+	var quad := QuadMesh.new()
 	var sz := _vec(h["size_m"])
-	sz.z = 0.06
-	box.size = sz
-	mi.mesh = box
+	quad.size = Vector2(sz.x, sz.y)
+	mi.mesh = quad
 	mi.position = _vec(h["center_m"])
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
@@ -488,15 +487,15 @@ void fragment() {
 	float a = 0.0;
 	for (int i = 0; i < 4; i++) {
 		float fi = float(i);
-		float y0 = 0.20 + fi * 0.18;
-		float wave = 0.055 * sin(UV.x * 6.4 + fi * 1.35 + TIME * 0.85);
+		float y0 = 0.22 + fi * 0.18;
+		float wave = 0.040 * sin(UV.x * 6.8 + fi * 1.25);
 		float d = abs(UV.y - (y0 + wave));
-		float stroke = smoothstep(0.016, 0.0035, d);
-		float fade = smoothstep(0.0, 0.07, UV.x) * smoothstep(1.0, 0.93, UV.x);
-		a += stroke * fade * 0.40;
+		float stroke = smoothstep(0.0075, 0.0018, d);
+		float fade = smoothstep(0.0, 0.06, UV.x) * smoothstep(1.0, 0.94, UV.x);
+		a += stroke * fade * 0.28;
 	}
 	ALBEDO = vec3(0.96, 0.90, 0.76);
-	ALPHA = clamp(a, 0.0, 0.48);
+	ALPHA = clamp(a, 0.0, 0.34);
 }
 """
 	mat.shader = sh
