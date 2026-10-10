@@ -889,6 +889,30 @@ func _run_capture() -> void:
 		img.save_png(path)
 		_write_perf(out, String(shot["id"]))
 		print("SELVA_SHOT %s" % path)
+	if OS.get_environment("SELVA_SWEEP") != "":
+		var sweep: Array = [
+			{"id": "x04", "feet": Vector3(4.5417, 0.0, 0.0)},
+			{"id": "x36", "feet": Vector3(36.0, 4.0, 0.0)},
+			{"id": "x66", "feet": Vector3(66.0, 8.0, 0.0)},
+			{"id": "x87", "feet": Vector3(86.6667, 8.0, 0.0)},
+			{"id": "x95", "feet": Vector3(95.3333, 14.6667, 0.0)},
+			{"id": "x133", "feet": Vector3(133.3333, 16.0, 0.0)},
+			{"id": "x163", "feet": Vector3(162.6667, 10.6667, 0.0)},
+			{"id": "x193", "feet": Vector3(193.3333, 9.3333, 0.0)},
+		]
+		for raw_s in sweep:
+			var s: Dictionary = raw_s
+			_shot_feet = s["feet"]
+			_player.global_position = _shot_feet
+			_player.velocity = Vector3.ZERO
+			for _j in 60:
+				await get_tree().physics_frame
+			await RenderingServer.frame_post_draw
+			_log_framing(String(s["id"]))
+			var simg := vp.get_texture().get_image()
+			var spath := "%s3d_%s.png" % [out, String(s["id"])]
+			simg.save_png(spath)
+			print("SELVA_SWEEP %s feet=%s" % [spath, _shot_feet])
 	get_tree().quit()
 
 

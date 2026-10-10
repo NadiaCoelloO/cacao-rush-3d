@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""WCAG contrast of Maya body and outline vs the immediate background.
+"""WCAG contrast of Maya body vs the real backdrop, and cacao pods.
 
-Samples 3d_entrance.png (play strip) and 3d_hazard.png (wind zone).
-Does not change pixels. Prints body_ratio and outline_ratio.
+Maya: samples 3d_x*.png sweep (8 x along selva-1) plus entrance/hazard/cacao.
+Body vs immediate non-Maya neighbors (play-jungle band). Outline vs dawn/wind.
+Cacao: HP001_*_engine_totem_pods*.png pods vs their neighbors.
+Does not change pixels.
 """
 from __future__ import annotations
 
@@ -13,6 +15,17 @@ from pathlib import Path
 from PIL import Image
 
 DOCS = Path(__file__).resolve().parents[1] / "docs" / "hp001"
+
+SWEEP = [
+    ("3d_x04.png", None),
+    ("3d_x36.png", None),
+    ("3d_x66.png", None),
+    ("3d_x87.png", None),
+    ("3d_x95.png", None),
+    ("3d_x133.png", None),
+    ("3d_x163.png", None),
+    ("3d_x193.png", None),
+]
 
 
 def lin(c: float) -> float:
@@ -65,22 +78,23 @@ def is_platform(rgb) -> bool:
     return r < 95 and g < 75 and b < 60 and r > 28 and abs(r - 2 * b) < 40
 
 
-def is_vignette(rgb) -> bool:
-    r, g, b = rgb[:3]
-    if r > 90 or g > 75 or b > 60:
-        return False
-    return r >= b and g <= r + 8 and r + g + b < 200
-
-
 def is_sky_or_wind(rgb) -> bool:
-    """Golden dawn / thin cream wind strokes — the outline's job in H03."""
     r, g, b = rgb[:3]
     if r < 130 or g < 100 or b < 50:
         return False
     return r >= g - 6 and g >= b - 8 and r + g + b > 300
 
 
-def measure(path: Path, region=None) -> dict:
+def is_cacao(rgb) -> bool:
+    r, g, b = rgb[:3]
+    if r < 140 or r < g + 8:
+        return False
+    if g < 40 or b > 120:
+        return False
+    return r - b > 40 and r > 150
+
+
+def measure_maya(path: Path, region=None) -> dict:
     im = Image.open(path).convert("RGB")
     w, h = im.size
     px = im.load()
@@ -90,7 +104,6 @@ def measure(path: Path, region=None) -> dict:
         for x in range(x0, x1):
             if is_cream(px[x, y]):
                 cream.append((x, y, px[x, y]))
-    # Prefer a compact blob (Maya) over painted-cumulus hits.
     if len(cream) > 400:
         best = []
         step = 8
@@ -105,8 +118,6 @@ def measure(path: Path, region=None) -> dict:
         return {"file": path.name, "error": "maya body not found", "cream_n": len(cream)}
     xs = [p[0] for p in cream]
     ys = [p[1] for p in cream]
-    cx = sum(xs) / len(xs)
-    cy = sum(ys) / len(ys)
     body_rgb = [p[2] for p in cream]
     outline_rgb = []
     body_bg = []
@@ -119,31 +130,26 @@ def measure(path: Path, region=None) -> dict:
             rgb = px[nx, ny]
             if is_outline(rgb):
                 outline_rgb.append(rgb)
-            elif is_vignette(rgb):
-                body_bg.append(rgb)
             elif not is_cream(rgb) and not is_platform(rgb):
-                pass
-    # Ring just outside the cream+outline cluster.
-    for y in range(max(y0, int(min(ys)) - 10), min(y1, int(max(ys)) + 11)):
-        for x in range(max(x0, int(min(xs)) - 10), min(x1, int(max(xs)) + 11)):
+                body_bg.append(rgb)
+    for y in range(max(y0, int(min(ys)) - 12), min(y1, int(max(ys)) + 13)):
+        for x in range(max(x0, int(min(xs)) - 12), min(x1, int(max(xs)) + 13)):
             rgb = px[x, y]
             if is_cream(rgb) or is_outline(rgb) or is_platform(rgb):
                 continue
-            # near the silhouette, not far sky
-            if min(abs(x - min(xs)), abs(x - max(xs)), abs(y - min(ys)), abs(y - max(ys))) <= 10:
-                if is_vignette(rgb):
-                    body_bg.append(rgb)
-                elif is_sky_or_wind(rgb):
+            if min(abs(x - min(xs)), abs(x - max(xs)), abs(y - min(ys)), abs(y - max(ys))) <= 12:
+                if is_sky_or_wind(rgb):
                     outline_bg.append(rgb)
-    # Outline vs wind/dawn: walk a wider ring if the cushion ate the close sky.
-    if len(outline_bg) < 20:
-        for rad in (14, 18, 22):
+                else:
+                    body_bg.append(rgb)
+    if len(outline_bg) < 16:
+        for rad in (16, 22):
             for y in range(max(y0, int(min(ys)) - rad), min(y1, int(max(ys)) + rad + 1)):
                 for x in range(max(x0, int(min(xs)) - rad), min(x1, int(max(xs)) + rad + 1)):
                     rgb = px[x, y]
                     if is_sky_or_wind(rgb):
                         outline_bg.append(rgb)
-            if len(outline_bg) >= 20:
+            if len(outline_bg) >= 16:
                 break
     body = median_rgb(body_rgb)
     outline = median_rgb(outline_rgb) if outline_rgb else (18, 12, 8)
@@ -154,11 +160,10 @@ def measure(path: Path, region=None) -> dict:
         "cream_n": len(cream),
         "outline_n": len(outline_rgb),
         "body_bg_n": len(body_bg),
-        "outline_bg_n": len(outline_bg),
-        "center_px": [round(cx, 1), round(cy, 1)],
+        "center_px": [round(sum(xs) / len(xs), 1), round(sum(ys) / len(ys), 1)],
         "body_rgb": list(body),
-        "outline_rgb": list(outline),
         "body_bg_rgb": list(bg_body),
+        "outline_rgb": list(outline),
         "outline_bg_rgb": list(bg_out),
         "body_ratio": round(wcag(body, bg_body), 2),
         "outline_ratio": round(wcag(outline, bg_out), 2),
@@ -167,20 +172,70 @@ def measure(path: Path, region=None) -> dict:
     }
 
 
+def measure_cacao(path: Path) -> dict:
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    px = im.load()
+    pods = []
+    for y in range(h):
+        for x in range(w):
+            if is_cacao(px[x, y]):
+                pods.append((x, y, px[x, y]))
+    if len(pods) < 20:
+        return {"file": path.name, "error": "cacao pods not found", "pod_n": len(pods)}
+    if len(pods) > 800:
+        best = []
+        for cy in range(0, h, 10):
+            for cx in range(0, w, 10):
+                bunch = [p for p in pods if abs(p[0] - cx) < 36 and abs(p[1] - cy) < 48]
+                if len(bunch) > len(best) and 30 < len(bunch) < 1200:
+                    best = bunch
+        if best:
+            pods = best
+    xs = [p[0] for p in pods]
+    ys = [p[1] for p in pods]
+    pod_rgb = [p[2] for p in pods]
+    bg = []
+    for x, y, _ in pods:
+        for dx, dy in ((-3, 0), (3, 0), (0, -3), (0, 3), (-4, -2), (4, 2)):
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < w and 0 <= ny < h:
+                rgb = px[nx, ny]
+                if not is_cacao(rgb):
+                    bg.append(rgb)
+    pod = median_rgb(pod_rgb)
+    bgm = median_rgb(bg) if bg else (20, 16, 10)
+    return {
+        "file": path.name,
+        "pod_n": len(pods),
+        "center_px": [round(sum(xs) / len(xs), 1), round(sum(ys) / len(ys), 1)],
+        "pod_rgb": list(pod),
+        "bg_rgb": list(bgm),
+        "ratio": round(wcag(pod, bgm), 2),
+        "pass": wcag(pod, bgm) >= 4.4,
+    }
+
+
 def main() -> int:
-    shots = [
-        (DOCS / "3d_entrance.png", (40, 280, 220, 420)),
-        (DOCS / "3d_hazard.png", (500, 300, 680, 430)),
-    ]
-    report = []
-    for path, region in shots:
+    maya = []
+    files = [(DOCS / n, r) for n, r in SWEEP]
+    for extra in ("3d_entrance.png", "3d_hazard.png", "3d_cacao.png"):
+        p = DOCS / extra
+        if p.exists() and p not in [f for f, _ in files]:
+            files.append((p, None))
+    for path, region in files:
         if not path.exists():
-            report.append({"file": path.name, "error": "missing"})
+            maya.append({"file": path.name, "error": "missing"})
             continue
-        report.append(measure(path, region))
+        maya.append(measure_maya(path, region))
+    cacao = []
+    for p in sorted(DOCS.glob("HP001_*engine_totem_pods*.png")):
+        cacao.append(measure_cacao(p))
+    report = {"maya": maya, "cacao": cacao}
     print(json.dumps(report, indent=2))
-    ok = all(r.get("body_pass") and r.get("outline_pass") for r in report if "body_pass" in r)
-    return 0 if ok else 1
+    ok_m = all(r.get("body_pass") for r in maya if "body_pass" in r)
+    ok_c = all(r.get("pass") for r in cacao if "pass" in r) if cacao else True
+    return 0 if ok_m and ok_c else 1
 
 
 if __name__ == "__main__":

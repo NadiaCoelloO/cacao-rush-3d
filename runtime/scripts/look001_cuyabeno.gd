@@ -47,6 +47,7 @@ const PLAT_WET_EDGE := Color(0.16, 0.11, 0.08)
 const PLAT_EMIT := Color(0.34, 0.24, 0.14)
 const PLAT_EMIT_ENERGY := 0.28
 const DOSEL_CARD_LAYER := 10
+const HANG_BEAD_LAYER := 11
 const WATER_LAYER := 12
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
@@ -464,7 +465,7 @@ func _outline_hero_meshes(n: Node) -> void:
 	if n is MeshInstance3D:
 		var src := n as MeshInstance3D
 		if src.mesh and src.get_node_or_null("MayaOutline") == null:
-			_add_outline_mesh(src, "MayaOutline", src.mesh, Vector3.ZERO, 0.070)
+			_add_outline_mesh(src, "MayaOutline", src.mesh, Vector3.ZERO, 0.048)
 	for c in n.get_children():
 		_outline_hero_meshes(c)
 
@@ -481,20 +482,20 @@ func _add_maya_outline(pilot: Node3D) -> void:
 	var body := CapsuleMesh.new()
 	body.radius = 0.38
 	body.height = 1.62
-	_add_outline_mesh(player, "MayaOutline", body, Vector3(0.0, 0.82, 0.0), 0.055)
+	_add_outline_mesh(player, "MayaOutline", body, Vector3(0.0, 0.82, 0.0), 0.040)
 	var head := SphereMesh.new()
-	head.radius = 0.20
-	head.height = 0.40
+	head.radius = 0.18
+	head.height = 0.36
 	head.radial_segments = 10
 	head.rings = 6
-	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.070)
+	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.045)
 	var hand := SphereMesh.new()
-	hand.radius = 0.16
-	hand.height = 0.32
+	hand.radius = 0.12
+	hand.height = 0.24
 	hand.radial_segments = 8
 	hand.rings = 4
-	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.065)
-	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.065)
+	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.040)
+	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.040)
 
 
 func _attach_maya_follow_fill(pilot: Node3D) -> void:
@@ -767,10 +768,10 @@ func _build_environment(pilot: Node3D) -> void:
 	var sky_mat := ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color(0.98, 0.72, 0.36)
 	sky_mat.sky_horizon_color = Color(1.0, 0.86, 0.58)
-	sky_mat.ground_horizon_color = Color(0.62, 0.42, 0.24)
-	sky_mat.ground_bottom_color = Color(0.14, 0.09, 0.05)
+	sky_mat.ground_horizon_color = Color(0.72, 0.52, 0.30)
+	sky_mat.ground_bottom_color = Color(0.22, 0.15, 0.08)
 	sky_mat.sky_energy_multiplier = 0.92
-	sky_mat.ground_energy_multiplier = 0.22
+	sky_mat.ground_energy_multiplier = 0.55
 	sky_mat.sun_angle_max = 18.0
 	sky_mat.sun_curve = 0.12
 	sky.sky_material = sky_mat
@@ -1138,7 +1139,8 @@ func _hide_water_on_follow_cam(pilot: Node3D) -> void:
 
 
 func _curved_liana_mat() -> ShaderMaterial:
-	# Thin greenish-brown catenaries + leaf nubs. No straight rods.
+	# Thin catenaries + large irregular leaves. Darker than the dawn sky.
+	# No square beads.
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
@@ -1146,19 +1148,35 @@ render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, 
 void fragment() {
 	vec2 p = UV;
 	float a = 0.0;
-	float c0 = 0.14 + 0.20 * p.y * p.y + 0.03 * sin(p.y * 7.4);
-	float c1 = 0.40 + 0.13 * p.y * p.y + 0.025 * sin(p.y * 8.1 + 1.2);
-	float c2 = 0.68 + 0.18 * p.y * p.y + 0.03 * sin(p.y * 6.6 + 2.0);
-	float t = mix(0.016, 0.006, p.y);
-	a += smoothstep(t, t * 0.2, abs(p.x - c0)) * step(p.y, 0.92);
-	a += smoothstep(t, t * 0.2, abs(p.x - c1)) * step(p.y, 0.70);
-	a += smoothstep(t, t * 0.2, abs(p.x - c2)) * step(p.y, 0.86);
-	a += step(0.62, fract(p.y * 14.0)) * step(abs(p.x - c0), 0.028) * 0.8;
-	a += step(0.62, fract(p.y * 13.0 + 0.4)) * step(abs(p.x - c1), 0.026) * 0.8;
-	if (a < 0.16) {
+	float c0 = 0.16 + 0.18 * p.y * p.y + 0.035 * sin(p.y * 6.2);
+	float c1 = 0.44 + 0.12 * p.y * p.y + 0.028 * sin(p.y * 7.4 + 1.1);
+	float c2 = 0.72 + 0.16 * p.y * p.y + 0.032 * sin(p.y * 5.8 + 2.2);
+	float t = mix(0.013, 0.005, p.y);
+	a += smoothstep(t, t * 0.15, abs(p.x - c0)) * step(p.y, 0.94);
+	a += smoothstep(t, t * 0.15, abs(p.x - c1)) * step(p.y, 0.74);
+	a += smoothstep(t, t * 0.15, abs(p.x - c2)) * step(p.y, 0.88);
+	for (int i = 0; i < 8; i++) {
+		float fi = float(i);
+		float ly = 0.08 + fi * 0.105;
+		float side = (mod(fi, 2.0) < 0.5) ? 1.0 : -1.0;
+		float wobble = 0.70 + 0.28 * sin(fi * 1.7 + p.y * 3.0);
+		vec2 c = vec2(c0 + side * 0.070, ly);
+		vec2 q = p - c;
+		q = vec2(q.x * 1.10 + q.y * 0.42 * side, q.y * 1.55 - q.x * 0.18);
+		a = max(a, (1.0 - smoothstep(0.42, 1.05, length(q) / (0.072 * wobble))) * step(ly, 0.92));
+		c = vec2(c1 - side * 0.062, ly + 0.04);
+		q = p - c;
+		q = vec2(q.x * 0.95 - q.y * 0.36 * side, q.y * 1.40);
+		a = max(a, (1.0 - smoothstep(0.40, 1.00, length(q) / (0.078 * wobble))) * step(ly, 0.70) * step(0.10, ly));
+		c = vec2(c2 + side * 0.058, ly + 0.02);
+		q = p - c;
+		q = vec2(q.x * 1.18 + q.y * 0.24 * side, q.y * 1.70);
+		a = max(a, (1.0 - smoothstep(0.44, 1.02, length(q) / (0.068 * wobble))) * step(ly, 0.84));
+	}
+	if (a < 0.14) {
 		discard;
 	}
-	ALBEDO = vec3(0.28, 0.24, 0.10);
+	ALBEDO = vec3(0.14, 0.16, 0.06);
 	ALPHA = 1.0;
 }
 """
@@ -1191,15 +1209,20 @@ func _cloud_card_mat() -> ShaderMaterial:
 render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 uniform sampler2D sky : source_color;
 void fragment() {
-	// Painted jungle-sky cumulus only (crop hills / waterfalls).
+	// Golden cumulus only — top of the frame. Crop the painted vine panel
+	// and crossfade the wrap so panels have no hard vertical cut.
 	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-	float par = eye.x * 0.0038;
-	vec2 uv = vec2(fract(UV.x * 0.92 + par + 0.03), clamp(1.0 - UV.y, 0.0, 1.0));
-	vec3 cloud = texture(sky, uv).rgb;
+	float v = mix(0.08, 0.68, clamp(1.0 - UV.y, 0.0, 1.0));
+	float raw = UV.x * 0.54 + eye.x * 0.0014 + 0.12;
+	float u = fract(raw);
+	float u2 = fract(raw + 0.41);
+	vec3 a = texture(sky, vec2(mix(0.24, 0.96, u), v)).rgb;
+	vec3 b = texture(sky, vec2(mix(0.24, 0.96, u2), v)).rgb;
+	float w = smoothstep(0.0, 0.18, u) * smoothstep(1.0, 0.82, u);
+	vec3 cloud = mix(b, a, w);
 	cloud *= vec3(1.06, 0.93, 0.70);
-	float haze = smoothstep(0.28, 0.00, UV.y);
-	vec3 warm = vec3(0.97, 0.80, 0.46);
-	ALBEDO = mix(cloud, warm, haze * 0.42);
+	float haze = smoothstep(0.22, 0.00, UV.y);
+	ALBEDO = mix(cloud, vec3(0.97, 0.80, 0.46), haze * 0.38);
 }
 """
 	mat.shader = sh
@@ -1213,49 +1236,55 @@ void fragment() {
 	return mat
 
 
-func _maya_body_vignette_mat() -> ShaderMaterial:
-	# Opaque warm dark cushion immediately behind Maya so her BODY (cream)
-	# holds ≥4.4:1 against the local background — not just the outline.
-	# Core stays ALPHA=1 past the torso/head/hands; only the rim fades so
-	# the golden dawn is not a hard rectangle.
+func _play_jungle_mat() -> ShaderMaterial:
+	# Mid-jungle play band: desaturated olive / dark brown, foliage mottling,
+	# warm haze only on the irregular crown. Opaque in the play strip so the
+	# clear color never shows. No disk on Maya — this IS the body backdrop.
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
 render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+uniform sampler2D sil : source_color;
 void fragment() {
-	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(1.04, 0.96);
-	float r = length(d);
-	float a = 1.0 - smoothstep(0.32, 0.58, r);
-	ALBEDO = vec3(0.007, 0.004, 0.002);
-	ALPHA = a;
+	vec3 eye = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+	float par = eye.x * 0.010;
+	float u = fract(UV.x * 1.85 + par);
+	float u2 = fract(UV.x * 1.85 + par + 0.37);
+	float wrap = smoothstep(0.0, 0.10, u) * smoothstep(1.0, 0.90, u);
+	vec3 s1 = texture(sil, vec2(u, mix(0.08, 0.92, UV.y))).rgb;
+	vec3 s2 = texture(sil, vec2(u2, mix(0.08, 0.92, fract(UV.y * 0.7 + 0.15)))).rgb;
+	vec3 silc = mix(s2, s1, wrap);
+	float leaf = 1.0 - smoothstep(0.20, 0.78, dot(silc, vec3(0.30, 0.59, 0.11)));
+	float n = 0.50 + 0.28 * sin((UV.x + par) * 23.0) * sin(UV.y * 17.0 + 1.1);
+	n += 0.18 * sin((UV.x * 0.5 + par * 0.4) * 9.0 + UV.y * 11.0);
+	float clump = smoothstep(0.32, 0.78, n);
+	vec3 earth = vec3(0.034, 0.026, 0.014);
+	vec3 olive = vec3(0.040, 0.052, 0.024);
+	vec3 moss = vec3(0.048, 0.062, 0.028);
+	vec3 col = mix(earth, olive, leaf);
+	col = mix(col, moss, clump * 0.55);
+	// Crown well above platform tops: wavy + diffuse. Warm fog only there.
+	float wave = 0.86 + 0.055 * sin((UV.x + par * 0.3) * 13.0) + 0.035 * sin(UV.x * 29.0 + 1.6);
+	float top = smoothstep(wave + 0.08, wave - 0.10, UV.y);
+	float haze = smoothstep(wave - 0.16, wave + 0.02, UV.y);
+	col = mix(col, vec3(0.36, 0.26, 0.12), haze * 0.20 * top);
+	if (top < 0.02) {
+		discard;
+	}
+	ALBEDO = col;
+	ALPHA = top;
 }
 """
 	mat.shader = sh
-	return mat
-
-
-func _play_band_dim_mat() -> ShaderMaterial:
-	var mat := ShaderMaterial.new()
-	var sh := Shader.new()
-	sh.code = """shader_type spatial;
-render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
-void fragment() {
-	vec2 d = vec2((UV.x - 0.5) * 0.55, (UV.y - 0.40) * 1.05);
-	float r = length(d);
-	float a = smoothstep(0.98, 0.22, r) * 0.18;
-	ALBEDO = vec3(0.16, 0.10, 0.055);
-	ALPHA = a;
-}
-"""
-	mat.shader = sh
+	var sil := _load_tex(HP_SIL_TEX)
+	if sil:
+		mat.set_shader_parameter("sil", sil)
 	return mat
 
 
 func _build_side_follow_art(pilot: Node3D) -> void:
-	# Locked to the follow cam so every gameplay still (entrance / hazard /
-	# cacao) shows cumulus + two low jungle strips + left-edge lianas.
-	# Cards sit in camera space: play plane is local z ≈ −24.1; behind it is
-	# z < −24. No collision. Flat várzea — no hills, no waterfalls.
+	# 2D-style bands, camera-locked. Sky/cumulus on top. Mid-jungle play
+	# band behind the strip (water/earth up past jump height). No Maya disk.
 	var cam: Node = pilot.get_node_or_null("PlayerMaya/Camera3D")
 	if cam == null:
 		return
@@ -1265,30 +1294,19 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	var play_cam := cam as Camera3D
 	if play_cam:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
-	# Fill the 40×22.5 view so painted cumulus is not a postage stamp.
-	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 1.4, -38.0), Vector2(78.0, 34.0), Vector3.ZERO, _cloud_card_mat())
-	_add_card(hold, "HP001_PlayDim", Vector3(0.0, -0.4, -36.0), Vector2(78.0, 18.0), Vector3.ZERO, _play_band_dim_mat())
-	var sil_tex := _load_tex(HP_SIL_TEX)
-	if sil_tex:
-		var tex: Texture2D = sil_tex
-		var near_mat := _scissor_card(tex, Color(0.18, 0.24, 0.12), 0.28)
-		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -3.6, -30.0), Vector2(74.0, 6.4), Vector3.ZERO, near_mat)
-		var far_mat := _scissor_card(tex, Color(0.30, 0.36, 0.22), 0.28)
-		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -2.2, -46.0), Vector2(88.0, 7.2), Vector3.ZERO, far_mat)
-	# Top-left curtain. Curved strands only — the vine PNG is a dark slab
-	# and at z≈−3 it walled Maya. Discard keeps sky / play visible.
-	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-5.05, 2.15, -7.80), Vector2(2.60, 4.40), Vector3.ZERO, _curved_liana_mat())
-	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-4.40, 2.25, -8.40), Vector2(1.90, 3.60), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
-	_add_card(hold, "HP001_FG_Liana_Curve3", Vector3(-5.70, 1.85, -8.60), Vector2(1.70, 3.80), Vector3(0.0, 0.0, deg_to_rad(6.0)), _curved_liana_mat())
-	# Laguna still keeps a world-space curtain over the water (art camera).
+		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (HANG_BEAD_LAYER - 1))
+	# Sky lives in the upper third. Overscan so the wrap never hits the frame.
+	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 8.4, -42.0), Vector2(100.0, 28.0), Vector3.ZERO, _cloud_card_mat())
+	# Play band: NDC ≈ −1.2 … +0.45 at z=−28. Crown well above platform tops
+	# so pits do not read a false floor. Opaque — covers the old clear stripe.
+	_add_card(hold, "HP001_PlayJungle", Vector3(0.0, -5.2, -28.0), Vector2(92.0, 26.0), Vector3.ZERO, _play_jungle_mat())
+	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-5.15, 2.35, -7.80), Vector2(3.10, 5.10), Vector3.ZERO, _curved_liana_mat())
+	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-4.35, 2.45, -8.40), Vector2(2.20, 4.20), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
+	_add_card(hold, "HP001_FG_Liana_Curve3", Vector3(-5.85, 2.05, -8.60), Vector2(2.00, 4.40), Vector3(0.0, 0.0, deg_to_rad(6.0)), _curved_liana_mat())
 	var liana_tex := _load_tex(HP_LIANA_TEX)
 	if liana_tex:
 		var lmat2 := _liana_tex_mat(liana_tex, Color(0.42, 0.36, 0.18))
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
-	# Parent to Maya so level-edge cam clamp (entrance x=20) cannot miss her.
-	var player: Node3D = pilot.get_node_or_null("PlayerMaya") as Node3D
-	if player:
-		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.86, -0.85), Vector2(2.30, 2.90), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
@@ -1454,6 +1472,16 @@ func _build_kakaw_pods(pilot: Node3D) -> void:
 	for i in specs.size():
 		var spec: Dictionary = specs[i]
 		cluster.add_child(_make_cacao_pod("Pod_%d" % i, spec["pos"], spec["axis"], spec["col"]))
+	var rim := OmniLight3D.new()
+	rim.name = "KakawWarmRim"
+	rim.light_color = Color(1.0, 0.82, 0.48)
+	rim.light_energy = 1.15
+	rim.light_specular = 0.55
+	rim.omni_range = 1.8
+	rim.omni_attenuation = 1.4
+	rim.shadow_enabled = false
+	rim.position = Vector3(0.22, 2.92, 0.55)
+	cluster.add_child(rim)
 
 
 func _align_axis_y(node: Node3D, y_axis: Vector3) -> void:
@@ -1497,10 +1525,13 @@ func _make_cacao_pod(pod_name: String, pos: Vector3, long_axis: Vector3, col: Co
 	mat.resource_name = "KakawPod"
 	mat.albedo_color = col
 	mat.emission_enabled = true
-	mat.emission = col
-	mat.emission_energy_multiplier = 0.55
-	mat.roughness = 0.78
+	mat.emission = col.lerp(Color(1.0, 0.82, 0.42), 0.40)
+	mat.emission_energy_multiplier = 0.85
+	mat.roughness = 0.72
 	mat.metallic = 0.0
+	mat.rim_enabled = true
+	mat.rim = 0.72
+	mat.rim_tint = 0.35
 	_pod_mats.append(mat)
 	# Closed ellipsoid: rounded stalk pole at local −Y, shaved blunt cap at +Y.
 	# Ribs are CSG cylinder subtractions (valleys), not stuck-on slat meshes.

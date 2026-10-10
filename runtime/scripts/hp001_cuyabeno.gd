@@ -375,6 +375,8 @@ func _wire_hanging(pilot: Node3D) -> void:
 			mmi.material_override = mat
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		# Follow-cam hides these — they read as square beads in the 40×22.5 strip.
+		mmi.layers = 1 << 10
 		root.add_child(mmi)
 	print("HP001 hanging strands: ", xforms.size())
 
