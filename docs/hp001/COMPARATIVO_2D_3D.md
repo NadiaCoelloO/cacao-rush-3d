@@ -153,7 +153,7 @@ En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. 
 
 ## Look (E2d)
 
-La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyabeno_sky_2k`, solo el tercio de nubes, franja de juego más oscura/saturada) y **2 franjas** de selva lejana con bruma (`hp001_selva_silhouette`), detrás del carril, sin inclinación extra. Lianas de primer plano en el borde izquierdo del cuadro (`hp001_fg_liana`), fuera del hitbox. Copas y troncos de fondo (MultiMesh + LOD) a lo largo de todo selva-1, z < 0. Cards de tope en `Cam_Dosel` (layer 10) para que el corte de arriba no salga sesgado. Maya crema con outline sutil (cápsula, sin colisión). P00 tierra húmeda con emisión, sin sombras recibidas. Ranas y rocas al tamaño del hitbox; viento con rayas. Capturas en Vulkan Forward+. `player_maya.gd` no se tocó.
+La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (panorama + puffs), **2 franjas** de selva lejana con bruma, y lianas/tallos a la izquierda del cuadro (fuera del hitbox). Copas y troncos de fondo (MultiMesh + LOD) a lo largo de todo selva-1, z < 0. El tope de `Cam_Dosel` es un fleco de copa (textura volteada, layer 10), no una barra negra ni un corte sesgado. Maya crema con outline sutil. P00 tierra húmeda: la follow cam no ve el blackwater y la fascia + shader `fog_disabled` evitan el losa negra. Ranas y rocas al tamaño del hitbox; viento con rayas. Capturas en Vulkan Forward+. `player_maya.gd` no se tocó.
 
 ## Checks
 
@@ -162,7 +162,7 @@ La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyaben
 | `maya_feel_check` | **54/54 PASS** |
 | `hp001_lod_hole_check` | **PASS** (constantes + escena instanciada) |
 | `SELVA_CHECK` | 21 / 6 / 24 / 2 / 1 · offset (0, 1, 24.1256) · P01 6.6667 |
-| `selva1_run_probe` | **FAIL** far_x=93.31 · G00=0 · 5 muertes. Pozo verificado y=−18.45 |
+| `selva1_run_probe` | **PASS** ticks=1556 · far_x=194.32 · G00=1 · 0 muertes. Pozo verificado y=−18.45 |
 | `player_maya.gd` | no tocado |
 | capturas | Vulkan 1.4 Forward+ (llvmpipe), no OpenGL |
 
@@ -172,19 +172,19 @@ SHA viejos de E2c: **reemplazados** (ver `build_report.json`).
 
 | archivo | sha256 |
 |---|---|
-| `3d_entrance.png` | `1132f2e63eadf22df9c04d8d1c3ee281bc45f2a66e62f55bc9276b38b403e46b` |
-| `3d_hazard.png` | `4f40a139c01e24b6d9dfae5dc72a9fd411aac35bacc0b481d193d193347cbc84` |
-| `3d_cacao.png` | `f5b78450d799d5836f86605781e07f13c54e52d727f54d30d17cc94edf207ec7` |
+| `3d_entrance.png` | `662f72bffc367df84cec04ccb00d2d82e25b5c9b0046ffa61cf1c6ba38b10211` |
+| `3d_hazard.png` | `53b62c696a3029d4df19ebe54acee4df694f34ecf0af16cf8738a358438fc984` |
+| `3d_cacao.png` | `5a0764cc7c1602fc17eb42c4904755d4de4cd4833634fabaab9b9b0b4b33f88a` |
 | `2d_entrance.png` | `da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39` |
 | `2d_hazard.png` | `3b564cbec2ffdd2cde853050ef8295876098692502e90d8e784313f73ae2889d` |
 | `2d_cacao.png` | `497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598` |
-| `cmp_cuyabeno_2d_3d.png` | `8e66af66e6f70fa6bf752b930477e457b6f5b85d23069307dee58157c4d1d7d6` |
-| `HP001_E2d_engine_gameplay.png` | `3c4958a8005eb2aee17cdb7f6f615bd23973c9b1387049a86d56705aa7044f0d` |
-| `HP001_E2d_engine_laguna.png` | `3628c2567ddfe2f79b1cc2033abc7ec281b5e6c8a3c60fc54dea6118d38e0981` |
-| `HP001_E2d_engine_dosel.png` | `3f61c63d1622eacc02c4bb730d071c7d353656921f86c116ba652d71ce35ded1` |
-| `HP001_E2d_engine_dock_closeup.png` | `1fac76295ef7c6fe2e08b7d10396c3860c143f2a6a36f871d2565dcdc193435b` |
-| `HP001_E2d_engine_totem_pods_v4.png` | `523431c8a6c627cd78867f6071116baba2863c7e85d95930560bce4f1d2aa913` |
-| `HP001_E2d_engine_cmp_bg.png` | `720e0f85e73cd5afda929db7dfd1b97b361a0c00cba93aea9ddb3400de4c889c` |
+| `cmp_cuyabeno_2d_3d.png` | `d85361ff37825000c883172ae00d397e3f5e9f790bc4c1f2b40a6ec347999d01` |
+| `HP001_E2d_engine_gameplay.png` | `c61c3672ad99b43b870b04995d372562b214cedab18da021b17062036f1c6cd1` |
+| `HP001_E2d_engine_laguna.png` | `f91fc516d96dee8ae87cfb06f72c5b82d7c3c853b106ca7eea4e7af6b0851320` |
+| `HP001_E2d_engine_dosel.png` | `a60204656687f012a268d83ed9b8202354b4053a6b29a5383d7f0d57fa1d7815` |
+| `HP001_E2d_engine_dock_closeup.png` | `9ef4b446a7514e076f42f658f38f8f3b0371f0b34e7171ad16d49755976b6f34` |
+| `HP001_E2d_engine_totem_pods_v4.png` | `24364752a849772b91e2d15e38ba72264436ecf8a6366d6ce4311bca201f7ded` |
+| `HP001_E2d_engine_cmp_bg.png` | `4ed10d7bf6a2b7c6a4aceea40db8a19ac0ac0241f59cfded2eae0e2479cfddf3` |
 | `hp001_cuyabeno_sky_2k.png` | `5bb9b19567cec3f1131e4121b73a0b59722e9f1350abbd12a0b6995144edbeb3` |
 | `hp001_selva_silhouette.png` | `0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157` |
 | `hp001_fg_liana.png` | `c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90` |

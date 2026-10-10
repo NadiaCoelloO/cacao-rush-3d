@@ -1060,6 +1060,34 @@ func _hide_water_on_follow_cam(pilot: Node3D) -> void:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
 
 
+func _add_fg_vine_stems(hold: Node3D) -> void:
+	# Texture strands are thin at 40×22.5; a few unshaded stems read like the 2D.
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(0.22, 0.30, 0.12)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.disable_receive_shadows = true
+	for spec in [
+		{"n": "1", "pos": Vector3(-2.18, 1.55, -3.05), "h": 3.4, "r": 0.035},
+		{"n": "2", "pos": Vector3(-2.02, 1.25, -3.25), "h": 2.7, "r": 0.028},
+		{"n": "3", "pos": Vector3(-2.32, 1.70, -3.45), "h": 3.1, "r": 0.022},
+	]:
+		var mi := MeshInstance3D.new()
+		mi.name = "HP001_FG_Vine_%s" % spec["n"]
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = spec["r"]
+		cyl.bottom_radius = spec["r"] * 0.85
+		cyl.height = spec["h"]
+		cyl.radial_segments = 6
+		cyl.rings = 1
+		mi.mesh = cyl
+		mi.position = spec["pos"]
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		hold.add_child(mi)
+
+
 func _add_cumulus_blobs(hold: Node3D) -> void:
 	# Guaranteed readable puffs if the panorama sample reads as flat haze.
 	var mat := StandardMaterial3D.new()
@@ -1164,10 +1192,11 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -2.2, -46.0), Vector2(88.0, 7.2), Vector3.ZERO, far_mat)
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var liana: Texture2D = load(HP_LIANA_TEX)
-		var lmat := _scissor_card(liana, Color(0.70, 0.78, 0.48), 0.18)
+		var lmat := _scissor_card(liana, Color(0.62, 0.70, 0.38), 0.12)
 		# Hang from the top-left like the 2D still — outside Maya's hitbox.
-		_add_card(hold, "HP001_FG_Liana_L", Vector3(-1.95, 1.55, -3.35), Vector2(2.35, 4.10), Vector3.ZERO, lmat)
-		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.25, 1.15, -3.85), Vector2(1.70, 3.20), Vector3.ZERO, lmat)
+		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.05, 1.85, -3.15), Vector2(2.80, 4.60), Vector3.ZERO, lmat)
+		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.35, 1.35, -3.55), Vector2(2.10, 3.80), Vector3.ZERO, lmat)
+	_add_fg_vine_stems(hold)
 	# Laguna still keeps a world-space curtain over the water (art camera).
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.78, 0.86, 0.62), 0.22)

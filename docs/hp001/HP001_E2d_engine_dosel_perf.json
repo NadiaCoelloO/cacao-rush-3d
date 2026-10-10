@@ -1,9 +1,9 @@
 {
-	"buffer_mem_bytes": 26883816,
-	"draw_calls": 198,
-	"objects": 198,
-	"primitives": 238333,
+	"buffer_mem_bytes": 27756176,
+	"draw_calls": 206,
+	"objects": 206,
+	"primitives": 239143,
 	"shot": "dosel",
 	"texture_mem_bytes": 610253824,
-	"video_mem_bytes": 705295080
+	"video_mem_bytes": 706167440
 }
