@@ -39,7 +39,7 @@ All views under 350k / 250 draws.
 
 `selva1_run_probe` **FAIL** far_x=93.31 G00=0 (5 deaths). Pit line verified (feet y=−18.45). `player_maya.gd` not modified.
 
-HEAD is recorded in `build_report.json` `e2d` after this commit. Draft PR, no merge.
+HEAD: `78a7316376b396fce73636e56fa5ef1e1c6da2af` (`cursor/hp001-e1-cuyabeno`). Draft PR, no merge.
 
 ## 6. sha256
 
