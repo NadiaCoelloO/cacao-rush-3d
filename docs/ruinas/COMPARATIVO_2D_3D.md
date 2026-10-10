@@ -71,7 +71,7 @@ Valores copiados de `sim.ts`. Nada de esto toca `player_maya.gd`.
 | caída del nivel | pies bajo `-(80+42)/24` m (−5.08 m). Resta una vida, igual que `p.y > level.height + 80`. El `kill_y` de Maya en esta escena está en −1000 para que ese respawn instantáneo (sin vida) no dispare |
 | monedas | distancia al centro < 28 px. Se ocultan |
 | K01 | salto lo activa, guarda el spawn (`x+4`, pies en la base del poste), `poleLock` 0.35 s, texto «Partida guardada» |
-| K00 | primer salto guarda y avisa «Tótem guardado — W otra vez». El siguiente loguea `pichincha-1`, reaparece en el último spawn y queda en lock 0.4 s (`poleLockT` del poste) para no dispararse otra vez en el tick siguiente. No congela |
+| K00 | primer salto guarda y avisa «Tótem guardado — W otra vez». El viaje pide un salto nuevo (mantener W no lo repite cada 0.4 s), loguea `pichincha-1` y reaparece en el último spawn. El lock de 0.4 s evita que el mismo press caiga en dos ticks. No congela |
 | F00 | overlap loguea `jardin-1`, marca la caída como usada y reaparece en el último spawn. No resta vida y no congela |
 | G00 | overlap marca la meta, oculta el grano y deja `win` 1.35 s |
 | one-way | la colisión se apaga si los pies están bajo `top−0.06`, y también mientras `_drop_timer > 0` (abajo+salto, 0.18 s). El timer lo arma Maya; la escena lo lee al inicio del tick siguiente, todavía dentro de esa ventana |
@@ -177,7 +177,7 @@ En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. 
 
 ## Look
 
-Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC` con borde `#2C1810`, sin emisión. Láser: el ancho del hurtbox, 0.4167 m, `#E85A3A` al 0.88, núcleo `#FFF0D2` de 0.125 m. Cacao: óvalo de frente a cámara, el mismo tamaño que la elipse 2D (16×22 px a 540, **20×30 px** en el patio a 720p), `#8B4A2B` con un poco de `#C46A3A`. El radio de recogida sigue en 28 px. El pozo tiene un fondo verde entre las lianas. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
+Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC` con borde `#2C1810`, sin emisión. Láser: el ancho del hurtbox, 0.4167 m, `#E85A3A` al 0.88, núcleo `#FFF0D2` de 0.125 m. Cacao: óvalo de frente a cámara, el mismo tamaño que la elipse 2D (16×22 px a 540, unos 20×30 px en el patio a 720p), base `#6B3A1F` con un poco de `#C46A3A`. El radio de recogida sigue en 28 px. El pozo tiene un fondo verde entre las lianas. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
 
 ## Pendiente
 

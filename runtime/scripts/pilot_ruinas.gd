@@ -583,13 +583,13 @@ func _add_lip(host: Node3D, size: Vector3, mat: Material) -> void:
 
 
 func _bean_mat() -> ShaderMaterial:
-	# Flat oval facing the camera. Fog would crush #8B4A2B; a small warm mix
-	# is the slight emission, and the pickup radius stays 28 px.
+	# Flat oval facing the camera, sized like the 2D ellipse. Base is the 2D
+	# fill #6b3a1f; a little #C46A3A keeps it readable. Pickup radius stays 28 px.
 	var mat := ShaderMaterial.new()
 	var shader := Shader.new()
-	shader.code = "shader_type spatial;\nrender_mode unshaded, fog_disabled, cull_back;\nuniform vec4 albedo : source_color = vec4(0.545, 0.290, 0.169, 1.0);\nuniform vec4 warm : source_color = vec4(0.769, 0.416, 0.227, 1.0);\nvoid fragment() {\n\tALBEDO = mix(albedo.rgb, warm.rgb, 0.16);\n}\n"
+	shader.code = "shader_type spatial;\nrender_mode unshaded, fog_disabled, cull_back;\nuniform vec4 albedo : source_color = vec4(0.420, 0.227, 0.122, 1.0);\nuniform vec4 warm : source_color = vec4(0.769, 0.416, 0.227, 1.0);\nvoid fragment() {\n\tALBEDO = mix(albedo.rgb, warm.rgb, 0.2) * 0.70;\n}\n"
 	mat.shader = shader
-	mat.set_shader_parameter("albedo", COL_BEAN)
+	mat.set_shader_parameter("albedo", Color("6b3a1f"))
 	mat.set_shader_parameter("warm", Color("c46a3a"))
 	return mat
 
@@ -925,7 +925,6 @@ func _collect_coins() -> void:
 func _touch_poles() -> void:
 	var body := _full_body()
 	var jump := Input.is_action_just_pressed("jump")
-	var held := Input.is_action_pressed("jump")
 	for pole in _poles:
 		if not _overlap(body, pole["aabb"]):
 			continue
@@ -933,11 +932,12 @@ func _touch_poles() -> void:
 		var active := bool(pole["active"])
 		var can_warp := secret != ""
 		var ready := active and can_warp
-		var press := jump or (ready and held and _pole_lock <= 0.0)
-		if not press or _status == "warp":
+		# A held jump must not re-fire the stub every poleLock. The 2D keeps
+		# game.warp set; here the only gate is a new press, plus 0.4 s so one
+		# press cannot land on two physics ticks.
+		if not jump or _status == "warp":
 			continue
 		if ready:
-			# poleLockT 0.4 blocks the same press from firing on the next tick.
 			if _warp_lock > 0.0:
 				continue
 			_warp_lock = 0.4
