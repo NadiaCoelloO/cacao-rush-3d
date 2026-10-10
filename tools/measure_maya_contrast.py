@@ -65,6 +65,13 @@ def is_platform(rgb) -> bool:
     return r < 95 and g < 75 and b < 60 and r > 28 and abs(r - 2 * b) < 40
 
 
+def is_vignette(rgb) -> bool:
+    r, g, b = rgb[:3]
+    if r > 90 or g > 75 or b > 60:
+        return False
+    return r >= b and g <= r + 8 and r + g + b < 200
+
+
 def measure(path: Path, region=None) -> dict:
     im = Image.open(path).convert("RGB")
     w, h = im.size
@@ -104,8 +111,10 @@ def measure(path: Path, region=None) -> dict:
             rgb = px[nx, ny]
             if is_outline(rgb):
                 outline_rgb.append(rgb)
-            elif not is_cream(rgb) and not is_platform(rgb):
+            elif is_vignette(rgb):
                 body_bg.append(rgb)
+            elif not is_cream(rgb) and not is_platform(rgb):
+                pass
     # Ring just outside the cream+outline cluster.
     for y in range(max(y0, int(min(ys)) - 10), min(y1, int(max(ys)) + 11)):
         for x in range(max(x0, int(min(xs)) - 10), min(x1, int(max(xs)) + 11)):
@@ -113,10 +122,11 @@ def measure(path: Path, region=None) -> dict:
             if is_cream(rgb) or is_outline(rgb) or is_platform(rgb):
                 continue
             # near the silhouette, not far sky
-            if min(abs(x - min(xs)), abs(x - max(xs)), abs(y - min(ys)), abs(y - max(ys))) <= 8:
-                outline_bg.append(rgb)
-                if not is_cream(rgb):
+            if min(abs(x - min(xs)), abs(x - max(xs)), abs(y - min(ys)), abs(y - max(ys))) <= 10:
+                if is_vignette(rgb) or is_outline(rgb):
                     body_bg.append(rgb)
+                else:
+                    outline_bg.append(rgb)
     body = median_rgb(body_rgb)
     outline = median_rgb(outline_rgb) if outline_rgb else (18, 12, 8)
     bg_body = median_rgb(body_bg) if body_bg else (200, 190, 150)

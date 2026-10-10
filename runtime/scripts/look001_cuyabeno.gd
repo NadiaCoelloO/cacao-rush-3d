@@ -1146,25 +1146,20 @@ render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, 
 void fragment() {
 	vec2 p = UV;
 	float a = 0.0;
-	for (int i = 0; i < 7; i++) {
-		float fi = float(i);
-		float x0 = 0.07 + fi * 0.135;
-		float sag = 0.16 + 0.07 * sin(fi * 1.7 + 0.4);
-		float len = 0.62 + 0.30 * fract(fi * 0.37 + 0.15);
-		float cx = x0 + sag * p.y * p.y + 0.035 * sin(p.y * 8.5 + fi * 1.1);
-		float d = abs(p.x - cx);
-		float thick = mix(0.011, 0.0045, p.y);
-		float along = step(p.y, len) * smoothstep(len, len - 0.10, p.y);
-		a += smoothstep(thick, thick * 0.22, d) * along;
-		float leaf_row = step(0.62, fract(p.y * 16.0 + fi * 0.31));
-		float leaf = leaf_row * step(d, 0.030) * step(abs(p.x - cx - mix(-0.016, 0.016, fract(fi * 0.5))), 0.011);
-		a += leaf * along * 0.90;
-	}
-	if (a < 0.14) {
+	float c0 = 0.14 + 0.20 * p.y * p.y + 0.03 * sin(p.y * 7.4);
+	float c1 = 0.40 + 0.13 * p.y * p.y + 0.025 * sin(p.y * 8.1 + 1.2);
+	float c2 = 0.68 + 0.18 * p.y * p.y + 0.03 * sin(p.y * 6.6 + 2.0);
+	float t = mix(0.016, 0.006, p.y);
+	a += smoothstep(t, t * 0.2, abs(p.x - c0)) * step(p.y, 0.92);
+	a += smoothstep(t, t * 0.2, abs(p.x - c1)) * step(p.y, 0.70);
+	a += smoothstep(t, t * 0.2, abs(p.x - c2)) * step(p.y, 0.86);
+	a += step(0.62, fract(p.y * 14.0)) * step(abs(p.x - c0), 0.028) * 0.8;
+	a += step(0.62, fract(p.y * 13.0 + 0.4)) * step(abs(p.x - c1), 0.026) * 0.8;
+	if (a < 0.16) {
 		discard;
 	}
-	ALBEDO = vec3(0.30, 0.26, 0.12);
-	ALPHA = clamp(a, 0.0, 1.0);
+	ALBEDO = vec3(0.28, 0.24, 0.10);
+	ALPHA = 1.0;
 }
 """
 	mat.shader = sh
@@ -1288,10 +1283,8 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	if liana_tex:
 		var lmat2 := _liana_tex_mat(liana_tex, Color(0.42, 0.36, 0.18))
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
-	# Cushion follows Maya. Look-ahead (+2 m) puts camera-center off her body.
-	var player: Node = pilot.get_node_or_null("PlayerMaya")
-	if player:
-		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.95, -0.85), Vector2(3.40, 4.20), Vector3.ZERO, _maya_body_vignette_mat())
+	# Look-ahead is +2 m, so Maya sits near camera x ≈ −2, not the lens center.
+	_add_card(hold, "HP001_MayaVignette", Vector3(-2.05, -0.12, -25.35), Vector2(3.10, 3.80), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
