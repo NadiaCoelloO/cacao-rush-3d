@@ -1,9 +1,9 @@
 extends Node
-## HP-001 E1/E2a: high-poly totem + trunk kit + visual dock + groundcover.
+## HP-001 E1/E2b: high-poly totem + trunk kit + canopy v2 + visual dock + groundcover.
 ## Totem sits on TotemWarpAnchor (same pivot/footprint as LOOK/greybox).
-## Trunks instance LOOK-001 tree transforms via MultiMesh + visibility_range LODs.
+## Trunks/crowns instance LOOK-001 tree transforms via MultiMesh + visibility_range.
 ## Dock and groundcover are visual only. Collisions stay on the existing CSG
-## shapes; this node never adds physics. WaterLily is not instanced.
+## shapes; this node never adds physics. WaterLily flower is sparse + cream.
 
 const TOTEM := [
 	"res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb",
@@ -25,6 +25,11 @@ const GROUNDCOVER := [
 	"res://models/hp001/groundcover_cuyabeno_LOD0.glb",
 	"res://models/hp001/groundcover_cuyabeno_LOD1.glb",
 ]
+const CANOPY := [
+	"res://models/hp001/canopy_cuyabeno_hp_LOD0.glb",
+	"res://models/hp001/canopy_cuyabeno_hp_LOD1.glb",
+	"res://models/hp001/canopy_cuyabeno_hp_LOD2.glb",
+]
 const BEAM_ORIGIN_LOCAL := Vector3(-0.0009, 2.2783, 0.220)
 # Trunks: overlap enough that Godot 4.2.2 first-frame hysteresis cannot
 # hide every LOD (become-visible uses [begin+margin, end-margin]).
@@ -41,11 +46,27 @@ const TOTEM_LOD_MARGIN := 4.0
 const DOCK_LOD_BEGIN := [0.0, 28.0, 58.0]
 const DOCK_LOD_END := [36.0, 66.0, 0.0]
 const DOCK_LOD_MARGIN := 4.0
-# Groundcover LOD0/1 overlap; LOD1 fades out (no LOD2 in the kit). WaterLily excluded.
+# Groundcover LOD0/1 overlap; LOD1 fades out (no LOD2 in the kit).
 const GC_LOD_BEGIN := [0.0, 12.0]
 const GC_LOD_END := [18.0, 40.0]
 const GC_LOD_MARGIN := 3.0
-const GC_KINDS := ["Fern", "CacaoLeaves"]
+const GC_KINDS := ["Fern", "CacaoLeaves", "WaterLilyPads", "WaterLily"]
+# Identidad PASA on the flower: ~1 of every 4–5 lily groups. Flag stays so it
+# can be switched off without unwiring the mesh.
+const LILY_FLOWER_ENABLED := true
+const LILY_FLOWER_RATIO := 0.22
+const LILY_CREAM := Color("8f8578")
+# Canopy v2: overlapping LODs, LOD2 never culled. First-frame inner 0–13 / 13–29 / 29–∞.
+const CANOPY_LOD_BEGIN := [0.0, 10.0, 26.0]
+const CANOPY_LOD_END := [16.0, 32.0, 0.0]
+const CANOPY_LOD_MARGIN := 3.0
+# Blender Z-up fork offset → Godot Y-up (x, z, −y). Same transform as the trunk.
+const CANOPY_KIND := {"Thin": "Small", "Medium": "Medium", "Thick": "Large"}
+const CANOPY_LOCAL_OFF := {
+	"Thin": Vector3(0.5679, 6.72, -0.5651),
+	"Medium": Vector3(-0.2995, 9.24, -0.0545),
+	"Thick": Vector3(-0.5955, 11.76, -0.0651),
+}
 # No greybox wooden walkway in the lagoon: pier on the −Z shore, east of the
 # totem, off the playable strip / oneway / solid (x≈10, into the lagoon).
 const DOCK_ORIGIN := Vector3(10.0, 0.0, -4.0)
@@ -71,9 +92,10 @@ func wire(pilot: Node3D) -> bool:
 		return false
 	_wire_totem(pilot)
 	_wire_trunks(pilot)
+	_wire_canopy(pilot)
 	_wire_dock(pilot)
 	_wire_groundcover(pilot)
-	print("HP001 wired totem LODs + %s trunk MultiMeshes + dock + groundcover" % str(VARIANTS))
+	print("HP001 wired totem + trunks + canopy v2 + dock + groundcover")
 	return true
 
 
@@ -202,6 +224,130 @@ func _wire_trunks(pilot: Node3D) -> void:
 	print("HP001 trunks: ", trees.size(), " instances, ", mm_count, " MultiMeshes")
 
 
+func _wire_canopy(pilot: Node3D) -> void:
+	if not ResourceLoader.exists(CANOPY[0]):
+		push_warning("HP001: canopy GLBs missing")
+		return
+	var kit := _load_named_kit(CANOPY, ["Small", "Medium", "Large"], "Canopy_Clump_%s_LOD%d", "M_Canopy_HP")
+	var meshes: Dictionary = kit["meshes"]
+	var mat: BaseMaterial3D = kit["mat"]
+	if mat:
+		_harden_mat(mat, 0.5, true)
+		# Leaf grade toward sunlit yellow-green (README sat↑ hue− val↑), not olive.
+		mat.albedo_color = Color(1.18, 1.22, 0.78)
+	var placements := _canopy_placements()
+	var world: Node3D = pilot.get_node_or_null("WorldRoot")
+	var root := Node3D.new()
+	root.name = "HP001_Canopy"
+	if world:
+		world.add_child(root)
+	else:
+		add_child(root)
+	var mm_count := 0
+	for kind in ["Small", "Medium", "Large"]:
+		var by_cell: Dictionary = {}
+		for p in placements:
+			if String(p["kind"]) != kind:
+				continue
+			var xf: Transform3D = p["xf"]
+			var key := _cluster_key(xf.origin)
+			if not by_cell.has(key):
+				by_cell[key] = []
+			(by_cell[key] as Array).append(xf)
+		for key in by_cell.keys():
+			var xforms: Array = by_cell[key]
+			var centroid := Vector3.ZERO
+			for xf in xforms:
+				centroid += (xf as Transform3D).origin
+			centroid /= float(xforms.size())
+			var cluster_mmis: Array[MultiMeshInstance3D] = []
+			var shared_aabb := AABB()
+			var have_aabb := false
+			for lod in 3:
+				var mesh_key := "%s_%d" % [kind, lod]
+				if not meshes.has(mesh_key):
+					continue
+				var mm := MultiMesh.new()
+				mm.transform_format = MultiMesh.TRANSFORM_3D
+				mm.mesh = meshes[mesh_key]
+				mm.instance_count = xforms.size()
+				for i in xforms.size():
+					var world_xf: Transform3D = xforms[i]
+					var local := Transform3D(world_xf.basis, world_xf.origin - centroid)
+					mm.set_instance_transform(i, local)
+					if lod == 0:
+						var inst_aabb := _xform_aabb(local, mm.mesh.get_aabb())
+						if not have_aabb:
+							shared_aabb = inst_aabb
+							have_aabb = true
+						else:
+							shared_aabb = shared_aabb.merge(inst_aabb)
+				var mmi := MultiMeshInstance3D.new()
+				mmi.name = "HP001_Canopy_%s_LOD%d_%d_%d" % [kind, lod, key.x, key.y]
+				mmi.multimesh = mm
+				mmi.position = centroid
+				if mat:
+					mmi.material_override = mat
+				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+				_apply_lod_range(mmi, CANOPY_LOD_BEGIN[lod], CANOPY_LOD_END[lod], CANOPY_LOD_MARGIN)
+				var xz := Vector2(centroid.x, centroid.z).length()
+				if lod == 0 and xz <= 28.0:
+					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				else:
+					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				root.add_child(mmi)
+				cluster_mmis.append(mmi)
+				mm_count += 1
+			if have_aabb:
+				for mmi in cluster_mmis:
+					mmi.custom_aabb = shared_aabb
+	print("HP001 canopy: ", placements.size(), " crowns, ", mm_count, " MultiMeshes")
+
+
+func _canopy_placements() -> Array:
+	var out: Array = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261010
+	var trees := _load_trees()
+	for t in trees:
+		if typeof(t) != TYPE_DICTIONARY:
+			continue
+		var variant := String(t.get("variant", "Medium"))
+		if not CANOPY_KIND.has(variant):
+			continue
+		var xf := _xform_from(t)
+		var off: Vector3 = CANOPY_LOCAL_OFF[variant]
+		# Mixed crown heights + some lateral slip so they are not one mushroom.
+		off.y *= rng.randf_range(0.90, 1.14)
+		if rng.randf() < 0.58:
+			off.x += rng.randf_range(-0.38, 0.38)
+			off.z += rng.randf_range(-0.30, 0.30)
+		var origin := xf * off
+		var basis := xf.basis
+		# Random yaw hides the LOD2 impostor thread.
+		basis = Basis(Vector3.UP, rng.randf() * TAU) * basis
+		if rng.randf() < 0.64:
+			var axis := Vector3(rng.randf_range(-1.0, 1.0), 0.0, rng.randf_range(-1.0, 1.0))
+			if axis.length() > 0.01:
+				basis = Basis(axis.normalized(), deg_to_rad(rng.randf_range(2.4, 7.8))) * basis
+		out.append({"kind": String(CANOPY_KIND[variant]), "xf": Transform3D(basis, origin)})
+	# Filler crowns above LOOK sky-gap spots (no trunk; merge into the ceiling).
+	var fillers := [
+		{"kind": "Large", "origin": Vector3(2.6, 15.4, -3.8)},
+		{"kind": "Medium", "origin": Vector3(-2.0, 16.2, -6.2)},
+		{"kind": "Large", "origin": Vector3(5.8, 16.8, -8.8)},
+		{"kind": "Small", "origin": Vector3(-6.2, 14.8, 3.6)},
+		{"kind": "Medium", "origin": Vector3(8.4, 15.6, -12.4)},
+		{"kind": "Large", "origin": Vector3(-4.8, 17.0, -14.2)},
+	]
+	for spec in fillers:
+		var yaw := rng.randf() * TAU
+		var s := rng.randf_range(0.92, 1.12)
+		var b := Basis(Vector3.UP, yaw).scaled(Vector3(s, s, s))
+		out.append({"kind": String(spec["kind"]), "xf": Transform3D(b, spec["origin"])})
+	return out
+
+
 func _wire_dock(pilot: Node3D) -> void:
 	if not ResourceLoader.exists(DOCK[0]):
 		push_warning("HP001: dock GLBs missing")
@@ -209,6 +355,10 @@ func _wire_dock(pilot: Node3D) -> void:
 	var kit := _load_named_kit(DOCK, ["Straight", "End", "Step"], "Dock_%s_LOD%d", "M_Dock_HP")
 	var meshes: Dictionary = kit["meshes"]
 	var mat: BaseMaterial3D = kit["mat"]
+	if mat:
+		# Subtle bark/irregularity on fascia and bearers (atlas multiply).
+		mat.albedo_color = Color(0.86, 0.78, 0.68)
+		mat.roughness = maxf(mat.roughness, 0.78)
 	if not meshes.has("Straight_0"):
 		push_warning("HP001: Dock_Straight mesh missing")
 		return
@@ -260,6 +410,11 @@ func _wire_groundcover(pilot: Node3D) -> void:
 	var mat: BaseMaterial3D = kit["mat"]
 	if mat:
 		_harden_mat(mat, 0.5, true)
+	var flower_mat: BaseMaterial3D = null
+	if mat:
+		flower_mat = mat.duplicate() as BaseMaterial3D
+		# White petals → Maya cream from the material (atlas still drives pads).
+		flower_mat.albedo_color = LILY_CREAM.lightened(0.18)
 	var placements := _scatter_groundcover()
 	var world: Node3D = pilot.get_node_or_null("WorldRoot")
 	var root := Node3D.new()
@@ -311,8 +466,9 @@ func _wire_groundcover(pilot: Node3D) -> void:
 				mmi.name = "HP001_GC_%s_LOD%d_%d_%d" % [kind, lod, key.x, key.y]
 				mmi.multimesh = mm
 				mmi.position = centroid
-				if mat:
-					mmi.material_override = mat
+				var use_mat := flower_mat if kind == "WaterLily" and flower_mat else mat
+				if use_mat:
+					mmi.material_override = use_mat
 				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				_apply_lod_range(mmi, GC_LOD_BEGIN[lod], GC_LOD_END[lod], GC_LOD_MARGIN)
@@ -322,7 +478,7 @@ func _wire_groundcover(pilot: Node3D) -> void:
 			if have_aabb:
 				for mmi in cluster_mmis:
 					mmi.custom_aabb = shared_aabb
-	print("HP001 groundcover: ", placements.size(), " instances, ", mm_count, " MultiMeshes (no WaterLily)")
+	print("HP001 groundcover: ", placements.size(), " instances, ", mm_count, " MultiMeshes (lily flower flag=", LILY_FLOWER_ENABLED, ")")
 
 
 func _load_named_kit(paths: Array, variants: Array, name_fmt: String, mat_name: String) -> Dictionary:
@@ -414,6 +570,26 @@ func _scatter_groundcover() -> Array:
 			p.y = -0.06
 			out.append({"kind": "CacaoLeaves", "xf": _gc_xform(p, rng)})
 			n_leaf += 1
+	# Lilies on the lagoon, off the dock and playable strip. Pads by default;
+	# flowered groups ~1/4–5 when the Identidad flag is on.
+	var n_lily := 0
+	var n_flower := 0
+	var lily_tries := 0
+	while n_lily < 10 and lily_tries < 160:
+		lily_tries += 1
+		var p := Vector3(
+			rng.randf_range(-10.5, 9.5),
+			-0.12,
+			rng.randf_range(-13.5, -5.2)
+		)
+		if _gc_blocked(p):
+			continue
+		var flower := LILY_FLOWER_ENABLED and rng.randf() < LILY_FLOWER_RATIO
+		var kind := "WaterLily" if flower else "WaterLilyPads"
+		out.append({"kind": kind, "xf": _gc_xform(p, rng)})
+		n_lily += 1
+		if flower:
+			n_flower += 1
 	return out
 
 

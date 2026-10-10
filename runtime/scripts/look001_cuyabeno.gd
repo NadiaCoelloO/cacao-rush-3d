@@ -15,6 +15,9 @@ const BEAM_GOLD_MAT := preload("res://materials/m_warp_beam_gold.tres")
 const BEAM_CYAN_MAT := preload("res://materials/m_warp_beam_cyan.tres")
 const HP001_SCRIPT := preload("res://scripts/hp001_cuyabeno.gd")
 const HP_TOTEM_LOD0 := "res://models/hp001/totem_warp_cuyabeno_hp_LOD0.glb"
+const HP_CANOPY_LOD0 := "res://models/hp001/canopy_cuyabeno_hp_LOD0.glb"
+const HP_SKY_TEX := "res://textures/hp001_cuyabeno_sky_2k.png"
+const HP_FALLS_TEX := "res://textures/hp001_waterfall_card.png"
 
 const WATER_Y := -0.12
 const TOTEM_XZ := Vector3(7.5, 0.0, 0.0)
@@ -110,6 +113,8 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_build_lights(pilot)
 	_build_fog()
 	_build_probe()
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		_build_distant_falls(pilot)
 	if _hp_ok:
 		var hp: Node = HP001_SCRIPT.new()
 		hp.name = "HP001"
@@ -201,6 +206,22 @@ func capture_still(shot: String, out_path: String) -> void:
 		pods_cam.position = Vector3(13.05, 1.22, -2.15)
 		get_parent().add_child(pods_cam)
 		pods_cam.look_at(Vector3(10.35, 0.12, -5.35), Vector3.UP)
+		cam = pods_cam
+	elif shot == "cmp_bg":
+		# Same framing as HP001_canopy_2d_vs_3d: eye 22.5 m, +5.4° so the
+		# horizon sits ~63 % down. Capture-only; gameplay cam unchanged.
+		if player:
+			player.visible = false
+			if play_cam:
+				play_cam.current = false
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_CmpBg"
+		pods_cam.far = 280.0
+		pods_cam.fov = 40.0
+		pods_cam.position = Vector3(2.0, 22.5, 26.0)
+		get_parent().add_child(pods_cam)
+		var aim := pods_cam.position + Vector3(-0.18, tan(deg_to_rad(5.4)), -1.0)
+		pods_cam.look_at(aim, Vector3.UP)
 		cam = pods_cam
 	else:
 		if player:
@@ -322,6 +343,8 @@ func _walk_look(n: Node) -> void:
 				wood_post.roughness = 0.85
 				mi.material_override = wood_post
 		if n.name.begins_with("LOOK001_Trees") and _hp_ok:
+			n.visible = false
+		if n.name.begins_with("LOOK001_Canopy") and ResourceLoader.exists(HP_CANOPY_LOD0):
 			n.visible = false
 	for c in n.get_children():
 		_walk_look(c)
@@ -525,6 +548,9 @@ func _grade_csg_playable(pilot: Node3D) -> void:
 
 
 func _thicken_canopy() -> void:
+	# HP canopy v2 replaces LOOK clumps and the extra gap cards.
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		return
 	# Reuse the LOD canopy mesh (not a new high-poly) to close sky holes.
 	for root in _lod_roots:
 		var canopy := _find_named(root, "LOOK001_Canopy")
@@ -616,25 +642,37 @@ func _build_environment(pilot: Node3D) -> void:
 		pilot.add_child(we)
 	_env = Environment.new()
 	_env.background_mode = Environment.BG_SKY
-	var sky_mat := ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = Color("3a4844")
-	sky_mat.sky_horizon_color = Color("6a655c")
-	sky_mat.ground_horizon_color = Color("4a5048")
-	sky_mat.ground_bottom_color = Color("10191a")
-	sky_mat.sky_energy_multiplier = 0.32
-	sky_mat.ground_energy_multiplier = 0.18
-	sky_mat.sun_angle_max = 14.0
-	sky_mat.sun_curve = 0.15
 	var sky := Sky.new()
-	sky.sky_material = sky_mat
+	if ResourceLoader.exists(HP_SKY_TEX):
+		var pano := PanoramaSkyMaterial.new()
+		pano.panorama = load(HP_SKY_TEX)
+		pano.energy_multiplier = 1.55
+		sky.sky_material = pano
+		_env.background_energy_multiplier = 1.35
+		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		_env.ambient_light_color = Color("a3ad92")
+		_env.ambient_light_energy = 0.40
+		_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+		_env.tonemap_exposure = 1.18
+	else:
+		var sky_mat := ProceduralSkyMaterial.new()
+		sky_mat.sky_top_color = Color("3a4844")
+		sky_mat.sky_horizon_color = Color("6a655c")
+		sky_mat.ground_horizon_color = Color("4a5048")
+		sky_mat.ground_bottom_color = Color("10191a")
+		sky_mat.sky_energy_multiplier = 0.32
+		sky_mat.ground_energy_multiplier = 0.18
+		sky_mat.sun_angle_max = 14.0
+		sky_mat.sun_curve = 0.15
+		sky.sky_material = sky_mat
+		_env.background_energy_multiplier = 0.55
+		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		_env.ambient_light_color = Color("6a7c74")
+		_env.ambient_light_energy = 0.62
+		_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+		_env.tonemap_exposure = 1.00
 	_env.sky = sky
-	_env.background_energy_multiplier = 0.55
-	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_env.ambient_light_color = Color("6a7c74")
-	_env.ambient_light_energy = 0.62
 	_env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.tonemap_exposure = 1.00
 	_env.ssr_enabled = true
 	_env.ssr_max_steps = 64
 	_env.ssr_fade_in = 0.15
@@ -654,18 +692,32 @@ func _build_environment(pilot: Node3D) -> void:
 	_env.set("glow_levels/6", 0.0)
 	_env.set("glow_levels/7", 0.0)
 	_env.adjustment_enabled = true
-	_env.adjustment_brightness = 1.06
-	_env.adjustment_contrast = 0.97
-	_env.adjustment_saturation = 0.92
-	_env.volumetric_fog_enabled = true
-	_env.volumetric_fog_density = 0.0020
-	_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
-	_env.volumetric_fog_anisotropy = 0.32
-	# Low vol-fog preset (ON by default): shorter volume + less detail spread.
-	# Playable KEY/FILL/RIM/SPOT energies are unchanged.
-	_env.volumetric_fog_length = 48.0
-	_env.volumetric_fog_detail_spread = 1.5
-	_env.volumetric_fog_ambient_inject = 0.55
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		_env.adjustment_brightness = 1.10
+		_env.adjustment_contrast = 1.02
+		_env.adjustment_saturation = 1.08
+		# Low vol-fog preset kept (detail_spread 1.5) but longer/warmer so
+		# depth and god-rays read at least at the 2D jungle-sky level.
+		_env.volumetric_fog_enabled = true
+		_env.volumetric_fog_density = 0.0026
+		_env.volumetric_fog_albedo = Color("f0d49a")
+		_env.volumetric_fog_emission = Color("ead8aa")
+		_env.volumetric_fog_emission_energy = 0.18
+		_env.volumetric_fog_anisotropy = 0.48
+		_env.volumetric_fog_length = 96.0
+		_env.volumetric_fog_detail_spread = 1.5
+		_env.volumetric_fog_ambient_inject = 0.72
+	else:
+		_env.adjustment_brightness = 1.06
+		_env.adjustment_contrast = 0.97
+		_env.adjustment_saturation = 0.92
+		_env.volumetric_fog_enabled = true
+		_env.volumetric_fog_density = 0.0020
+		_env.volumetric_fog_albedo = Color(0.72, 0.75, 0.70)
+		_env.volumetric_fog_anisotropy = 0.32
+		_env.volumetric_fog_length = 48.0
+		_env.volumetric_fog_detail_spread = 1.5
+		_env.volumetric_fog_ambient_inject = 0.55
 	we.environment = _env
 
 
@@ -677,27 +729,61 @@ func _build_lights(pilot: Node3D) -> void:
 			(old as Light3D).light_energy = 0.0
 	var key := DirectionalLight3D.new()
 	key.name = "LOOK001_KEY_SunDawn_Filtered"
-	key.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(-35.0), deg_to_rad(70.0), 0.0)), Vector3(0, 8, 4))
-	key.light_color = Color(1.0, 0.78, 0.56)
-	key.light_energy = 1.35
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		# README table: elevation 18°, azimuth 160° from +X, colour (1, 0.78, 0.45).
+		var el := deg_to_rad(18.0)
+		var az := deg_to_rad(160.0)
+		var to_sun := Vector3(cos(el) * cos(az), sin(el), cos(el) * sin(az))
+		key.position = to_sun * 42.0
+		key.look_at(Vector3.ZERO, Vector3.UP)
+		key.light_color = Color(1.0, 0.78, 0.45)
+		key.light_energy = 2.20
+		key.light_volumetric_fog_energy = 2.85
+		key.light_specular = 0.28
+		if key.get("light_angular_distance") != null:
+			key.set("light_angular_distance", 2.0)
+	else:
+		key.transform = Transform3D(Basis.from_euler(Vector3(deg_to_rad(-35.0), deg_to_rad(70.0), 0.0)), Vector3(0, 8, 4))
+		key.light_color = Color(1.0, 0.78, 0.56)
+		key.light_energy = 1.35
+		key.light_volumetric_fog_energy = 1.35
+		key.light_specular = 0.35
+		if key.get("light_angular_distance") != null:
+			key.set("light_angular_distance", 4.0)
 	key.shadow_enabled = true
 	key.shadow_blur = 1.8
-	key.light_volumetric_fog_energy = 1.35
-	key.light_specular = 0.35
-	if key.get("light_angular_distance") != null:
-		key.set("light_angular_distance", 4.0)
 	add_child(key)
 
 	var fill := DirectionalLight3D.new()
 	fill.name = "LOOK001_FILL_Cool"
-	fill.light_color = Color("8a9a88")
-	fill.light_energy = 0.70
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		fill.light_color = Color("a3ad92")
+		fill.light_energy = 0.40
+	else:
+		fill.light_color = Color("8a9a88")
+		fill.light_energy = 0.70
 	fill.shadow_enabled = false
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.2
 	add_child(fill)
 	fill.position = Vector3(-8.0, 8.5, 6.0)
 	fill.look_at(Vector3(5.0, 1.0, 0.0), Vector3.UP)
+
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		# Cheap rim on the crowns (not Maya — default cull, no follow layer).
+		var canopy_rim := DirectionalLight3D.new()
+		canopy_rim.name = "HP001_RIM_Canopy"
+		var el_r := deg_to_rad(14.0)
+		var az_r := deg_to_rad(340.0)
+		var to_rim := Vector3(cos(el_r) * cos(az_r), sin(el_r), cos(el_r) * sin(az_r))
+		canopy_rim.position = to_rim * 36.0
+		canopy_rim.look_at(Vector3(0.0, 10.0, -6.0), Vector3.UP)
+		canopy_rim.light_color = Color(1.0, 0.92, 0.62)
+		canopy_rim.light_energy = 0.62
+		canopy_rim.light_specular = 0.15
+		canopy_rim.shadow_enabled = false
+		canopy_rim.light_volumetric_fog_energy = 0.85
+		add_child(canopy_rim)
 
 	var lateral := OmniLight3D.new()
 	lateral.name = "LOOK001_KEY_Soft_Lateral"
@@ -816,7 +902,11 @@ func _build_fog() -> void:
 	tex.noise = noise
 	var bank_mat := FogMaterial.new()
 	bank_mat.density = 0.62
-	bank_mat.albedo = Color(0.74, 0.76, 0.70)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		bank_mat.albedo = Color("f0d49a")
+		bank_mat.density = 0.48
+	else:
+		bank_mat.albedo = Color(0.74, 0.76, 0.70)
 	bank_mat.height_falloff = 0.55
 	bank_mat.edge_fade = 0.5
 	bank_mat.density_texture = tex
@@ -825,7 +915,11 @@ func _build_fog() -> void:
 		add_child(_make_fog_volume("LOOK001_FogBank_%02d" % i, spec, bank_mat))
 	var trunk_mat := FogMaterial.new()
 	trunk_mat.density = 0.18
-	trunk_mat.albedo = Color(0.68, 0.72, 0.66)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		trunk_mat.albedo = Color("ead8aa")
+		trunk_mat.density = 0.14
+	else:
+		trunk_mat.albedo = Color(0.68, 0.72, 0.66)
 	trunk_mat.height_falloff = 0.25
 	trunk_mat.edge_fade = 0.45
 	trunk_mat.density_texture = tex
@@ -839,8 +933,14 @@ func _build_fog() -> void:
 	haze.size = Vector3(120.0, 20.0, 80.0)
 	haze.position = Vector3(0.0, 14.0, -18.0)
 	var haze_mat := FogMaterial.new()
-	haze_mat.density = 0.032
-	haze_mat.albedo = Color(0.66, 0.70, 0.64)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		haze.size = Vector3(180.0, 36.0, 140.0)
+		haze.position = Vector3(0.0, 16.0, -42.0)
+		haze_mat.density = 0.028
+		haze_mat.albedo = Color("ead8aa")
+	else:
+		haze_mat.density = 0.032
+		haze_mat.albedo = Color(0.66, 0.70, 0.64)
 	haze_mat.height_falloff = 0.04
 	haze_mat.edge_fade = 0.3
 	haze.material = haze_mat
@@ -859,6 +959,56 @@ func _build_fog() -> void:
 	clear_mat.edge_fade = 0.7
 	clear.material = clear_mat
 	add_child(clear)
+	if ResourceLoader.exists(HP_CANOPY_LOD0):
+		# Second haze layer on the far ridges (README k 0.0022 /m, warmer far).
+		var ridge := FogVolume.new()
+		ridge.name = "HP001_RidgeHaze"
+		ridge.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+		ridge.size = Vector3(220.0, 48.0, 90.0)
+		ridge.position = Vector3(-8.0, 22.0, -95.0)
+		var ridge_mat := FogMaterial.new()
+		ridge_mat.density = 0.040
+		ridge_mat.albedo = Color("d2cdb4")
+		ridge_mat.height_falloff = 0.03
+		ridge_mat.edge_fade = 0.35
+		ridge.material = ridge_mat
+		add_child(ridge)
+
+
+func _build_distant_falls(pilot: Node3D) -> void:
+	if not ResourceLoader.exists(HP_FALLS_TEX):
+		return
+	var tex: Texture2D = load(HP_FALLS_TEX)
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.22
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_texture = tex
+	mat.albedo_color = Color(0.92, 0.90, 0.82)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
+	var root := Node3D.new()
+	root.name = "HP001_DistantFalls"
+	pilot.add_child(root)
+	# Silhouettes on the far −Z ridge, upper-left of Cam_Laguna / cmp_bg.
+	var cards := [
+		{"pos": Vector3(-38.0, 14.0, -118.0), "size": Vector2(22.0, 38.0), "yaw": 18.0},
+		{"pos": Vector3(-22.0, 11.5, -132.0), "size": Vector2(16.0, 30.0), "yaw": -8.0},
+		{"pos": Vector3(18.0, 13.0, -140.0), "size": Vector2(14.0, 26.0), "yaw": 6.0},
+	]
+	for i in cards.size():
+		var spec: Dictionary = cards[i]
+		var plane := PlaneMesh.new()
+		plane.size = spec["size"]
+		var mi := MeshInstance3D.new()
+		mi.name = "HP001_Falls_%02d" % i
+		mi.mesh = plane
+		mi.material_override = mat
+		mi.position = spec["pos"]
+		mi.rotation.y = deg_to_rad(spec["yaw"])
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		root.add_child(mi)
 
 
 func _make_fog_volume(vol_name: String, spec: Dictionary, mat: FogMaterial) -> FogVolume:

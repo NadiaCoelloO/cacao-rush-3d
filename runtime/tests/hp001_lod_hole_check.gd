@@ -14,14 +14,17 @@ func _init() -> void:
 	_print_stack("totem", HP.TOTEM_LOD_BEGIN, HP.TOTEM_LOD_END, HP.TOTEM_LOD_MARGIN)
 	_print_stack("trunk Thin/Medium/Thick", HP.LOD_BEGIN, HP.LOD_END, HP.LOD_MARGIN)
 	_print_stack("dock", HP.DOCK_LOD_BEGIN, HP.DOCK_LOD_END, HP.DOCK_LOD_MARGIN)
-	_print_stack("groundcover Fern/CacaoLeaves", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN)
+	_print_stack("canopy Small/Medium/Large", HP.CANOPY_LOD_BEGIN, HP.CANOPY_LOD_END, HP.CANOPY_LOD_MARGIN)
+	_print_stack("groundcover Fern/CacaoLeaves/Lily", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN)
 	failed += _check("totem", HP.TOTEM_LOD_BEGIN, HP.TOTEM_LOD_END, HP.TOTEM_LOD_MARGIN)
 	for v in HP.VARIANTS:
 		failed += _check("trunk %s" % v, HP.LOD_BEGIN, HP.LOD_END, HP.LOD_MARGIN)
+	failed += _check("canopy", HP.CANOPY_LOD_BEGIN, HP.CANOPY_LOD_END, HP.CANOPY_LOD_MARGIN)
 	failed += _check("dock", HP.DOCK_LOD_BEGIN, HP.DOCK_LOD_END, HP.DOCK_LOD_MARGIN)
 	# Groundcover has no LOD2 on purpose: it may fade out past LOD1 end.
 	failed += _check_until("groundcover Fern", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN, 37.0)
 	failed += _check_until("groundcover CacaoLeaves", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN, 37.0)
+	failed += _check_until("groundcover LilyPads", HP.GC_LOD_BEGIN, HP.GC_LOD_END, HP.GC_LOD_MARGIN, 37.0)
 	if failed == 0:
 		print("HP001 LOD HOLE CHECK: PASS (0 holes, 0–%.0f m @ %.1f m, first-frame hysteresis)" % [MAX_D, STEP])
 		quit(0)
