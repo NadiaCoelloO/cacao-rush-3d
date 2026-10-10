@@ -4,13 +4,15 @@ extends Control
 
 @onready var btn_arcade: Button = $Center/BtnArcade2D
 @onready var btn_cinematic: Button = $Center/BtnCinematic3D
+@onready var btn_ruinas: Button = $Center/BtnRuinas
 @onready var info_label: Label = $Center/InfoLabel
 
 
 func _ready() -> void:
 	btn_arcade.pressed.connect(_on_arcade_pressed)
 	btn_cinematic.pressed.connect(_on_cinematic_pressed)
-	info_label.text = "Pilot: Cuyabeno (world id selva) · greybox only"
+	btn_ruinas.pressed.connect(_on_ruinas_pressed)
+	info_label.text = "Pilotos: Cuyabeno (selva) y Ruinas de Kakaw (ruinas) · greybox"
 
 
 func _on_arcade_pressed() -> void:
@@ -23,3 +25,7 @@ func _on_arcade_pressed() -> void:
 
 func _on_cinematic_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/pilot_cuyabeno.tscn")
+
+
+func _on_ruinas_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/pilot_ruinas.tscn")
