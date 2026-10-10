@@ -38,12 +38,13 @@ const MAYA_PACK := Color("8a7358")
 const ONEWAY_SLAB := Color("3a2a1c")
 const ONEWAY_CUE := Color("4a3a2a")
 ## Wet várzea earth — dark brown, not the old light-grey slabs.
-const PLAT_ALBEDO := Color(0.20, 0.14, 0.09)
-const PLAT_WET_EDGE := Color(0.10, 0.08, 0.06)
+const PLAT_ALBEDO := Color(0.42, 0.30, 0.18)
+const PLAT_WET_EDGE := Color(0.16, 0.11, 0.08)
 ## Soft top-edge lift on greybox platforms only (not Maya). Keep this low —
 ## combined with the path lights, 0.4+ reads as white puro.
-const PLAT_EMIT := Color(0.16, 0.12, 0.08)
-const PLAT_EMIT_ENERGY := 0.05
+const PLAT_EMIT := Color(0.22, 0.16, 0.10)
+const PLAT_EMIT_ENERGY := 0.22
+const DOSEL_CARD_LAYER := 10
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -110,15 +111,17 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_grade_oneway(pilot)
 	_grade_csg_playable(pilot)
 	_grade_hero(pilot)
+	_add_maya_outline(pilot)
 	_attach_maya_follow_fill(pilot)
 	_thicken_canopy()
 	_build_environment(pilot)
 	_build_lights(pilot)
 	_build_fog()
 	_build_probe()
-	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		_build_side_follow_art(pilot)
-		_build_wet_earth_edge(pilot)
+		if ResourceLoader.exists(HP_CANOPY_LOD0):
+			_build_side_follow_art(pilot)
+			_build_dosel_cap_cards(pilot)
+			_build_wet_earth_edge(pilot)
 	if _hp_ok:
 		var hp: Node = HP001_SCRIPT.new()
 		hp.name = "HP001"
@@ -411,6 +414,32 @@ func _grade_hero_node(n: Node) -> void:
 		_grade_hero_node(c)
 
 
+func _add_maya_outline(pilot: Node3D) -> void:
+	# Subtle dark-cream shell so Maya holds ≥4.4:1 against the pale sky.
+	# Visual only — no collision, cream albedo on the hero stays.
+	var player: Node = pilot.get_node_or_null("PlayerMaya")
+	if player == null:
+		return
+	if player.get_node_or_null("MayaOutline") != null:
+		return
+	var mi := MeshInstance3D.new()
+	mi.name = "MayaOutline"
+	var cap := CapsuleMesh.new()
+	cap.radius = 0.40
+	cap.height = 1.92
+	mi.mesh = cap
+	mi.position = Vector3(0.0, 0.90, 0.0)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_FRONT
+	mat.albedo_color = Color(0.20, 0.15, 0.10)
+	mat.disable_receive_shadows = true
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	player.add_child(mi)
+
+
 func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	var player: Node3D = pilot.get_node_or_null("PlayerMaya")
 	if player == null:
@@ -548,6 +577,7 @@ func _rim_platform_mat(d: BaseMaterial3D) -> void:
 	d.emission_energy_multiplier = PLAT_EMIT_ENERGY
 	d.roughness = 0.78
 	d.metallic = 0.0
+	d.disable_receive_shadows = true
 
 
 func _grade_csg_playable(pilot: Node3D) -> void:
@@ -1043,10 +1073,13 @@ func _cloud_card_mat() -> ShaderMaterial:
 	sh.code = """shader_type spatial;
 render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 uniform sampler2D sky : source_color;
-uniform vec4 tint : source_color = vec4(1.0);
 void fragment() {
-	vec2 uv = vec2(fract(UV.x * 1.35 + 0.08), mix(0.46, 0.03, UV.y));
-	ALBEDO = texture(sky, uv).rgb * tint.rgb;
+	vec2 uv = vec2(fract(UV.x * 1.35 + 0.08), mix(0.42, 0.06, UV.y));
+	vec3 cloud = texture(sky, uv).rgb;
+	// Play band (lower card) is darker / more saturated so cream Maya ≥4.4:1.
+	float play = smoothstep(0.62, 0.18, UV.y);
+	vec3 dusk = vec3(0.28, 0.36, 0.40);
+	ALBEDO = mix(cloud * vec3(0.72, 0.78, 0.70), dusk, play * 0.55);
 }
 """
 	mat.shader = sh
@@ -1054,7 +1087,6 @@ void fragment() {
 		mat.set_shader_parameter("sky", load(HP_SKY_TEX))
 	elif ResourceLoader.exists("res://textures/hp001_jungle_sky_2d.jpg"):
 		mat.set_shader_parameter("sky", load("res://textures/hp001_jungle_sky_2d.jpg"))
-	mat.set_shader_parameter("tint", Color(1.02, 0.98, 0.90))
 	return mat
 
 
@@ -1069,27 +1101,52 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	var hold := Node3D.new()
 	hold.name = "HP001_SideFollow"
 	cam.add_child(hold)
-	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 7.2, -44.0), Vector2(84.0, 28.0), Vector3.ZERO, _cloud_card_mat())
+	# Level with the view plane (no extra euler) so the top edge is not a slant.
+	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 4.8, -40.0), Vector2(68.0, 18.0), Vector3.ZERO, _cloud_card_mat())
 	if ResourceLoader.exists(HP_SIL_TEX):
 		var tex: Texture2D = load(HP_SIL_TEX)
-		# Nearer strip: darker, just behind the play plane.
 		var near_mat := _scissor_card(tex, Color(0.14, 0.18, 0.10), 0.32)
-		near_mat.albedo_color = Color(0.14, 0.18, 0.10)
-		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -1.15, -33.0), Vector2(74.0, 8.4), Vector3.ZERO, near_mat)
-		# Farther strip: lighter / hazy.
-		var far_mat := _scissor_card(tex, Color(0.38, 0.40, 0.32), 0.32)
-		_add_card(hold, "HP001_SelvaSil_far", Vector3(2.5, -0.35, -52.0), Vector2(92.0, 10.0), Vector3.ZERO, far_mat)
+		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -2.4, -32.0), Vector2(70.0, 7.2), Vector3.ZERO, near_mat)
+		var far_mat := _scissor_card(tex, Color(0.32, 0.36, 0.28), 0.32)
+		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -1.6, -48.0), Vector2(82.0, 8.0), Vector3.ZERO, far_mat)
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var liana: Texture2D = load(HP_LIANA_TEX)
 		var lmat := _scissor_card(liana, Color(0.78, 0.86, 0.62), 0.22)
-		# Left edge of the 40×22.5 frame, like the 2D vine. Outside the
-		# 0.7 m hitbox and the walkable strip (Maya stays center-frame).
-		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.28, 0.72, -3.15), Vector2(1.55, 2.55), Vector3(deg_to_rad(4.0), deg_to_rad(8.0), deg_to_rad(-3.0)), lmat)
-		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.55, 1.05, -3.55), Vector2(1.15, 1.85), Vector3(deg_to_rad(6.0), deg_to_rad(12.0), deg_to_rad(4.0)), lmat)
+		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.32, 0.55, -3.20), Vector2(1.50, 2.40), Vector3.ZERO, lmat)
+		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.58, 0.95, -3.60), Vector2(1.10, 1.70), Vector3.ZERO, lmat)
 	# Laguna still keeps a world-space curtain over the water (art camera).
 	if ResourceLoader.exists(HP_LIANA_TEX):
 		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.78, 0.86, 0.62), 0.22)
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
+
+
+func _build_dosel_cap_cards(pilot: Node3D) -> void:
+	# Cam_Dosel saw a slanted crown cut at the top of the frame. Screen-aligned
+	# quads (identity euler, camera children) put a level olive band up there.
+	# Layer 10 is only in Cam_Dosel’s cull mask so gameplay does not see them.
+	var cam: Camera3D = pilot.get_node_or_null("Cam_Dosel") as Camera3D
+	if cam == null:
+		return
+	var bit := 1 << DOSEL_CARD_LAYER
+	cam.cull_mask = cam.cull_mask | bit
+	var play_cam: Camera3D = pilot.get_node_or_null("PlayerMaya/Camera3D") as Camera3D
+	if play_cam:
+		play_cam.cull_mask = play_cam.cull_mask & ~bit
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.albedo_color = Color(0.10, 0.14, 0.08)
+	mat.disable_receive_shadows = true
+	var hold := Node3D.new()
+	hold.name = "HP001_DoselCap"
+	cam.add_child(hold)
+	for spec in [
+		{"n": "C", "pos": Vector3(0.0, 4.55, -11.0), "size": Vector2(20.0, 4.0)},
+		{"n": "L", "pos": Vector3(-5.6, 3.85, -9.4), "size": Vector2(10.0, 3.4)},
+		{"n": "R", "pos": Vector3(5.8, 4.15, -10.2), "size": Vector2(10.5, 3.6)},
+	]:
+		var mi := _add_card(hold, "HP001_DoselCap_%s" % spec["n"], spec["pos"], spec["size"], Vector3.ZERO, mat)
+		mi.layers = bit
 
 
 func _build_wet_earth_edge(pilot: Node3D) -> void:

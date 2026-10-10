@@ -73,8 +73,8 @@ def main():
         pair(
             load(DOCS / "2d_hazard.png"),
             load(DOCS / "3d_hazard.png"),
-            "2D renderGame  ·  pinchos H00  ·  pies (1504, 598)",
-            "3D gameplay  ·  mismo tramo  ·  pies (63.2083, 2.6667, 0)",
+            "2D renderGame  ·  viento H03 + roca H04  ·  pies (3187, 230)",
+            "3D gameplay  ·  mismo tramo  ·  pies (133.3333, 18, 0)",
         ),
         pair(
             load(DOCS / "2d_cacao.png"),

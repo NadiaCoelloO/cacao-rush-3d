@@ -3,7 +3,7 @@
     "level_id": "selva-1",
     "world_id": "selva",
     "display": "Cuyabeno",
-    "subtitle": "Las primeras semillas",
+    "subtitle": "Laguna negra de Sucumbíos",
     "source_requested": "NadiaCoelloO/sand-vivid-dawn-sail@5fd450312c8e6ad0a214f35b68fd81ec2857fec3",
     "source_read": "NadiaCoelloO/Cacao.Game src/game/levels.ts selva-1 (QA-verified same geometry)",
     "px_to_m": 0.041666666666666664,
@@ -1299,14 +1299,14 @@
     },
     {
       "id": "hazard",
-      "label": "Pinchos H00 sobre el suelo ancho",
+      "label": "Viento H03 + roca H04 en la repisa (P15)",
       "player_px": {
-        "x": 1504,
-        "y": 598
+        "x": 3187,
+        "y": 230
       },
       "feet_m": [
-        63.2083,
-        2.6667,
+        133.3333,
+        18.0,
         0.0
       ]
     },

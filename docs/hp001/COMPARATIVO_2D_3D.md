@@ -6,7 +6,7 @@ El piso de entrada se baja **13.3333 m** para que su top quede en Godot y = 0 (e
 
 ## Fuente
 
-El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` no se pudo leer desde aquí (404). El layout y los timings salen de `NadiaCoelloO/Cacao.Game` `levels.ts` / `sim.ts` (`selva-1`, `sitSpikes`, `freeCoins`). QA verificó que esa geometría es la misma. 21 plataformas, 6 peligros, 24 granos (lista completa del archivo; el brief decía 23), 2 postes, 1 meta.
+El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` no se pudo leer desde aquí (404). El layout y los timings salen de `NadiaCoelloO/Cacao.Game` `levels.ts` / `sim.ts` (`selva-1`, `sitSpikes`, `freeCoins`). QA verificó que esa geometría es la misma. 21 plataformas, 6 peligros, 24 granos (lista completa del archivo; el brief decía 23), 2 postes, 1 meta. Subtítulo del pin: **Laguna negra de Sucumbíos**.
 
 El tótem (7.5, 0, 0), el muelle (10, 0, −4) y la laguna quedan como arte: fuera del carril o encima de P00. No añaden colisión.
 
@@ -34,7 +34,7 @@ Misma pose en los dos renders. 2D: `renderGame` (implementación fiel: sky + pla
 | id | pies 2D | pies 3D m | nota |
 |---|---|---|---|
 | entrance | (96, 662) | (4.5417, 0, 0) | Entrada: P00, oneway #0 a 6.67 m, tótem |
-| hazard | (1504, 598) | (63.2083, 2.6667, 0) | Pinchos H00 sobre P05 |
+| hazard | (3187, 230) | (133.3333, 18, 0) | Viento H03 + roca H04 sobre P15 |
 | cacao | (1568, 470) | (65.875, 8, 0) | Granos C10 + oneway P07 |
 
 La fila 2 de `cmp_cuyabeno_2d_3d.png` es el gameplay 2D contra el 3D **en el mismo tramo**. Las filas 3 y 4 son el tramo con peligro y el tramo con cacao.
@@ -50,6 +50,7 @@ Valores copiados de `sim.ts`. Nada de esto toca `player_maya.gd`.
 | viento H03 | no mata; suma `vx` 150 px/s² al cuerpo si hay overlap (`applyWind`) |
 | rocas H04–H05 | `along = (time*vx + phase*40) % (range+80)`; fuera de rango vuelven a `ox-80` |
 | kill | vidas 5, `invuln` 0.8, `hitstop` 0.08, `deathT` 0.55, respawn con `invuln` 1.1 |
+| pozo | `sim.ts` `p.y > height+80` → pies Godot **−18.4167 m**. Play pone `kill_y = −80` (el default −3.33 no se usa). `selva1_play._kill()` resta vida. Feel no se toca. |
 | monedas | distancia al centro < 28 px. Se ocultan. 24 granos |
 | K00 / K01 | salto activa, guarda el spawn (`x+4`, pies en la base), `poleLock` 0.35 s |
 | G00 | overlap marca la meta, oculta el grano y deja `win` 1.35 s |
@@ -152,7 +153,7 @@ En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. 
 
 ## Look (E2d)
 
-La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyabeno_sky_2k`, solo el tercio de nubes) y **2 franjas** de selva lejana con bruma (`hp001_selva_silhouette`), detrás del carril. Lianas de primer plano en el borde izquierdo del cuadro (`hp001_fg_liana`), fuera del hitbox. Copas y troncos de fondo (MultiMesh + LOD) a lo largo de todo selva-1, z < 0. QuadMesh vertical: el `PlaneMesh` XZ no se veía de lado. Sin cerros ni cascadas. `player_maya.gd` no se tocó.
+La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyabeno_sky_2k`, solo el tercio de nubes, franja de juego más oscura/saturada) y **2 franjas** de selva lejana con bruma (`hp001_selva_silhouette`), detrás del carril, sin inclinación extra. Lianas de primer plano en el borde izquierdo del cuadro (`hp001_fg_liana`), fuera del hitbox. Copas y troncos de fondo (MultiMesh + LOD) a lo largo de todo selva-1, z < 0. Cards de tope en `Cam_Dosel` (layer 10) para que el corte de arriba no salga sesgado. Maya crema con outline sutil (cápsula, sin colisión). P00 tierra húmeda con emisión, sin sombras recibidas. Ranas y rocas al tamaño del hitbox; viento con rayas. Capturas en Vulkan Forward+. `player_maya.gd` no se tocó.
 
 ## Checks
 
@@ -161,6 +162,7 @@ La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyaben
 | `maya_feel_check` | **54/54 PASS** |
 | `hp001_lod_hole_check` | **PASS** (constantes + escena instanciada) |
 | `SELVA_CHECK` | 21 / 6 / 24 / 2 / 1 · offset (0, 1, 24.1256) · P01 6.6667 |
+| `selva1_run_probe` | pendiente (este commit) |
 | `player_maya.gd` | no tocado |
 
 ## sha256

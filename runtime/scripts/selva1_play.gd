@@ -18,9 +18,13 @@ const VIEW_W_M := 960.0 * PX
 const VIEW_H_M := 540.0 * PX
 const CAM_DOLLY := 24.1256
 const Y_SHIFT := 13.333333
+## sim.ts: kill when p.y (top, y-down) > level.height + 80. Godot stores feet,
+## so the line is (LEVEL_H − (LEVEL_H + 80 + PH)) / 24 − Y_SHIFT ≈ −18.42 m.
+## player_maya.gd default kill_y (−3.33) is 80 px under y=0; play overrides it.
+const PIT_KILL_Y := -18.4167
 const MAYA_LAYER := 2
-const COL_EARTH := Color(0.20, 0.14, 0.09)
-const COL_EARTH_LIP := Color(0.28, 0.20, 0.12)
+const COL_EARTH := Color(0.42, 0.30, 0.18)
+const COL_EARTH_LIP := Color(0.50, 0.36, 0.22)
 const COL_WET := Color(0.10, 0.08, 0.06)
 const COL_CRATE := Color(0.36, 0.24, 0.14)
 const COL_CRUMBLE := Color(0.16, 0.11, 0.07)
@@ -90,11 +94,13 @@ func _ready() -> void:
 	var xf: Transform3D = _player._spawn
 	xf.origin = feet
 	_player._spawn = xf
+	# Feel keeps the tscn kill_y (−3.33). Play uses the 2D pit line via _tick_play.
+	_player.kill_y = -80.0
 	_hint = pilot.get_node_or_null("UI/Hud/HintLabel") as Label
 	var hud_label := pilot.get_node_or_null("UI/Hud/WorldLabel") as Label
 	if hud_label:
 		var meta: Dictionary = _layout["meta"]
-		hud_label.text = "%s  ·  id %s  ·  selva-1  ·  %s" % [meta["display"], meta["world_id"], meta["level_id"]]
+		hud_label.text = "%s  ·  %s  ·  %s" % [meta["display"], meta.get("subtitle", ""), meta["level_id"]]
 	var late := Node.new()
 	late.name = "LateSim"
 	late.set_script(load("res://scripts/selva1_play_late.gd"))
@@ -146,6 +152,12 @@ func late_physics(delta: float) -> void:
 func _is_feel_harness() -> bool:
 	# maya_feel_check instantiates the packed scene into its own SceneTree.
 	# OS.has_feature("headless") is not set for `--headless -s` on 4.2.2.
+	# The G00 probe uses the same -s path, so SELVA_RUN / current_scene=pilot
+	# force play (pit −18.4, 1:1 geo). Feel must keep kill_y −3.33.
+	if OS.get_environment("SELVA_RUN") != "" \
+			or OS.get_environment("SELVA_CAPTURE") != "" \
+			or OS.get_environment("SELVA_CHECK") != "":
+		return false
 	var tree := get_tree()
 	if tree == null:
 		return true
@@ -177,6 +189,15 @@ func _disable_slice_boxes(pilot: Node3D, keep_feel_ledge: bool) -> void:
 	var oneway: Node = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder/CSGOneway")
 	if oneway is CSGShape3D:
 		(oneway as CSGShape3D).use_collision = false
+	# Play: hide the 24 m feel slab so P00 (1:1 earth) is the floor, not a
+	# second dark box covering the first gap.
+	if not keep_feel_ledge:
+		if floor_csg:
+			(floor_csg as Node3D).visible = false
+		if ledge:
+			(ledge as Node3D).visible = false
+		if oneway:
+			(oneway as Node3D).visible = false
 
 
 func _build_world() -> void:
@@ -237,9 +258,9 @@ func _build_world() -> void:
 		if kind == "spikes":
 			_add_spikes(visual, h)
 		elif kind == "frog":
-			rec["mesh"] = _add_critter(visual, String(h["id"]), _vec(h["center_m"]), COL_FROG, 0.28, 0.22)
+			rec["mesh"] = _add_frog(visual, h)
 		elif kind == "rock":
-			rec["mesh"] = _add_critter(visual, String(h["id"]), _vec(h["center_m"]), COL_ROCK, 0.32, 0.28)
+			rec["mesh"] = _add_rock(visual, h)
 		elif kind == "wind":
 			_add_wind_card(visual, h)
 		_hazards.append(rec)
@@ -315,6 +336,9 @@ func _add_box(host: Node3D, center: Array, size: Array, mat: Material, collide: 
 	box.size = s
 	mesh.mesh = box
 	mesh.material_override = mat
+	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if mat is BaseMaterial3D:
+		(mat as BaseMaterial3D).disable_receive_shadows = true
 	host.add_child(mesh)
 	if collide:
 		var shape := CollisionShape3D.new()
@@ -372,33 +396,77 @@ func _stamp_wedge(st: SurfaceTool, x: float, w: float, bottom: float, h: float, 
 		st.add_vertex(tri[2])
 
 
-func _add_critter(visual: Node3D, id: String, at: Vector3, color: Color, rx: float, ry: float) -> MeshInstance3D:
+func _add_frog(visual: Node3D, h: Dictionary) -> MeshInstance3D:
+	# Hitbox 18×16 px = 0.75×0.667 m. Body fills that AABB so it reads at 40×22.5.
+	var sz := _vec(h["size_m"])
+	var root := MeshInstance3D.new()
+	root.name = String(h["id"])
+	root.position = _vec(h["center_m"])
+	var body := SphereMesh.new()
+	body.radius = sz.x * 0.50
+	body.height = sz.y
+	body.radial_segments = 10
+	body.rings = 6
+	root.mesh = body
+	var mat := _mat(COL_FROG, 0.62)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	root.material_override = mat
+	var eye_mat := _mat(Color(0.95, 0.90, 0.80), 0.4)
+	eye_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	for side in [-1.0, 1.0]:
+		var eye := MeshInstance3D.new()
+		var ball := SphereMesh.new()
+		ball.radius = 0.09
+		ball.height = 0.18
+		eye.mesh = ball
+		eye.position = Vector3(side * sz.x * 0.22, sz.y * 0.28, 0.28)
+		eye.material_override = eye_mat
+		root.add_child(eye)
+	visual.add_child(root)
+	return root
+
+
+func _add_rock(visual: Node3D, h: Dictionary) -> MeshInstance3D:
+	# Hitbox 22×20 px = 0.917×0.833 m. Coconut-sized ellipsoid, same as 2D.
+	var sz := _vec(h["size_m"])
 	var mi := MeshInstance3D.new()
-	mi.name = id
+	mi.name = String(h["id"])
 	var mesh := SphereMesh.new()
-	mesh.radius = rx
-	mesh.height = ry * 2.0
-	mesh.radial_segments = 8
-	mesh.rings = 4
+	mesh.radius = sz.x * 0.50
+	mesh.height = sz.y
+	mesh.radial_segments = 10
+	mesh.rings = 6
 	mi.mesh = mesh
-	mi.position = at
-	mi.material_override = _mat(color, 0.7)
+	mi.position = _vec(h["center_m"])
+	var mat := _mat(Color(0.42, 0.24, 0.12), 0.78)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mi.material_override = mat
 	visual.add_child(mi)
 	return mi
 
 
 func _add_wind_card(visual: Node3D, h: Dictionary) -> void:
+	# 2D: clipped cream dashes drifting with vx. Shader stripes, no collision.
 	var mi := MeshInstance3D.new()
 	mi.name = String(h["id"])
 	var box := BoxMesh.new()
 	var sz := _vec(h["size_m"])
-	sz.z = 0.08
+	sz.z = 0.06
 	box.size = sz
 	mi.mesh = box
 	mi.position = _vec(h["center_m"])
-	var mat := _mat(COL_WIND, 0.9, false, 0.18)
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled;
+void fragment() {
+	float dash = step(0.62, fract(UV.x * 18.0 + UV.y * 0.35 + TIME * 1.4));
+	float row = step(0.45, fract(UV.y * 16.0));
+	ALBEDO = vec3(0.95, 0.90, 0.80);
+	ALPHA = dash * row * 0.42;
+}
+"""
+	mat.shader = sh
 	mi.material_override = mat
 	visual.add_child(mi)
 
@@ -409,8 +477,9 @@ func _earth(color: Color, rough: float) -> StandardMaterial3D:
 	mat.roughness = rough
 	mat.metallic = 0.0
 	mat.emission_enabled = true
-	mat.emission = Color(0.16, 0.12, 0.08)
-	mat.emission_energy_multiplier = 0.05
+	mat.emission = Color(0.28, 0.20, 0.12)
+	mat.emission_energy_multiplier = 0.34
+	mat.disable_receive_shadows = true
 	return mat
 
 
@@ -489,6 +558,9 @@ func _tick_play(delta: float) -> void:
 		return
 	_invuln = maxf(0.0, _invuln - delta)
 	_pole_lock = maxf(0.0, _pole_lock - delta)
+	if _player.global_position.y < PIT_KILL_Y:
+		_kill()
+		return
 	_hazards_touch()
 	if _status != "playing":
 		return
@@ -750,6 +822,9 @@ func _print_counts() -> void:
 		_layout["pickups"].size(), _layout["checkpoints"].size()
 	])
 	print("SELVA_CAM offset=%s P01_top=%.4f" % [_player.camera_offset, float(_layout["platforms"][1]["top_m"])])
+	print("SELVA_PIT kill_y=%.4f player_kill_y=%.4f subtitle=%s" % [
+		PIT_KILL_Y, _player.kill_y, String(_layout["meta"].get("subtitle", ""))
+	])
 
 
 func _run_capture() -> void:
