@@ -75,6 +75,17 @@ def measure(path: Path, region=None) -> dict:
         for x in range(x0, x1):
             if is_cream(px[x, y]):
                 cream.append((x, y, px[x, y]))
+    # Prefer a compact blob (Maya) over painted-cumulus hits.
+    if len(cream) > 400:
+        best = []
+        step = 8
+        for cy in range(y0, y1, step):
+            for cx in range(x0, x1, step):
+                bunch = [p for p in cream if abs(p[0] - cx) < 28 and abs(p[1] - cy) < 40]
+                if len(bunch) > len(best) and 20 < len(bunch) < 900:
+                    best = bunch
+        if best:
+            cream = best
     if len(cream) < 12:
         return {"file": path.name, "error": "maya body not found", "cream_n": len(cream)}
     xs = [p[0] for p in cream]

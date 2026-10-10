@@ -1278,22 +1278,20 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -3.6, -30.0), Vector2(74.0, 6.4), Vector3.ZERO, near_mat)
 		var far_mat := _scissor_card(tex, Color(0.30, 0.36, 0.22), 0.28)
 		_add_card(hold, "HP001_SelvaSil_far", Vector3(0.0, -2.2, -46.0), Vector2(88.0, 7.2), Vector3.ZERO, far_mat)
-	# Hanging curtain: painted leaves + curved brown-green strands. No rods.
-	var liana_tex := _load_tex(HP_LIANA_TEX)
-	if liana_tex:
-		var lmat := _liana_tex_mat(liana_tex, Color(0.40, 0.34, 0.16))
-		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.05, 1.85, -3.15), Vector2(2.80, 4.60), Vector3.ZERO, lmat)
-		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.35, 1.35, -3.55), Vector2(2.10, 3.80), Vector3.ZERO, lmat)
-	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-2.12, 1.95, -3.05), Vector2(3.20, 5.10), Vector3.ZERO, _curved_liana_mat())
-	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-1.55, 2.10, -3.40), Vector2(2.40, 4.40), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
+	# Top-left curtain. Curved strands only — the vine PNG is a dark slab
+	# and at z≈−3 it walled Maya. Discard keeps sky / play visible.
+	_add_card(hold, "HP001_FG_Liana_Curve", Vector3(-5.05, 2.15, -7.80), Vector2(2.60, 4.40), Vector3.ZERO, _curved_liana_mat())
+	_add_card(hold, "HP001_FG_Liana_Curve2", Vector3(-4.40, 2.25, -8.40), Vector2(1.90, 3.60), Vector3(0.0, 0.0, deg_to_rad(-8.0)), _curved_liana_mat())
+	_add_card(hold, "HP001_FG_Liana_Curve3", Vector3(-5.70, 1.85, -8.60), Vector2(1.70, 3.80), Vector3(0.0, 0.0, deg_to_rad(6.0)), _curved_liana_mat())
 	# Laguna still keeps a world-space curtain over the water (art camera).
+	var liana_tex := _load_tex(HP_LIANA_TEX)
 	if liana_tex:
 		var lmat2 := _liana_tex_mat(liana_tex, Color(0.42, 0.36, 0.18))
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
 	# Cushion follows Maya. Look-ahead (+2 m) puts camera-center off her body.
 	var player: Node = pilot.get_node_or_null("PlayerMaya")
 	if player:
-		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.95, -0.85), Vector2(4.20, 5.10), Vector3.ZERO, _maya_body_vignette_mat())
+		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.95, -0.85), Vector2(3.40, 4.20), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
