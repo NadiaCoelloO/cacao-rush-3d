@@ -188,6 +188,10 @@ func capture_still(shot: String, out_path: String) -> void:
 	vp.size = Vector2i(1920, 1080)
 	DisplayServer.window_set_size(Vector2i(1920, 1080))
 	force_lod0()
+	var hud := get_parent().get_node_or_null("UI")
+	if hud:
+		hud.visible = false
+	var player: Node3D = get_parent().get_node_or_null("PlayerMaya")
 	# Laguna / dosel / dock / pods / cmp_bg are art cameras. Hide the 200 m
 	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
 	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
@@ -199,10 +203,12 @@ func capture_still(shot: String, out_path: String) -> void:
 			var geo: Node = get_parent().get_node_or_null(path)
 			if geo:
 				geo.visible = false
-	var hud := get_parent().get_node_or_null("UI")
-	if hud:
-		hud.visible = false
-	var player: Node3D = get_parent().get_node_or_null("PlayerMaya")
+		# Follow-cam band cards are camera children in world space; art
+		# cameras would see a giant olive quad. Hide them off gameplay.
+		if player:
+			var side: Node = player.get_node_or_null("Camera3D/HP001_SideFollow")
+			if side:
+				side.visible = false
 	var play_cam: Camera3D = null
 	if player:
 		play_cam = player.get_node_or_null("Camera3D")

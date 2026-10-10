@@ -103,7 +103,10 @@ def cacao_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    return (r >= 140) & (r >= g + 8) & (g >= 40) & (b <= 120) & ((r - b) > 40) & (r > 150)
+    warm = (r >= 190) & (r >= g + 8) & (b <= 140) & ((r - b) > 50)
+    yellow_or_orange = g >= 140
+    red_pod = (r - g) >= 70
+    return warm & (yellow_or_orange | red_pod)
 
 
 def densest_window(mask: np.ndarray, ww: int, hh: int, lo: int, hi: int) -> np.ndarray:
@@ -125,6 +128,8 @@ def densest_window(mask: np.ndarray, ww: int, hh: int, lo: int, hi: int) -> np.n
                 continue
             compact = n / (1.0 + float(xs.std()) + float(ys.std()))
             score = compact * (1.0 + 0.35 * (ys.max() - ys.min()) / max(1.0, float(xs.max() - xs.min())))
+            if y0 < h * 0.30:
+                score *= 0.22
             if score > best_score:
                 best_score = score
                 best = (x0, y0, x1, y1)
@@ -150,7 +155,7 @@ def measure_maya(path: Path, x_m=None) -> dict:
     im = np.array(Image.open(path).convert("RGB"))
     cream = cream_mask(im)
     n_cream = int(cream.sum())
-    cream = densest_window(cream, 32, 60, 18, 280)
+    cream = densest_window(cream, 32, 60, 8, 280)
     n_cream = int(cream.sum())
     if n_cream < 12:
         return {"file": path.name, "x_m": x_m, "error": "maya body not found", "cream_n": n_cream}
@@ -209,8 +214,14 @@ def measure_cacao(path: Path) -> dict:
         n = int(pods.sum())
     ys, xs = np.where(pods)
     pod_rgb = im[pods]
-    near = neighbor_ring(pods, 4)
-    bg = im[near & ~pods]
+    near = neighbor_ring(pods, 6)
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    dark = (r + g + b < 240) & (np.maximum(np.maximum(r, g), b) < 120)
+    bg = im[near & ~pods & dark]
+    if bg.size == 0:
+        bg = im[near & ~pods]
     pod = median_rgb(pod_rgb)
     bgm = median_rgb(bg) if bg.size else (20, 16, 10)
     ratio = wcag(pod, bgm)
