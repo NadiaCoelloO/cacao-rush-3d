@@ -51,11 +51,11 @@ Misma pose en los dos renders. 2D: `renderGame`, 960×540, `camLook = 48`, `time
 
 | toma | tris | draws | tris mundo | draws mundo |
 |---|---:|---:|---:|---:|
-| patio | 2295 | 141 | 940 | 105 |
-| jardin | 2381 | 154 | 1026 | 118 |
-| mantle | 2093 | 108 | 738 | 72 |
-| h00 | 2443 | 118 | 1088 | 82 |
-| h04 | 2363 | 119 | 1008 | 83 |
+| patio | 2737 | 143 | 1382 | 107 |
+| jardin | 2683 | 155 | 1328 | 119 |
+| mantle | 2273 | 108 | 918 | 72 |
+| h00 | 2911 | 117 | 1556 | 81 |
+| h04 | 2771 | 119 | 1416 | 83 |
 
 Los granos van por instancia para poder ocultarlos al recogerlos. El bisel, las lianas y el núcleo del láser suman draws. Sigue muy por debajo del techo de 180k tris. El draw count queda por encima de 80 porque cada grano y cada adorno es su propio mesh.
 
@@ -66,12 +66,12 @@ Valores copiados de `sim.ts`. Nada de esto toca `player_maya.gd`.
 | pieza | comportamiento |
 |---|---|
 | pinchos H00–H03 | overlap del hurtbox `(x+4, y+8, w-8, h-10)` → `kill` |
-| láseres H04–H06 | igual, solo si `(time+phase) % period < period*0.42` |
+| láseres H04–H06 | igual, solo si `(time+phase) % period < period*0.42`. El dibujo cubre el AABB: 0.4167 m en `#E85A3A` alpha 0.88, núcleo `#FFF0D2` de 0.125 m |
 | kill | vidas 5, `invuln` 0.8, `hitstop` 0.08, `deathT` 0.55, respawn con `invuln` 1.1. A 0 vidas, `over` |
 | caída del nivel | pies bajo `-(80+42)/24` m (−5.08 m). Resta una vida, igual que `p.y > level.height + 80`. El `kill_y` de Maya en esta escena está en −1000 para que ese respawn instantáneo (sin vida) no dispare |
 | monedas | distancia al centro < 28 px. Se ocultan |
 | K01 | salto lo activa, guarda el spawn (`x+4`, pies en la base del poste), `poleLock` 0.35 s, texto «Partida guardada» |
-| K00 | primer salto guarda y avisa «Tótem guardado — W otra vez». El siguiente loguea `pichincha-1` y reaparece en el último spawn. No congela |
+| K00 | primer salto guarda y avisa «Tótem guardado — W otra vez». El siguiente loguea `pichincha-1`, reaparece en el último spawn y queda en lock 0.4 s (`poleLockT` del poste) para no dispararse otra vez en el tick siguiente. No congela |
 | F00 | overlap loguea `jardin-1`, marca la caída como usada y reaparece en el último spawn. No resta vida y no congela |
 | G00 | overlap marca la meta, oculta el grano y deja `win` 1.35 s |
 | one-way | la colisión se apaga si los pies están bajo `top−0.06`, y también mientras `_drop_timer > 0` (abajo+salto, 0.18 s). El timer lo arma Maya; la escena lo lee al inicio del tick siguiente, todavía dentro de esa ventana |
@@ -177,7 +177,7 @@ En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. 
 
 ## Look
 
-Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC`, sin emisión. Láser: franja roja `#C41418` de 0.16 m con núcleo `#FFF0D2`. Cacao `#8B4A2B` con emisión cálida `#C46A3A`. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
+Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC` con borde `#2C1810`, sin emisión. Láser: el ancho del hurtbox, 0.4167 m, `#E85A3A` al 0.88, núcleo `#FFF0D2` de 0.125 m. Cacao: óvalo de frente a cámara, el mismo tamaño que la elipse 2D (16×22 px a 540, **20×30 px** en el patio a 720p), `#8B4A2B` con un poco de `#C46A3A`. El radio de recogida sigue en 28 px. El pozo tiene un fondo verde entre las lianas. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
 
 ## Pendiente
 

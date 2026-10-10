@@ -31,7 +31,9 @@ const COL_STONE_WET := Color("3a2e28")
 const COL_WOOD := Color("5c4030")
 const COL_MOSS := Color("4a5a38")
 const COL_SPIKE := Color("c9c4bc")
-const COL_LASER := Color("c41418")
+const COL_SPIKE_EDGE := Color("2c1810")
+## render.ts laser body rgba(232, 90, 58, 0.88), core #fff0d2 at 30% of the 10 px width.
+const COL_LASER := Color("e85a3a")
 const COL_LASER_CORE := Color("fff0d2")
 const COL_BEAN := Color("8b4a2b")
 const COL_BEVEL := Color("d8cbb8")
@@ -70,6 +72,8 @@ var _win_t := 0.0
 var _status := "playing"
 var _hold_pos := Vector3.ZERO
 var _pole_lock := 0.0
+## sim.ts secret warp sets poleLockT = 0.4 so a second physics tick cannot re-fire.
+var _warp_lock := 0.0
 var _message := ""
 var _message_t := 0.0
 var _hint: Label
@@ -205,6 +209,7 @@ func _build_world() -> void:
 		"crate": _stone_mat(COL_WOOD, 0.86),
 		"crumble": _stone_mat(COL_STONE_WET, 0.72),
 		"spike": _flat(COL_SPIKE),
+		"spike_edge": _flat(COL_SPIKE_EDGE),
 		"laser": _mat(COL_LASER, 0.4, true),
 		"moss": _mat(COL_MOSS, 0.9),
 		"root": _mat(COL_ROOT, 0.9),
@@ -243,7 +248,7 @@ func _build_world() -> void:
 	for raw_h in _layout["hazards"]:
 		var h: Dictionary = raw_h
 		if String(h["kind"]) == "spikes":
-			_add_spikes(visual, h, _tool(stamps, "spike"))
+			_add_spikes(visual, h, _tool(stamps, "spike"), _tool(stamps, "spike_edge"))
 		else:
 			var beam := Node3D.new()
 			beam.name = String(h["id"])
@@ -264,10 +269,12 @@ func _build_world() -> void:
 		var sphere := SphereMesh.new()
 		sphere.radius = 0.22
 		sphere.height = 0.44
-		sphere.radial_segments = 8
-		sphere.rings = 4
+		sphere.radial_segments = 10
+		sphere.rings = 6
 		bean.mesh = sphere
-		bean.scale = Vector3(0.72, 1.15, 0.62)
+		# 2D fallback ellipse is radius 8×11 px (16×22). At 24 px/m that is
+		# 0.667×0.917 m, face-on to the +Z camera. Pickup radius stays 28 px.
+		bean.scale = Vector3(1.515, 2.084, 0.36)
 		bean.position = center
 		bean.material_override = bean_mat
 		visual.add_child(bean)
@@ -384,15 +391,14 @@ func _push_fade() -> void:
 		(mat as ShaderMaterial).set_shader_parameter("maya_pos", mid)
 
 
-func _stamp_wedge(st: SurfaceTool, x: float, w: float, bottom: float, h: float) -> void:
-	# Pale triangle, thin in Z. Gameplay still uses the hazard AABB.
-	var z := 0.08
-	var bl := Vector3(x, bottom, z)
-	var br := Vector3(x + w, bottom, z)
-	var ap := Vector3(x + w * 0.5, bottom + h, z)
-	var bl2 := Vector3(x, bottom, -z)
-	var br2 := Vector3(x + w, bottom, -z)
-	var ap2 := Vector3(x + w * 0.5, bottom + h, -z)
+func _stamp_wedge(st: SurfaceTool, x: float, w: float, bottom: float, h: float, z_near: float, z_far: float) -> void:
+	# Triangle prism. z_near is toward the camera (+Z). Gameplay uses the hazard AABB.
+	var bl := Vector3(x, bottom, z_near)
+	var br := Vector3(x + w, bottom, z_near)
+	var ap := Vector3(x + w * 0.5, bottom + h, z_near)
+	var bl2 := Vector3(x, bottom, z_far)
+	var br2 := Vector3(x + w, bottom, z_far)
+	var ap2 := Vector3(x + w * 0.5, bottom + h, z_far)
 	_tri(st, bl, br, ap)
 	_tri(st, bl2, ap2, br2)
 	_tri(st, bl, ap, bl2)
@@ -423,29 +429,36 @@ func _stamp_bevel(st: SurfaceTool, c: Vector3, s: Vector3) -> void:
 	_stamp_box(st, bc, bs)
 
 
+func _laser_mat(color: Color, alpha: float) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	var shader := Shader.new()
+	shader.code = "shader_type spatial;\nrender_mode blend_mix, unshaded, fog_disabled, cull_disabled, depth_draw_opaque;\nuniform vec4 albedo : source_color = vec4(1.0);\nuniform float alpha = 1.0;\nvoid fragment() {\n\tALBEDO = albedo.rgb;\n\tALPHA = alpha;\n}\n"
+	mat.shader = shader
+	mat.set_shader_parameter("albedo", color)
+	mat.set_shader_parameter("alpha", alpha)
+	return mat
+
+
 func _thin_laser(mesh: MeshInstance3D) -> void:
+	# Visual matches the hurt AABB on the thin axis (10 px = 0.4167 m) so the
+	# lethal strip is the strip you see. Core is 0.3 of that width (0.125 m).
 	var box := mesh.mesh as BoxMesh
 	var sz := box.size
-	sz.x = 0.16
-	sz.z = 0.05
+	var vertical := sz.y >= sz.x
+	sz.z = 0.08
 	box.size = sz
-	var red := StandardMaterial3D.new()
-	red.albedo_color = COL_LASER
-	red.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mesh.material_override = red
+	mesh.material_override = _laser_mat(COL_LASER, 0.88)
 	var core := MeshInstance3D.new()
 	core.name = "Core"
 	var core_box := BoxMesh.new()
-	core_box.size = Vector3(0.048, sz.y, 0.06)
+	core_box.size = Vector3(0.125, sz.y, 0.1) if vertical else Vector3(sz.x, 0.125, 0.1)
 	core.mesh = core_box
-	var core_mat := StandardMaterial3D.new()
-	core_mat.albedo_color = COL_LASER_CORE
-	core_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	core.material_override = core_mat
+	core.position = Vector3(0.0, 0.0, 0.03)
+	core.material_override = _laser_mat(COL_LASER_CORE, 0.95)
 	mesh.add_child(core)
 
 
-func _add_spikes(_visual: Node3D, h: Dictionary, st: SurfaceTool) -> void:
+func _add_spikes(_visual: Node3D, h: Dictionary, st: SurfaceTool, edge: SurfaceTool) -> void:
 	var px: Dictionary = h["px"]
 	var tooth := 16.0
 	var n := maxi(1, int(round(float(px["w"]) / tooth)))
@@ -454,8 +467,13 @@ func _add_spikes(_visual: Node3D, h: Dictionary, st: SurfaceTool) -> void:
 	var size: Array = h["size_m"]
 	var origin_x := float(center[0]) - float(size[0]) * 0.5
 	var bottom := float(center[1]) - float(size[1]) * 0.5
+	var height := float(size[1])
+	var grow := 0.045
 	for i in n:
-		_stamp_wedge(st, origin_x + float(i) * bw * PX, bw * PX, bottom, float(size[1]))
+		var x := origin_x + float(i) * bw * PX
+		var w := bw * PX
+		_stamp_wedge(edge, x - grow, w + grow * 2.0, bottom, height + grow, 0.05, -0.02)
+		_stamp_wedge(st, x, w, bottom, height, 0.12, 0.055)
 
 
 func _vec(a: Array) -> Vector3:
@@ -564,15 +582,15 @@ func _add_lip(host: Node3D, size: Vector3, mat: Material) -> void:
 	host.add_child(mesh)
 
 
-func _bean_mat() -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = COL_BEAN
-	mat.roughness = 0.42
-	mat.metallic = 0.04
-	mat.metallic_specular = 0.35
-	mat.emission_enabled = true
-	mat.emission = Color("c46a3a")
-	mat.emission_energy_multiplier = 0.8
+func _bean_mat() -> ShaderMaterial:
+	# Flat oval facing the camera. Fog would crush #8B4A2B; a small warm mix
+	# is the slight emission, and the pickup radius stays 28 px.
+	var mat := ShaderMaterial.new()
+	var shader := Shader.new()
+	shader.code = "shader_type spatial;\nrender_mode unshaded, fog_disabled, cull_back;\nuniform vec4 albedo : source_color = vec4(0.545, 0.290, 0.169, 1.0);\nuniform vec4 warm : source_color = vec4(0.769, 0.416, 0.227, 1.0);\nvoid fragment() {\n\tALBEDO = mix(albedo.rgb, warm.rgb, 0.16);\n}\n"
+	mat.shader = shader
+	mat.set_shader_parameter("albedo", COL_BEAN)
+	mat.set_shader_parameter("warm", Color("c46a3a"))
 	return mat
 
 
@@ -636,12 +654,26 @@ func _dress_pit(visual: Node3D, mats: Dictionary) -> void:
 	beam.position = Vector3(17.35, 0.45, 0.0)
 	beam.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
 	beam.light_color = Color("8fce86")
-	beam.light_energy = 2.2
-	beam.spot_range = 6.5
-	beam.spot_angle = 18.0
-	beam.spot_attenuation = 0.8
+	beam.light_energy = 3.1
+	beam.spot_range = 7.2
+	beam.spot_angle = 26.0
+	beam.spot_attenuation = 0.7
 	beam.shadow_enabled = false
 	visual.add_child(beam)
+	# Lit green behind the gap, between the vines. Behind Maya (z < 0).
+	var backdrop := MeshInstance3D.new()
+	backdrop.name = "PitBackdrop"
+	var back_mesh := QuadMesh.new()
+	back_mesh.size = Vector2(2.35, 6.4)
+	backdrop.mesh = back_mesh
+	backdrop.position = Vector3(17.35, 3.55, -0.9)
+	var back_mat := StandardMaterial3D.new()
+	back_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	back_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	back_mat.albedo_color = Color(0.42, 0.62, 0.34, 0.78)
+	back_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	backdrop.material_override = back_mat
+	visual.add_child(backdrop)
 	_add_mist(visual)
 	_add_dust(visual, Vector3(17.35, 2.2, 0.2), Color(0.75, 0.9, 0.62, 0.35))
 	_add_silhouettes(visual)
@@ -811,6 +843,7 @@ func _tick_play(delta: float) -> void:
 		return
 	_invuln = maxf(0.0, _invuln - delta)
 	_pole_lock = maxf(0.0, _pole_lock - delta)
+	_warp_lock = maxf(0.0, _warp_lock - delta)
 	_hazards_touch()
 	if _status != "playing":
 		return
@@ -904,7 +937,11 @@ func _touch_poles() -> void:
 		if not press or _status == "warp":
 			continue
 		if ready:
-			_pole_lock = 0.35
+			# poleLockT 0.4 blocks the same press from firing on the next tick.
+			if _warp_lock > 0.0:
+				continue
+			_warp_lock = 0.4
+			_pole_lock = 0.4
 			_begin_warp(secret)
 			continue
 		pole["active"] = true
@@ -1176,6 +1213,21 @@ func _log_framing(shot: String) -> void:
 		shot, _player.camera_offset, fov, vis_h, absf(top.y - bot.y), absf(right.x - left.x),
 		vp.x, vp.y, absf(feet.y - head.y)
 	])
+	for c in _coins:
+		var mesh := c["mesh"] as MeshInstance3D
+		var center := mesh.global_position
+		var half := Vector2(0.22 * mesh.scale.x, 0.22 * mesh.scale.y)
+		var p0 := cam.unproject_position(center + Vector3(-half.x, 0.0, 0.0))
+		var p1 := cam.unproject_position(center + Vector3(half.x, 0.0, 0.0))
+		var p2 := cam.unproject_position(center + Vector3(0.0, half.y, 0.0))
+		var p3 := cam.unproject_position(center + Vector3(0.0, -half.y, 0.0))
+		var bw := absf(p1.x - p0.x)
+		var bh := absf(p3.y - p2.y)
+		var mid := Vector2((p0.x + p1.x) * 0.5, (p2.y + p3.y) * 0.5)
+		if mid.x < 8.0 or mid.y < 8.0 or mid.x > vp.x - 8.0 or mid.y > vp.y - 8.0:
+			continue
+		print("RUINAS_BEAN shot=%s id=%s px=%.1fx%.1f at=(%.0f,%.0f)" % [shot, c["id"], bw, bh, mid.x, mid.y])
+		break
 
 
 func _write_perf(out: String, shot: String, _with_player := true) -> void:
