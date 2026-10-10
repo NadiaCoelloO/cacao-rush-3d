@@ -117,8 +117,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 	_build_fog()
 	_build_probe()
 	if ResourceLoader.exists(HP_CANOPY_LOD0):
-		_build_distant_selva(pilot)
-		_build_fg_curtains(pilot)
+		_build_side_follow_art(pilot)
 		_build_wet_earth_edge(pilot)
 	if _hp_ok:
 		var hp: Node = HP001_SCRIPT.new()
@@ -185,9 +184,13 @@ func capture_still(shot: String, out_path: String) -> void:
 	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
 	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
 	if shot != "gameplay":
-		var geo: Node = get_parent().get_node_or_null("WorldRoot/Selva1Geo")
-		if geo:
-			geo.visible = false
+		for path in [
+			"WorldRoot/Selva1Geo",
+			"WorldRoot/HP001_CorridorBank",
+		]:
+			var geo: Node = get_parent().get_node_or_null(path)
+			if geo:
+				geo.visible = false
 	var hud := get_parent().get_node_or_null("UI")
 	if hud:
 		hud.visible = false
@@ -1017,11 +1020,14 @@ func _scissor_card(tex: Texture2D, tint: Color, cutoff: float) -> StandardMateri
 
 
 func _add_card(parent: Node, card_name: String, pos: Vector3, size: Vector2, eul: Vector3, mat: Material) -> MeshInstance3D:
-	var plane := PlaneMesh.new()
-	plane.size = size
+	# QuadMesh lives in XY and faces +Z. Camera looks down local −Z, so a child
+	# at z<0 with identity rotation faces the lens. PlaneMesh is XZ / +Y and
+	# was invisible in the 40×22.5 side camera.
+	var quad := QuadMesh.new()
+	quad.size = size
 	var mi := MeshInstance3D.new()
 	mi.name = card_name
-	mi.mesh = plane
+	mi.mesh = quad
 	mi.material_override = mat
 	mi.position = pos
 	mi.rotation = eul
@@ -1031,42 +1037,59 @@ func _add_card(parent: Node, card_name: String, pos: Vector3, size: Vector2, eul
 	return mi
 
 
-func _build_distant_selva(pilot: Node3D) -> void:
-	# Flat várzea: 3 receding treeline strips + aerial haze. No hills, no falls.
-	var root := Node3D.new()
-	root.name = "HP001_DistantSelva"
-	pilot.add_child(root)
+func _cloud_card_mat() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
+uniform sampler2D sky : source_color;
+uniform vec4 tint : source_color = vec4(1.0);
+void fragment() {
+	vec2 uv = vec2(fract(UV.x * 1.35 + 0.08), mix(0.46, 0.03, UV.y));
+	ALBEDO = texture(sky, uv).rgb * tint.rgb;
+}
+"""
+	mat.shader = sh
+	if ResourceLoader.exists(HP_SKY_TEX):
+		mat.set_shader_parameter("sky", load(HP_SKY_TEX))
+	elif ResourceLoader.exists("res://textures/hp001_jungle_sky_2d.jpg"):
+		mat.set_shader_parameter("sky", load("res://textures/hp001_jungle_sky_2d.jpg"))
+	mat.set_shader_parameter("tint", Color(1.02, 0.98, 0.90))
+	return mat
+
+
+func _build_side_follow_art(pilot: Node3D) -> void:
+	# Locked to the follow cam so every gameplay still (entrance / hazard /
+	# cacao) shows cumulus + two low jungle strips + left-edge lianas.
+	# Cards sit in camera space: play plane is local z ≈ −24.1; behind it is
+	# z < −24. No collision. Flat várzea — no hills, no waterfalls.
+	var cam: Node = pilot.get_node_or_null("PlayerMaya/Camera3D")
+	if cam == null:
+		return
+	var hold := Node3D.new()
+	hold.name = "HP001_SideFollow"
+	cam.add_child(hold)
+	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 7.2, -44.0), Vector2(84.0, 28.0), Vector3.ZERO, _cloud_card_mat())
 	if ResourceLoader.exists(HP_SIL_TEX):
 		var tex: Texture2D = load(HP_SIL_TEX)
-		var strips := [
-			{"pos": Vector3(0.0, 4.1, -48.0), "size": Vector2(130.0, 9.0), "tint": Color(0.16, 0.20, 0.11), "yaw": 0.0},
-			{"pos": Vector3(-6.0, 4.6, -70.0), "size": Vector2(160.0, 8.2), "tint": Color(0.28, 0.32, 0.22), "yaw": 4.0},
-			{"pos": Vector3(4.0, 5.0, -96.0), "size": Vector2(190.0, 7.4), "tint": Color(0.42, 0.44, 0.36), "yaw": -3.0},
-		]
-		for i in strips.size():
-			var spec: Dictionary = strips[i]
-			var mat := _scissor_card(tex, spec["tint"], 0.35)
-			_add_card(root, "HP001_SelvaSil_%02d" % i, spec["pos"], spec["size"], Vector3(0.0, deg_to_rad(spec["yaw"]), 0.0), mat)
-	# Extra strip pair on +Z so gameplay looking −Z still has a far bank.
-	if ResourceLoader.exists(HP_SIL_TEX):
-		var tex2: Texture2D = load(HP_SIL_TEX)
-		var mat_b := _scissor_card(tex2, Color(0.22, 0.26, 0.16), 0.35)
-		_add_card(root, "HP001_SelvaSil_back", Vector3(0.0, 4.4, 36.0), Vector2(110.0, 8.0), Vector3(0.0, PI, 0.0), mat_b)
-
-
-func _build_fg_curtains(pilot: Node3D) -> void:
-	if not ResourceLoader.exists(HP_LIANA_TEX):
-		return
-	var tex: Texture2D = load(HP_LIANA_TEX)
-	var mat := _scissor_card(tex, Color(0.85, 0.92, 0.70), 0.28)
-	# Parent to the follow cam: stays in the top/side of the gameplay frame,
-	# outside the walkable strip, no collision.
-	var cam: Node = pilot.get_node_or_null("PlayerMaya/Camera3D")
-	if cam:
-		_add_card(cam, "HP001_FG_Liana_L", Vector3(-1.62, 1.22, -2.28), Vector2(2.35, 3.15), Vector3(deg_to_rad(10.0), deg_to_rad(16.0), deg_to_rad(-4.0)), mat)
-		_add_card(cam, "HP001_FG_Liana_R", Vector3(1.95, 1.38, -2.50), Vector2(1.70, 2.45), Vector3(deg_to_rad(8.0), deg_to_rad(-22.0), deg_to_rad(6.0)), mat)
-	# Laguna still: one curtain near Cam_Laguna, upper-left, over the water.
-	_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), mat)
+		# Nearer strip: darker, just behind the play plane.
+		var near_mat := _scissor_card(tex, Color(0.14, 0.18, 0.10), 0.32)
+		near_mat.albedo_color = Color(0.14, 0.18, 0.10)
+		_add_card(hold, "HP001_SelvaSil_near", Vector3(0.0, -1.15, -33.0), Vector2(74.0, 8.4), Vector3.ZERO, near_mat)
+		# Farther strip: lighter / hazy.
+		var far_mat := _scissor_card(tex, Color(0.38, 0.40, 0.32), 0.32)
+		_add_card(hold, "HP001_SelvaSil_far", Vector3(2.5, -0.35, -52.0), Vector2(92.0, 10.0), Vector3.ZERO, far_mat)
+	if ResourceLoader.exists(HP_LIANA_TEX):
+		var liana: Texture2D = load(HP_LIANA_TEX)
+		var lmat := _scissor_card(liana, Color(0.78, 0.86, 0.62), 0.22)
+		# Left edge of the 40×22.5 frame, like the 2D vine. Outside the
+		# 0.7 m hitbox and the walkable strip (Maya stays center-frame).
+		_add_card(hold, "HP001_FG_Liana_L", Vector3(-2.28, 0.72, -3.15), Vector2(1.55, 2.55), Vector3(deg_to_rad(4.0), deg_to_rad(8.0), deg_to_rad(-3.0)), lmat)
+		_add_card(hold, "HP001_FG_Liana_L2", Vector3(-2.55, 1.05, -3.55), Vector2(1.15, 1.85), Vector3(deg_to_rad(6.0), deg_to_rad(12.0), deg_to_rad(4.0)), lmat)
+	# Laguna still keeps a world-space curtain over the water (art camera).
+	if ResourceLoader.exists(HP_LIANA_TEX):
+		var lmat2 := _scissor_card(load(HP_LIANA_TEX), Color(0.78, 0.86, 0.62), 0.22)
+		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
 
 
 func _build_wet_earth_edge(pilot: Node3D) -> void:

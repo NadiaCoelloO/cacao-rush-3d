@@ -58,7 +58,8 @@ def main():
     rows = [
         pair(
             sky_card(),
-            load(DOCS / "HP001_E2c_engine_cmp_bg.png") if (DOCS / "HP001_E2c_engine_cmp_bg.png").exists()
+            load(DOCS / "HP001_E2d_engine_cmp_bg.png") if (DOCS / "HP001_E2d_engine_cmp_bg.png").exists()
+            else load(DOCS / "HP001_E2c_engine_cmp_bg.png") if (DOCS / "HP001_E2c_engine_cmp_bg.png").exists()
             else load(DOCS / "HP001_E2b_engine_cmp_bg.png"),
             "2D  ·  jungle-sky (nube, Cuyabeno plano)",
             "3D  ·  cielo + silueta plana (misma cámara de fondo)",

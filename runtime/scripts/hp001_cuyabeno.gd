@@ -94,9 +94,10 @@ func wire(pilot: Node3D) -> bool:
 	_wire_trunks(pilot)
 	_wire_canopy(pilot)
 	_wire_hanging(pilot)
+	_wire_corridor_bank(pilot)
 	_wire_dock(pilot)
 	_wire_groundcover(pilot)
-	print("HP001 wired totem + trunks + canopy v2 + dock + groundcover")
+	print("HP001 wired totem + trunks + canopy v2 + dock + groundcover + corridor")
 	return true
 
 
@@ -320,6 +321,8 @@ func _wire_hanging(pilot: Node3D) -> void:
 	for t in _load_trees():
 		if typeof(t) != TYPE_DICTIONARY:
 			continue
+		if String(t.get("kind", "")) == "corridor":
+			continue
 		if rng.randf() > 0.55:
 			continue
 		var variant := String(t.get("variant", "Medium"))
@@ -371,6 +374,180 @@ func _wire_hanging(pilot: Node3D) -> void:
 		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		root.add_child(mmi)
 	print("HP001 hanging strands: ", xforms.size())
+
+
+func _corridor_xforms() -> Array:
+	# Background bank behind the play plane (z < 0) along the full 200 m strip.
+	# Visual only. Camera sits at +Z, so these sit behind the platforms.
+	var out: Array = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261012
+	var x := 8.0
+	while x < 202.0:
+		for row in [[-8.4, 0.88], [-13.2, 1.02], [-18.6, 1.12]]:
+			if rng.randf() < 0.20:
+				continue
+			var z: float = float(row[0]) + rng.randf_range(-1.3, 1.3)
+			var s: float = float(row[1]) * rng.randf_range(0.82, 1.16)
+			var yaw := rng.randf() * TAU
+			var variant: String = VARIANTS[rng.randi_range(0, 2)]
+			var basis := Basis(Vector3.UP, yaw).scaled(Vector3(s, s, s))
+			var origin := Vector3(x + rng.randf_range(-2.2, 2.2), -0.22, z)
+			out.append({"variant": variant, "xf": Transform3D(basis, origin)})
+		x += rng.randf_range(8.2, 11.0)
+	return out
+
+
+func _wire_corridor_bank(pilot: Node3D) -> void:
+	var xforms: Array = _corridor_xforms()
+	if xforms.is_empty():
+		return
+	var world: Node3D = pilot.get_node_or_null("WorldRoot")
+	var root := Node3D.new()
+	root.name = "HP001_CorridorBank"
+	if world:
+		world.add_child(root)
+	else:
+		add_child(root)
+	var trunk_kit := _load_trunk_kit()
+	var tmeshes: Dictionary = trunk_kit["meshes"]
+	var bark: BaseMaterial3D = trunk_kit["bark"]
+	var grouped: Dictionary = {}
+	for rec in xforms:
+		var variant: String = rec["variant"]
+		var xf: Transform3D = rec["xf"]
+		var key := _cluster_key(xf.origin)
+		if not grouped.has(variant):
+			grouped[variant] = {}
+		var cells: Dictionary = grouped[variant]
+		if not cells.has(key):
+			cells[key] = []
+		(cells[key] as Array).append(xf)
+	var trunk_n := 0
+	var mm_count := 0
+	for variant in VARIANTS:
+		if not grouped.has(variant):
+			continue
+		var cells: Dictionary = grouped[variant]
+		for key in cells.keys():
+			var cell_xf: Array = cells[key]
+			var centroid := Vector3.ZERO
+			for xf in cell_xf:
+				centroid += (xf as Transform3D).origin
+			centroid /= float(cell_xf.size())
+			var cluster_mmis: Array[MultiMeshInstance3D] = []
+			var shared_aabb := AABB()
+			var have_aabb := false
+			for lod in 3:
+				var mesh_key := "%s_%d" % [variant, lod]
+				if not tmeshes.has(mesh_key):
+					continue
+				var mm := MultiMesh.new()
+				mm.transform_format = MultiMesh.TRANSFORM_3D
+				mm.mesh = tmeshes[mesh_key]
+				mm.instance_count = cell_xf.size()
+				for i in cell_xf.size():
+					var world_xf: Transform3D = cell_xf[i]
+					var local := Transform3D(world_xf.basis, world_xf.origin - centroid)
+					mm.set_instance_transform(i, local)
+					if lod == 0:
+						var inst_aabb := _xform_aabb(local, mm.mesh.get_aabb())
+						if not have_aabb:
+							shared_aabb = inst_aabb
+							have_aabb = true
+						else:
+							shared_aabb = shared_aabb.merge(inst_aabb)
+				var mmi := MultiMeshInstance3D.new()
+				mmi.name = "HP001_Corridor_%s_LOD%d_%d_%d" % [variant, lod, key.x, key.y]
+				mmi.multimesh = mm
+				mmi.position = centroid
+				if bark:
+					mmi.material_override = bark
+				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+				_apply_lod_range(mmi, LOD_BEGIN[lod], LOD_END[lod], LOD_MARGIN)
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				root.add_child(mmi)
+				cluster_mmis.append(mmi)
+				mm_count += 1
+			if have_aabb:
+				for mmi in cluster_mmis:
+					mmi.custom_aabb = shared_aabb
+			trunk_n += cell_xf.size()
+	var canopy_kit := _load_named_kit(CANOPY, ["Small", "Medium", "Large"], "Canopy_Clump_%s_LOD%d", "M_Canopy_HP")
+	var cmeshes: Dictionary = canopy_kit["meshes"]
+	var cmat: BaseMaterial3D = canopy_kit["mat"]
+	if cmat:
+		_harden_mat(cmat, 0.5, true)
+		cmat.albedo_color = Color(0.86, 0.96, 0.72)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261013
+	var crowns: Array = []
+	for rec in xforms:
+		var variant: String = rec["variant"]
+		if not CANOPY_KIND.has(variant):
+			continue
+		var xf: Transform3D = rec["xf"]
+		var off: Vector3 = CANOPY_LOCAL_OFF[variant]
+		off.y *= rng.randf_range(0.88, 1.10)
+		var origin: Vector3 = xf * off
+		var basis := Basis(Vector3.UP, rng.randf() * TAU) * xf.basis
+		crowns.append({"kind": String(CANOPY_KIND[variant]), "xf": Transform3D(basis, origin)})
+	var crown_n := 0
+	for kind in ["Small", "Medium", "Large"]:
+		var by_cell: Dictionary = {}
+		for p in crowns:
+			if String(p["kind"]) != kind:
+				continue
+			var xf: Transform3D = p["xf"]
+			var key := _cluster_key(xf.origin)
+			if not by_cell.has(key):
+				by_cell[key] = []
+			(by_cell[key] as Array).append(xf)
+		for key in by_cell.keys():
+			var cell_xf: Array = by_cell[key]
+			var centroid := Vector3.ZERO
+			for xf in cell_xf:
+				centroid += (xf as Transform3D).origin
+			centroid /= float(cell_xf.size())
+			var cluster_mmis: Array[MultiMeshInstance3D] = []
+			var shared_aabb := AABB()
+			var have_aabb := false
+			for lod in 3:
+				var mesh_key := "%s_%d" % [kind, lod]
+				if not cmeshes.has(mesh_key):
+					continue
+				var mm := MultiMesh.new()
+				mm.transform_format = MultiMesh.TRANSFORM_3D
+				mm.mesh = cmeshes[mesh_key]
+				mm.instance_count = cell_xf.size()
+				for i in cell_xf.size():
+					var world_xf: Transform3D = cell_xf[i]
+					var local := Transform3D(world_xf.basis, world_xf.origin - centroid)
+					mm.set_instance_transform(i, local)
+					if lod == 0:
+						var inst_aabb := _xform_aabb(local, mm.mesh.get_aabb())
+						if not have_aabb:
+							shared_aabb = inst_aabb
+							have_aabb = true
+						else:
+							shared_aabb = shared_aabb.merge(inst_aabb)
+				var mmi := MultiMeshInstance3D.new()
+				mmi.name = "HP001_CorridorCanopy_%s_LOD%d_%d_%d" % [kind, lod, key.x, key.y]
+				mmi.multimesh = mm
+				mmi.position = centroid
+				if cmat:
+					mmi.material_override = cmat
+				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+				_apply_lod_range(mmi, CANOPY_LOD_BEGIN[lod], CANOPY_LOD_END[lod], CANOPY_LOD_MARGIN)
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				root.add_child(mmi)
+				cluster_mmis.append(mmi)
+				mm_count += 1
+			if have_aabb:
+				for mmi in cluster_mmis:
+					mmi.custom_aabb = shared_aabb
+			crown_n += cell_xf.size()
+	print("HP001 corridor bank: ", trunk_n, " trunks, ", crown_n, " crowns, ", mm_count, " MultiMeshes")
 
 
 func _canopy_placements() -> Array:

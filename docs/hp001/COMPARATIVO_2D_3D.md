@@ -150,9 +150,9 @@ P01 / P07 / P10 / P16 son one-way reales (drop-through), no una caja sólida. P0
 
 En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. En 3D el mantle sigue viendo el mask de colisión; sacarlos exige tocar `player_maya.gd`. No se tocó.
 
-## Look (E2c)
+## Look (E2d)
 
-Cielo: `hp001_cuyabeno_sky_2k.png` (cúmulos, sin cerros). Tres tiras planas `hp001_selva_silhouette.png`. Suelo de gameplay: tierra húmeda `#332416` + labio mojado. Copas oliva. 1–2 cortinas de liana (`hp001_fg_liana.png`) en la cámara, sin colisión. ≥1 flor de lirio en la laguna. Las texturas de cielo y fondo están en `LOOK-001_manifest.json`.
+La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos (`hp001_cuyabeno_sky_2k`, solo el tercio de nubes) y **2 franjas** de selva lejana con bruma (`hp001_selva_silhouette`), detrás del carril. Lianas de primer plano en el borde izquierdo del cuadro (`hp001_fg_liana`), fuera del hitbox. Copas y troncos de fondo (MultiMesh + LOD) a lo largo de todo selva-1, z < 0. QuadMesh vertical: el `PlaneMesh` XZ no se veía de lado. Sin cerros ni cascadas. `player_maya.gd` no se tocó.
 
 ## Checks
 
