@@ -151,8 +151,8 @@ def measure(path: Path, region=None) -> dict:
 
 def main() -> int:
     shots = [
-        (DOCS / "3d_entrance.png", (40, 240, 420, 520)),
-        (DOCS / "3d_hazard.png", (480, 200, 820, 500)),
+        (DOCS / "3d_entrance.png", (40, 280, 220, 420)),
+        (DOCS / "3d_hazard.png", (500, 300, 680, 430)),
     ]
     report = []
     for path, region in shots:

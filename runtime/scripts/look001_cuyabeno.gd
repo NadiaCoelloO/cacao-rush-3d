@@ -436,7 +436,7 @@ void fragment() {
 }
 """
 	mat.shader = sh
-	mat.set_shader_parameter("albedo", Color(0.07, 0.045, 0.028))
+	mat.set_shader_parameter("albedo", Color(0.035, 0.022, 0.012))
 	mat.set_shader_parameter("grow", grow)
 	return mat
 
@@ -1221,10 +1221,10 @@ func _maya_body_vignette_mat() -> ShaderMaterial:
 	sh.code = """shader_type spatial;
 render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 void fragment() {
-	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(0.92, 1.05);
+	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(1.05, 1.15);
 	float r = length(d);
-	float a = pow(clamp(1.0 - r * 0.98, 0.0, 1.0), 0.70);
-	ALBEDO = vec3(0.045, 0.030, 0.016);
+	float a = pow(clamp(1.0 - r * 1.25, 0.0, 1.0), 0.60);
+	ALBEDO = vec3(0.040, 0.026, 0.014);
 	ALPHA = a;
 }
 """
@@ -1283,8 +1283,10 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	if liana_tex:
 		var lmat2 := _liana_tex_mat(liana_tex, Color(0.42, 0.36, 0.18))
 		_add_card(pilot, "HP001_FG_Liana_Laguna", Vector3(15.15, 4.35, -16.55), Vector2(3.4, 4.6), Vector3(deg_to_rad(6.0), deg_to_rad(-22.0), 0.0), lmat2)
-	# Look-ahead is +2 m, so Maya sits near camera x ≈ −2, not the lens center.
-	_add_card(hold, "HP001_MayaVignette", Vector3(-2.05, -0.12, -25.35), Vector2(3.10, 3.80), Vector3.ZERO, _maya_body_vignette_mat())
+	# Parent to Maya so level-edge cam clamp (entrance x=20) cannot miss her.
+	var player: Node3D = pilot.get_node_or_null("PlayerMaya") as Node3D
+	if player:
+		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.92, -0.90), Vector2(2.60, 3.20), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
