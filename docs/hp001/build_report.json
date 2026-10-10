@@ -834,8 +834,8 @@
    "dock": "PASA",
    "fern": "PASA",
    "cacao_leaves": "PASA",
-   "canopy_e2": "NO PASA — not imported; LOOK dosel kept",
-   "water_lily": "NO PASA — mesh in GLB, never instanced"
+   "canopy_e2": "NO PASA \u2014 not imported; LOOK dosel kept",
+   "water_lily": "NO PASA \u2014 mesh in GLB, never instanced"
   },
   "deck_align_m": {
    "deck_top_local": 0.4011,
@@ -950,5 +950,87 @@
   },
   "maya_feel_check": "54/54 PASS",
   "lod_hole_check": "PASS"
+ },
+ "e2b": {
+  "pass": "E2b",
+  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 \u2192 Cacao.Game jungle-sky.jpg.",
+  "bundle_sha256_ok": true,
+  "canopy_instances": 36,
+  "canopy_multimeshes": 69,
+  "trunk_instances": 22,
+  "groundcover_instances": 38,
+  "lily_flower_enabled": true,
+  "lily_flower_ratio": 0.22,
+  "dock_deck_delta_m": 0.0,
+  "dock_deck_top_local_m": 0.3889,
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS (canopy + totem + trunks + dock + gc)",
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 100207,
+    "draw_calls": 144
+   },
+   "laguna": {
+    "primitives": 96066,
+    "draw_calls": 136
+   },
+   "dosel": {
+    "primitives": 225277,
+    "draw_calls": 190
+   },
+   "dock": {
+    "primitives": 70305,
+    "draw_calls": 93
+   },
+   "pods": {
+    "primitives": 75216,
+    "draw_calls": 77
+   },
+   "cmp_bg": {
+    "primitives": 93300,
+    "draw_calls": 61
+   }
+  },
+  "uhd_vram_mb": 147,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "glb_sha256": {
+   "canopy_cuyabeno_hp_LOD0.glb": "0efc525f248bb9edc2a062fa739a443aac8b643a148a743a44af6e13a04fa415",
+   "canopy_cuyabeno_hp_LOD1.glb": "8ea1e5004852bca394f6c7993e5dfc05cbfc9913f2ec0bcc23b7f319a6866d4d",
+   "canopy_cuyabeno_hp_LOD2.glb": "597aa8548c78f8c012b75efa5c0b1fb5625dbdef63617fd9a83e17d6fae450b2",
+   "dock_cuyabeno_hp_LOD0.glb": "b4cc5132aa0350363d113237b663f1605658ef81118de0d1cd1c6f14ffda2325",
+   "dock_cuyabeno_hp_LOD1.glb": "89eb8c282810a5cf51404b463baed44a47faf9e31c51369e004bc44f8fc55a90",
+   "dock_cuyabeno_hp_LOD2.glb": "37ba8d4dd094805808a8f305b3ab0d366c248a023457d088551ff2dd8a5e0602",
+   "groundcover_cuyabeno_LOD0.glb": "a11a1444d4a75a8814e09b5850d39c4c56d3983cef925238802f2c9deef4714a",
+   "groundcover_cuyabeno_LOD1.glb": "01f7770db9d26aedbbaa6aa05e5d5d68008d9201ac19d3066b478a10e3ab3889"
+  },
+  "captures": {
+   "HP001_E2b_engine_gameplay.png": "90a213d23381042118d1da703eaab6a921c52dc71e7d5a47809ccd5a8823adc9",
+   "HP001_E2b_engine_laguna.png": "a76135749210bfb939de92c12b010f07383b0d36f2d059a4616ac3ce025ddccb",
+   "HP001_E2b_engine_dosel.png": "8374530fb271c1ab13f4f4547f3b01eca33aef927e72e1f25c25eab04f5f38ad",
+   "HP001_E2b_engine_dock_closeup.png": "1e34357dd1c5e98518af49a312f05e01fd829c9df4783e737ac352dc1005a2fd",
+   "HP001_E2b_engine_totem_pods_v4.png": "c394d674b8ce71e388a104ebc5dffdab4507ea0e4df38f1259ef171df0344b56",
+   "HP001_E2b_engine_cmp_bg.png": "12b52cee969852dc8ae961c229f554077d0e9242db94ef6bcfaf94611b49fa2f",
+   "cmp_cuyabeno_2d_3d.png": "c9a3a041e8f329f2054a540fe182123218712e5ad2f4b59de0caaf207b79dba7"
+  },
+  "light": {
+   "sun_elevation_deg": 18,
+   "sun_azimuth_deg": 160,
+   "sun_color": [
+    1.0,
+    0.78,
+    0.45
+   ],
+   "sun_energy": 1.45,
+   "vol_fog_density": 0.0016,
+   "vol_fog_length": 80,
+   "vol_fog_albedo": "f0d49a",
+   "maya_follow_cull_mask": 2,
+   "sdfgi": false
+  },
+  "2d_source": "https://raw.githubusercontent.com/NadiaCoelloO/Cacao.Game/main/public/game/maps/jungle-sky.jpg",
+  "2d_source_note": "sand-vivid-dawn-sail @ 5fd45031 returned 404; Cacao.Game main used (identical jungle-sky)."
  }
 }

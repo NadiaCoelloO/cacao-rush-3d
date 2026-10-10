@@ -234,7 +234,7 @@ func _wire_canopy(pilot: Node3D) -> void:
 	if mat:
 		_harden_mat(mat, 0.5, true)
 		# Leaf grade toward sunlit yellow-green (README sat↑ hue− val↑), not olive.
-		mat.albedo_color = Color(1.18, 1.22, 0.78)
+		mat.albedo_color = Color(1.10, 1.16, 0.80)
 	var placements := _canopy_placements()
 	var world: Node3D = pilot.get_node_or_null("WorldRoot")
 	var root := Node3D.new()
@@ -339,6 +339,14 @@ func _canopy_placements() -> Array:
 		{"kind": "Small", "origin": Vector3(-6.2, 14.8, 3.6)},
 		{"kind": "Medium", "origin": Vector3(8.4, 15.6, -12.4)},
 		{"kind": "Large", "origin": Vector3(-4.8, 17.0, -14.2)},
+		{"kind": "Large", "origin": Vector3(-12.0, 16.2, -20.0)},
+		{"kind": "Medium", "origin": Vector3(14.2, 15.6, -18.5)},
+		{"kind": "Large", "origin": Vector3(0.4, 17.4, -24.0)},
+		{"kind": "Medium", "origin": Vector3(-14.5, 15.2, 8.0)},
+		{"kind": "Large", "origin": Vector3(16.0, 16.4, 6.2)},
+		{"kind": "Small", "origin": Vector3(10.5, 17.0, -30.0)},
+		{"kind": "Large", "origin": Vector3(-16.0, 16.6, -8.5)},
+		{"kind": "Medium", "origin": Vector3(4.2, 18.0, -34.0)},
 	]
 	for spec in fillers:
 		var yaw := rng.randf() * TAU

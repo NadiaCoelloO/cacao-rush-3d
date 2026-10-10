@@ -40,4 +40,18 @@ Unchanged: **106.0 MB**. SDFGI is **off** (UHD).
 | Cap | 192 |
 | Headroom | **≈ 45** |
 
-Engine primitive/draw table is filled after the E2b captures (gameplay / laguna / dosel / pods).
+## 5. Engine monitors (lavapipe, 1920×1080)
+
+Not the UHD VRAM number. Primitive / draw caps apply.
+
+| View | Primitives | Draws |
+|---|---:|---:|
+| gameplay | 100,207 | 144 |
+| laguna | 96,066 | 136 |
+| dosel | 225,277 | 190 |
+| dock closeup | 70,305 | 93 |
+| pods | 75,216 | 77 |
+| Hard cap | 350,000 | 250 |
+| Target | 250,000 | — |
+
+Dosel is under the 350k ceiling with ~125k headroom. All views under 250 draws. `maya_feel_check` 54/54. LOD hole-check PASS (canopy included, LOD2 never culled).
