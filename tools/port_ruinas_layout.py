@@ -320,8 +320,19 @@ def build():
         },
         {
             "id": "mantle",
-            "label": "Borde de mantle en la corona del muro de escalada",
+            "label": "Corona del muro izquierdo, posicionada (Maya no llega jugando)",
+            "placed": True,
             "player_px": {"x": 356, "y": T * 6 - PH},
+        },
+        {
+            "id": "h00",
+            "label": "Pinchos H00 sobre el bloque grande",
+            "player_px": {"x": 1180, "y": T * 17 - PH},
+        },
+        {
+            "id": "h04",
+            "label": "Láser H04 junto a la plataforma móvil",
+            "player_px": {"x": 1288, "y": T * 19 - PH},
         },
     ]
     for s in shots:

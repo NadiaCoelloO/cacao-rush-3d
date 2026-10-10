@@ -4,23 +4,39 @@ extends Node3D
 ## PX_TO_M as player_maya.gd). Geometry is built from res://data/ruinas1_layout.json.
 ## player_maya.gd, its feel, and Maya's collision capsule are not modified.
 ## High-poly HOLD. Oneway collision drops while Maya's feet are below the lip
-## (jump-through). Down+jump drop-through stays in the player and is not wired.
-## Spikes and lasers are volumes only: damage is not added here.
+## (jump-through) and while player_maya's _drop_timer is running (down+jump,
+## 0.18 s). Mantle still queries every solid on Maya's collision_mask; excluding
+## oneways from that query needs a change in player_maya.gd, so it is not done.
+##
+## sim.ts values used here: hazard inset (x+4, y+8, w-8, h-10), coin radius 28 px,
+## laser duty 0.42, kill invuln 0.8 / hitstop 0.08 / deathT 0.55 / respawn invuln
+## 1.1 / MAX_LIVES 5, checkpoint poleLock 0.35, goal winT 1.35, fall warpT 0.28.
 
 const LAYOUT := "res://data/ruinas1_layout.json"
 const LEVEL_H_PX := 1152.0
+const LEVEL_W_PX := 4800.0
 const PX := 1.0 / 24.0
+const PW := 26.0 * PX
+const VIEW_W_M := 960.0 * PX
+const VIEW_H_M := 540.0 * PX
+## fov 50 vertical, dolly set so the view covers the 2D 960×540 window.
+const CAM_DOLLY := 24.1256
+const MAYA_LAYER := 2
 
-const COL_STONE := Color("77766a")
-const COL_STONE_LIT := Color("aaa083")
-const COL_STONE_WET := Color("46514b")
-const COL_COVER := Color("5c5b52")
-const COL_WOOD := Color("63503a")
-const COL_MOSS := Color("657047")
+const COL_STONE := Color("4a382c")
+const COL_STONE_LIP := Color("6b5440")
+const COL_STONE_WET := Color("3a2e28")
+const COL_WOOD := Color("5c4030")
+const COL_MOSS := Color("4a5a38")
 const COL_SPIKE := Color("a34d36")
-const COL_HONEY := Color("e3c58c")
-const COL_CACAO := Color("d7a43b")
-const COL_CACAO_DEEP := Color("c97632")
+const COL_LASER := Color("e85a3a")
+const COL_BEAN := Color("8b4a2b")
+const COL_POLE := Color("6a5a4a")
+const COL_POLE_ON := Color("3d8a72")
+const COL_ROOT := Color("3a2a22")
+const COL_VINE := Color("2c3a28")
+const COL_SKY := Color("1e1714")
+const COL_FOG := Color("24302a")
 
 var _layout: Dictionary = {}
 var _player: CharacterBody3D
@@ -28,10 +44,29 @@ var _oneways: Array = []
 var _crumbles: Array = []
 var _movers: Array = []
 var _lasers: Array = []
+var _hazards: Array = []
+var _coins: Array = []
+var _poles: Array = []
+var _falls: Array = []
+var _goal_aabb := AABB()
+var _goal_mesh: MeshInstance3D
+var _goal_taken := false
 var _crumble_t: Dictionary = {}
 var _time := 0.0
 var _capturing := false
 var _shot_feet := Vector3.ZERO
+var _lives := 5
+var _coins_taken := 0
+var _invuln := 0.0
+var _hitstop := 0.0
+var _death_t := 0.0
+var _win_t := 0.0
+var _status := "playing"
+var _hold_pos := Vector3.ZERO
+var _pole_lock := 0.0
+var _message := ""
+var _message_t := 0.0
+var _hint: Label
 
 @onready var _hud: Control = $UI/Hud
 @onready var _hud_label: Label = $UI/Hud/WorldLabel
@@ -49,6 +84,9 @@ func _ready() -> void:
 		var meta: Dictionary = _layout["meta"]
 		_hud_label.text = "%s  ·  id %s  ·  greybox  ·  %s" % [meta["display"], meta["world_id"], meta["level_id"]]
 	_style_light()
+	_tag_maya_layer(_player)
+	_attach_maya_lights()
+	_hint = $UI/Hud/HintLabel as Label
 	var late := Node.new()
 	late.name = "LateSim"
 	late.set_script(load("res://scripts/pilot_ruinas_late.gd"))
@@ -67,11 +105,20 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player == null:
 		return
-	if not _capturing:
+	if not _capturing and _status == "playing" and _hitstop <= 0.0:
 		_time += delta
 	_tick_movers()
 	_tick_oneways()
 	_tick_lasers()
+	_bob_coins()
+	if not _capturing:
+		_tick_play(delta)
+
+
+func _process(delta: float) -> void:
+	if _message_t > 0.0:
+		_message_t = maxf(0.0, _message_t - delta)
+		_show_hud()
 
 
 ## Runs after PlayerMaya (later sibling) so floor state and the capture pin are post-move.
@@ -82,6 +129,9 @@ func late_physics(delta: float) -> void:
 	if _capturing:
 		_player.velocity = Vector3.ZERO
 		_player.global_position = _shot_feet
+	else:
+		_tick_freeze(delta)
+	_match_framing()
 
 
 func _load_layout() -> Dictionary:
@@ -97,48 +147,71 @@ func _load_layout() -> Dictionary:
 
 func _style_light() -> void:
 	var sun := $DirectionalLight3D as DirectionalLight3D
-	if sun == null:
-		return
-	sun.rotation_degrees = Vector3(-28.0, 48.0, 0.0)
-	sun.light_color = COL_HONEY
-	sun.light_energy = 1.15
-	sun.shadow_enabled = true
+	if sun:
+		# Warm light from above the canopy. Low energy so the stone stays in shadow.
+		sun.rotation_degrees = Vector3(-72.0, 36.0, 0.0)
+		sun.light_color = Color("c4a07a")
+		sun.light_energy = 0.42
+		sun.shadow_enabled = true
+	var env_node := $WorldEnvironment as WorldEnvironment
+	if env_node and env_node.environment:
+		var env := env_node.environment
+		env.background_mode = Environment.BG_COLOR
+		env.background_color = COL_SKY
+		env.ambient_light_color = COL_SKY
+		env.ambient_light_energy = 0.18
+		env.fog_enabled = true
+		env.fog_light_color = COL_FOG
+		env.fog_density = 0.035
+		env.volumetric_fog_enabled = true
+		env.volumetric_fog_density = 0.015
+		env.volumetric_fog_albedo = Color("2a3328")
+	_add_pit_fog()
+
+
+func _add_pit_fog() -> void:
+	var fog := FogVolume.new()
+	fog.name = "PitFog"
+	# Between the climb walls, sitting in the shaft. F00 spans x 15.3–22, y up to 6.7.
+	fog.position = Vector3(18.7, 3.2, 0.0)
+	fog.size = Vector3(8.0, 7.0, 5.0)
+	var mat := FogMaterial.new()
+	mat.density = 1.15
+	mat.albedo = Color("1a2820")
+	fog.material = mat
+	add_child(fog)
 
 
 func _build_world() -> void:
 	var root := $WorldRoot as Node3D
 	var mats := {
-		"solid": _mat(COL_STONE, 0.88),
-		"cover": _mat(COL_COVER, 0.9),
-		"oneway": _mat(COL_STONE_LIT, 0.82),
-		"moving": _mat(COL_STONE_LIT, 0.8),
+		"solid": _mat(COL_STONE, 0.92),
+		"lip": _mat(COL_STONE_LIP, 0.84),
+		"oneway": _mat(COL_STONE, 0.9),
+		"moving": _mat(COL_STONE, 0.88),
 		"crate": _mat(COL_WOOD, 0.86),
-		"crumble": _mat(COL_STONE_WET, 0.55),
+		"crumble": _mat(COL_STONE_WET, 0.72),
 		"spike": _mat(COL_SPIKE, 0.75),
-		"laser": _mat(COL_HONEY, 0.45, true),
-		"coin": _mat(COL_CACAO, 0.7),
-		"pole": _mat(COL_STONE_LIT, 0.84),
-		"pole_secret": _mat(COL_CACAO_DEEP, 0.7),
-		"goal": _mat(COL_CACAO, 0.62),
-		"fall": _mat(COL_MOSS, 0.8, false, 0.38),
+		"laser": _mat(COL_LASER, 0.45, true),
+		"moss": _mat(COL_MOSS, 0.9),
+		"root": _mat(COL_ROOT, 0.9),
 	}
 	var stamps := {}
 	for raw in _layout["platforms"]:
 		var p: Dictionary = raw
 		var kind := String(p["kind"])
-		var tag := String(p["tag"])
-		var mat_key := kind
-		if tag.begins_with("techo"):
-			mat_key = "cover"
+		var mat_key := kind if mats.has(kind) else "solid"
 		var body: CollisionObject3D = AnimatableBody3D.new() if kind == "moving" else StaticBody3D.new()
 		body.name = String(p["id"])
 		body.set_meta("kind", kind)
 		body.set_meta("top_m", float(p["top_m"]))
 		var dynamic := kind == "moving" or kind == "crumble"
 		_add_box(body, p["center_m"], p["size_m"], mats[mat_key], true, dynamic)
+		if dynamic:
+			_add_lip(body, _vec(p["size_m"]), mats["lip"])
 		root.add_child(body)
 		if not dynamic:
-			_stamp_box(_tool(stamps, mat_key), _vec(p["center_m"]), _vec(p["size_m"]))
+			_stamp_stone(_tool(stamps, mat_key), _tool(stamps, "lip"), _vec(p["center_m"]), _vec(p["size_m"]))
 		if kind == "oneway":
 			_oneways.append(body)
 		elif kind == "crumble":
@@ -166,25 +239,87 @@ func _build_world() -> void:
 			_set_depth(mesh, 0.25)
 			visual.add_child(beam)
 			_lasers.append(mesh)
+	var bean_mat := _bean_mat()
 	for raw_c in _layout["pickups"]:
 		var c: Dictionary = raw_c
 		var cp: Array = c["center_m"]
-		_stamp_sphere(_tool(stamps, "coin"), Vector3(float(cp[0]), float(cp[1]), float(cp[2])), float(c["radius_m"]))
+		var center := Vector3(float(cp[0]), float(cp[1]), float(cp[2]))
+		var bean := MeshInstance3D.new()
+		bean.name = String(c["id"])
+		var sphere := SphereMesh.new()
+		sphere.radius = 0.22
+		sphere.height = 0.44
+		sphere.radial_segments = 8
+		sphere.rings = 4
+		bean.mesh = sphere
+		bean.scale = Vector3(0.72, 1.15, 0.62)
+		bean.position = center
+		bean.material_override = bean_mat
+		visual.add_child(bean)
+		_coins.append({
+			"id": String(c["id"]),
+			"center": center,
+			"phase": float(c["px"]["x"]) * 0.05,
+			"mesh": bean,
+			"taken": false,
+		})
 	for raw_k in _layout["checkpoints"]:
 		var k: Dictionary = raw_k
 		var secret = k["secret"]
-		var key := "pole_secret" if secret != null else "pole"
 		var sz: Vector3 = _vec(k["size_m"])
 		sz.z = 0.45
-		_stamp_box(_tool(stamps, key), _vec(k["center_m"]), sz)
+		var pole := MeshInstance3D.new()
+		pole.name = String(k["id"])
+		var box := BoxMesh.new()
+		box.size = Vector3(0.33, sz.y, 0.28)
+		pole.mesh = box
+		pole.position = _vec(k["center_m"])
+		pole.material_override = _mat(COL_POLE, 0.8)
+		visual.add_child(pole)
+		var px: Dictionary = k["px"]
+		var spawn_feet := Vector3((float(px["x"]) + 4.0 + 13.0) * PX, (LEVEL_H_PX - float(px["y"]) - float(px["h"])) * PX, 0.0)
+		_poles.append({
+			"id": String(k["id"]),
+			"aabb": _aabb_of(_vec(k["center_m"]), _vec(k["size_m"])),
+			"secret": secret if secret != null else "",
+			"active": false,
+			"mesh": pole,
+			"spawn": spawn_feet,
+		})
 	var goal: Dictionary = _layout["goal"]
 	var gsz: Vector3 = _vec(goal["size_m"])
-	gsz.z = 0.7
-	_stamp_box(_tool(stamps, "goal"), _vec(goal["center_m"]), gsz)
+	_goal_aabb = _aabb_of(_vec(goal["center_m"]), gsz)
+	_goal_mesh = MeshInstance3D.new()
+	_goal_mesh.name = "G00"
+	var goal_sphere := SphereMesh.new()
+	goal_sphere.radius = 0.38
+	goal_sphere.height = 0.76
+	goal_sphere.radial_segments = 8
+	goal_sphere.rings = 4
+	_goal_mesh.mesh = goal_sphere
+	_goal_mesh.scale = Vector3(0.85, 1.2, 0.7)
+	_goal_mesh.position = _vec(goal["center_m"])
+	_goal_mesh.material_override = _bean_mat()
+	visual.add_child(_goal_mesh)
 	for raw_f in _layout["falls"]:
 		var f: Dictionary = raw_f
-		_stamp_box(_tool(stamps, "fall"), _vec(f["center_m"]), _vec(f["size_m"]))
+		_falls.append({
+			"id": String(f["id"]),
+			"secret": String(f["secret"]),
+			"aabb": _aabb_of(_vec(f["center_m"]), _vec(f["size_m"])),
+			"used": false,
+		})
 	_commit_stamps(visual, stamps, mats)
+	_dress_pit(visual, mats)
+	for raw_h in _layout["hazards"]:
+		var h: Dictionary = raw_h
+		_hazards.append({
+			"id": String(h["id"]),
+			"kind": String(h["kind"]),
+			"aabb": _aabb_of(_vec(h["center_m"]), _vec(h["size_m"])),
+			"period": float(h["period"]) if h["period"] != null else 0.0,
+			"phase": float(h["phase"]) if h["phase"] != null else 0.0,
+		})
 
 
 func _add_box(host: Node3D, center: Array, size: Array, mat: Material, collide: bool, with_mesh := true) -> void:
@@ -302,6 +437,426 @@ func _sphere_point(c: Vector3, radius: float, u: float, v: float) -> Vector3:
 	return c + Vector3(sin(v) * cos(u), cos(v), sin(v) * sin(u)) * radius
 
 
+func _stamp_stone(body: SurfaceTool, lip: SurfaceTool, c: Vector3, s: Vector3) -> void:
+	var hx := s.x * 0.5
+	var hy := s.y * 0.5
+	var hz := s.z * 0.5
+	_stamp_face(body, c, Vector3(0, 0, 1), Vector3(hx, 0, 0), Vector3(0, hy, 0), hz)
+	_stamp_face(body, c, Vector3(0, 0, -1), Vector3(-hx, 0, 0), Vector3(0, hy, 0), hz)
+	_stamp_face(lip, c, Vector3(0, 1, 0), Vector3(hx, 0, 0), Vector3(0, 0, -hz), hy)
+	_stamp_face(body, c, Vector3(0, -1, 0), Vector3(hx, 0, 0), Vector3(0, 0, hz), hy)
+	_stamp_face(body, c, Vector3(1, 0, 0), Vector3(0, 0, -hz), Vector3(0, hy, 0), hx)
+	_stamp_face(body, c, Vector3(-1, 0, 0), Vector3(0, 0, hz), Vector3(0, hy, 0), hx)
+
+
+func _add_lip(host: Node3D, size: Vector3, mat: Material) -> void:
+	var lip_h := minf(0.12, size.y * 0.35)
+	var mesh := MeshInstance3D.new()
+	mesh.name = "Lip"
+	var box := BoxMesh.new()
+	box.size = Vector3(size.x, lip_h, size.z)
+	mesh.mesh = box
+	mesh.position = Vector3(0.0, size.y * 0.5 - lip_h * 0.5 + 0.01, 0.0)
+	mesh.material_override = mat
+	host.add_child(mesh)
+
+
+func _bean_mat() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = COL_BEAN
+	mat.roughness = 0.42
+	mat.metallic = 0.04
+	mat.metallic_specular = 0.35
+	mat.emission_enabled = true
+	mat.emission = COL_BEAN
+	mat.emission_energy_multiplier = 0.12
+	return mat
+
+
+func _aabb_of(center: Vector3, size: Vector3) -> AABB:
+	return AABB(center - size * 0.5, size)
+
+
+func _dress_pit(visual: Node3D, mats: Dictionary) -> void:
+	# Vines in the secret shaft. Quads, alpha-scissor, not a blocking volume.
+	var vine_mat := _vine_mat()
+	for i in 6:
+		var quad := MeshInstance3D.new()
+		quad.name = "Vine%d" % i
+		var mesh := QuadMesh.new()
+		mesh.size = Vector2(0.16, 6.4)
+		quad.mesh = mesh
+		quad.material_override = vine_mat
+		var x := 16.15 + float(i) * 0.42
+		quad.position = Vector3(x, 3.3, 0.35 if i % 2 == 0 else -0.35)
+		visual.add_child(quad)
+	# Moss along the inner base of the climb walls. Visual only.
+	for side in [15.7, 19.5]:
+		var moss := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.55, 1.15, 2.4)
+		moss.mesh = box
+		moss.position = Vector3(side, 0.55, 0.0)
+		moss.material_override = mats["moss"]
+		visual.add_child(moss)
+	# A few roots hugging the stone at the shaft mouth. Not colliders.
+	for i in 4:
+		var root := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.35, 0.22, 1.6)
+		root.mesh = box
+		root.position = Vector3(14.2 + float(i) * 1.5, 0.35 + float(i % 2) * 0.4, 1.15)
+		root.rotation_degrees = Vector3(0.0, 18.0 * float(i), 8.0)
+		root.material_override = mats["root"]
+		visual.add_child(root)
+	var beam := SpotLight3D.new()
+	beam.name = "JardinBeam"
+	beam.position = Vector3(17.4, 0.35, 0.0)
+	beam.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	beam.light_color = Color("6a9a62")
+	beam.light_energy = 1.6
+	beam.spot_range = 14.0
+	beam.spot_angle = 38.0
+	beam.spot_attenuation = 1.1
+	beam.shadow_enabled = false
+	visual.add_child(beam)
+	_add_mist(visual)
+	_add_dust(visual, Vector3(17.4, 2.4, 0.4), Color(0.75, 0.85, 0.62, 0.28))
+	_add_silhouettes(visual)
+
+
+func _vine_mat() -> StandardMaterial3D:
+	var img := Image.create(8, 32, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for y in 32:
+		img.set_pixel(2, y, Color("4a6240"))
+		img.set_pixel(3, y, Color("6d8a58"))
+	var tex := ImageTexture.create_from_image(img)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = tex
+	mat.albedo_color = Color(1, 1, 1, 1)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.4
+	mat.roughness = 0.9
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	return mat
+
+
+func _add_mist(visual: Node3D) -> void:
+	# Horizontal sheets. FogVolume is Forward+ only; these stay visible on the GL capture too.
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(0.12, 0.18, 0.14, 0.42)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	for i in 3:
+		var sheet := MeshInstance3D.new()
+		var mesh := QuadMesh.new()
+		mesh.size = Vector2(7.2, 4.2)
+		sheet.mesh = mesh
+		sheet.material_override = mat
+		sheet.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+		sheet.position = Vector3(17.6, 0.8 + float(i) * 1.5, 0.0)
+		visual.add_child(sheet)
+
+
+func _add_silhouettes(visual: Node3D) -> void:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("0c0908")
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.roughness = 1.0
+	var heights := [18.0, 26.0, 14.0, 22.0, 16.0, 28.0]
+	for i in heights.size():
+		var quad := MeshInstance3D.new()
+		var mesh := QuadMesh.new()
+		mesh.size = Vector2(7.0, heights[i])
+		quad.mesh = mesh
+		quad.material_override = mat
+		quad.position = Vector3(-6.0 + float(i) * 14.0, heights[i] * 0.45, -8.0)
+		visual.add_child(quad)
+
+
+func _add_dust(visual: Node3D, at: Vector3, color: Color) -> void:
+	var parts := GPUParticles3D.new()
+	parts.position = at
+	parts.amount = 28
+	parts.lifetime = 3.2
+	parts.visibility_aabb = AABB(Vector3(-2, -2, -2), Vector3(4, 8, 4))
+	var proc := ParticleProcessMaterial.new()
+	proc.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	proc.emission_box_extents = Vector3(1.1, 1.6, 0.35)
+	proc.direction = Vector3(0.05, 1, 0)
+	proc.spread = 18.0
+	proc.initial_velocity_min = 0.12
+	proc.initial_velocity_max = 0.35
+	proc.gravity = Vector3(0, 0.04, 0)
+	proc.color = color
+	parts.process_material = proc
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.05, 0.05)
+	var qmat := StandardMaterial3D.new()
+	qmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	qmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	qmat.albedo_color = Color(1, 1, 1, 0.45)
+	qmat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	quad.material = qmat
+	parts.draw_pass_1 = quad
+	visual.add_child(parts)
+
+
+func _tag_maya_layer(node: Node) -> void:
+	if node is VisualInstance3D:
+		var vis := node as VisualInstance3D
+		vis.layers = vis.layers | MAYA_LAYER
+	for child in node.get_children():
+		_tag_maya_layer(child)
+
+
+func _attach_maya_lights() -> void:
+	# LOOK-001 fill and rim. cull_mask is Maya's layer only; the world light stays on layer 1.
+	var fill := OmniLight3D.new()
+	fill.name = "LOOK001_FILL_MayaBack"
+	fill.light_color = Color(1.0, 0.86, 0.70)
+	fill.light_energy = 0.34
+	fill.light_specular = 0.0
+	fill.omni_range = 3.0
+	fill.omni_attenuation = 1.5
+	fill.shadow_enabled = false
+	fill.light_volumetric_fog_energy = 0.0
+	fill.light_cull_mask = MAYA_LAYER
+	fill.position = Vector3(0.0, 1.22, 0.88)
+	_player.add_child(fill)
+	var rim := OmniLight3D.new()
+	rim.name = "LOOK001_RIM_MayaFollow"
+	rim.light_color = Color(1.0, 0.86, 0.70)
+	rim.light_energy = 0.10
+	rim.light_specular = 0.0
+	rim.omni_range = 2.6
+	rim.omni_attenuation = 1.5
+	rim.shadow_enabled = false
+	rim.light_volumetric_fog_energy = 0.0
+	rim.light_cull_mask = MAYA_LAYER
+	rim.position = Vector3(0.50, 1.48, -0.60)
+	_player.add_child(rim)
+
+
+func _match_framing() -> void:
+	var cam := _player.get_node_or_null("Camera3D") as Camera3D
+	if cam == null:
+		return
+	var offset: Vector3 = _player.camera_offset
+	var focus := cam.global_position - offset
+	# 2D followCam clamped to the level, then the 960×540 window is centered on that.
+	var min_x := VIEW_W_M * 0.5
+	var max_x := LEVEL_W_PX * PX - VIEW_W_M * 0.5
+	var max_y := (LEVEL_H_PX - 270.0) * PX
+	var min_y := (LEVEL_H_PX - (LEVEL_H_PX - 540.0) - 270.0) * PX
+	focus.x = clampf(focus.x, min_x, max_x)
+	focus.y = clampf(focus.y, min_y, max_y)
+	cam.global_position = focus + offset
+	if focus.distance_squared_to(cam.global_position) > 0.001:
+		cam.look_at(focus, Vector3.UP)
+
+
+func _overlap(a: AABB, b: AABB) -> bool:
+	return a.position.x < b.end.x and a.end.x > b.position.x and a.position.y < b.end.y and a.end.y > b.position.y
+
+
+func _full_body() -> AABB:
+	var feet := _player.global_position
+	var h := float(_player._h)
+	return AABB(Vector3(feet.x - PW * 0.5, feet.y, -2.0), Vector3(PW, h, 4.0))
+
+
+func _hurt_body() -> AABB:
+	# sim.ts hazards: aabb(p.x+4, p.y+8, p.w-8, p.h-10). 2D y grows down.
+	var feet := _player.global_position
+	var h := float(_player._h)
+	var left := feet.x - PW * 0.5 + 4.0 * PX
+	var box_h := h - 10.0 * PX
+	var bottom := feet.y + 2.0 * PX
+	return AABB(Vector3(left, bottom, -2.0), Vector3(PW - 8.0 * PX, box_h, 4.0))
+
+
+func _tick_play(delta: float) -> void:
+	if _status != "playing":
+		return
+	_invuln = maxf(0.0, _invuln - delta)
+	_pole_lock = maxf(0.0, _pole_lock - delta)
+	_hazards_touch()
+	if _status != "playing":
+		return
+	_collect_coins()
+	_touch_poles()
+	_touch_goal()
+	_touch_falls()
+	_show_hud()
+
+
+func _hazards_touch() -> void:
+	if _invuln > 0.0:
+		return
+	var body := _hurt_body()
+	for h in _hazards:
+		if String(h["kind"]) == "laser":
+			var period := float(h["period"])
+			var phase := float(h["phase"])
+			if fposmod(_time + phase, period) >= period * 0.42:
+				continue
+		if _overlap(body, h["aabb"]):
+			_kill()
+			return
+
+
+func _kill() -> void:
+	if _invuln > 0.0 or _status != "playing":
+		return
+	_lives -= 1
+	_invuln = 0.8
+	_hitstop = 0.08
+	_hold_pos = _player.global_position
+	if _lives <= 0:
+		_status = "over"
+		_say("Sin vidas", 2.0)
+	else:
+		_status = "dead"
+		_death_t = 0.55
+		_say("Caída", 0.55)
+
+
+func _tick_freeze(delta: float) -> void:
+	if _hitstop > 0.0:
+		_hitstop = maxf(0.0, _hitstop - delta)
+		_player.velocity = Vector3.ZERO
+		_player.global_position = _hold_pos
+		return
+	if _status == "dead":
+		_death_t -= delta
+		_player.velocity = Vector3.ZERO
+		_player.global_position = _hold_pos
+		if _death_t <= 0.0:
+			_player._respawn()
+			_invuln = 1.1
+			_status = "playing"
+			_say("Partida", 0.8)
+		return
+	if _status == "over" or _status == "win" or _status == "warp":
+		_player.velocity = Vector3.ZERO
+		_player.global_position = _hold_pos
+		if _status == "win":
+			_win_t -= delta
+
+
+func _collect_coins() -> void:
+	var feet := _player.global_position
+	var h := float(_player._h)
+	var center := Vector2(feet.x, feet.y + h * 0.5)
+	for c in _coins:
+		if bool(c["taken"]):
+			continue
+		var at: Vector3 = c["center"]
+		if center.distance_to(Vector2(at.x, at.y)) < 28.0 * PX:
+			c["taken"] = true
+			(c["mesh"] as MeshInstance3D).visible = false
+			_coins_taken += 1
+
+
+func _touch_poles() -> void:
+	var body := _full_body()
+	var jump := Input.is_action_just_pressed("jump")
+	var held := Input.is_action_pressed("jump")
+	for pole in _poles:
+		if not _overlap(body, pole["aabb"]):
+			continue
+		var secret := String(pole["secret"])
+		var active := bool(pole["active"])
+		var can_warp := secret != ""
+		var ready := active and can_warp
+		var press := jump or (ready and held and _pole_lock <= 0.0)
+		if not press or _status == "warp":
+			continue
+		if ready:
+			_begin_warp(secret)
+			continue
+		pole["active"] = true
+		var mesh := pole["mesh"] as MeshInstance3D
+		var mat := mesh.material_override as StandardMaterial3D
+		if mat:
+			mat.albedo_color = COL_POLE_ON
+		var spawn: Vector3 = pole["spawn"]
+		var xf: Transform3D = _player._spawn
+		xf.origin = spawn
+		_player._spawn = xf
+		_pole_lock = 0.35
+		if secret != "":
+			_say("Tótem guardado — W otra vez", 1.6)
+			print("RUINAS_SECRET %s" % secret)
+		else:
+			_say("Partida guardada", 1.6)
+
+
+func _touch_goal() -> void:
+	if _goal_taken:
+		return
+	if not _overlap(_full_body(), _goal_aabb):
+		return
+	_goal_taken = true
+	if _goal_mesh:
+		_goal_mesh.visible = false
+	_status = "win"
+	_win_t = 1.35
+	_hold_pos = _player.global_position
+	_say("Meta", 1.35)
+	print("RUINAS_GOAL taken")
+
+
+func _touch_falls() -> void:
+	if _status != "playing":
+		return
+	var body := _full_body()
+	for f in _falls:
+		if bool(f["used"]):
+			continue
+		if not _overlap(body, f["aabb"]):
+			continue
+		f["used"] = true
+		_begin_warp(String(f["secret"]))
+		return
+
+
+func _begin_warp(world: String) -> void:
+	_status = "warp"
+	_hold_pos = _player.global_position
+	var level := "%s-1" % world
+	print("RUINAS_WARP world=%s level=%s stub=no 3D scene" % [world, level])
+	_say("Warp %s (sin escena 3D)" % level, 2.4)
+
+
+func _bob_coins() -> void:
+	for c in _coins:
+		if bool(c["taken"]):
+			continue
+		var mesh := c["mesh"] as MeshInstance3D
+		var at: Vector3 = c["center"]
+		mesh.position = at + Vector3(0.0, sin(_time * 4.0 + float(c["phase"])) * (4.0 * PX), 0.0)
+
+
+func _say(text: String, seconds: float) -> void:
+	_message = text
+	_message_t = seconds
+	_show_hud()
+
+
+func _show_hud() -> void:
+	if _hint == null:
+		return
+	var line := "Vidas %d · cacao %d" % [_lives, _coins_taken]
+	if _message_t > 0.0 and _message != "":
+		line = "%s · %s" % [_message, line]
+	_hint.text = line
+
+
 func _tick_movers() -> void:
 	for body in _movers:
 		var m: Dictionary = body.get_meta("move")
@@ -320,8 +875,11 @@ func _tick_movers() -> void:
 
 func _tick_oneways() -> void:
 	var feet := _player.global_position.y
+	# player_maya arms _drop_timer (0.18 s) on down+jump. This runs before Maya's
+	# tick, so the disable lands on the next physics frame, inside that window.
+	var dropping: bool = float(_player._drop_timer) > 0.0
 	for body in _oneways:
-		var enable: bool = feet >= float(body.get_meta("top_m")) - 0.06
+		var enable: bool = (not dropping) and feet >= float(body.get_meta("top_m")) - 0.06
 		var shape := body.get_node("CollisionShape3D") as CollisionShape3D
 		shape.disabled = not enable
 

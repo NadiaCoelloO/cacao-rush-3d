@@ -1359,7 +1359,8 @@
     },
     {
       "id": "mantle",
-      "label": "Borde de mantle en la corona del muro de escalada",
+      "label": "Corona del muro izquierdo, posicionada (Maya no llega jugando)",
+      "placed": true,
       "player_px": {
         "x": 356,
         "y": 150
@@ -1367,6 +1368,32 @@
       "feet_m": [
         15.375,
         40.0,
+        0.0
+      ]
+    },
+    {
+      "id": "h00",
+      "label": "Pinchos H00 sobre el bloque grande",
+      "player_px": {
+        "x": 1180,
+        "y": 502
+      },
+      "feet_m": [
+        49.7083,
+        25.3333,
+        0.0
+      ]
+    },
+    {
+      "id": "h04",
+      "label": "L\u00e1ser H04 junto a la plataforma m\u00f3vil",
+      "player_px": {
+        "x": 1288,
+        "y": 566
+      },
+      "feet_m": [
+        54.2083,
+        22.6667,
         0.0
       ]
     }
