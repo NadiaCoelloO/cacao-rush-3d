@@ -72,6 +72,14 @@ def is_vignette(rgb) -> bool:
     return r >= b and g <= r + 8 and r + g + b < 200
 
 
+def is_sky_or_wind(rgb) -> bool:
+    """Golden dawn / thin cream wind strokes — the outline's job in H03."""
+    r, g, b = rgb[:3]
+    if r < 130 or g < 100 or b < 50:
+        return False
+    return r >= g - 6 and g >= b - 8 and r + g + b > 300
+
+
 def measure(path: Path, region=None) -> dict:
     im = Image.open(path).convert("RGB")
     w, h = im.size
@@ -123,10 +131,20 @@ def measure(path: Path, region=None) -> dict:
                 continue
             # near the silhouette, not far sky
             if min(abs(x - min(xs)), abs(x - max(xs)), abs(y - min(ys)), abs(y - max(ys))) <= 10:
-                if is_vignette(rgb) or is_outline(rgb):
+                if is_vignette(rgb):
                     body_bg.append(rgb)
-                else:
+                elif is_sky_or_wind(rgb):
                     outline_bg.append(rgb)
+    # Outline vs wind/dawn: walk a wider ring if the cushion ate the close sky.
+    if len(outline_bg) < 20:
+        for rad in (14, 18, 22):
+            for y in range(max(y0, int(min(ys)) - rad), min(y1, int(max(ys)) + rad + 1)):
+                for x in range(max(x0, int(min(xs)) - rad), min(x1, int(max(xs)) + rad + 1)):
+                    rgb = px[x, y]
+                    if is_sky_or_wind(rgb):
+                        outline_bg.append(rgb)
+            if len(outline_bg) >= 20:
+                break
     body = median_rgb(body_rgb)
     outline = median_rgb(outline_rgb) if outline_rgb else (18, 12, 8)
     bg_body = median_rgb(body_bg) if body_bg else (200, 190, 150)
