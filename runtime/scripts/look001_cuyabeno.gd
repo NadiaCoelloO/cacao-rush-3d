@@ -487,14 +487,14 @@ func _add_maya_outline(pilot: Node3D) -> void:
 	head.height = 0.40
 	head.radial_segments = 10
 	head.rings = 6
-	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.055)
+	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.070)
 	var hand := SphereMesh.new()
-	hand.radius = 0.13
-	hand.height = 0.26
+	hand.radius = 0.16
+	hand.height = 0.32
 	hand.radial_segments = 8
 	hand.rings = 4
-	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.050)
-	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.050)
+	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.065)
+	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.065)
 
 
 func _attach_maya_follow_fill(pilot: Node3D) -> void:
@@ -1215,16 +1215,18 @@ void fragment() {
 
 func _maya_body_vignette_mat() -> ShaderMaterial:
 	# Opaque warm dark cushion immediately behind Maya so her BODY (cream)
-	# holds ≥4.4:1 against the local background. Edges fade so the dawn sky stays.
+	# holds ≥4.4:1 against the local background — not just the outline.
+	# Core stays ALPHA=1 past the torso/head/hands; only the rim fades so
+	# the golden dawn is not a hard rectangle.
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
 render_mode unshaded, blend_mix, cull_disabled, fog_disabled, shadows_disabled, specular_disabled;
 void fragment() {
-	vec2 d = (UV - vec2(0.50, 0.50)) * vec2(1.05, 1.15);
+	vec2 d = (UV - vec2(0.50, 0.48)) * vec2(1.00, 0.92);
 	float r = length(d);
-	float a = pow(clamp(1.0 - r * 1.25, 0.0, 1.0), 0.60);
-	ALBEDO = vec3(0.028, 0.018, 0.010);
+	float a = 1.0 - smoothstep(0.34, 0.70, r);
+	ALBEDO = vec3(0.010, 0.006, 0.003);
 	ALPHA = a;
 }
 """
@@ -1286,7 +1288,7 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	# Parent to Maya so level-edge cam clamp (entrance x=20) cannot miss her.
 	var player: Node3D = pilot.get_node_or_null("PlayerMaya") as Node3D
 	if player:
-		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.92, -0.90), Vector2(2.60, 3.20), Vector3.ZERO, _maya_body_vignette_mat())
+		_add_card(player, "HP001_MayaVignette", Vector3(0.0, 0.88, -0.85), Vector2(3.20, 4.10), Vector3.ZERO, _maya_body_vignette_mat())
 
 
 func _build_dosel_cap_cards(pilot: Node3D) -> void:
