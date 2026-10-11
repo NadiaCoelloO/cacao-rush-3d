@@ -321,8 +321,10 @@ def _grain_color_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    # Filmic grade lifts the grain rim to cream-gold eggs, brighter than Maya tan.
-    return (r >= 230) & (g >= 200) & (b >= 140) & (r >= g - 8) & (r >= b + 20)
+    # Cacao face #8B4A2B + orange rim #CE722E (filmic grade may lift both).
+    cacao = (r >= 88) & (r <= 200) & (g >= 38) & (g <= 130) & (b <= 90) & (r >= g + 16) & (r >= b + 28)
+    orange = (r >= 150) & (r <= 240) & (g >= 70) & (g <= 170) & (b <= 100) & (r >= g + 24) & (r >= b + 55)
+    return cacao | orange
 
 
 def _connected_blobs(mask: np.ndarray, min_n=20, max_n=700, max_w=36, max_h=40) -> list[dict]:
@@ -540,7 +542,7 @@ def main() -> int:
             continue
         maya.append(measure_maya(path, x_m))
     cacao = []
-    pods = sorted(DOCS.glob("HP001_E2g_engine_totem_pods*.png"))
+    pods = sorted(DOCS.glob("HP001_E2h_engine_totem_pods*.png"))
     if not pods:
         pods = sorted(DOCS.glob("HP001_*engine_totem_pods*.png"))
         pods = pods[-1:] if pods else []

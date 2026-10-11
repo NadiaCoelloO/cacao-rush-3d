@@ -536,21 +536,18 @@ func _bean_mat() -> ShaderMaterial:
 	shader.code = """shader_type spatial;
 render_mode unshaded, fog_disabled, cull_back, specular_disabled;
 uniform vec4 albedo : source_color;
-uniform vec4 warm : source_color;
+uniform vec4 rim_col : source_color;
 void fragment() {
 	vec3 n = normalize(NORMAL);
-	vec3 v = normalize(VIEW);
-	float ndv = abs(dot(n, v));
-	float rim = pow(1.0 - clamp(ndv, 0.0, 1.0), 1.15);
-	float key = clamp(dot(n, normalize(vec3(0.42, 0.70, 0.58))), 0.0, 1.0);
-	float wrap = pow(key, 0.45);
-	float lift = clamp(0.28 + wrap * 0.62 + rim * 0.90, 0.0, 1.0);
-	ALBEDO = mix(albedo.rgb, warm.rgb, lift);
+	// Face stays cacao. Legibility is a thick orange ring only — no key on the face.
+	float ring = length(n.xy);
+	float rim = smoothstep(0.20, 0.55, ring);
+	ALBEDO = mix(albedo.rgb, rim_col.rgb, rim);
 }
 """
 	mat.shader = shader
-	mat.set_shader_parameter("albedo", Color("c87838"))
-	mat.set_shader_parameter("warm", Color("f8d090"))
+	mat.set_shader_parameter("albedo", Color("8b4a2b"))
+	mat.set_shader_parameter("rim_col", Color("ce722e"))
 	return mat
 
 

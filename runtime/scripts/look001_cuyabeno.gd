@@ -1240,11 +1240,10 @@ void fragment() {
 
 
 func _play_jungle_mat() -> ShaderMaterial:
-	# Mid-jungle play band: desaturated olive / dark brown, foliage mottling,
-	# painted canopy crown (sil texture, soft cut — no noise dither).
-	# Extra-dark mid-route so Maya body+shadows stay ≥4.4:1 (x66 / x87).
-	# Opaque in the play strip. No disk on Maya — this IS the body backdrop.
-	# QuadMesh UV.y = 0 is the TOP of the card (Godot 4).
+	# Mid-jungle play band: desaturated olive / dark brown, foliage mottling.
+	# Crown is the painted sil ALPHA (transparent sky / opaque copas), mapped
+	# into the upper band so the horizon is irregular tree-tops — no dither,
+	# no straight card edge. Opaque in the play strip (Maya body backdrop).
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = """shader_type spatial;
@@ -1277,17 +1276,19 @@ void fragment() {
 	col *= mix(0.74, 1.0, smoothstep(10.0, 28.0, eye.x));
 	float mid = smoothstep(50.0, 60.0, eye.x) * (1.0 - smoothstep(92.0, 108.0, eye.x));
 	col *= mix(1.0, 0.58, mid);
-	// Painted canopy crown (sil strip: white sky / dark foliage). UV.y=0 is TOP.
-	// Soft threshold, no noise dither — that read as speckled fragments.
-	vec2 crown_uv = vec2(fract(vx * 0.52 + par * 0.40), mix(0.0, 0.38, clamp(vy / 0.22, 0.0, 1.0)));
-	float crown_lum = dot(texture(sil, crown_uv).rgb, vec3(0.30, 0.59, 0.11));
-	float keep = 1.0 - smoothstep(0.18, 0.72, crown_lum);
-	keep = smoothstep(0.12, 0.42, keep);
-	if (keep < 0.20) {
+	// Painted canopy crown from sil ALPHA (sky is transparent, not white RGB).
+	// UV.y=0 is the card TOP. Map the sil scallop (≈ y 0.23–0.35) onto the
+	// upper band so the horizon is irregular tree-tops, never a straight cut.
+	float sy = mix(0.10, 0.50, clamp(vy / 0.28, 0.0, 1.0));
+	float a1 = texture(sil, vec2(fract(vx * 1.35 + par * 0.32), sy)).a;
+	float a2 = texture(sil, vec2(fract(vx * 0.52 + par * 0.14 + 0.21), sy)).a;
+	float keep = max(a1, a2 * 0.88);
+	keep = smoothstep(0.10, 0.52, keep);
+	if (keep < 0.16) {
 		discard;
 	}
-	float haze = 1.0 - smoothstep(0.0, 0.20, vy);
-	col = mix(col, vec3(0.14, 0.11, 0.05), haze * 0.16 * keep);
+	float haze = 1.0 - smoothstep(0.0, 0.22, vy);
+	col = mix(col, vec3(0.13, 0.10, 0.04), haze * 0.18 * keep);
 	ALBEDO = col;
 }
 """

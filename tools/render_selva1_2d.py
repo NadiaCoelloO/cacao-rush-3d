@@ -31,8 +31,8 @@ SPIKE = (201, 196, 188)
 FROG = (62, 118, 56)
 ROCK = (96, 76, 56)
 WIND = (200, 220, 184)
-BEAN = (168, 90, 42)
-BEAN_HI = (248, 214, 148)
+BEAN = (139, 74, 43)
+BEAN_RIM = (206, 114, 46)
 POLE = (106, 90, 74)
 GOAL = (166, 106, 42)
 
@@ -120,8 +120,7 @@ def draw_shot(layout, shot, out_path: Path) -> None:
         if not vis(x - r, y - r, r * 2, r * 2):
             continue
         sx, sy = x - cam_x, y - cam_y
-        d.ellipse([sx - 8, sy - 11, sx + 8, sy + 11], fill=BEAN)
-        d.ellipse([sx - 6, sy - 10, sx + 3, sy - 1], fill=BEAN_HI)
+        d.ellipse([sx - 8, sy - 11, sx + 8, sy + 11], fill=BEAN, outline=BEAN_RIM, width=3)
 
     for k in layout["checkpoints"]:
         box = k["px"]
