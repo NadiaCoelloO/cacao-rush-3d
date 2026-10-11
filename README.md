@@ -27,6 +27,7 @@ runtime/            # Godot 4 project (Fase 2) ← open this in Godot
 - [BRIEF_ASSETS_MAYA_SELVA](docs/BRIEF_ASSETS_MAYA_SELVA.md)
 - [PORT_MAP](docs/PORT_MAP.md) · [PORT_CONTRACT](docs/PORT_CONTRACT.md)
 - [WORLD_SELVA_DISPLAY](docs/WORLD_SELVA_DISPLAY.md)
+- [LOOK-001_GODOT](docs/LOOK-001_GODOT.md) — Cuyabeno cinematic look wired in Godot (water / fog / sky / beam / grade)
 
 ## Fase 2 (Godot)
 

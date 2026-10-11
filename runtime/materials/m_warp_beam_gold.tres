@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cacao_m_warp_gold"]
+
+[ext_resource type="Shader" path="res://shaders/warp_beam.gdshader" id="1_beam"]
+
+[resource]
+resource_name = "LOOK001_BeamGold"
+render_priority = 10
+shader = ExtResource("1_beam")
+shader_parameter/beam_color = Color(1, 0.819608, 0.415686, 1)
+shader_parameter/strength = 3.2
+shader_parameter/height_m = 6.2
+shader_parameter/height_fade_pow = 1.6
+shader_parameter/facing_gain = 0.85

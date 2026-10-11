@@ -8,4 +8,4 @@
 | Rejected | «Selva Dulce» (Identidad NO); Yasuní (superseded) |
 | Status | Locked for pilot |
 
-Greybox structural OK. Identidad: confirm Cuyabeno look when leaving grey.
+Greybox structural OK. LOOK-001 wires the Cuyabeno cinematic look (black water, canopy, low fog, warp gold+cyan) into the Godot pilot — `docs/LOOK-001_GODOT.md`. High-poly HOLD.
