@@ -1364,28 +1364,29 @@ void fragment() {
 	// medium sit on a flat baseline. Sparse emergents, tiny sky holes.
 	// No low-freq hill, no cordillera. UV.y=0 is the card TOP.
 	float xw = vx + par * 0.03;
-	float t_s = fract(xw * 22.0);
-	float t_m = fract(xw * 12.5 + 0.37);
-	float t_s2 = fract(xw * 31.0 + 0.71);
-	float u_s = (t_s - 0.5) * 1.72;
-	float u_m = (t_m - 0.5) * 1.62;
-	float u_s2 = (t_s2 - 0.5) * 1.80;
-	float copa_s = pow(sqrt(max(1.0 - u_s * u_s, 0.0)), 0.62);
-	float copa_m = pow(sqrt(max(1.0 - u_m * u_m, 0.0)), 0.58);
-	float copa_s2 = pow(sqrt(max(1.0 - u_s2 * u_s2, 0.0)), 0.68);
-	float scallop = max(max(copa_s * 0.78, copa_m * 1.00), copa_s2 * 0.52);
-	float ecell = floor(xw * 10.0 + 0.4);
+	float t_s = fract(xw * 50.0);
+	float t_m = fract(xw * 29.0 + 0.41);
+	float t_t = fract(xw * 64.0 + 0.17);
+	float u_s = (t_s - 0.5) * 1.68;
+	float u_m = (t_m - 0.5) * 1.58;
+	float u_t = (t_t - 0.5) * 1.75;
+	float copa_s = pow(sqrt(max(1.0 - u_s * u_s, 0.0)), 0.70);
+	float copa_m = pow(sqrt(max(1.0 - u_m * u_m, 0.0)), 0.65);
+	float copa_t = pow(sqrt(max(1.0 - u_t * u_t, 0.0)), 0.75);
+	float scallop = max(max(copa_s * 0.72, copa_m * 1.00), copa_t * 0.45);
+	float fill = 0.22 + 0.78 * scallop;
+	float ecell = floor(xw * 16.0 + 0.4);
 	float eh = fract(sin(ecell * 127.13) * 43758.54);
-	float eloc = fract(xw * 10.0 + 0.4);
-	float eu = (eloc - 0.5) * 1.65;
-	float emerg = step(0.85, eh) * pow(sqrt(max(1.0 - eu * eu, 0.0)), 0.55);
-	float hcell = floor(xw * 20.0 + 1.2);
+	float eloc = fract(xw * 16.0 + 0.4);
+	float eu = (eloc - 0.5) * 2.20;
+	float emerg = step(0.88, eh) * pow(sqrt(max(1.0 - eu * eu, 0.0)), 0.60);
+	float hcell = floor(xw * 48.0 + 1.2);
 	float hh = fract(sin(hcell * 91.7) * 23341.2);
-	float hloc = fract(xw * 20.0 + 1.2);
-	float hu = (hloc - 0.5) * 2.00;
-	float hole = step(0.90, hh) * pow(sqrt(max(1.0 - hu * hu, 0.0)), 0.75);
-	float crown = 0.034 + scallop * 0.038 + emerg * 0.036 - hole * 0.016;
-	float keep = smoothstep(crown - 0.004, crown + 0.008, vy);
+	float hloc = fract(xw * 48.0 + 1.2);
+	float hu = (hloc - 0.5) * 3.40;
+	float hole = step(0.93, hh) * pow(sqrt(max(1.0 - hu * hu, 0.0)), 0.80);
+	float crown = 0.030 + fill * 0.044 + emerg * 0.038 - hole * 0.012;
+	float keep = smoothstep(crown - 0.003, crown + 0.007, vy);
 	if (keep < 0.22) {
 		discard;
 	}
