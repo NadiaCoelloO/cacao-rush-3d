@@ -135,6 +135,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 		_hp_ok = bool(hp.call("wire", pilot))
 		_hide_dock_on_follow_cam(pilot)
 		_hide_totem_crate_on_follow_cam(pilot)
+		_set_spawn_crate_visible(pilot, false)
 		var mats = hp.get("totem_mats")
 		_hp_totem_mats.clear()
 		if mats is Array:
@@ -199,6 +200,7 @@ func capture_still(shot: String, out_path: String) -> void:
 	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
 	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
 	if shot != "gameplay":
+		_set_spawn_crate_visible(get_parent(), true)
 		for path in [
 			"WorldRoot/Selva1Geo",
 			"WorldRoot/HP001_CorridorBank",
@@ -1165,6 +1167,23 @@ func _hide_totem_crate_on_follow_cam(pilot: Node3D) -> void:
 		var nm := String(c.name)
 		if nm.begins_with("HP001_Totem") or nm.begins_with("TotemPlaceholder"):
 			_set_layer_recursive(c, bit)
+
+
+func _set_spawn_crate_visible(pilot: Node3D, vis: bool) -> void:
+	# Follow-cam / SELVA stills: hide the pier and the totem crate so they
+	# do not cover Maya at spawn. Art cameras turn them back on.
+	for path in ["WorldRoot/HP001_Dock", "WorldRoot/FloorPlaceholder"]:
+		var n: Node = pilot.get_node_or_null(path)
+		if n:
+			(n as Node3D).visible = vis
+	var anchor: Node = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
+	if anchor == null:
+		return
+	for c in anchor.get_children():
+		var nm := String(c.name)
+		if nm.begins_with("HP001_Totem") or nm.find("Placeholder") >= 0:
+			if c is Node3D:
+				(c as Node3D).visible = vis
 
 
 func _set_layer_recursive(n: Node, bit: int) -> void:

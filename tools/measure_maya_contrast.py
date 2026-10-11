@@ -398,7 +398,7 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
         + 0.7152 * lin(grain_rgb[:, 1])
         + 0.0722 * lin(grain_rgb[:, 2])
     )
-    rim = grain_rgb[lums >= np.percentile(lums, 70.0)]
+    rim = grain_rgb[lums >= np.percentile(lums, 85.0)]
     face = grain_rgb[lums < np.median(lums)]
     near = neighbor_ring(mask, 7)
     jungle = (r < 95) & (g < 110) & (b < 80) & (g >= r - 10) & ~mask
@@ -489,6 +489,8 @@ def measure_grains() -> list[dict]:
             # Platform-top beans can be 8–12 px; sample the projected ellipse.
             found = False
             for name, fx, fy, im in loaded:
+                if preferred_still.get(gid) and name != preferred_still[gid]:
+                    continue
                 if not _visible(wx, wy, fx, fy):
                     continue
                 cx, cy = _project(wx, wy, fx, fy)
