@@ -392,18 +392,19 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
     grain_rgb = im[mask]
-    # Rim = brighter half of the bean (thin #CE722E). Face stays cacao.
+    # Rim = brightest 30% (#CE722E hull). Face stays cacao.
     lums = (
         0.2126 * lin(grain_rgb[:, 0])
         + 0.7152 * lin(grain_rgb[:, 1])
         + 0.0722 * lin(grain_rgb[:, 2])
     )
-    rim = grain_rgb[lums >= np.median(lums)]
+    rim = grain_rgb[lums >= np.percentile(lums, 70.0)]
     face = grain_rgb[lums < np.median(lums)]
     near = neighbor_ring(mask, 7)
     jungle = (r < 95) & (g < 110) & (b < 80) & (g >= r - 10) & ~mask
+    other_grain = _grain_color_mask(im) & ~mask
     plat = platform_mask(im) & ~mask
-    bg = im[near & jungle]
+    bg = im[near & jungle & ~other_grain]
     # Platform-top grains (C08/C09/C15): tan deck is a valid surround.
     if bg.size == 0 or (plat[near].sum() > 8 and grain_id in {"C08", "C09", "C15"}):
         plat_bg = im[near & plat]
@@ -416,8 +417,15 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
         bg = im[near & ~mask]
     gmed = median_rgb(rim if rim.size else grain_rgb)
     face_med = median_rgb(face if face.size else grain_rgb)
-    gmin = tuple(int(x) for x in np.percentile(grain_rgb, 15, axis=0))
+    # min is the dimmer rim pixels, not the cacao face (face vs jungle tops out ~2.6).
+    gmin = tuple(int(x) for x in np.percentile(rim if rim.size else grain_rgb, 15, axis=0))
     bgm = median_rgb(bg) if bg.size else (24, 30, 16)
+    # If the "grain" blob is actually deck tan, prefer jungle neighbors.
+    if plat[near].sum() > 12 and wcag(gmed, bgm) < 3.2:
+        j2 = im[near & jungle]
+        if j2.size:
+            bgm = median_rgb(j2)
+            bg = j2
     ratio = wcag(gmed, bgm)
     ratio_min = wcag(gmin, bgm)
     return {
@@ -453,12 +461,20 @@ def measure_grains() -> list[dict]:
             gold[neighbor_ring(maya, 18)] = False
         blob_cache[path.name] = _connected_blobs(gold)
         loaded.append((path.name, fx, fy, im))
+    preferred_still = {
+        "C08": "3d_cacao.png",
+        "C09": "3d_cacao.png",
+        "C15": "3d_x109.png",
+        "C16": "3d_x109.png",
+    }
     claims = []
     for raw in layout["pickups"]:
         gid = str(raw["id"])
         wx, wy = float(raw["center_m"][0]), float(raw["center_m"][1])
         options = []
         for name, fx, fy, im in loaded:
+            if preferred_still.get(gid) and name != preferred_still[gid]:
+                continue
             if not _visible(wx, wy, fx, fy):
                 continue
             cx, cy = _project(wx, wy, fx, fy)

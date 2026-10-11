@@ -134,6 +134,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 		add_child(hp)
 		_hp_ok = bool(hp.call("wire", pilot))
 		_hide_dock_on_follow_cam(pilot)
+		_hide_totem_crate_on_follow_cam(pilot)
 		var mats = hp.get("totem_mats")
 		_hp_totem_mats.clear()
 		if mats is Array:
@@ -1151,6 +1152,19 @@ func _hide_dock_on_follow_cam(pilot: Node3D) -> void:
 	var dock: Node = pilot.get_node_or_null("WorldRoot/HP001_Dock")
 	if dock:
 		_set_layer_recursive(dock, 1 << (WATER_LAYER - 1))
+
+
+func _hide_totem_crate_on_follow_cam(pilot: Node3D) -> void:
+	# The HP totem mesh is a wide wooden crate on P00. Follow cam sees it as
+	# the "caja del muelle" covering Maya at x=4.54. Art cameras keep it.
+	var anchor: Node = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
+	if anchor == null:
+		return
+	var bit := 1 << (WATER_LAYER - 1)
+	for c in anchor.get_children():
+		var nm := String(c.name)
+		if nm.begins_with("HP001_Totem") or nm.begins_with("TotemPlaceholder"):
+			_set_layer_recursive(c, bit)
 
 
 func _set_layer_recursive(n: Node, bit: int) -> void:
