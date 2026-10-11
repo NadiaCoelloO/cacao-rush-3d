@@ -354,7 +354,7 @@ def _grain_color_mask(im: np.ndarray) -> np.ndarray:
     return cacao | orange
 
 
-def _connected_blobs(mask: np.ndarray, min_n=20, max_n=700, max_w=36, max_h=40) -> list[dict]:
+def _connected_blobs(mask: np.ndarray, min_n=8, max_n=900, max_w=48, max_h=52) -> list[dict]:
     h, w = mask.shape
     seen = np.zeros_like(mask)
     blobs = []
@@ -470,7 +470,32 @@ def measure_grains() -> list[dict]:
             options.sort(key=lambda t: t[0])
             claims.append(options)
         else:
-            claims.append([(1e9, gid, None, None, None, None, None)])
+            # Platform-top beans can be 8–12 px; sample the projected ellipse.
+            found = False
+            for name, fx, fy, im in loaded:
+                if not _visible(wx, wy, fx, fy):
+                    continue
+                cx, cy = _project(wx, wy, fx, fy)
+                yy, xx = np.ogrid[: im.shape[0], : im.shape[1]]
+                ell = ((xx - cx) / 14.0) ** 2 + ((yy - cy) / 18.0) ** 2 <= 1.0
+                gold = _grain_color_mask(im)
+                mask = gold & ell
+                if int(mask.sum()) < 6:
+                    r = im[:, :, 0].astype(np.int16)
+                    g = im[:, :, 1].astype(np.int16)
+                    b = im[:, :, 2].astype(np.int16)
+                    warm = (r >= 55) & (r <= 200) & (r >= g + 10) & (r >= b + 16) & (b <= 90)
+                    mask = warm & ell
+                n = int(mask.sum())
+                if n >= 6:
+                    bys, bxs = np.where(mask)
+                    blob = {"xs": bxs, "ys": bys, "cx": float(bxs.mean()), "cy": float(bys.mean()), "n": n}
+                    blob_cache[name].append(blob)
+                    claims.append([(0.0, gid, name, len(blob_cache[name]) - 1, cx, cy, im)])
+                    found = True
+                    break
+            if not found:
+                claims.append([(1e9, gid, None, None, None, None, None)])
     used = set()
     rows_by_id = {}
     # Greedy unique assignment, nearest first.
@@ -611,7 +636,6 @@ def main() -> int:
             "all_min_ge_3": all(r.get("min_pass") for r in grains if "min_pass" in r),
         },
     }
-    print(json.dumps(report, indent=2))
     sweep_names = {n for n, _x, _y in SWEEP}
     p10_need = {"3d_x36.png", "3d_x66.png", "3d_cacao.png"}
     ok_m = all(r.get("body_pass") for r in maya if r.get("file") in sweep_names and "body_pass" in r)
@@ -622,6 +646,7 @@ def main() -> int:
         "files": sorted(p10_need),
         "pass": ok_p10,
     }
+    print(json.dumps(report, indent=2))
     return 0 if ok_m and ok_p10 and ok_c and ok_g else 1
 
 

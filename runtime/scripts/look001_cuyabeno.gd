@@ -133,6 +133,7 @@ func apply(pilot: Node3D, lod_roots: Array) -> void:
 		hp.name = "HP001"
 		add_child(hp)
 		_hp_ok = bool(hp.call("wire", pilot))
+		_hide_dock_on_follow_cam(pilot)
 		var mats = hp.get("totem_mats")
 		_hp_totem_mats.clear()
 		if mats is Array:
@@ -1139,6 +1140,24 @@ func _hide_water_on_follow_cam(pilot: Node3D) -> void:
 	var play_cam: Camera3D = pilot.get_node_or_null("PlayerMaya/Camera3D") as Camera3D
 	if play_cam:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
+
+
+func _hide_dock_on_follow_cam(pilot: Node3D) -> void:
+	# HP dock is lagoon art. On the 40×22.5 follow cam it reads as a crate
+	# on P00 and covers Maya at spawn. Same cull as water (layer 12).
+	var play_cam: Camera3D = pilot.get_node_or_null("PlayerMaya/Camera3D") as Camera3D
+	if play_cam:
+		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
+	var dock: Node = pilot.get_node_or_null("WorldRoot/HP001_Dock")
+	if dock:
+		_set_layer_recursive(dock, 1 << (WATER_LAYER - 1))
+
+
+func _set_layer_recursive(n: Node, bit: int) -> void:
+	if n is GeometryInstance3D:
+		(n as GeometryInstance3D).layers = bit
+	for c in n.get_children():
+		_set_layer_recursive(c, bit)
 
 
 func _curved_liana_mat() -> ShaderMaterial:

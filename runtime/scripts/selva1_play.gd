@@ -282,6 +282,7 @@ func _build_world() -> void:
 			_add_wind_card(visual, h)
 		_hazards.append(rec)
 	var bean_mat := _bean_mat()
+	var bean_rim := _bean_rim_mat(0.045)
 	for raw_c in _layout["pickups"]:
 		var c: Dictionary = raw_c
 		var center := _vec(c["center_m"])
@@ -296,6 +297,12 @@ func _build_world() -> void:
 		bean.scale = Vector3(1.515, 2.084, 0.36)
 		bean.position = center
 		bean.material_override = bean_mat
+		var rim := MeshInstance3D.new()
+		rim.name = String(c["id"]) + "_rim"
+		rim.mesh = sphere
+		rim.material_override = bean_rim
+		rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		bean.add_child(rim)
 		visual.add_child(bean)
 		_coins.append({
 			"id": String(c["id"]),
@@ -545,21 +552,37 @@ func _bean_mat() -> ShaderMaterial:
 render_mode unshaded, fog_disabled, cull_back, specular_disabled;
 uniform vec4 albedo_lo : source_color;
 uniform vec4 albedo_hi : source_color;
-uniform vec4 rim_col : source_color;
 void fragment() {
 	vec3 n = normalize(NORMAL);
-	// Face stays cacao #6b3a1f–#8B4A2B. No cream/#f8d090 mix.
-	// Legibility is a thin orange rim #CE722E on the silhouette only.
+	// Face only: #6b3a1f–#8B4A2B. No cream/#f8d090 and no orange wash.
 	float mottling = clamp(0.35 + 0.65 * n.y, 0.0, 1.0);
-	vec3 face = mix(albedo_lo.rgb, albedo_hi.rgb, mottling);
-	float rim = smoothstep(0.70, 0.94, length(n.xy));
-	ALBEDO = mix(face, rim_col.rgb, rim);
+	ALBEDO = mix(albedo_lo.rgb, albedo_hi.rgb, mottling);
 }
 """
 	mat.shader = shader
 	mat.set_shader_parameter("albedo_lo", COL_BEAN_LO)
 	mat.set_shader_parameter("albedo_hi", COL_BEAN)
-	mat.set_shader_parameter("rim_col", COL_BEAN_RIM)
+	return mat
+
+
+func _bean_rim_mat(grow: float) -> ShaderMaterial:
+	# 1–2 px inverted hull, same trick as Maya. Face stays cacao.
+	var mat := ShaderMaterial.new()
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode unshaded, cull_front, fog_disabled, shadows_disabled, specular_disabled;
+uniform vec4 albedo : source_color;
+uniform float grow;
+void vertex() {
+	VERTEX += NORMAL * grow;
+}
+void fragment() {
+	ALBEDO = albedo.rgb;
+}
+"""
+	mat.shader = shader
+	mat.set_shader_parameter("albedo", COL_BEAN_RIM)
+	mat.set_shader_parameter("grow", grow)
 	return mat
 
 
