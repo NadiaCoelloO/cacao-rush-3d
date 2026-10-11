@@ -10,6 +10,8 @@ uniform float strength = 3.2;
 uniform float height_m = 6.2;
 uniform float height_fade_pow = 1.6;
 uniform float facing_gain = 0.85;
+// Fade the open cylinder base so the bottom rim does not read as a hard disc.
+uniform float base_fade_m = 0.35;
 
 varying float h01;
 
@@ -20,7 +22,9 @@ void vertex() {
 
 void fragment() {
 	float facing = abs(dot(normalize(NORMAL), normalize(VIEW)));
-	float a = clamp(facing_gain * pow(1.0 - h01, height_fade_pow) * facing, 0.0, 1.0);
+	float y_m = h01 * height_m;
+	float base_a = smoothstep(0.0, max(base_fade_m, 0.001), y_m);
+	float a = clamp(facing_gain * pow(1.0 - h01, height_fade_pow) * facing * base_a, 0.0, 1.0);
 	ALBEDO = beam_color.rgb * strength;
 	ALPHA = a;
 }

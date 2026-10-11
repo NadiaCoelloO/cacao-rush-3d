@@ -1,0 +1,9646 @@
+{
+  "method": "QA E2j: grain silhouette max(rim, outline) vs local bg; Maya p10 exclude 2 px AA",
+  "maya": [
+    {
+      "file": "3d_x04.png",
+      "x_m": 4.54,
+      "cream_n": 219,
+      "body_n": 407,
+      "body_core_n": 17,
+      "p10_n": 2,
+      "outline_n": 183,
+      "body_bg_n": 2759,
+      "body_center_px": [
+        152.9,
+        393.5
+      ],
+      "body_bbox_px": [
+        145,
+        365,
+        166,
+        424
+      ],
+      "body_samples_px": [
+        [
+          153,
+          394
+        ],
+        [
+          145,
+          369
+        ],
+        [
+          150,
+          365
+        ],
+        [
+          166,
+          380
+        ],
+        [
+          145,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        150.0,
+        396.0
+      ],
+      "p10_bbox_px": [
+        146,
+        370,
+        154,
+        422
+      ],
+      "p10_samples_px": [
+        [
+          146,
+          370
+        ],
+        [
+          154,
+          422
+        ]
+      ],
+      "bg_center_px": [
+        156.2,
+        381.1
+      ],
+      "bg_bbox_px": [
+        129,
+        349,
+        182,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          156,
+          381
+        ],
+        [
+          129,
+          353
+        ],
+        [
+          134,
+          349
+        ],
+        [
+          182,
+          364
+        ],
+        [
+          129,
+          419
+        ]
+      ],
+      "body_rgb": [
+        188,
+        158,
+        98
+      ],
+      "body_p10_rgb": [
+        180,
+        147,
+        94
+      ],
+      "body_bg_rgb": [
+        23,
+        29,
+        11
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        198,
+        171,
+        124
+      ],
+      "body_ratio": 6.74,
+      "p10_ratio": 5.98,
+      "outline_ratio": 9.36,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x36.png",
+      "x_m": 36.0,
+      "cream_n": 223,
+      "body_n": 353,
+      "body_core_n": 42,
+      "p10_n": 6,
+      "outline_n": 173,
+      "body_bg_n": 3855,
+      "body_center_px": [
+        576.4,
+        384.0
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.5,
+        380.0
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        380
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.5
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          381
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        221,
+        174,
+        115
+      ],
+      "body_p10_rgb": [
+        222,
+        166,
+        90
+      ],
+      "body_bg_rgb": [
+        26,
+        33,
+        14
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        214,
+        176,
+        116
+      ],
+      "body_ratio": 8.18,
+      "p10_ratio": 7.66,
+      "outline_ratio": 10.15,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x66.png",
+      "x_m": 66.0,
+      "cream_n": 225,
+      "body_n": 350,
+      "body_core_n": 42,
+      "p10_n": 7,
+      "outline_n": 173,
+      "body_bg_n": 3861,
+      "body_center_px": [
+        576.4,
+        384.0
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.1,
+        380.1
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        381
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ],
+        [
+          572,
+          381
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.6
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          381
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        220,
+        173,
+        113
+      ],
+      "body_p10_rgb": [
+        221,
+        165,
+        89
+      ],
+      "body_bg_rgb": [
+        22,
+        28,
+        12
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        213,
+        175,
+        115
+      ],
+      "body_ratio": 8.51,
+      "p10_ratio": 7.96,
+      "outline_ratio": 10.04,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x87.png",
+      "x_m": 86.67,
+      "cream_n": 224,
+      "body_n": 351,
+      "body_core_n": 42,
+      "p10_n": 6,
+      "outline_n": 173,
+      "body_bg_n": 3853,
+      "body_center_px": [
+        576.4,
+        383.9
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.5,
+        380.0
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        380
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.5
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          380
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        221,
+        174,
+        115
+      ],
+      "body_p10_rgb": [
+        222,
+        166,
+        90
+      ],
+      "body_bg_rgb": [
+        17,
+        22,
+        7
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        208,
+        174,
+        116
+      ],
+      "body_ratio": 9.09,
+      "p10_ratio": 8.5,
+      "outline_ratio": 9.83,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x95.png",
+      "x_m": 95.33,
+      "cream_n": 51,
+      "body_n": 66,
+      "body_core_n": 9,
+      "p10_n": 1,
+      "outline_n": 68,
+      "body_bg_n": 864,
+      "body_center_px": [
+        581.0,
+        412.1
+      ],
+      "body_bbox_px": [
+        580,
+        400,
+        582,
+        424
+      ],
+      "body_samples_px": [
+        [
+          581,
+          412
+        ],
+        [
+          580,
+          403
+        ],
+        [
+          581,
+          400
+        ],
+        [
+          582,
+          400
+        ],
+        [
+          580,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        581.0,
+        420.0
+      ],
+      "p10_bbox_px": [
+        581,
+        420,
+        581,
+        420
+      ],
+      "p10_samples_px": [
+        [
+          581,
+          420
+        ]
+      ],
+      "bg_center_px": [
+        583.7,
+        402.6
+      ],
+      "bg_bbox_px": [
+        564,
+        384,
+        598,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          403
+        ],
+        [
+          564,
+          387
+        ],
+        [
+          565,
+          384
+        ],
+        [
+          598,
+          392
+        ],
+        [
+          564,
+          419
+        ]
+      ],
+      "body_rgb": [
+        199,
+        166,
+        113
+      ],
+      "body_p10_rgb": [
+        189,
+        153,
+        101
+      ],
+      "body_bg_rgb": [
+        28,
+        34,
+        16
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        211,
+        177,
+        104
+      ],
+      "body_ratio": 7.09,
+      "p10_ratio": 6.15,
+      "outline_ratio": 10.09,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x133.png",
+      "x_m": 133.33,
+      "cream_n": 51,
+      "body_n": 66,
+      "body_core_n": 9,
+      "p10_n": 1,
+      "outline_n": 68,
+      "body_bg_n": 864,
+      "body_center_px": [
+        581.0,
+        412.1
+      ],
+      "body_bbox_px": [
+        580,
+        400,
+        582,
+        424
+      ],
+      "body_samples_px": [
+        [
+          581,
+          412
+        ],
+        [
+          580,
+          403
+        ],
+        [
+          581,
+          400
+        ],
+        [
+          582,
+          400
+        ],
+        [
+          580,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        581.0,
+        420.0
+      ],
+      "p10_bbox_px": [
+        581,
+        420,
+        581,
+        420
+      ],
+      "p10_samples_px": [
+        [
+          581,
+          420
+        ]
+      ],
+      "bg_center_px": [
+        583.7,
+        402.6
+      ],
+      "bg_bbox_px": [
+        564,
+        384,
+        598,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          403
+        ],
+        [
+          564,
+          387
+        ],
+        [
+          565,
+          384
+        ],
+        [
+          598,
+          392
+        ],
+        [
+          564,
+          419
+        ]
+      ],
+      "body_rgb": [
+        199,
+        166,
+        112
+      ],
+      "body_p10_rgb": [
+        189,
+        153,
+        101
+      ],
+      "body_bg_rgb": [
+        27,
+        35,
+        15
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        211,
+        176,
+        104
+      ],
+      "body_ratio": 7.05,
+      "p10_ratio": 6.11,
+      "outline_ratio": 10.02,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x163.png",
+      "x_m": 162.67,
+      "cream_n": 51,
+      "body_n": 65,
+      "body_core_n": 9,
+      "p10_n": 1,
+      "outline_n": 75,
+      "body_bg_n": 1717,
+      "body_center_px": [
+        581.0,
+        412.3
+      ],
+      "body_bbox_px": [
+        580,
+        400,
+        582,
+        424
+      ],
+      "body_samples_px": [
+        [
+          581,
+          412
+        ],
+        [
+          580,
+          404
+        ],
+        [
+          581,
+          400
+        ],
+        [
+          582,
+          400
+        ],
+        [
+          580,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        581.0,
+        420.0
+      ],
+      "p10_bbox_px": [
+        581,
+        420,
+        581,
+        420
+      ],
+      "p10_samples_px": [
+        [
+          581,
+          420
+        ]
+      ],
+      "bg_center_px": [
+        582.6,
+        416.9
+      ],
+      "bg_bbox_px": [
+        564,
+        384,
+        598,
+        440
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          417
+        ],
+        [
+          564,
+          388
+        ],
+        [
+          565,
+          384
+        ],
+        [
+          598,
+          392
+        ],
+        [
+          564,
+          440
+        ]
+      ],
+      "body_rgb": [
+        199,
+        166,
+        112
+      ],
+      "body_p10_rgb": [
+        188,
+        152,
+        101
+      ],
+      "body_bg_rgb": [
+        29,
+        36,
+        16
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        236,
+        198,
+        135
+      ],
+      "body_ratio": 6.95,
+      "p10_ratio": 5.96,
+      "outline_ratio": 12.78,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x193.png",
+      "x_m": 193.33,
+      "cream_n": 47,
+      "body_n": 42,
+      "body_core_n": 42,
+      "p10_n": 5,
+      "outline_n": 90,
+      "body_bg_n": 819,
+      "body_center_px": [
+        973.2,
+        413.2
+      ],
+      "body_bbox_px": [
+        972,
+        396,
+        974,
+        424
+      ],
+      "body_samples_px": [
+        [
+          973,
+          413
+        ],
+        [
+          972,
+          421
+        ],
+        [
+          973,
+          396
+        ],
+        [
+          974,
+          414
+        ],
+        [
+          973,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        972.8,
+        412.2
+      ],
+      "p10_bbox_px": [
+        972,
+        396,
+        973,
+        424
+      ],
+      "p10_samples_px": [
+        [
+          973,
+          420
+        ],
+        [
+          972,
+          422
+        ],
+        [
+          973,
+          396
+        ],
+        [
+          973,
+          424
+        ]
+      ],
+      "bg_center_px": [
+        967.5,
+        402.4
+      ],
+      "bg_bbox_px": [
+        956,
+        380,
+        990,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          968,
+          402
+        ],
+        [
+          956,
+          405
+        ],
+        [
+          957,
+          380
+        ],
+        [
+          990,
+          398
+        ],
+        [
+          956,
+          419
+        ]
+      ],
+      "body_rgb": [
+        228,
+        180,
+        93
+      ],
+      "body_p10_rgb": [
+        212,
+        163,
+        82
+      ],
+      "body_bg_rgb": [
+        27,
+        34,
+        15
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        224,
+        179,
+        104
+      ],
+      "body_ratio": 8.57,
+      "p10_ratio": 7.14,
+      "outline_ratio": 10.64,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_entrance.png",
+      "x_m": 4.54,
+      "cream_n": 226,
+      "body_n": 388,
+      "body_core_n": 30,
+      "p10_n": 3,
+      "outline_n": 192,
+      "body_bg_n": 3079,
+      "body_center_px": [
+        154.0,
+        391.0
+      ],
+      "body_bbox_px": [
+        145,
+        365,
+        170,
+        421
+      ],
+      "body_samples_px": [
+        [
+          154,
+          391
+        ],
+        [
+          145,
+          369
+        ],
+        [
+          150,
+          365
+        ],
+        [
+          170,
+          387
+        ],
+        [
+          145,
+          421
+        ]
+      ],
+      "p10_center_px": [
+        150.3,
+        395.0
+      ],
+      "p10_bbox_px": [
+        146,
+        370,
+        153,
+        412
+      ],
+      "p10_samples_px": [
+        [
+          153,
+          403
+        ],
+        [
+          146,
+          370
+        ],
+        [
+          152,
+          412
+        ]
+      ],
+      "bg_center_px": [
+        158.2,
+        382.5
+      ],
+      "bg_bbox_px": [
+        129,
+        349,
+        186,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          158,
+          383
+        ],
+        [
+          129,
+          353
+        ],
+        [
+          134,
+          349
+        ],
+        [
+          186,
+          371
+        ],
+        [
+          129,
+          419
+        ]
+      ],
+      "body_rgb": [
+        177,
+        147,
+        89
+      ],
+      "body_p10_rgb": [
+        179,
+        152,
+        99
+      ],
+      "body_bg_rgb": [
+        23,
+        29,
+        11
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        177,
+        147,
+        95
+      ],
+      "body_ratio": 5.91,
+      "p10_ratio": 6.24,
+      "outline_ratio": 7.09,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_hazard.png",
+      "x_m": 133.33,
+      "cream_n": 48,
+      "body_n": 40,
+      "body_core_n": 40,
+      "p10_n": 4,
+      "outline_n": 63,
+      "body_bg_n": 1301,
+      "body_center_px": [
+        580.7,
+        351.8
+      ],
+      "body_bbox_px": [
+        580,
+        344,
+        582,
+        361
+      ],
+      "body_samples_px": [
+        [
+          581,
+          352
+        ],
+        [
+          580,
+          344
+        ],
+        [
+          582,
+          344
+        ],
+        [
+          580,
+          361
+        ]
+      ],
+      "p10_center_px": [
+        580.0,
+        357.5
+      ],
+      "p10_bbox_px": [
+        580,
+        356,
+        580,
+        359
+      ],
+      "p10_samples_px": [
+        [
+          580,
+          357
+        ],
+        [
+          580,
+          356
+        ],
+        [
+          580,
+          359
+        ]
+      ],
+      "bg_center_px": [
+        582.6,
+        355.2
+      ],
+      "bg_bbox_px": [
+        564,
+        328,
+        598,
+        377
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          355
+        ],
+        [
+          564,
+          328
+        ],
+        [
+          598,
+          329
+        ],
+        [
+          564,
+          377
+        ]
+      ],
+      "body_rgb": [
+        198,
+        168,
+        110
+      ],
+      "body_p10_rgb": [
+        190,
+        154,
+        103
+      ],
+      "body_bg_rgb": [
+        32,
+        39,
+        19
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        220,
+        189,
+        141
+      ],
+      "body_ratio": 6.78,
+      "p10_ratio": 5.88,
+      "outline_ratio": 11.52,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_cacao.png",
+      "x_m": 65.88,
+      "cream_n": 227,
+      "body_n": 351,
+      "body_core_n": 42,
+      "p10_n": 7,
+      "outline_n": 174,
+      "body_bg_n": 3859,
+      "body_center_px": [
+        576.4,
+        384.0
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.1,
+        380.1
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        381
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ],
+        [
+          572,
+          381
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.6
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          381
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        220,
+        173,
+        113
+      ],
+      "body_p10_rgb": [
+        221,
+        165,
+        89
+      ],
+      "body_bg_rgb": [
+        22,
+        28,
+        12
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        213,
+        175,
+        115
+      ],
+      "body_ratio": 8.51,
+      "p10_ratio": 7.96,
+      "outline_ratio": 10.04,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    }
+  ],
+  "cacao": [
+    {
+      "file": "HP001_E2i_engine_totem_pods_v4.png",
+      "pod_n": 134,
+      "center_px": [
+        828.4,
+        790.7
+      ],
+      "pod_rgb": [
+        218,
+        192,
+        125
+      ],
+      "bg_rgb": [
+        224,
+        200,
+        137
+      ],
+      "ratio": 1.08,
+      "pass": false
+    }
+  ],
+  "grains": [
+    {
+      "id": "C00",
+      "file": "3d_x04.png",
+      "n": 149,
+      "face_n": 67,
+      "rim_n": 82,
+      "outline_n": 176,
+      "bg_n": 199,
+      "proj_px": [
+        213.3,
+        297.3
+      ],
+      "found_px": [
+        207.7,
+        285.4
+      ],
+      "face_center_px": [
+        207.7,
+        290.3
+      ],
+      "face_bbox_px": [
+        204,
+        276,
+        215,
+        307
+      ],
+      "face_samples_px": [
+        [
+          204,
+          291
+        ],
+        [
+          204,
+          285
+        ],
+        [
+          210,
+          276
+        ],
+        [
+          215,
+          278
+        ],
+        [
+          211,
+          307
+        ]
+      ],
+      "rim_center_px": [
+        207.8,
+        281.4
+      ],
+      "rim_bbox_px": [
+        202,
+        273,
+        218,
+        298
+      ],
+      "rim_samples_px": [
+        [
+          205,
+          281
+        ],
+        [
+          202,
+          287
+        ],
+        [
+          209,
+          273
+        ],
+        [
+          218,
+          278
+        ],
+        [
+          203,
+          298
+        ]
+      ],
+      "outline_center_px": [
+        207.9,
+        291.1
+      ],
+      "outline_bbox_px": [
+        201,
+        269,
+        221,
+        311
+      ],
+      "outline_samples_px": [
+        [
+          201,
+          291
+        ],
+        [
+          201,
+          282
+        ],
+        [
+          211,
+          269
+        ],
+        [
+          221,
+          280
+        ],
+        [
+          207,
+          311
+        ]
+      ],
+      "sil_center_px": [
+        207.8,
+        281.4
+      ],
+      "sil_bbox_px": [
+        202,
+        273,
+        218,
+        298
+      ],
+      "sil_samples_px": [
+        [
+          205,
+          281
+        ],
+        [
+          202,
+          287
+        ],
+        [
+          209,
+          273
+        ],
+        [
+          218,
+          278
+        ],
+        [
+          203,
+          298
+        ]
+      ],
+      "bg_center_px": [
+        205.8,
+        284.8
+      ],
+      "bg_bbox_px": [
+        196,
+        267,
+        224,
+        313
+      ],
+      "bg_samples_px": [
+        [
+          198,
+          282
+        ],
+        [
+          196,
+          281
+        ],
+        [
+          203,
+          267
+        ],
+        [
+          224,
+          272
+        ],
+        [
+          205,
+          313
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        53,
+        25,
+        14
+      ],
+      "outline_p15_rgb": [
+        52,
+        25,
+        14
+      ],
+      "bg_rgb": [
+        24,
+        30,
+        12
+      ],
+      "rim_ratio": 7.41,
+      "outline_ratio": 1.05,
+      "winner": "rim",
+      "median_ratio": 7.41,
+      "min_ratio": 7.41,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C01",
+      "file": "3d_x04.png",
+      "n": 296,
+      "face_n": 95,
+      "rim_n": 68,
+      "outline_n": 191,
+      "bg_n": 202,
+      "proj_px": [
+        290.1,
+        281.3
+      ],
+      "found_px": [
+        289.7,
+        288.9
+      ],
+      "face_center_px": [
+        288.2,
+        291.7
+      ],
+      "face_bbox_px": [
+        282,
+        282,
+        295,
+        300
+      ],
+      "face_samples_px": [
+        [
+          290,
+          292
+        ],
+        [
+          282,
+          286
+        ],
+        [
+          291,
+          282
+        ],
+        [
+          295,
+          292
+        ],
+        [
+          290,
+          300
+        ]
+      ],
+      "rim_center_px": [
+        291.3,
+        282.9
+      ],
+      "rim_bbox_px": [
+        279,
+        268,
+        298,
+        293
+      ],
+      "rim_samples_px": [
+        [
+          297,
+          283
+        ],
+        [
+          279,
+          283
+        ],
+        [
+          290,
+          268
+        ],
+        [
+          298,
+          281
+        ],
+        [
+          280,
+          293
+        ]
+      ],
+      "outline_center_px": [
+        290.2,
+        293.7
+      ],
+      "outline_bbox_px": [
+        277,
+        267,
+        300,
+        305
+      ],
+      "outline_samples_px": [
+        [
+          296,
+          294
+        ],
+        [
+          277,
+          282
+        ],
+        [
+          290,
+          267
+        ],
+        [
+          300,
+          284
+        ],
+        [
+          283,
+          305
+        ]
+      ],
+      "sil_center_px": [
+        291.3,
+        282.9
+      ],
+      "sil_bbox_px": [
+        279,
+        268,
+        298,
+        293
+      ],
+      "sil_samples_px": [
+        [
+          297,
+          283
+        ],
+        [
+          279,
+          283
+        ],
+        [
+          290,
+          268
+        ],
+        [
+          298,
+          281
+        ],
+        [
+          280,
+          293
+        ]
+      ],
+      "bg_center_px": [
+        291.0,
+        289.3
+      ],
+      "bg_bbox_px": [
+        273,
+        265,
+        304,
+        307
+      ],
+      "bg_samples_px": [
+        [
+          303,
+          289
+        ],
+        [
+          273,
+          277
+        ],
+        [
+          294,
+          265
+        ],
+        [
+          304,
+          275
+        ],
+        [
+          280,
+          307
+        ]
+      ],
+      "face_rgb": [
+        154,
+        77,
+        37
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        52,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        52,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        23,
+        30,
+        11
+      ],
+      "rim_ratio": 7.43,
+      "outline_ratio": 1.05,
+      "winner": "rim",
+      "median_ratio": 7.43,
+      "min_ratio": 7.43,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C02",
+      "file": "3d_x04.png",
+      "n": 470,
+      "face_n": 197,
+      "rim_n": 123,
+      "outline_n": 256,
+      "bg_n": 284,
+      "proj_px": [
+        366.9,
+        297.3
+      ],
+      "found_px": [
+        365.7,
+        289.4
+      ],
+      "face_center_px": [
+        366.1,
+        291.4
+      ],
+      "face_bbox_px": [
+        359,
+        278,
+        372,
+        305
+      ],
+      "face_samples_px": [
+        [
+          368,
+          291
+        ],
+        [
+          359,
+          287
+        ],
+        [
+          367,
+          278
+        ],
+        [
+          372,
+          286
+        ],
+        [
+          368,
+          305
+        ]
+      ],
+      "rim_center_px": [
+        365.5,
+        283.7
+      ],
+      "rim_bbox_px": [
+        356,
+        273,
+        375,
+        298
+      ],
+      "rim_samples_px": [
+        [
+          359,
+          282
+        ],
+        [
+          356,
+          287
+        ],
+        [
+          364,
+          273
+        ],
+        [
+          375,
+          286
+        ],
+        [
+          357,
+          298
+        ]
+      ],
+      "outline_center_px": [
+        365.9,
+        294.1
+      ],
+      "outline_bbox_px": [
+        355,
+        270,
+        377,
+        311
+      ],
+      "outline_samples_px": [
+        [
+          373,
+          300
+        ],
+        [
+          355,
+          283
+        ],
+        [
+          363,
+          270
+        ],
+        [
+          377,
+          288
+        ],
+        [
+          361,
+          311
+        ]
+      ],
+      "sil_center_px": [
+        365.5,
+        283.7
+      ],
+      "sil_bbox_px": [
+        356,
+        273,
+        375,
+        298
+      ],
+      "sil_samples_px": [
+        [
+          359,
+          282
+        ],
+        [
+          356,
+          287
+        ],
+        [
+          364,
+          273
+        ],
+        [
+          375,
+          286
+        ],
+        [
+          357,
+          298
+        ]
+      ],
+      "bg_center_px": [
+        365.5,
+        288.7
+      ],
+      "bg_bbox_px": [
+        350,
+        267,
+        381,
+        313
+      ],
+      "bg_samples_px": [
+        [
+          380,
+          289
+        ],
+        [
+          350,
+          281
+        ],
+        [
+          358,
+          267
+        ],
+        [
+          381,
+          280
+        ],
+        [
+          358,
+          313
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        23,
+        30,
+        12
+      ],
+      "rim_ratio": 7.43,
+      "outline_ratio": 1.04,
+      "winner": "rim",
+      "median_ratio": 7.43,
+      "min_ratio": 7.43,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C03",
+      "file": "3d_x04.png",
+      "n": 203,
+      "face_n": 109,
+      "rim_n": 41,
+      "outline_n": 116,
+      "bg_n": 23,
+      "proj_px": [
+        341.3,
+        84.0
+      ],
+      "found_px": [
+        341.1,
+        80.2
+      ],
+      "face_center_px": [
+        340.4,
+        80.1
+      ],
+      "face_bbox_px": [
+        338,
+        71,
+        343,
+        92
+      ],
+      "face_samples_px": [
+        [
+          340,
+          80
+        ],
+        [
+          338,
+          71
+        ],
+        [
+          343,
+          73
+        ],
+        [
+          339,
+          92
+        ]
+      ],
+      "rim_center_px": [
+        345.0,
+        75.6
+      ],
+      "rim_bbox_px": [
+        342,
+        66,
+        346,
+        86
+      ],
+      "rim_samples_px": [
+        [
+          345,
+          76
+        ],
+        [
+          342,
+          66
+        ],
+        [
+          346,
+          73
+        ],
+        [
+          345,
+          86
+        ]
+      ],
+      "outline_center_px": [
+        343.2,
+        87.6
+      ],
+      "outline_bbox_px": [
+        334,
+        66,
+        348,
+        98
+      ],
+      "outline_samples_px": [
+        [
+          344,
+          88
+        ],
+        [
+          334,
+          95
+        ],
+        [
+          345,
+          66
+        ],
+        [
+          348,
+          74
+        ],
+        [
+          334,
+          98
+        ]
+      ],
+      "sil_center_px": [
+        345.0,
+        75.6
+      ],
+      "sil_bbox_px": [
+        342,
+        66,
+        346,
+        86
+      ],
+      "sil_samples_px": [
+        [
+          345,
+          76
+        ],
+        [
+          342,
+          66
+        ],
+        [
+          346,
+          73
+        ],
+        [
+          345,
+          86
+        ]
+      ],
+      "bg_center_px": [
+        349.7,
+        66.0
+      ],
+      "bg_bbox_px": [
+        346,
+        64,
+        352,
+        70
+      ],
+      "bg_samples_px": [
+        [
+          350,
+          66
+        ],
+        [
+          346,
+          64
+        ],
+        [
+          352,
+          67
+        ],
+        [
+          351,
+          70
+        ]
+      ],
+      "face_rgb": [
+        155,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        33,
+        25,
+        1
+      ],
+      "rim_ratio": 7.57,
+      "outline_ratio": 1.06,
+      "winner": "rim",
+      "median_ratio": 7.57,
+      "min_ratio": 7.57,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C04",
+      "file": "3d_x36.png",
+      "n": 285,
+      "face_n": 71,
+      "rim_n": 96,
+      "outline_n": 236,
+      "bg_n": 246,
+      "proj_px": [
+        192.0,
+        212.0
+      ],
+      "found_px": [
+        190.4,
+        213.0
+      ],
+      "face_center_px": [
+        191.1,
+        219.9
+      ],
+      "face_bbox_px": [
+        183,
+        209,
+        195,
+        227
+      ],
+      "face_samples_px": [
+        [
+          191,
+          220
+        ],
+        [
+          183,
+          220
+        ],
+        [
+          195,
+          209
+        ],
+        [
+          190,
+          227
+        ]
+      ],
+      "rim_center_px": [
+        190.3,
+        204.6
+      ],
+      "rim_bbox_px": [
+        179,
+        194,
+        198,
+        220
+      ],
+      "rim_samples_px": [
+        [
+          194,
+          202
+        ],
+        [
+          179,
+          214
+        ],
+        [
+          187,
+          194
+        ],
+        [
+          198,
+          209
+        ],
+        [
+          180,
+          220
+        ]
+      ],
+      "outline_center_px": [
+        188.0,
+        218.2
+      ],
+      "outline_bbox_px": [
+        177,
+        191,
+        199,
+        233
+      ],
+      "outline_samples_px": [
+        [
+          181,
+          221
+        ],
+        [
+          177,
+          210
+        ],
+        [
+          187,
+          191
+        ],
+        [
+          199,
+          206
+        ],
+        [
+          184,
+          233
+        ]
+      ],
+      "sil_center_px": [
+        190.3,
+        204.6
+      ],
+      "sil_bbox_px": [
+        179,
+        194,
+        198,
+        220
+      ],
+      "sil_samples_px": [
+        [
+          194,
+          202
+        ],
+        [
+          179,
+          214
+        ],
+        [
+          187,
+          194
+        ],
+        [
+          198,
+          209
+        ],
+        [
+          180,
+          220
+        ]
+      ],
+      "bg_center_px": [
+        187.2,
+        214.0
+      ],
+      "bg_bbox_px": [
+        173,
+        188,
+        204,
+        235
+      ],
+      "bg_samples_px": [
+        [
+          176,
+          209
+        ],
+        [
+          173,
+          208
+        ],
+        [
+          181,
+          188
+        ],
+        [
+          204,
+          203
+        ],
+        [
+          182,
+          235
+        ]
+      ],
+      "face_rgb": [
+        154,
+        77,
+        37
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        28,
+        34,
+        14
+      ],
+      "rim_ratio": 7.1,
+      "outline_ratio": 1.01,
+      "winner": "rim",
+      "median_ratio": 7.1,
+      "min_ratio": 7.1,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C05",
+      "file": "3d_grains_c07.png",
+      "n": 464,
+      "face_n": 208,
+      "rim_n": 106,
+      "outline_n": 269,
+      "bg_n": 282,
+      "proj_px": [
+        469.3,
+        361.3
+      ],
+      "found_px": [
+        469.1,
+        362.5
+      ],
+      "face_center_px": [
+        469.3,
+        364.5
+      ],
+      "face_bbox_px": [
+        462,
+        351,
+        476,
+        378
+      ],
+      "face_samples_px": [
+        [
+          471,
+          364
+        ],
+        [
+          462,
+          362
+        ],
+        [
+          471,
+          351
+        ],
+        [
+          476,
+          362
+        ],
+        [
+          467,
+          378
+        ]
+      ],
+      "rim_center_px": [
+        468.8,
+        356.0
+      ],
+      "rim_bbox_px": [
+        460,
+        346,
+        478,
+        371
+      ],
+      "rim_samples_px": [
+        [
+          463,
+          353
+        ],
+        [
+          460,
+          357
+        ],
+        [
+          467,
+          346
+        ],
+        [
+          478,
+          357
+        ],
+        [
+          460,
+          371
+        ]
+      ],
+      "outline_center_px": [
+        469.1,
+        366.8
+      ],
+      "outline_bbox_px": [
+        458,
+        343,
+        480,
+        384
+      ],
+      "outline_samples_px": [
+        [
+          462,
+          373
+        ],
+        [
+          458,
+          359
+        ],
+        [
+          467,
+          343
+        ],
+        [
+          480,
+          359
+        ],
+        [
+          464,
+          384
+        ]
+      ],
+      "sil_center_px": [
+        468.8,
+        356.0
+      ],
+      "sil_bbox_px": [
+        460,
+        346,
+        478,
+        371
+      ],
+      "sil_samples_px": [
+        [
+          463,
+          353
+        ],
+        [
+          460,
+          357
+        ],
+        [
+          467,
+          346
+        ],
+        [
+          478,
+          357
+        ],
+        [
+          460,
+          371
+        ]
+      ],
+      "bg_center_px": [
+        469.0,
+        361.8
+      ],
+      "bg_bbox_px": [
+        454,
+        340,
+        484,
+        386
+      ],
+      "bg_samples_px": [
+        [
+          455,
+          362
+        ],
+        [
+          454,
+          351
+        ],
+        [
+          461,
+          340
+        ],
+        [
+          484,
+          351
+        ],
+        [
+          462,
+          386
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        28,
+        35,
+        15
+      ],
+      "rim_ratio": 7.03,
+      "outline_ratio": 1.01,
+      "winner": "rim",
+      "median_ratio": 7.03,
+      "min_ratio": 7.03,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C06",
+      "file": "3d_grains_c07.png",
+      "n": 467,
+      "face_n": 214,
+      "rim_n": 105,
+      "outline_n": 268,
+      "bg_n": 277,
+      "proj_px": [
+        554.7,
+        332.0
+      ],
+      "found_px": [
+        554.1,
+        325.6
+      ],
+      "face_center_px": [
+        554.3,
+        327.5
+      ],
+      "face_bbox_px": [
+        547,
+        314,
+        561,
+        341
+      ],
+      "face_samples_px": [
+        [
+          556,
+          327
+        ],
+        [
+          547,
+          326
+        ],
+        [
+          552,
+          314
+        ],
+        [
+          561,
+          325
+        ],
+        [
+          552,
+          341
+        ]
+      ],
+      "rim_center_px": [
+        553.8,
+        319.2
+      ],
+      "rim_bbox_px": [
+        545,
+        309,
+        563,
+        334
+      ],
+      "rim_samples_px": [
+        [
+          548,
+          316
+        ],
+        [
+          545,
+          320
+        ],
+        [
+          552,
+          309
+        ],
+        [
+          563,
+          320
+        ],
+        [
+          545,
+          334
+        ]
+      ],
+      "outline_center_px": [
+        554.1,
+        329.5
+      ],
+      "outline_bbox_px": [
+        543,
+        306,
+        565,
+        347
+      ],
+      "outline_samples_px": [
+        [
+          547,
+          336
+        ],
+        [
+          543,
+          322
+        ],
+        [
+          552,
+          306
+        ],
+        [
+          565,
+          321
+        ],
+        [
+          549,
+          347
+        ]
+      ],
+      "sil_center_px": [
+        553.8,
+        319.2
+      ],
+      "sil_bbox_px": [
+        545,
+        309,
+        563,
+        334
+      ],
+      "sil_samples_px": [
+        [
+          548,
+          316
+        ],
+        [
+          545,
+          320
+        ],
+        [
+          552,
+          309
+        ],
+        [
+          563,
+          320
+        ],
+        [
+          545,
+          334
+        ]
+      ],
+      "bg_center_px": [
+        553.9,
+        324.4
+      ],
+      "bg_bbox_px": [
+        539,
+        303,
+        569,
+        349
+      ],
+      "bg_samples_px": [
+        [
+          540,
+          324
+        ],
+        [
+          539,
+          314
+        ],
+        [
+          546,
+          303
+        ],
+        [
+          569,
+          314
+        ],
+        [
+          547,
+          349
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        25,
+        32,
+        13
+      ],
+      "rim_ratio": 7.27,
+      "outline_ratio": 1.02,
+      "winner": "rim",
+      "median_ratio": 7.27,
+      "min_ratio": 7.27,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C07",
+      "file": "3d_x36.png",
+      "n": 480,
+      "face_n": 209,
+      "rim_n": 121,
+      "outline_n": 256,
+      "bg_n": 282,
+      "proj_px": [
+        704.0,
+        297.3
+      ],
+      "found_px": [
+        703.6,
+        298.8
+      ],
+      "face_center_px": [
+        703.7,
+        300.8
+      ],
+      "face_bbox_px": [
+        697,
+        287,
+        710,
+        315
+      ],
+      "face_samples_px": [
+        [
+          706,
+          301
+        ],
+        [
+          697,
+          297
+        ],
+        [
+          702,
+          287
+        ],
+        [
+          710,
+          295
+        ],
+        [
+          702,
+          315
+        ]
+      ],
+      "rim_center_px": [
+        703.7,
+        292.7
+      ],
+      "rim_bbox_px": [
+        694,
+        282,
+        713,
+        307
+      ],
+      "rim_samples_px": [
+        [
+          698,
+          289
+        ],
+        [
+          694,
+          297
+        ],
+        [
+          702,
+          282
+        ],
+        [
+          713,
+          295
+        ],
+        [
+          695,
+          307
+        ]
+      ],
+      "outline_center_px": [
+        703.9,
+        303.2
+      ],
+      "outline_bbox_px": [
+        693,
+        279,
+        715,
+        320
+      ],
+      "outline_samples_px": [
+        [
+          711,
+          309
+        ],
+        [
+          693,
+          293
+        ],
+        [
+          702,
+          279
+        ],
+        [
+          715,
+          297
+        ],
+        [
+          698,
+          320
+        ]
+      ],
+      "sil_center_px": [
+        703.7,
+        292.7
+      ],
+      "sil_bbox_px": [
+        694,
+        282,
+        713,
+        307
+      ],
+      "sil_samples_px": [
+        [
+          698,
+          289
+        ],
+        [
+          694,
+          297
+        ],
+        [
+          702,
+          282
+        ],
+        [
+          713,
+          295
+        ],
+        [
+          695,
+          307
+        ]
+      ],
+      "bg_center_px": [
+        703.6,
+        297.6
+      ],
+      "bg_bbox_px": [
+        688,
+        276,
+        719,
+        322
+      ],
+      "bg_samples_px": [
+        [
+          718,
+          298
+        ],
+        [
+          688,
+          291
+        ],
+        [
+          696,
+          276
+        ],
+        [
+          719,
+          289
+        ],
+        [
+          695,
+          322
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        25,
+        32,
+        13
+      ],
+      "rim_ratio": 7.27,
+      "outline_ratio": 1.02,
+      "winner": "rim",
+      "median_ratio": 7.27,
+      "min_ratio": 7.27,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C08",
+      "file": "3d_x66.png",
+      "n": 176,
+      "face_n": 71,
+      "rim_n": 44,
+      "outline_n": 46,
+      "bg_n": 84,
+      "proj_px": [
+        256.0,
+        580.0
+      ],
+      "found_px": [
+        255.1,
+        579.2
+      ],
+      "face_center_px": [
+        255.8,
+        580.8
+      ],
+      "face_bbox_px": [
+        254,
+        570,
+        257,
+        591
+      ],
+      "face_samples_px": [
+        [
+          256,
+          581
+        ],
+        [
+          254,
+          576
+        ],
+        [
+          257,
+          570
+        ],
+        [
+          256,
+          591
+        ]
+      ],
+      "rim_center_px": [
+        252.6,
+        576.0
+      ],
+      "rim_bbox_px": [
+        251,
+        567,
+        257,
+        588
+      ],
+      "rim_samples_px": [
+        [
+          252,
+          576
+        ],
+        [
+          251,
+          576
+        ],
+        [
+          254,
+          567
+        ],
+        [
+          257,
+          567
+        ],
+        [
+          252,
+          588
+        ]
+      ],
+      "outline_center_px": [
+        251.1,
+        580.1
+      ],
+      "outline_bbox_px": [
+        250,
+        567,
+        254,
+        591
+      ],
+      "outline_samples_px": [
+        [
+          250,
+          580
+        ],
+        [
+          250,
+          572
+        ],
+        [
+          252,
+          567
+        ],
+        [
+          254,
+          591
+        ],
+        [
+          251,
+          591
+        ]
+      ],
+      "sil_center_px": [
+        251.1,
+        580.1
+      ],
+      "sil_bbox_px": [
+        250,
+        567,
+        254,
+        591
+      ],
+      "sil_samples_px": [
+        [
+          250,
+          580
+        ],
+        [
+          250,
+          572
+        ],
+        [
+          252,
+          567
+        ],
+        [
+          254,
+          591
+        ],
+        [
+          251,
+          591
+        ]
+      ],
+      "bg_center_px": [
+        251.9,
+        592.5
+      ],
+      "bg_bbox_px": [
+        245,
+        579,
+        264,
+        598
+      ],
+      "bg_samples_px": [
+        [
+          249,
+          593
+        ],
+        [
+          245,
+          579
+        ],
+        [
+          264,
+          593
+        ],
+        [
+          249,
+          598
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        161,
+        120,
+        60
+      ],
+      "rim_ratio": 1.73,
+      "outline_ratio": 4.12,
+      "winner": "outline",
+      "median_ratio": 4.12,
+      "min_ratio": 4.12,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C09",
+      "file": "3d_x66.png",
+      "n": 181,
+      "face_n": 88,
+      "rim_n": 31,
+      "outline_n": 58,
+      "bg_n": 84,
+      "proj_px": [
+        405.3,
+        580.0
+      ],
+      "found_px": [
+        402.9,
+        578.6
+      ],
+      "face_center_px": [
+        403.5,
+        579.1
+      ],
+      "face_bbox_px": [
+        401,
+        568,
+        405,
+        591
+      ],
+      "face_samples_px": [
+        [
+          403,
+          579
+        ],
+        [
+          401,
+          576
+        ],
+        [
+          404,
+          568
+        ],
+        [
+          405,
+          568
+        ],
+        [
+          405,
+          591
+        ]
+      ],
+      "rim_center_px": [
+        399.7,
+        575.2
+      ],
+      "rim_bbox_px": [
+        399,
+        567,
+        402,
+        586
+      ],
+      "rim_samples_px": [
+        [
+          399,
+          575
+        ],
+        [
+          399,
+          571
+        ],
+        [
+          401,
+          567
+        ],
+        [
+          402,
+          567
+        ],
+        [
+          399,
+          586
+        ]
+      ],
+      "outline_center_px": [
+        398.5,
+        581.0
+      ],
+      "outline_bbox_px": [
+        397,
+        567,
+        402,
+        591
+      ],
+      "outline_samples_px": [
+        [
+          398,
+          581
+        ],
+        [
+          397,
+          573
+        ],
+        [
+          399,
+          567
+        ],
+        [
+          402,
+          590
+        ],
+        [
+          399,
+          591
+        ]
+      ],
+      "sil_center_px": [
+        398.5,
+        581.0
+      ],
+      "sil_bbox_px": [
+        397,
+        567,
+        402,
+        591
+      ],
+      "sil_samples_px": [
+        [
+          398,
+          581
+        ],
+        [
+          397,
+          573
+        ],
+        [
+          399,
+          567
+        ],
+        [
+          402,
+          590
+        ],
+        [
+          399,
+          591
+        ]
+      ],
+      "bg_center_px": [
+        400.0,
+        592.4
+      ],
+      "bg_bbox_px": [
+        393,
+        579,
+        412,
+        598
+      ],
+      "bg_samples_px": [
+        [
+          398,
+          594
+        ],
+        [
+          393,
+          579
+        ],
+        [
+          412,
+          593
+        ],
+        [
+          398,
+          598
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        161,
+        120,
+        60
+      ],
+      "rim_ratio": 1.73,
+      "outline_ratio": 4.12,
+      "winner": "outline",
+      "median_ratio": 4.12,
+      "min_ratio": 4.12,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C10",
+      "file": "3d_x66.png",
+      "n": 477,
+      "face_n": 206,
+      "rim_n": 122,
+      "outline_n": 263,
+      "bg_n": 292,
+      "proj_px": [
+        597.3,
+        297.3
+      ],
+      "found_px": [
+        596.7,
+        300.1
+      ],
+      "face_center_px": [
+        596.7,
+        302.0
+      ],
+      "face_bbox_px": [
+        590,
+        289,
+        603,
+        315
+      ],
+      "face_samples_px": [
+        [
+          599,
+          302
+        ],
+        [
+          590,
+          298
+        ],
+        [
+          594,
+          289
+        ],
+        [
+          603,
+          296
+        ],
+        [
+          594,
+          315
+        ]
+      ],
+      "rim_center_px": [
+        596.8,
+        294.3
+      ],
+      "rim_bbox_px": [
+        587,
+        283,
+        606,
+        309
+      ],
+      "rim_samples_px": [
+        [
+          603,
+          291
+        ],
+        [
+          587,
+          298
+        ],
+        [
+          596,
+          283
+        ],
+        [
+          606,
+          296
+        ],
+        [
+          588,
+          309
+        ]
+      ],
+      "outline_center_px": [
+        597.1,
+        304.5
+      ],
+      "outline_bbox_px": [
+        586,
+        280,
+        608,
+        322
+      ],
+      "outline_samples_px": [
+        [
+          604,
+          310
+        ],
+        [
+          586,
+          295
+        ],
+        [
+          596,
+          280
+        ],
+        [
+          608,
+          298
+        ],
+        [
+          593,
+          322
+        ]
+      ],
+      "sil_center_px": [
+        596.8,
+        294.3
+      ],
+      "sil_bbox_px": [
+        587,
+        283,
+        606,
+        309
+      ],
+      "sil_samples_px": [
+        [
+          603,
+          291
+        ],
+        [
+          587,
+          298
+        ],
+        [
+          596,
+          283
+        ],
+        [
+          606,
+          296
+        ],
+        [
+          588,
+          309
+        ]
+      ],
+      "bg_center_px": [
+        596.6,
+        299.5
+      ],
+      "bg_bbox_px": [
+        581,
+        277,
+        612,
+        324
+      ],
+      "bg_samples_px": [
+        [
+          611,
+          300
+        ],
+        [
+          581,
+          292
+        ],
+        [
+          590,
+          277
+        ],
+        [
+          612,
+          290
+        ],
+        [
+          591,
+          324
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        24,
+        30,
+        13
+      ],
+      "rim_ratio": 7.41,
+      "outline_ratio": 1.04,
+      "winner": "rim",
+      "median_ratio": 7.41,
+      "min_ratio": 7.41,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C11",
+      "file": "3d_x87.png",
+      "n": 465,
+      "face_n": 195,
+      "rim_n": 120,
+      "outline_n": 260,
+      "bg_n": 284,
+      "proj_px": [
+        191.9,
+        382.7
+      ],
+      "found_px": [
+        192.4,
+        374.6
+      ],
+      "face_center_px": [
+        193.0,
+        376.6
+      ],
+      "face_bbox_px": [
+        186,
+        363,
+        199,
+        390
+      ],
+      "face_samples_px": [
+        [
+          194,
+          377
+        ],
+        [
+          186,
+          370
+        ],
+        [
+          193,
+          363
+        ],
+        [
+          199,
+          374
+        ],
+        [
+          194,
+          390
+        ]
+      ],
+      "rim_center_px": [
+        192.1,
+        368.8
+      ],
+      "rim_bbox_px": [
+        183,
+        358,
+        202,
+        383
+      ],
+      "rim_samples_px": [
+        [
+          186,
+          366
+        ],
+        [
+          183,
+          370
+        ],
+        [
+          191,
+          358
+        ],
+        [
+          202,
+          374
+        ],
+        [
+          184,
+          383
+        ]
+      ],
+      "outline_center_px": [
+        192.0,
+        379.0
+      ],
+      "outline_bbox_px": [
+        181,
+        355,
+        203,
+        396
+      ],
+      "outline_samples_px": [
+        [
+          185,
+          384
+        ],
+        [
+          181,
+          372
+        ],
+        [
+          190,
+          355
+        ],
+        [
+          203,
+          370
+        ],
+        [
+          188,
+          396
+        ]
+      ],
+      "sil_center_px": [
+        192.1,
+        368.8
+      ],
+      "sil_bbox_px": [
+        183,
+        358,
+        202,
+        383
+      ],
+      "sil_samples_px": [
+        [
+          186,
+          366
+        ],
+        [
+          183,
+          370
+        ],
+        [
+          191,
+          358
+        ],
+        [
+          202,
+          374
+        ],
+        [
+          184,
+          383
+        ]
+      ],
+      "bg_center_px": [
+        192.4,
+        373.8
+      ],
+      "bg_bbox_px": [
+        177,
+        352,
+        208,
+        398
+      ],
+      "bg_samples_px": [
+        [
+          178,
+          374
+        ],
+        [
+          177,
+          364
+        ],
+        [
+          185,
+          352
+        ],
+        [
+          208,
+          368
+        ],
+        [
+          185,
+          398
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        25,
+        30,
+        14
+      ],
+      "rim_ratio": 7.39,
+      "outline_ratio": 1.04,
+      "winner": "rim",
+      "median_ratio": 7.39,
+      "min_ratio": 7.39,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C12",
+      "file": "3d_x87.png",
+      "n": 475,
+      "face_n": 204,
+      "rim_n": 121,
+      "outline_n": 260,
+      "bg_n": 283,
+      "proj_px": [
+        533.2,
+        297.3
+      ],
+      "found_px": [
+        532.5,
+        289.5
+      ],
+      "face_center_px": [
+        532.6,
+        291.6
+      ],
+      "face_bbox_px": [
+        526,
+        278,
+        539,
+        305
+      ],
+      "face_samples_px": [
+        [
+          535,
+          292
+        ],
+        [
+          526,
+          287
+        ],
+        [
+          534,
+          278
+        ],
+        [
+          539,
+          287
+        ],
+        [
+          535,
+          305
+        ]
+      ],
+      "rim_center_px": [
+        532.5,
+        283.6
+      ],
+      "rim_bbox_px": [
+        523,
+        273,
+        542,
+        298
+      ],
+      "rim_samples_px": [
+        [
+          526,
+          281
+        ],
+        [
+          523,
+          287
+        ],
+        [
+          530,
+          273
+        ],
+        [
+          542,
+          287
+        ],
+        [
+          524,
+          298
+        ]
+      ],
+      "outline_center_px": [
+        532.9,
+        294.0
+      ],
+      "outline_bbox_px": [
+        522,
+        270,
+        544,
+        311
+      ],
+      "outline_samples_px": [
+        [
+          540,
+          299
+        ],
+        [
+          522,
+          283
+        ],
+        [
+          530,
+          270
+        ],
+        [
+          544,
+          288
+        ],
+        [
+          528,
+          311
+        ]
+      ],
+      "sil_center_px": [
+        532.5,
+        283.6
+      ],
+      "sil_bbox_px": [
+        523,
+        273,
+        542,
+        298
+      ],
+      "sil_samples_px": [
+        [
+          526,
+          281
+        ],
+        [
+          523,
+          287
+        ],
+        [
+          530,
+          273
+        ],
+        [
+          542,
+          287
+        ],
+        [
+          524,
+          298
+        ]
+      ],
+      "bg_center_px": [
+        532.5,
+        288.6
+      ],
+      "bg_bbox_px": [
+        517,
+        267,
+        548,
+        313
+      ],
+      "bg_samples_px": [
+        [
+          547,
+          289
+        ],
+        [
+          517,
+          281
+        ],
+        [
+          524,
+          267
+        ],
+        [
+          548,
+          281
+        ],
+        [
+          525,
+          313
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        16,
+        21,
+        6
+      ],
+      "rim_ratio": 8.05,
+      "outline_ratio": 1.13,
+      "winner": "rim",
+      "median_ratio": 8.05,
+      "min_ratio": 8.05,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C13",
+      "file": "3d_x95.png",
+      "n": 471,
+      "face_n": 196,
+      "rim_n": 124,
+      "outline_n": 256,
+      "bg_n": 282,
+      "proj_px": [
+        426.8,
+        297.3
+      ],
+      "found_px": [
+        425.6,
+        289.5
+      ],
+      "face_center_px": [
+        425.9,
+        291.5
+      ],
+      "face_bbox_px": [
+        419,
+        278,
+        432,
+        305
+      ],
+      "face_samples_px": [
+        [
+          428,
+          292
+        ],
+        [
+          419,
+          287
+        ],
+        [
+          427,
+          278
+        ],
+        [
+          432,
+          287
+        ],
+        [
+          428,
+          305
+        ]
+      ],
+      "rim_center_px": [
+        425.5,
+        283.7
+      ],
+      "rim_bbox_px": [
+        416,
+        273,
+        435,
+        298
+      ],
+      "rim_samples_px": [
+        [
+          432,
+          282
+        ],
+        [
+          416,
+          287
+        ],
+        [
+          424,
+          273
+        ],
+        [
+          435,
+          287
+        ],
+        [
+          417,
+          298
+        ]
+      ],
+      "outline_center_px": [
+        425.9,
+        294.1
+      ],
+      "outline_bbox_px": [
+        415,
+        270,
+        437,
+        311
+      ],
+      "outline_samples_px": [
+        [
+          433,
+          300
+        ],
+        [
+          415,
+          283
+        ],
+        [
+          423,
+          270
+        ],
+        [
+          437,
+          288
+        ],
+        [
+          420,
+          311
+        ]
+      ],
+      "sil_center_px": [
+        425.5,
+        283.7
+      ],
+      "sil_bbox_px": [
+        416,
+        273,
+        435,
+        298
+      ],
+      "sil_samples_px": [
+        [
+          432,
+          282
+        ],
+        [
+          416,
+          287
+        ],
+        [
+          424,
+          273
+        ],
+        [
+          435,
+          287
+        ],
+        [
+          417,
+          298
+        ]
+      ],
+      "bg_center_px": [
+        425.5,
+        288.6
+      ],
+      "bg_bbox_px": [
+        410,
+        267,
+        441,
+        313
+      ],
+      "bg_samples_px": [
+        [
+          440,
+          289
+        ],
+        [
+          410,
+          281
+        ],
+        [
+          418,
+          267
+        ],
+        [
+          441,
+          281
+        ],
+        [
+          417,
+          313
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        19,
+        24,
+        8
+      ],
+      "rim_ratio": 7.85,
+      "outline_ratio": 1.1,
+      "winner": "rim",
+      "median_ratio": 7.85,
+      "min_ratio": 7.85,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C14",
+      "file": "3d_x95.png",
+      "n": 476,
+      "face_n": 206,
+      "rim_n": 121,
+      "outline_n": 266,
+      "bg_n": 290,
+      "proj_px": [
+        597.4,
+        297.3
+      ],
+      "found_px": [
+        596.7,
+        290.1
+      ],
+      "face_center_px": [
+        596.7,
+        292.0
+      ],
+      "face_bbox_px": [
+        590,
+        279,
+        603,
+        305
+      ],
+      "face_samples_px": [
+        [
+          599,
+          292
+        ],
+        [
+          590,
+          288
+        ],
+        [
+          594,
+          279
+        ],
+        [
+          603,
+          286
+        ],
+        [
+          594,
+          305
+        ]
+      ],
+      "rim_center_px": [
+        596.7,
+        284.4
+      ],
+      "rim_bbox_px": [
+        587,
+        273,
+        606,
+        299
+      ],
+      "rim_samples_px": [
+        [
+          590,
+          282
+        ],
+        [
+          587,
+          288
+        ],
+        [
+          596,
+          273
+        ],
+        [
+          606,
+          286
+        ],
+        [
+          588,
+          299
+        ]
+      ],
+      "outline_center_px": [
+        597.0,
+        294.5
+      ],
+      "outline_bbox_px": [
+        586,
+        270,
+        608,
+        312
+      ],
+      "outline_samples_px": [
+        [
+          604,
+          300
+        ],
+        [
+          586,
+          284
+        ],
+        [
+          596,
+          270
+        ],
+        [
+          608,
+          288
+        ],
+        [
+          593,
+          312
+        ]
+      ],
+      "sil_center_px": [
+        596.7,
+        284.4
+      ],
+      "sil_bbox_px": [
+        587,
+        273,
+        606,
+        299
+      ],
+      "sil_samples_px": [
+        [
+          590,
+          282
+        ],
+        [
+          587,
+          288
+        ],
+        [
+          596,
+          273
+        ],
+        [
+          606,
+          286
+        ],
+        [
+          588,
+          299
+        ]
+      ],
+      "bg_center_px": [
+        596.6,
+        289.4
+      ],
+      "bg_bbox_px": [
+        581,
+        267,
+        612,
+        314
+      ],
+      "bg_samples_px": [
+        [
+          611,
+          289
+        ],
+        [
+          581,
+          282
+        ],
+        [
+          590,
+          267
+        ],
+        [
+          612,
+          280
+        ],
+        [
+          591,
+          314
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        19,
+        25,
+        9
+      ],
+      "rim_ratio": 7.79,
+      "outline_ratio": 1.09,
+      "winner": "rim",
+      "median_ratio": 7.79,
+      "min_ratio": 7.79,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C15",
+      "file": "3d_x109.png",
+      "n": 120,
+      "face_n": 62,
+      "rim_n": 12,
+      "outline_n": 64,
+      "bg_n": 64,
+      "proj_px": [
+        512.0,
+        422.7
+      ],
+      "found_px": [
+        516.4,
+        424.6
+      ],
+      "face_center_px": [
+        515.9,
+        424.4
+      ],
+      "face_bbox_px": [
+        514,
+        419,
+        519,
+        433
+      ],
+      "face_samples_px": [
+        [
+          516,
+          424
+        ],
+        [
+          514,
+          419
+        ],
+        [
+          519,
+          419
+        ],
+        [
+          514,
+          433
+        ]
+      ],
+      "rim_center_px": [
+        520.8,
+        422.5
+      ],
+      "rim_bbox_px": [
+        520,
+        418,
+        521,
+        426
+      ],
+      "rim_samples_px": [
+        [
+          521,
+          422
+        ],
+        [
+          520,
+          423
+        ],
+        [
+          521,
+          418
+        ],
+        [
+          521,
+          426
+        ]
+      ],
+      "outline_center_px": [
+        519.3,
+        429.1
+      ],
+      "outline_bbox_px": [
+        509,
+        418,
+        523,
+        435
+      ],
+      "outline_samples_px": [
+        [
+          519,
+          429
+        ],
+        [
+          509,
+          434
+        ],
+        [
+          522,
+          418
+        ],
+        [
+          523,
+          418
+        ],
+        [
+          509,
+          435
+        ]
+      ],
+      "sil_center_px": [
+        519.3,
+        429.1
+      ],
+      "sil_bbox_px": [
+        509,
+        418,
+        523,
+        435
+      ],
+      "sil_samples_px": [
+        [
+          519,
+          429
+        ],
+        [
+          509,
+          434
+        ],
+        [
+          522,
+          418
+        ],
+        [
+          523,
+          418
+        ],
+        [
+          509,
+          435
+        ]
+      ],
+      "bg_center_px": [
+        517.5,
+        437.0
+      ],
+      "bg_bbox_px": [
+        507,
+        431,
+        527,
+        440
+      ],
+      "bg_samples_px": [
+        [
+          517,
+          439
+        ],
+        [
+          507,
+          436
+        ],
+        [
+          524,
+          431
+        ],
+        [
+          527,
+          431
+        ],
+        [
+          507,
+          440
+        ]
+      ],
+      "face_rgb": [
+        154,
+        77,
+        37
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        161,
+        120,
+        60
+      ],
+      "rim_ratio": 1.73,
+      "outline_ratio": 4.12,
+      "winner": "outline",
+      "median_ratio": 4.12,
+      "min_ratio": 4.12,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C16",
+      "file": "3d_x109.png",
+      "n": 224,
+      "face_n": 106,
+      "rim_n": 28,
+      "outline_n": 112,
+      "bg_n": 88,
+      "proj_px": [
+        640.0,
+        422.7
+      ],
+      "found_px": [
+        639.5,
+        424.4
+      ],
+      "face_center_px": [
+        639.5,
+        424.2
+      ],
+      "face_bbox_px": [
+        633,
+        419,
+        646,
+        432
+      ],
+      "face_samples_px": [
+        [
+          637,
+          424
+        ],
+        [
+          633,
+          419
+        ],
+        [
+          646,
+          419
+        ],
+        [
+          637,
+          432
+        ]
+      ],
+      "rim_center_px": [
+        639.5,
+        421.1
+      ],
+      "rim_bbox_px": [
+        630,
+        418,
+        649,
+        425
+      ],
+      "rim_samples_px": [
+        [
+          631,
+          421
+        ],
+        [
+          630,
+          418
+        ],
+        [
+          649,
+          418
+        ],
+        [
+          631,
+          425
+        ]
+      ],
+      "outline_center_px": [
+        639.5,
+        429.5
+      ],
+      "outline_bbox_px": [
+        629,
+        418,
+        650,
+        435
+      ],
+      "outline_samples_px": [
+        [
+          639,
+          435
+        ],
+        [
+          629,
+          418
+        ],
+        [
+          650,
+          418
+        ],
+        [
+          632,
+          435
+        ]
+      ],
+      "sil_center_px": [
+        639.5,
+        429.5
+      ],
+      "sil_bbox_px": [
+        629,
+        418,
+        650,
+        435
+      ],
+      "sil_samples_px": [
+        [
+          639,
+          435
+        ],
+        [
+          629,
+          418
+        ],
+        [
+          650,
+          418
+        ],
+        [
+          632,
+          435
+        ]
+      ],
+      "bg_center_px": [
+        639.5,
+        436.7
+      ],
+      "bg_bbox_px": [
+        625,
+        431,
+        654,
+        440
+      ],
+      "bg_samples_px": [
+        [
+          639,
+          439
+        ],
+        [
+          625,
+          431
+        ],
+        [
+          654,
+          431
+        ],
+        [
+          631,
+          440
+        ]
+      ],
+      "face_rgb": [
+        154,
+        78,
+        37
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        161,
+        120,
+        60
+      ],
+      "rim_ratio": 1.73,
+      "outline_ratio": 4.12,
+      "winner": "outline",
+      "median_ratio": 4.12,
+      "min_ratio": 4.12,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C17",
+      "file": "3d_hazard.png",
+      "n": 470,
+      "face_n": 202,
+      "rim_n": 117,
+      "outline_n": 262,
+      "bg_n": 285,
+      "proj_px": [
+        149.3,
+        341.3
+      ],
+      "found_px": [
+        148.9,
+        341.5
+      ],
+      "face_center_px": [
+        149.5,
+        343.5
+      ],
+      "face_bbox_px": [
+        142,
+        330,
+        156,
+        357
+      ],
+      "face_samples_px": [
+        [
+          150,
+          344
+        ],
+        [
+          142,
+          340
+        ],
+        [
+          150,
+          330
+        ],
+        [
+          156,
+          344
+        ],
+        [
+          151,
+          357
+        ]
+      ],
+      "rim_center_px": [
+        148.5,
+        335.2
+      ],
+      "rim_bbox_px": [
+        139,
+        325,
+        158,
+        350
+      ],
+      "rim_samples_px": [
+        [
+          142,
+          334
+        ],
+        [
+          139,
+          340
+        ],
+        [
+          146,
+          325
+        ],
+        [
+          158,
+          338
+        ],
+        [
+          140,
+          350
+        ]
+      ],
+      "outline_center_px": [
+        149.1,
+        345.8
+      ],
+      "outline_bbox_px": [
+        138,
+        322,
+        160,
+        363
+      ],
+      "outline_samples_px": [
+        [
+          142,
+          352
+        ],
+        [
+          138,
+          336
+        ],
+        [
+          146,
+          322
+        ],
+        [
+          160,
+          339
+        ],
+        [
+          144,
+          363
+        ]
+      ],
+      "sil_center_px": [
+        148.5,
+        335.2
+      ],
+      "sil_bbox_px": [
+        139,
+        325,
+        158,
+        350
+      ],
+      "sil_samples_px": [
+        [
+          142,
+          334
+        ],
+        [
+          139,
+          340
+        ],
+        [
+          146,
+          325
+        ],
+        [
+          158,
+          338
+        ],
+        [
+          140,
+          350
+        ]
+      ],
+      "bg_center_px": [
+        148.6,
+        340.7
+      ],
+      "bg_bbox_px": [
+        133,
+        319,
+        164,
+        365
+      ],
+      "bg_samples_px": [
+        [
+          163,
+          341
+        ],
+        [
+          133,
+          334
+        ],
+        [
+          140,
+          319
+        ],
+        [
+          164,
+          332
+        ],
+        [
+          142,
+          365
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        38,
+        45,
+        23
+      ],
+      "rim_ratio": 6.2,
+      "outline_ratio": 1.15,
+      "winner": "rim",
+      "median_ratio": 6.2,
+      "min_ratio": 6.2,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C18",
+      "file": "3d_hazard.png",
+      "n": 476,
+      "face_n": 207,
+      "rim_n": 117,
+      "outline_n": 187,
+      "bg_n": 253,
+      "proj_px": [
+        490.7,
+        298.7
+      ],
+      "found_px": [
+        489.8,
+        297.5
+      ],
+      "face_center_px": [
+        490.0,
+        299.6
+      ],
+      "face_bbox_px": [
+        483,
+        286,
+        497,
+        313
+      ],
+      "face_samples_px": [
+        [
+          492,
+          300
+        ],
+        [
+          483,
+          296
+        ],
+        [
+          492,
+          286
+        ],
+        [
+          497,
+          299
+        ],
+        [
+          492,
+          313
+        ]
+      ],
+      "rim_center_px": [
+        489.4,
+        291.4
+      ],
+      "rim_bbox_px": [
+        480,
+        281,
+        499,
+        306
+      ],
+      "rim_samples_px": [
+        [
+          484,
+          288
+        ],
+        [
+          480,
+          296
+        ],
+        [
+          488,
+          281
+        ],
+        [
+          499,
+          293
+        ],
+        [
+          481,
+          306
+        ]
+      ],
+      "outline_center_px": [
+        490.1,
+        297.1
+      ],
+      "outline_bbox_px": [
+        479,
+        278,
+        501,
+        319
+      ],
+      "outline_samples_px": [
+        [
+          500,
+          297
+        ],
+        [
+          479,
+          292
+        ],
+        [
+          487,
+          278
+        ],
+        [
+          501,
+          295
+        ],
+        [
+          485,
+          319
+        ]
+      ],
+      "sil_center_px": [
+        489.4,
+        291.4
+      ],
+      "sil_bbox_px": [
+        480,
+        281,
+        499,
+        306
+      ],
+      "sil_samples_px": [
+        [
+          484,
+          288
+        ],
+        [
+          480,
+          296
+        ],
+        [
+          488,
+          281
+        ],
+        [
+          499,
+          293
+        ],
+        [
+          481,
+          306
+        ]
+      ],
+      "bg_center_px": [
+        489.5,
+        294.5
+      ],
+      "bg_bbox_px": [
+        474,
+        275,
+        505,
+        321
+      ],
+      "bg_samples_px": [
+        [
+          476,
+          291
+        ],
+        [
+          474,
+          290
+        ],
+        [
+          482,
+          275
+        ],
+        [
+          505,
+          287
+        ],
+        [
+          483,
+          321
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        25,
+        33,
+        13
+      ],
+      "rim_ratio": 7.21,
+      "outline_ratio": 1.01,
+      "winner": "rim",
+      "median_ratio": 7.21,
+      "min_ratio": 7.21,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C19",
+      "file": "3d_grains_c21.png",
+      "n": 455,
+      "face_n": 205,
+      "rim_n": 100,
+      "outline_n": 242,
+      "bg_n": 261,
+      "proj_px": [
+        42.7,
+        340.0
+      ],
+      "found_px": [
+        42.1,
+        337.5
+      ],
+      "face_center_px": [
+        42.8,
+        339.5
+      ],
+      "face_bbox_px": [
+        35,
+        326,
+        49,
+        353
+      ],
+      "face_samples_px": [
+        [
+          43,
+          340
+        ],
+        [
+          35,
+          337
+        ],
+        [
+          43,
+          326
+        ],
+        [
+          49,
+          338
+        ],
+        [
+          44,
+          353
+        ]
+      ],
+      "rim_center_px": [
+        41.7,
+        329.9
+      ],
+      "rim_bbox_px": [
+        33,
+        321,
+        51,
+        346
+      ],
+      "rim_samples_px": [
+        [
+          46,
+          326
+        ],
+        [
+          33,
+          331
+        ],
+        [
+          40,
+          321
+        ],
+        [
+          51,
+          333
+        ],
+        [
+          33,
+          346
+        ]
+      ],
+      "outline_center_px": [
+        42.1,
+        342.3
+      ],
+      "outline_bbox_px": [
+        31,
+        318,
+        53,
+        359
+      ],
+      "outline_samples_px": [
+        [
+          35,
+          348
+        ],
+        [
+          31,
+          333
+        ],
+        [
+          39,
+          318
+        ],
+        [
+          53,
+          335
+        ],
+        [
+          38,
+          359
+        ]
+      ],
+      "sil_center_px": [
+        41.7,
+        329.9
+      ],
+      "sil_bbox_px": [
+        33,
+        321,
+        51,
+        346
+      ],
+      "sil_samples_px": [
+        [
+          46,
+          326
+        ],
+        [
+          33,
+          331
+        ],
+        [
+          40,
+          321
+        ],
+        [
+          51,
+          333
+        ],
+        [
+          33,
+          346
+        ]
+      ],
+      "bg_center_px": [
+        41.9,
+        336.6
+      ],
+      "bg_bbox_px": [
+        27,
+        315,
+        57,
+        361
+      ],
+      "bg_samples_px": [
+        [
+          56,
+          336
+        ],
+        [
+          27,
+          325
+        ],
+        [
+          34,
+          315
+        ],
+        [
+          57,
+          327
+        ],
+        [
+          35,
+          361
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        37,
+        44,
+        22
+      ],
+      "rim_ratio": 6.29,
+      "outline_ratio": 1.14,
+      "winner": "rim",
+      "median_ratio": 6.29,
+      "min_ratio": 6.29,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C20",
+      "file": "3d_grains_c21.png",
+      "n": 316,
+      "face_n": 132,
+      "rim_n": 65,
+      "outline_n": 122,
+      "bg_n": 127,
+      "proj_px": [
+        298.7,
+        254.7
+      ],
+      "found_px": [
+        298.8,
+        252.4
+      ],
+      "face_center_px": [
+        299.7,
+        253.4
+      ],
+      "face_bbox_px": [
+        293,
+        241,
+        303,
+        267
+      ],
+      "face_samples_px": [
+        [
+          300,
+          253
+        ],
+        [
+          293,
+          241
+        ],
+        [
+          303,
+          248
+        ],
+        [
+          298,
+          267
+        ]
+      ],
+      "rim_center_px": [
+        298.1,
+        246.9
+      ],
+      "rim_bbox_px": [
+        288,
+        234,
+        306,
+        259
+      ],
+      "rim_samples_px": [
+        [
+          304,
+          246
+        ],
+        [
+          288,
+          243
+        ],
+        [
+          294,
+          234
+        ],
+        [
+          306,
+          248
+        ],
+        [
+          289,
+          259
+        ]
+      ],
+      "outline_center_px": [
+        299.3,
+        258.9
+      ],
+      "outline_bbox_px": [
+        288,
+        231,
+        308,
+        272
+      ],
+      "outline_samples_px": [
+        [
+          303,
+          265
+        ],
+        [
+          288,
+          237
+        ],
+        [
+          294,
+          231
+        ],
+        [
+          308,
+          253
+        ],
+        [
+          294,
+          272
+        ]
+      ],
+      "sil_center_px": [
+        298.1,
+        246.9
+      ],
+      "sil_bbox_px": [
+        288,
+        234,
+        306,
+        259
+      ],
+      "sil_samples_px": [
+        [
+          304,
+          246
+        ],
+        [
+          288,
+          243
+        ],
+        [
+          294,
+          234
+        ],
+        [
+          306,
+          248
+        ],
+        [
+          289,
+          259
+        ]
+      ],
+      "bg_center_px": [
+        302.7,
+        249.4
+      ],
+      "bg_bbox_px": [
+        286,
+        228,
+        312,
+        274
+      ],
+      "bg_samples_px": [
+        [
+          311,
+          249
+        ],
+        [
+          286,
+          230
+        ],
+        [
+          288,
+          228
+        ],
+        [
+          312,
+          242
+        ],
+        [
+          291,
+          274
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        36,
+        43,
+        22
+      ],
+      "rim_ratio": 6.37,
+      "outline_ratio": 1.12,
+      "winner": "rim",
+      "median_ratio": 6.37,
+      "min_ratio": 6.37,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C21",
+      "file": "3d_grains_c21.png",
+      "n": 470,
+      "face_n": 202,
+      "rim_n": 120,
+      "outline_n": 256,
+      "bg_n": 288,
+      "proj_px": [
+        640.0,
+        340.0
+      ],
+      "found_px": [
+        639.5,
+        335.2
+      ],
+      "face_center_px": [
+        639.5,
+        337.2
+      ],
+      "face_bbox_px": [
+        633,
+        324,
+        646,
+        350
+      ],
+      "face_samples_px": [
+        [
+          637,
+          337
+        ],
+        [
+          633,
+          332
+        ],
+        [
+          637,
+          324
+        ],
+        [
+          646,
+          332
+        ],
+        [
+          637,
+          350
+        ]
+      ],
+      "rim_center_px": [
+        639.5,
+        329.5
+      ],
+      "rim_bbox_px": [
+        630,
+        319,
+        649,
+        344
+      ],
+      "rim_samples_px": [
+        [
+          633,
+          327
+        ],
+        [
+          630,
+          333
+        ],
+        [
+          637,
+          319
+        ],
+        [
+          649,
+          333
+        ],
+        [
+          631,
+          344
+        ]
+      ],
+      "outline_center_px": [
+        639.5,
+        339.7
+      ],
+      "outline_bbox_px": [
+        629,
+        315,
+        650,
+        357
+      ],
+      "outline_samples_px": [
+        [
+          632,
+          345
+        ],
+        [
+          629,
+          329
+        ],
+        [
+          639,
+          315
+        ],
+        [
+          650,
+          329
+        ],
+        [
+          635,
+          357
+        ]
+      ],
+      "sil_center_px": [
+        639.5,
+        329.5
+      ],
+      "sil_bbox_px": [
+        630,
+        319,
+        649,
+        344
+      ],
+      "sil_samples_px": [
+        [
+          633,
+          327
+        ],
+        [
+          630,
+          333
+        ],
+        [
+          637,
+          319
+        ],
+        [
+          649,
+          333
+        ],
+        [
+          631,
+          344
+        ]
+      ],
+      "bg_center_px": [
+        639.5,
+        335.0
+      ],
+      "bg_bbox_px": [
+        624,
+        313,
+        655,
+        359
+      ],
+      "bg_samples_px": [
+        [
+          625,
+          335
+        ],
+        [
+          624,
+          327
+        ],
+        [
+          631,
+          313
+        ],
+        [
+          655,
+          327
+        ],
+        [
+          633,
+          359
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        26,
+        33,
+        14
+      ],
+      "rim_ratio": 7.19,
+      "outline_ratio": 1.01,
+      "winner": "rim",
+      "median_ratio": 7.19,
+      "min_ratio": 7.19,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C22",
+      "file": "3d_grains_c21.png",
+      "n": 475,
+      "face_n": 205,
+      "rim_n": 120,
+      "outline_n": 263,
+      "bg_n": 285,
+      "proj_px": [
+        981.3,
+        297.3
+      ],
+      "found_px": [
+        981.6,
+        291.5
+      ],
+      "face_center_px": [
+        981.2,
+        293.4
+      ],
+      "face_bbox_px": [
+        975,
+        280,
+        988,
+        307
+      ],
+      "face_samples_px": [
+        [
+          980,
+          293
+        ],
+        [
+          975,
+          290
+        ],
+        [
+          980,
+          280
+        ],
+        [
+          988,
+          287
+        ],
+        [
+          980,
+          307
+        ]
+      ],
+      "rim_center_px": [
+        981.8,
+        285.6
+      ],
+      "rim_bbox_px": [
+        972,
+        275,
+        991,
+        300
+      ],
+      "rim_samples_px": [
+        [
+          976,
+          282
+        ],
+        [
+          972,
+          290
+        ],
+        [
+          980,
+          275
+        ],
+        [
+          991,
+          287
+        ],
+        [
+          973,
+          300
+        ]
+      ],
+      "outline_center_px": [
+        982.0,
+        295.7
+      ],
+      "outline_bbox_px": [
+        971,
+        271,
+        993,
+        313
+      ],
+      "outline_samples_px": [
+        [
+          989,
+          301
+        ],
+        [
+          971,
+          287
+        ],
+        [
+          982,
+          271
+        ],
+        [
+          993,
+          288
+        ],
+        [
+          976,
+          313
+        ]
+      ],
+      "sil_center_px": [
+        981.8,
+        285.6
+      ],
+      "sil_bbox_px": [
+        972,
+        275,
+        991,
+        300
+      ],
+      "sil_samples_px": [
+        [
+          976,
+          282
+        ],
+        [
+          972,
+          290
+        ],
+        [
+          980,
+          275
+        ],
+        [
+          991,
+          287
+        ],
+        [
+          973,
+          300
+        ]
+      ],
+      "bg_center_px": [
+        981.6,
+        290.8
+      ],
+      "bg_bbox_px": [
+        966,
+        269,
+        997,
+        315
+      ],
+      "bg_samples_px": [
+        [
+          996,
+          291
+        ],
+        [
+          966,
+          284
+        ],
+        [
+          974,
+          269
+        ],
+        [
+          997,
+          281
+        ],
+        [
+          974,
+          315
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        34,
+        42,
+        20
+      ],
+      "rim_ratio": 6.47,
+      "outline_ratio": 1.1,
+      "winner": "rim",
+      "median_ratio": 6.47,
+      "min_ratio": 6.47,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    },
+    {
+      "id": "C23",
+      "file": "3d_x193.png",
+      "n": 473,
+      "face_n": 207,
+      "rim_n": 114,
+      "outline_n": 264,
+      "bg_n": 284,
+      "proj_px": [
+        938.7,
+        297.3
+      ],
+      "found_px": [
+        938.8,
+        299.4
+      ],
+      "face_center_px": [
+        938.5,
+        301.4
+      ],
+      "face_bbox_px": [
+        932,
+        288,
+        946,
+        315
+      ],
+      "face_samples_px": [
+        [
+          937,
+          301
+        ],
+        [
+          932,
+          299
+        ],
+        [
+          937,
+          288
+        ],
+        [
+          946,
+          300
+        ],
+        [
+          937,
+          315
+        ]
+      ],
+      "rim_center_px": [
+        938.9,
+        293.4
+      ],
+      "rim_bbox_px": [
+        929,
+        283,
+        948,
+        308
+      ],
+      "rim_samples_px": [
+        [
+          933,
+          290
+        ],
+        [
+          929,
+          300
+        ],
+        [
+          937,
+          283
+        ],
+        [
+          948,
+          294
+        ],
+        [
+          930,
+          308
+        ]
+      ],
+      "outline_center_px": [
+        938.9,
+        303.7
+      ],
+      "outline_bbox_px": [
+        928,
+        279,
+        950,
+        321
+      ],
+      "outline_samples_px": [
+        [
+          931,
+          309
+        ],
+        [
+          928,
+          295
+        ],
+        [
+          939,
+          279
+        ],
+        [
+          950,
+          296
+        ],
+        [
+          934,
+          321
+        ]
+      ],
+      "sil_center_px": [
+        938.9,
+        293.4
+      ],
+      "sil_bbox_px": [
+        929,
+        283,
+        948,
+        308
+      ],
+      "sil_samples_px": [
+        [
+          933,
+          290
+        ],
+        [
+          929,
+          300
+        ],
+        [
+          937,
+          283
+        ],
+        [
+          948,
+          294
+        ],
+        [
+          930,
+          308
+        ]
+      ],
+      "bg_center_px": [
+        938.7,
+        298.7
+      ],
+      "bg_bbox_px": [
+        923,
+        277,
+        954,
+        323
+      ],
+      "bg_samples_px": [
+        [
+          925,
+          295
+        ],
+        [
+          923,
+          294
+        ],
+        [
+          931,
+          277
+        ],
+        [
+          954,
+          288
+        ],
+        [
+          932,
+          323
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        38,
+        45,
+        23
+      ],
+      "rim_ratio": 6.2,
+      "outline_ratio": 1.15,
+      "winner": "rim",
+      "median_ratio": 6.2,
+      "min_ratio": 6.2,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)"
+    }
+  ],
+  "grains_2d": [
+    {
+      "id": "C00",
+      "file": "2d_entrance.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 2,
+      "bg_n": 9,
+      "proj_px": [
+        213.3,
+        297.3
+      ],
+      "found_px": [
+        213.5,
+        297.5
+      ],
+      "face_center_px": [
+        213.5,
+        297.5
+      ],
+      "face_bbox_px": [
+        203,
+        283,
+        224,
+        312
+      ],
+      "face_samples_px": [
+        [
+          213,
+          297
+        ],
+        [
+          203,
+          293
+        ],
+        [
+          211,
+          283
+        ],
+        [
+          224,
+          293
+        ],
+        [
+          211,
+          312
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        197.5,
+        284.0
+      ],
+      "outline_bbox_px": [
+        197,
+        284,
+        198,
+        284
+      ],
+      "outline_samples_px": [
+        [
+          197,
+          284
+        ],
+        [
+          198,
+          284
+        ]
+      ],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        197.8,
+        291.9
+      ],
+      "bg_bbox_px": [
+        197,
+        283,
+        198,
+        312
+      ],
+      "bg_samples_px": [
+        [
+          198,
+          288
+        ],
+        [
+          197,
+          287
+        ],
+        [
+          198,
+          283
+        ],
+        [
+          198,
+          312
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        50,
+        23
+      ],
+      "outline_p15_rgb": [
+        51,
+        50,
+        23
+      ],
+      "bg_rgb": [
+        71,
+        70,
+        40
+      ],
+      "rim_ratio": 4.19,
+      "outline_ratio": 1.35,
+      "winner": "rim",
+      "median_ratio": 4.19,
+      "min_ratio": 4.19,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C01",
+      "file": "2d_entrance.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 20,
+      "proj_px": [
+        290.1,
+        281.3
+      ],
+      "found_px": [
+        289.5,
+        281.5
+      ],
+      "face_center_px": [
+        289.5,
+        281.5
+      ],
+      "face_bbox_px": [
+        279,
+        267,
+        300,
+        296
+      ],
+      "face_samples_px": [
+        [
+          289,
+          281
+        ],
+        [
+          279,
+          277
+        ],
+        [
+          287,
+          267
+        ],
+        [
+          300,
+          277
+        ],
+        [
+          287,
+          296
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        273.1,
+        305.1
+      ],
+      "bg_bbox_px": [
+        269,
+        301,
+        278,
+        308
+      ],
+      "bg_samples_px": [
+        [
+          272,
+          305
+        ],
+        [
+          269,
+          303
+        ],
+        [
+          271,
+          301
+        ],
+        [
+          278,
+          308
+        ],
+        [
+          275,
+          308
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        73,
+        71,
+        20
+      ],
+      "rim_ratio": 4.15,
+      "outline_ratio": 1.72,
+      "winner": "rim",
+      "median_ratio": 4.15,
+      "min_ratio": 4.15,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C02",
+      "file": "2d_entrance.png",
+      "n": 552,
+      "face_n": 552,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 19,
+      "proj_px": [
+        366.9,
+        297.3
+      ],
+      "found_px": [
+        366.8,
+        297.5
+      ],
+      "face_center_px": [
+        366.8,
+        297.5
+      ],
+      "face_bbox_px": [
+        356,
+        283,
+        378,
+        312
+      ],
+      "face_samples_px": [
+        [
+          367,
+          297
+        ],
+        [
+          356,
+          293
+        ],
+        [
+          364,
+          283
+        ],
+        [
+          378,
+          293
+        ],
+        [
+          364,
+          312
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        344.9,
+        298.8
+      ],
+      "bg_bbox_px": [
+        344,
+        281,
+        346,
+        306
+      ],
+      "bg_samples_px": [
+        [
+          345,
+          300
+        ],
+        [
+          344,
+          300
+        ],
+        [
+          345,
+          281
+        ],
+        [
+          346,
+          281
+        ],
+        [
+          344,
+          306
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        22,
+        20,
+        3
+      ],
+      "rim_ratio": 8.03,
+      "outline_ratio": 1.13,
+      "winner": "rim",
+      "median_ratio": 8.03,
+      "min_ratio": 8.03,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C03",
+      "file": "2d_entrance.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 18,
+      "bg_n": 76,
+      "proj_px": [
+        341.3,
+        84.0
+      ],
+      "found_px": [
+        341.5,
+        84.2
+      ],
+      "face_center_px": [
+        341.5,
+        84.2
+      ],
+      "face_bbox_px": [
+        331,
+        69,
+        352,
+        99
+      ],
+      "face_samples_px": [
+        [
+          341,
+          84
+        ],
+        [
+          331,
+          80
+        ],
+        [
+          339,
+          69
+        ],
+        [
+          352,
+          80
+        ],
+        [
+          339,
+          99
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        343.3,
+        76.1
+      ],
+      "outline_bbox_px": [
+        341,
+        65,
+        347,
+        103
+      ],
+      "outline_samples_px": [
+        [
+          343,
+          68
+        ],
+        [
+          341,
+          65
+        ],
+        [
+          347,
+          99
+        ],
+        [
+          344,
+          103
+        ]
+      ],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        340.1,
+        89.5
+      ],
+      "bg_bbox_px": [
+        325,
+        63,
+        355,
+        105
+      ],
+      "bg_samples_px": [
+        [
+          327,
+          93
+        ],
+        [
+          325,
+          92
+        ],
+        [
+          333,
+          63
+        ],
+        [
+          355,
+          100
+        ],
+        [
+          339,
+          105
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        36,
+        33,
+        10
+      ],
+      "outline_p15_rgb": [
+        29,
+        26,
+        9
+      ],
+      "bg_rgb": [
+        45,
+        47,
+        21
+      ],
+      "rim_ratio": 5.96,
+      "outline_ratio": 1.18,
+      "winner": "rim",
+      "median_ratio": 5.96,
+      "min_ratio": 5.96,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C04",
+      "file": "2d_entrance.png",
+      "n": 550,
+      "face_n": 550,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 456,
+      "proj_px": [
+        768.0,
+        84.0
+      ],
+      "found_px": [
+        768.2,
+        84.2
+      ],
+      "face_center_px": [
+        768.2,
+        84.2
+      ],
+      "face_bbox_px": [
+        757,
+        69,
+        779,
+        99
+      ],
+      "face_samples_px": [
+        [
+          768,
+          84
+        ],
+        [
+          757,
+          80
+        ],
+        [
+          765,
+          69
+        ],
+        [
+          779,
+          80
+        ],
+        [
+          765,
+          99
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        768.1,
+        84.0
+      ],
+      "bg_bbox_px": [
+        750,
+        62,
+        786,
+        106
+      ],
+      "bg_samples_px": [
+        [
+          784,
+          84
+        ],
+        [
+          750,
+          73
+        ],
+        [
+          758,
+          62
+        ],
+        [
+          786,
+          73
+        ],
+        [
+          758,
+          106
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        249,
+        216,
+        149
+      ],
+      "rim_ratio": 1.68,
+      "outline_ratio": 11.96,
+      "winner": "outline",
+      "median_ratio": 11.96,
+      "min_ratio": 11.96,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C05",
+      "file": "2d_grains_c06.png",
+      "n": 415,
+      "face_n": 415,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 450,
+      "proj_px": [
+        558.7,
+        425.3
+      ],
+      "found_px": [
+        557.1,
+        427.7
+      ],
+      "face_center_px": [
+        557.1,
+        427.7
+      ],
+      "face_bbox_px": [
+        548,
+        411,
+        570,
+        440
+      ],
+      "face_samples_px": [
+        [
+          557,
+          428
+        ],
+        [
+          548,
+          421
+        ],
+        [
+          556,
+          411
+        ],
+        [
+          570,
+          427
+        ],
+        [
+          556,
+          440
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        558.0,
+        426.4
+      ],
+      "bg_bbox_px": [
+        541,
+        404,
+        577,
+        447
+      ],
+      "bg_samples_px": [
+        [
+          565,
+          419
+        ],
+        [
+          541,
+          414
+        ],
+        [
+          549,
+          404
+        ],
+        [
+          577,
+          420
+        ],
+        [
+          549,
+          447
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        180,
+        172,
+        133
+      ],
+      "rim_ratio": 1.01,
+      "outline_ratio": 7.18,
+      "winner": "outline",
+      "median_ratio": 7.18,
+      "min_ratio": 7.18,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C06",
+      "file": "2d_grains_c06.png",
+      "n": 550,
+      "face_n": 550,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 456,
+      "proj_px": [
+        644.0,
+        396.0
+      ],
+      "found_px": [
+        644.2,
+        396.2
+      ],
+      "face_center_px": [
+        644.2,
+        396.2
+      ],
+      "face_bbox_px": [
+        633,
+        381,
+        655,
+        411
+      ],
+      "face_samples_px": [
+        [
+          644,
+          396
+        ],
+        [
+          633,
+          392
+        ],
+        [
+          641,
+          381
+        ],
+        [
+          655,
+          392
+        ],
+        [
+          641,
+          411
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        644.1,
+        396.0
+      ],
+      "bg_bbox_px": [
+        626,
+        374,
+        662,
+        418
+      ],
+      "bg_samples_px": [
+        [
+          660,
+          396
+        ],
+        [
+          626,
+          385
+        ],
+        [
+          634,
+          374
+        ],
+        [
+          662,
+          385
+        ],
+        [
+          634,
+          418
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        189,
+        169,
+        124
+      ],
+      "rim_ratio": 1.0,
+      "outline_ratio": 7.15,
+      "winner": "outline",
+      "median_ratio": 7.15,
+      "min_ratio": 7.15,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C07",
+      "file": "2d_grains_c06.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 444,
+      "proj_px": [
+        729.3,
+        425.3
+      ],
+      "found_px": [
+        729.5,
+        425.5
+      ],
+      "face_center_px": [
+        729.5,
+        425.5
+      ],
+      "face_bbox_px": [
+        719,
+        411,
+        740,
+        440
+      ],
+      "face_samples_px": [
+        [
+          729,
+          425
+        ],
+        [
+          719,
+          421
+        ],
+        [
+          727,
+          411
+        ],
+        [
+          740,
+          421
+        ],
+        [
+          727,
+          440
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        729.5,
+        425.5
+      ],
+      "bg_bbox_px": [
+        712,
+        404,
+        747,
+        447
+      ],
+      "bg_samples_px": [
+        [
+          714,
+          425
+        ],
+        [
+          712,
+          414
+        ],
+        [
+          720,
+          404
+        ],
+        [
+          747,
+          414
+        ],
+        [
+          720,
+          447
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        198,
+        180,
+        130
+      ],
+      "rim_ratio": 1.12,
+      "outline_ratio": 8.02,
+      "winner": "outline",
+      "median_ratio": 8.02,
+      "min_ratio": 8.02,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C08",
+      "file": "2d_grains_c08.png",
+      "n": 550,
+      "face_n": 550,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 456,
+      "proj_px": [
+        484.0,
+        396.0
+      ],
+      "found_px": [
+        484.2,
+        396.2
+      ],
+      "face_center_px": [
+        484.2,
+        396.2
+      ],
+      "face_bbox_px": [
+        473,
+        381,
+        495,
+        411
+      ],
+      "face_samples_px": [
+        [
+          484,
+          396
+        ],
+        [
+          473,
+          392
+        ],
+        [
+          481,
+          381
+        ],
+        [
+          495,
+          392
+        ],
+        [
+          481,
+          411
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        484.1,
+        396.0
+      ],
+      "bg_bbox_px": [
+        466,
+        374,
+        502,
+        418
+      ],
+      "bg_samples_px": [
+        [
+          500,
+          396
+        ],
+        [
+          466,
+          385
+        ],
+        [
+          474,
+          374
+        ],
+        [
+          502,
+          385
+        ],
+        [
+          474,
+          418
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        176,
+        161,
+        123
+      ],
+      "rim_ratio": 1.11,
+      "outline_ratio": 6.44,
+      "winner": "outline",
+      "median_ratio": 6.44,
+      "min_ratio": 6.44,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C09",
+      "file": "2d_grains_c08.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 450,
+      "proj_px": [
+        633.3,
+        396.0
+      ],
+      "found_px": [
+        633.5,
+        396.2
+      ],
+      "face_center_px": [
+        633.5,
+        396.2
+      ],
+      "face_bbox_px": [
+        623,
+        381,
+        644,
+        411
+      ],
+      "face_samples_px": [
+        [
+          633,
+          396
+        ],
+        [
+          623,
+          392
+        ],
+        [
+          631,
+          381
+        ],
+        [
+          644,
+          392
+        ],
+        [
+          631,
+          411
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        633.5,
+        396.1
+      ],
+      "bg_bbox_px": [
+        616,
+        374,
+        651,
+        418
+      ],
+      "bg_samples_px": [
+        [
+          618,
+          396
+        ],
+        [
+          616,
+          385
+        ],
+        [
+          624,
+          374
+        ],
+        [
+          651,
+          385
+        ],
+        [
+          624,
+          418
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        187,
+        168,
+        121
+      ],
+      "rim_ratio": 1.01,
+      "outline_ratio": 7.04,
+      "winner": "outline",
+      "median_ratio": 7.04,
+      "min_ratio": 7.04,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C10",
+      "file": "2d_cacao.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 444,
+      "proj_px": [
+        601.3,
+        297.3
+      ],
+      "found_px": [
+        601.5,
+        297.5
+      ],
+      "face_center_px": [
+        601.5,
+        297.5
+      ],
+      "face_bbox_px": [
+        591,
+        283,
+        612,
+        312
+      ],
+      "face_samples_px": [
+        [
+          601,
+          297
+        ],
+        [
+          591,
+          293
+        ],
+        [
+          599,
+          283
+        ],
+        [
+          612,
+          293
+        ],
+        [
+          599,
+          312
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        601.5,
+        297.5
+      ],
+      "bg_bbox_px": [
+        584,
+        276,
+        619,
+        319
+      ],
+      "bg_samples_px": [
+        [
+          586,
+          297
+        ],
+        [
+          584,
+          286
+        ],
+        [
+          592,
+          276
+        ],
+        [
+          619,
+          286
+        ],
+        [
+          592,
+          319
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        235,
+        203,
+        139
+      ],
+      "rim_ratio": 1.47,
+      "outline_ratio": 10.52,
+      "winner": "outline",
+      "median_ratio": 10.52,
+      "min_ratio": 10.52,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C11",
+      "file": "2d_cacao.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 450,
+      "proj_px": [
+        857.3,
+        382.7
+      ],
+      "found_px": [
+        857.5,
+        382.8
+      ],
+      "face_center_px": [
+        857.5,
+        382.8
+      ],
+      "face_bbox_px": [
+        847,
+        368,
+        868,
+        398
+      ],
+      "face_samples_px": [
+        [
+          857,
+          383
+        ],
+        [
+          847,
+          379
+        ],
+        [
+          855,
+          368
+        ],
+        [
+          868,
+          379
+        ],
+        [
+          855,
+          398
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        857.5,
+        382.9
+      ],
+      "bg_bbox_px": [
+        840,
+        361,
+        875,
+        405
+      ],
+      "bg_samples_px": [
+        [
+          842,
+          383
+        ],
+        [
+          840,
+          372
+        ],
+        [
+          848,
+          361
+        ],
+        [
+          875,
+          372
+        ],
+        [
+          848,
+          405
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        202,
+        174,
+        119
+      ],
+      "rim_ratio": 1.08,
+      "outline_ratio": 7.69,
+      "winner": "outline",
+      "median_ratio": 7.69,
+      "min_ratio": 7.69,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C12",
+      "file": "2d_cacao.png",
+      "n": 552,
+      "face_n": 552,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 450,
+      "proj_px": [
+        1198.7,
+        297.3
+      ],
+      "found_px": [
+        1198.8,
+        297.5
+      ],
+      "face_center_px": [
+        1198.8,
+        297.5
+      ],
+      "face_bbox_px": [
+        1188,
+        283,
+        1210,
+        312
+      ],
+      "face_samples_px": [
+        [
+          1199,
+          297
+        ],
+        [
+          1188,
+          293
+        ],
+        [
+          1196,
+          283
+        ],
+        [
+          1210,
+          293
+        ],
+        [
+          1196,
+          312
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        1198.9,
+        297.5
+      ],
+      "bg_bbox_px": [
+        1181,
+        276,
+        1217,
+        319
+      ],
+      "bg_samples_px": [
+        [
+          1183,
+          297
+        ],
+        [
+          1181,
+          286
+        ],
+        [
+          1189,
+          276
+        ],
+        [
+          1217,
+          286
+        ],
+        [
+          1189,
+          319
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        225,
+        192,
+        129
+      ],
+      "rim_ratio": 1.32,
+      "outline_ratio": 9.44,
+      "winner": "outline",
+      "median_ratio": 9.44,
+      "min_ratio": 9.44,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C13",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C14",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C15",
+      "file": "2d_grains_c16.png",
+      "n": 550,
+      "face_n": 550,
+      "rim_n": 0,
+      "outline_n": 146,
+      "bg_n": 276,
+      "proj_px": [
+        516.0,
+        398.7
+      ],
+      "found_px": [
+        516.2,
+        398.8
+      ],
+      "face_center_px": [
+        516.2,
+        398.8
+      ],
+      "face_bbox_px": [
+        505,
+        384,
+        527,
+        414
+      ],
+      "face_samples_px": [
+        [
+          516,
+          399
+        ],
+        [
+          505,
+          395
+        ],
+        [
+          513,
+          384
+        ],
+        [
+          527,
+          395
+        ],
+        [
+          513,
+          414
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        516.2,
+        383.6
+      ],
+      "outline_bbox_px": [
+        503,
+        380,
+        530,
+        388
+      ],
+      "outline_samples_px": [
+        [
+          516,
+          383
+        ],
+        [
+          503,
+          387
+        ],
+        [
+          509,
+          380
+        ],
+        [
+          530,
+          387
+        ],
+        [
+          503,
+          388
+        ]
+      ],
+      "sil_center_px": [
+        516.2,
+        383.6
+      ],
+      "sil_bbox_px": [
+        503,
+        380,
+        530,
+        388
+      ],
+      "sil_samples_px": [
+        [
+          516,
+          383
+        ],
+        [
+          503,
+          387
+        ],
+        [
+          509,
+          380
+        ],
+        [
+          530,
+          387
+        ],
+        [
+          503,
+          388
+        ]
+      ],
+      "bg_center_px": [
+        516.0,
+        407.6
+      ],
+      "bg_bbox_px": [
+        498,
+        389,
+        534,
+        420
+      ],
+      "bg_samples_px": [
+        [
+          516,
+          419
+        ],
+        [
+          498,
+          389
+        ],
+        [
+          534,
+          389
+        ],
+        [
+          506,
+          420
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        62,
+        44,
+        28
+      ],
+      "outline_p15_rgb": [
+        62,
+        44,
+        28
+      ],
+      "bg_rgb": [
+        174,
+        158,
+        119
+      ],
+      "rim_ratio": 1.15,
+      "outline_ratio": 5.03,
+      "winner": "outline",
+      "median_ratio": 5.03,
+      "min_ratio": 5.03,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C16",
+      "file": "2d_grains_c16.png",
+      "n": 550,
+      "face_n": 550,
+      "rim_n": 0,
+      "outline_n": 146,
+      "bg_n": 276,
+      "proj_px": [
+        644.0,
+        398.7
+      ],
+      "found_px": [
+        644.2,
+        398.8
+      ],
+      "face_center_px": [
+        644.2,
+        398.8
+      ],
+      "face_bbox_px": [
+        633,
+        384,
+        655,
+        414
+      ],
+      "face_samples_px": [
+        [
+          644,
+          399
+        ],
+        [
+          633,
+          395
+        ],
+        [
+          641,
+          384
+        ],
+        [
+          655,
+          395
+        ],
+        [
+          641,
+          414
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        644.2,
+        383.6
+      ],
+      "outline_bbox_px": [
+        631,
+        380,
+        658,
+        388
+      ],
+      "outline_samples_px": [
+        [
+          644,
+          383
+        ],
+        [
+          631,
+          387
+        ],
+        [
+          637,
+          380
+        ],
+        [
+          658,
+          387
+        ],
+        [
+          631,
+          388
+        ]
+      ],
+      "sil_center_px": [
+        644.2,
+        383.6
+      ],
+      "sil_bbox_px": [
+        631,
+        380,
+        658,
+        388
+      ],
+      "sil_samples_px": [
+        [
+          644,
+          383
+        ],
+        [
+          631,
+          387
+        ],
+        [
+          637,
+          380
+        ],
+        [
+          658,
+          387
+        ],
+        [
+          631,
+          388
+        ]
+      ],
+      "bg_center_px": [
+        644.0,
+        407.6
+      ],
+      "bg_bbox_px": [
+        626,
+        389,
+        662,
+        420
+      ],
+      "bg_samples_px": [
+        [
+          644,
+          419
+        ],
+        [
+          626,
+          389
+        ],
+        [
+          662,
+          389
+        ],
+        [
+          634,
+          420
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        62,
+        44,
+        28
+      ],
+      "outline_p15_rgb": [
+        62,
+        44,
+        28
+      ],
+      "bg_rgb": [
+        182,
+        166,
+        121
+      ],
+      "rim_ratio": 1.05,
+      "outline_ratio": 5.51,
+      "winner": "outline",
+      "median_ratio": 5.51,
+      "min_ratio": 5.51,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C17",
+      "file": "2d_hazard.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 51,
+      "bg_n": 142,
+      "proj_px": [
+        149.3,
+        341.3
+      ],
+      "found_px": [
+        149.5,
+        341.5
+      ],
+      "face_center_px": [
+        149.5,
+        341.5
+      ],
+      "face_bbox_px": [
+        139,
+        327,
+        160,
+        356
+      ],
+      "face_samples_px": [
+        [
+          149,
+          341
+        ],
+        [
+          139,
+          337
+        ],
+        [
+          147,
+          327
+        ],
+        [
+          160,
+          337
+        ],
+        [
+          147,
+          356
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        133.0,
+        338.5
+      ],
+      "outline_bbox_px": [
+        132,
+        328,
+        135,
+        354
+      ],
+      "outline_samples_px": [
+        [
+          133,
+          338
+        ],
+        [
+          132,
+          330
+        ],
+        [
+          133,
+          328
+        ],
+        [
+          135,
+          328
+        ],
+        [
+          135,
+          354
+        ]
+      ],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        149.0,
+        345.0
+      ],
+      "bg_bbox_px": [
+        133,
+        322,
+        166,
+        362
+      ],
+      "bg_samples_px": [
+        [
+          134,
+          345
+        ],
+        [
+          133,
+          340
+        ],
+        [
+          138,
+          322
+        ],
+        [
+          166,
+          331
+        ],
+        [
+          141,
+          362
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        47,
+        43,
+        18
+      ],
+      "outline_p15_rgb": [
+        35,
+        33,
+        12
+      ],
+      "bg_rgb": [
+        36,
+        40,
+        20
+      ],
+      "rim_ratio": 6.57,
+      "outline_ratio": 1.06,
+      "winner": "rim",
+      "median_ratio": 6.57,
+      "min_ratio": 6.57,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C18",
+      "file": "2d_hazard.png",
+      "n": 550,
+      "face_n": 550,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 456,
+      "proj_px": [
+        490.7,
+        298.7
+      ],
+      "found_px": [
+        490.8,
+        298.8
+      ],
+      "face_center_px": [
+        490.8,
+        298.8
+      ],
+      "face_bbox_px": [
+        480,
+        284,
+        502,
+        314
+      ],
+      "face_samples_px": [
+        [
+          491,
+          299
+        ],
+        [
+          480,
+          295
+        ],
+        [
+          488,
+          284
+        ],
+        [
+          502,
+          295
+        ],
+        [
+          488,
+          314
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        490.9,
+        299.0
+      ],
+      "bg_bbox_px": [
+        473,
+        277,
+        509,
+        321
+      ],
+      "bg_samples_px": [
+        [
+          475,
+          299
+        ],
+        [
+          473,
+          288
+        ],
+        [
+          481,
+          277
+        ],
+        [
+          509,
+          288
+        ],
+        [
+          481,
+          321
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        204,
+        175,
+        123
+      ],
+      "rim_ratio": 1.1,
+      "outline_ratio": 7.81,
+      "winner": "outline",
+      "median_ratio": 7.81,
+      "min_ratio": 7.81,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C19",
+      "file": "2d_hazard.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 444,
+      "proj_px": [
+        917.3,
+        469.3
+      ],
+      "found_px": [
+        917.5,
+        469.5
+      ],
+      "face_center_px": [
+        917.5,
+        469.5
+      ],
+      "face_bbox_px": [
+        907,
+        455,
+        928,
+        484
+      ],
+      "face_samples_px": [
+        [
+          917,
+          469
+        ],
+        [
+          907,
+          465
+        ],
+        [
+          915,
+          455
+        ],
+        [
+          928,
+          465
+        ],
+        [
+          915,
+          484
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        917.5,
+        469.5
+      ],
+      "bg_bbox_px": [
+        900,
+        448,
+        935,
+        491
+      ],
+      "bg_samples_px": [
+        [
+          902,
+          469
+        ],
+        [
+          900,
+          458
+        ],
+        [
+          908,
+          448
+        ],
+        [
+          935,
+          458
+        ],
+        [
+          908,
+          491
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        217,
+        189,
+        132
+      ],
+      "rim_ratio": 1.27,
+      "outline_ratio": 9.05,
+      "winner": "outline",
+      "median_ratio": 9.05,
+      "min_ratio": 9.05,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C20",
+      "file": "2d_hazard.png",
+      "n": 536,
+      "face_n": 536,
+      "rim_n": 0,
+      "outline_n": 0,
+      "bg_n": 450,
+      "proj_px": [
+        1173.3,
+        384.0
+      ],
+      "found_px": [
+        1173.5,
+        384.2
+      ],
+      "face_center_px": [
+        1173.5,
+        384.2
+      ],
+      "face_bbox_px": [
+        1163,
+        369,
+        1184,
+        399
+      ],
+      "face_samples_px": [
+        [
+          1173,
+          384
+        ],
+        [
+          1163,
+          380
+        ],
+        [
+          1171,
+          369
+        ],
+        [
+          1184,
+          380
+        ],
+        [
+          1171,
+          399
+        ]
+      ],
+      "rim_center_px": [
+        0.0,
+        0.0
+      ],
+      "rim_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rim_samples_px": [],
+      "outline_center_px": [
+        0.0,
+        0.0
+      ],
+      "outline_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "outline_samples_px": [],
+      "sil_center_px": [
+        0.0,
+        0.0
+      ],
+      "sil_bbox_px": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sil_samples_px": [],
+      "bg_center_px": [
+        1173.5,
+        384.1
+      ],
+      "bg_bbox_px": [
+        1156,
+        362,
+        1191,
+        406
+      ],
+      "bg_samples_px": [
+        [
+          1158,
+          384
+        ],
+        [
+          1156,
+          373
+        ],
+        [
+          1164,
+          362
+        ],
+        [
+          1191,
+          373
+        ],
+        [
+          1164,
+          406
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "rim_rgb": [
+        240,
+        150,
+        52
+      ],
+      "rim_p15_rgb": [
+        240,
+        150,
+        52
+      ],
+      "outline_rgb": [
+        51,
+        24,
+        14
+      ],
+      "outline_p15_rgb": [
+        51,
+        24,
+        14
+      ],
+      "bg_rgb": [
+        203,
+        172,
+        118
+      ],
+      "rim_ratio": 1.06,
+      "outline_ratio": 7.59,
+      "winner": "outline",
+      "median_ratio": 7.59,
+      "min_ratio": 7.59,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C21",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C22",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C23",
+      "error": "not on any 2d still"
+    }
+  ],
+  "grains_summary": {
+    "n": 24,
+    "median_of_medians": 7.2,
+    "min_median": 4.12,
+    "min_of_mins": 4.12,
+    "pin_median": 4.03,
+    "pin_min": 3.7,
+    "all_median_ge_4_03": true,
+    "all_min_ge_3_7": true
+  },
+  "maya_p10_required": {
+    "files": [
+      "3d_x04.png",
+      "3d_x133.png",
+      "3d_x163.png",
+      "3d_x193.png",
+      "3d_x36.png",
+      "3d_x66.png",
+      "3d_x87.png",
+      "3d_x95.png"
+    ],
+    "threshold": 4.4,
+    "pass": true
+  }
+}
