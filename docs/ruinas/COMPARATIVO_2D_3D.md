@@ -167,17 +167,37 @@ Spawn 2D (96, 768) → pies (4.5417, 14.25, 0).
 
 ## Ruta de Maya
 
-P01 y P02 son muros de 40 m (px y 192, alto 960) que cierran el pozo de lado a lado. El salto de Maya es `jumpVel` 720 px con `GRAV_UP` 2100: cerca de 5.1 m, y un doble cerca de 10 m. Desde el suelo de entrada (top 12 m) la corona queda a 28 m. No hay wall-jump: implementarlo exige `player_maya.gd`, y eso queda para un OK de Nadia. La escalada de Nix (`character id == "nix"`) no está en Maya, y el pound de la caja P09 tampoco.
+P01 y P02 son muros de 40 m (px y 192, alto 960) que cierran el pozo de lado a lado. El salto de Maya es `jumpVel` 720 px con `GRAV_UP` 2100: cerca de 5.1 m, y un doble cerca de 10 m. Desde el suelo de entrada (top 12 m) la corona queda a 28 m. Con el kit MOVE-001 (OK de Nadia) el wall hop sube la cara de P01 y el zigzag cruza a P02. La escalada de Nix y el pound de P09 siguen fuera del kit.
 
-Con mantle solo, Maya no cruza el pozo ni sube a la corona. La toma `mantle` está **posicionada**, no jugada. La ruta hacia la meta, que pasa esos muros, queda **bloqueada** para Maya.
+La toma `mantle` de arriba está posicionada. Las de abajo salen de `ruinas_route_probe.gd`: solo inputs, sin teletransporte. Corona en el tick 175, meta en el tick 1666, 5 vidas.
 
 ## One-way y mantle
 
-En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. En 3D, `_nearby_solids` y `_blocked_rect` consultan `collision_mask`, el mismo mask con el que Maya se para en el piso. Sacar P08, P14 y P19 de esa consulta sin perder el suelo implica cambiar `player_maya.gd`. No se tocó. Siguen siendo suelo de one-way, y el mantle todavía puede verlos.
+En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. El kit hace lo mismo: un cuerpo en el grupo `oneway` o con meta `kind=oneway` no entra en el agarre. P08, P14 y P19 siguen siendo suelo.
 
 ## Look
 
 Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC` con borde `#2C1810`, sin emisión. Láser: el ancho del hurtbox, 0.4167 m, `#E85A3A` al 0.88, núcleo `#FFF0D2` de 0.125 m. Cacao: óvalo de frente a cámara, el mismo tamaño que la elipse 2D (16×22 px a 540, unos 20×30 px en el patio a 720p), base `#6B3A1F` con un poco de `#C46A3A`. El radio de recogida sigue en 28 px. El pozo tiene un fondo verde entre las lianas. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
+
+## Zigzag y arrastre jugados
+
+Misma ventana de cámara (foco clampeado, 40 × 22.5 m). Izquierda: planta 2D del layout. Derecha: viewport 1280×720 del probe.
+
+![zigzag](cmp_zigzag.png)
+
+![zigzag colgado](cmp_zigzag_hang.png)
+
+![arrastre](cmp_crawl.png)
+
+Secuencias: [zigzag.gif](zigzag.gif), [crawl.gif](crawl.gif).
+
+| archivo | sha256 |
+|---|---|
+| `cmp_zigzag.png` | `72e7021434121104f2585bcd81a0169d2075440ffa53f7713149c418c85aa7e7` |
+| `cmp_zigzag_hang.png` | `e0e9474cf4829d9a03d96e13114ddae149e702f6874ae43821bbbbb8294b05a9` |
+| `cmp_crawl.png` | `57d1bfb2b40717cb76ac0a7645550c1f1c9b653e2f9d4d7065f07e154ad65232` |
+| `zigzag.gif` | `5cfaeb4619b2734b8fc40ede6c4f2b68ae499455f1922b483fdbdec6dbed0152` |
+| `crawl.gif` | `693ff8e99823abb6f510cc3e7e560643423f43b38590f5eff2590c0512027db1` |
 
 ## Pendiente
 
@@ -188,8 +208,8 @@ Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los
 | warp K00 / F00 | stub con log y respawn al último spawn. No hay `pichincha-1` ni `jardin-1`. No congela |
 | caída fuera del nivel | resta una vida |
 | caja P09 pound | no. Maya no tiene pound |
-| escalada Nix en P01/P02 | no. Diferencia de personaje |
-| wall-jump | no. Haría falta el OK de Nadia para tocar `player_maya.gd` |
-| ruta pasado el pozo | bloqueada para Maya |
-| one-way fuera del mantle | no hecho. Hace falta `player_maya.gd` |
+| escalada Nix en P01/P02 | no. Diferencia de personaje, fase posterior |
+| wall-jump / zigzag | en el kit. El probe sube P01 y cruza a P02 |
+| ruta hasta G00 | el probe la termina con inputs |
+| one-way fuera del mantle | el kit no agarra cuerpos `oneway` |
 

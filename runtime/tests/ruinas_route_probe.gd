@@ -22,12 +22,23 @@ var _doubled := false
 var _p17_prev := -1.0
 var _p17_x := 0.0
 var _p17_down := false
+var _p17_speed := 1.0
 var _stuck := 0
 var _stuck_x := 0.0
 var _stuck_y := 0.0
+var _under_frames := 0
+var _under_done := false
+var _moment_dir := ""
+var _zig_shots := 0
+var _drag_shots := 0
+var _zig_cool := 0
+var _drag_cool := 0
 
 
 func _initialize() -> void:
+	_moment_dir = OS.get_environment("RUINAS_MOMENTS")
+	if _moment_dir.ends_with("/"):
+		_moment_dir = _moment_dir.substr(0, _moment_dir.length() - 1)
 	_run.call_deferred()
 
 
@@ -44,6 +55,7 @@ func _run() -> void:
 	for t in 60 * 150:
 		if _pilot._status == "playing":
 			await _drive()
+			await _maybe_shot()
 		else:
 			_phase = "wait-" + String(_pilot._status)
 			await _go(0.0, false, false)
@@ -81,6 +93,7 @@ func _drive() -> void:
 	var y := _p.global_position.y
 	var px := _plat_x("P17")
 	_p17_down = _p17_prev > 0.0 and px < _p17_prev - 0.02
+	_p17_speed = absf(px - _p17_prev) if _p17_prev > 0.0 else 1.0
 	_p17_prev = px
 	_p17_x = px
 	if absf(x - _stuck_x) < 0.04 and absf(y - _stuck_y) < 0.04:
@@ -93,6 +106,10 @@ func _drive() -> void:
 		_set_phase("mantle")
 		await _go(0.0, true, false)
 		return
+	if not _under_done and String(_p.pose_id) == "drag" and y < 13.2 and x > 26.2:
+		_under_frames += 1
+		if _under_frames > 18:
+			_under_done = true
 	# A leg latches in the air so a takeoff keeps its jump through the gap.
 	# Landing picks the next leg from where the feet actually are, so a death
 	# respawn (start or a saved pole) rejoins the route without a teleport.
@@ -113,9 +130,20 @@ func _plan(x: float, y: float) -> String:
 		return "approach"
 	if x < 17.2 and y < 39.6:
 		return "wall-p01"
-	if x < 32.7 and y < 16.0:
-		# Stay under the P04 lip until the feet are on its far side, then hop.
-		return "wall-p05" if x > 32.05 else "crawl-p04"
+	# P04 is a crawl lid. Forward progress is on top of it: the right end meets
+	# the P05 face with open sky above. Under the lid the same face is a corner
+	# with no headroom. Crawl in, then back out and hop up.
+	if not _under_done:
+		if y > 13.6 and y < 19.8 and x > 22.8 and x < 33.2:
+			return "retreat-under"
+		if y < 13.6 and x > 18.5 and x < 32.4:
+			return "crawl-p04"
+	if y > 13.6 and y < 19.8 and x > 22.8 and x < 33.2:
+		return "wall-p05" if x > 31.15 else "run-cover"
+	if y < 13.5 and x > 23.7 and x < 32.6:
+		return "retreat-under"
+	if y < 14.2 and x > 18.2 and x < 24.3:
+		return "onto-cover" if x > 21.35 else "run-cover"
 	if x < 32.7:
 		return "drop"
 	if x < 41.2 and y < 20.9:
@@ -141,14 +169,33 @@ func _plan(x: float, y: float) -> String:
 		return "board-p17"
 	var top17 := _plat_top("P17")
 	if absf(y - top17) < 1.55 and absf(x - _p17_x) < 3.1 and y > 26.5:
-		if x >= 130.05 and x <= 131.4:
+		# Single hop from the right-hand pause. A double hop tops out on the
+		# P19 one-way (y=32). Platform speed has to be near zero or the
+		# landing walks into H03.
+		if _p17_speed < 0.025 and _p17_x > 131.15 and x >= 129.95 and x <= 130.4:
 			return "cross-h03"
 		return "ride-p17"
 	if x < 141.6 and y > 22.2 and y < 26.8:
 		return "run-p18l" if x < 139.65 else "cross-h03"
 	if x < 156.5 and y > 22.2 and y < 26.8:
-		return "run-p18r" if x < 148.55 else "jump-p20"
-	if y < 26.45 and x < 167.4:
+		# Full speed at x≈149.1 clears the lip under H06. Stopping on the lip
+		# kills the jump, so the wait happens a step earlier.
+		if not _h06_clear():
+			if x > 148.55:
+				return "step-back"
+			if x > 148.15:
+				return "wait-laser"
+			return "run-p18r"
+		if x < 149.0 or _p.velocity.x < 10.0:
+			return "run-p18r"
+		if x <= 149.24:
+			return "jump-p20"
+		return "step-back"
+	# The P20 hop lands on the squeeze roof (the mouth is the same x as the floor).
+	# Run the roof and hop the P22 face. The under-route is the pose capture.
+	if y > 20.4 and y < 23.6 and x > 156.6 and x < 165.5:
+		return "wall-p22" if x > 161.35 else "run-roof"
+	if y < 20.6 and x > 156.8 and x < 167.4:
 		return "crawl-p21"
 	if y < 26.45:
 		return "wall-p22"
@@ -157,23 +204,42 @@ func _plan(x: float, y: float) -> String:
 	return "goal"
 
 
+func _h06_hot(ahead: float) -> bool:
+	var period := 2.2
+	var t := float(_pilot._time) + 0.3 + ahead
+	return fposmod(t, period) < period * 0.42
+
+
+func _h06_clear() -> bool:
+	return not _h06_hot(0.45) and not _h06_hot(0.62) and not _h06_hot(0.8) and not _h06_hot(0.95)
+
+
 func _p17_go() -> bool:
 	return _p17_down and _p17_x > 123.3 and _p17_x < 129.3
 
 
 func _act(x: float, y: float) -> void:
 	match _phase:
-		"approach", "drop", "run-p05", "run-p07", "run-p11", "run-p18l", "run-p18r", "run-p22", "goal":
+		"approach", "drop", "run-cover", "run-roof", "run-p05", "run-p07", "run-p11", "run-p18l", "run-p18r", "run-p22", "goal":
 			await _go(1.0, false, false)
+		"retreat-under":
+			await _go(-1.0, false, false)
+		"onto-cover", "full-p15", "cross-h03":
+			await _go(1.0, true, false)
+		"jump-p20":
+			# Hold through the rise so the arc clears H06, then release. A held
+			# fall grabs the P21 lip and mantles onto the roof.
+			var rising := _p.is_on_floor() or _p.velocity.y > 0.4
+			await _go(1.0, rising, false)
 		"wall-p01", "wall-p05", "wall-p22":
 			await _wall_hop(1.0)
 		"cross":
 			await _go(1.0, x > 15.45 or not _p.is_on_floor(), false)
 		"crawl-p04":
-			await _go(1.0, false, x > 23.45 and x < 31.5)
+			await _go(1.0, false, x > 22.9 and x < 31.6)
 		"settle-p05":
 			await _go(-1.0 if x > 36.2 else 0.35, false, false)
-		"leap-p07", "leap-p14", "leap-p16", "leap-p24", "launch-p11":
+		"leap-p07", "leap-p14", "leap-p16", "leap-p18", "leap-p24", "launch-p11":
 			await _double_right(0.0)
 		"board-p10":
 			await _board_p10(y)
@@ -183,8 +249,10 @@ func _act(x: float, y: float) -> void:
 			await _short_right()
 		"seek-p14":
 			await _go(-1.0 if x > 90.5 else 1.0, false, false)
-		"full-p15", "cross-h03", "jump-p20":
-			await _go(1.0, true, false)
+		"wait-laser":
+			await _go(0.0, false, false)
+		"step-back":
+			await _go(-1.0, false, false)
 		"wait-p15":
 			var steer := 0.0
 			if x < 99.45:
@@ -203,6 +271,38 @@ func _act(x: float, y: float) -> void:
 			await _go(-1.0 if x > 169.2 else 0.3, false, false)
 		_:
 			await _go(1.0, false, false)
+
+
+func _maybe_shot() -> void:
+	if _moment_dir == "":
+		return
+	var x := _p.global_position.x
+	var y := _p.global_position.y
+	var tag := ""
+	# The gap between the two crown walls. Sample every third tick so the
+	# sequence shows the hop, not eight copies of one frame.
+	if _zig_shots < 10 and y > 36.0 and x > 15.6 and x < 21.0:
+		_zig_cool += 1
+		if _zig_cool % 3 == 1:
+			tag = "zigzag_%02d" % _zig_shots
+			_zig_shots += 1
+	elif _drag_shots < 8 and String(_p.pose_id) == "drag" and y < 13.3 and x > 25.2 and x < 30.5:
+		_drag_cool += 1
+		if _drag_cool % 4 == 1:
+			tag = "crawl_%02d" % _drag_shots
+			_drag_shots += 1
+	if tag == "":
+		return
+	await RenderingServer.frame_post_draw
+	var img := root.get_viewport().get_texture().get_image()
+	if img == null:
+		return
+	var path := "%s/%s.png" % [_moment_dir, tag]
+	img.save_png(path)
+	var note := FileAccess.open("%s/%s.txt" % [_moment_dir, tag], FileAccess.WRITE)
+	if note:
+		note.store_string("feet=%.3f,%.3f pose=%s phase=%s\n" % [x, y, String(_p.pose_id), _phase])
+	print("RUINAS_SHOT %s feet=(%.2f, %.2f) pose=%s" % [path, x, y, String(_p.pose_id)])
 
 
 func _set_phase(next: String) -> void:
@@ -243,13 +343,22 @@ func _short_right() -> void:
 
 func _board_p10(y: float) -> void:
 	var top := _plat_top("P10")
+	var anchor := _plat_x("P10") - 1.2
+	var x := _p.global_position.x
+	# H04 sits on the right half of the mover. Land on the left and drop the
+	# button so the arc does not carry the hurtbox through the beam.
 	if not _p.is_on_floor():
-		await _go(1.0, true, false)
+		var steer := 0.0
+		if x < anchor - 0.15:
+			steer = 1.0
+		elif x > anchor + 0.25:
+			steer = -1.0
+		await _go(steer, false, false)
 		return
-	if top > y - 0.25 and top < y + 3.1:
+	if x > 51.35 and top > y - 0.3 and top < y + 2.0:
 		await _go(1.0, true, false)
 	else:
-		await _go(0.0, false, false)
+		await _go(0.0 if x > 51.7 else 1.0, false, false)
 
 
 func _steer_p10(x: float) -> void:
@@ -263,9 +372,9 @@ func _steer_p10(x: float) -> void:
 
 
 func _steer_p17(x: float) -> void:
-	var aim := 130.6
-	if _p17_x < 128.5:
-		aim = _p17_x
+	var aim := _p17_x
+	if _p17_x > 130.6:
+		aim = 130.15
 	var steer := 0.0
 	if x < aim - 0.18:
 		steer = 1.0
