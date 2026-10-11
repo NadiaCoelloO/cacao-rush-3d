@@ -1359,27 +1359,33 @@ void fragment() {
 	col *= mix(0.74, 1.0, smoothstep(10.0, 28.0, eye.x));
 	float mid = smoothstep(50.0, 60.0, eye.x) * (1.0 - smoothstep(92.0, 108.0, eye.x));
 	col *= mix(1.0, 0.58, mid);
-	// Almost-horizontal várzea scallop: adjacent rounded copas (small +
-	// medium), a few isolated emergents, small sky holes. No low-freq
-	// envelope — that was the hill. UV.y=0 is the card TOP.
+	// Almost-horizontal várzea: overlapping flat-topped copas (semicircle
+	// raised to <1 so the cap is mushroom-round, not a spike). Small +
+	// medium sit on a flat baseline. Sparse emergents, tiny sky holes.
+	// No low-freq hill, no cordillera. UV.y=0 is the card TOP.
 	float xw = vx + par * 0.03;
-	float t_s = fract(xw * 28.0);
-	float t_m = fract(xw * 16.0 + 0.31);
-	float t_s2 = fract(xw * 36.0 + 0.62);
-	float copa_s = pow(max(1.0 - abs(t_s - 0.5) * 2.05, 0.0), 1.55);
-	float copa_m = pow(max(1.0 - abs(t_m - 0.5) * 2.15, 0.0), 1.35);
-	float copa_s2 = pow(max(1.0 - abs(t_s2 - 0.5) * 2.25, 0.0), 1.70);
-	float scallop = max(max(copa_s * 0.88, copa_m * 1.00), copa_s2 * 0.62);
-	float ecell = floor(xw * 14.0 + 0.4);
+	float t_s = fract(xw * 20.0);
+	float t_m = fract(xw * 11.5 + 0.37);
+	float t_s2 = fract(xw * 27.0 + 0.71);
+	float u_s = (t_s - 0.5) * 1.48;
+	float u_m = (t_m - 0.5) * 1.38;
+	float u_s2 = (t_s2 - 0.5) * 1.58;
+	float copa_s = pow(sqrt(max(1.0 - u_s * u_s, 0.0)), 0.52);
+	float copa_m = pow(sqrt(max(1.0 - u_m * u_m, 0.0)), 0.48);
+	float copa_s2 = pow(sqrt(max(1.0 - u_s2 * u_s2, 0.0)), 0.58);
+	float scallop = max(max(copa_s * 0.70, copa_m * 1.00), copa_s2 * 0.48);
+	float ecell = floor(xw * 9.0 + 0.4);
 	float eh = fract(sin(ecell * 127.13) * 43758.54);
-	float eloc = fract(xw * 14.0 + 0.4);
-	float emerg = step(0.86, eh) * pow(max(1.0 - abs(eloc - 0.5) * 2.4, 0.0), 1.55);
-	float hcell = floor(xw * 22.0 + 1.2);
+	float eloc = fract(xw * 9.0 + 0.4);
+	float eu = (eloc - 0.5) * 1.70;
+	float emerg = step(0.84, eh) * pow(sqrt(max(1.0 - eu * eu, 0.0)), 0.50);
+	float hcell = floor(xw * 18.0 + 1.2);
 	float hh = fract(sin(hcell * 91.7) * 23341.2);
-	float hloc = fract(xw * 22.0 + 1.2);
-	float hole = step(0.90, hh) * pow(max(1.0 - abs(hloc - 0.5) * 2.6, 0.0), 1.35);
-	float crown = 0.040 + scallop * 0.052 + emerg * 0.050 - hole * 0.026;
-	float keep = smoothstep(crown - 0.003, crown + 0.006, vy);
+	float hloc = fract(xw * 18.0 + 1.2);
+	float hu = (hloc - 0.5) * 2.10;
+	float hole = step(0.91, hh) * pow(sqrt(max(1.0 - hu * hu, 0.0)), 0.70);
+	float crown = 0.036 + scallop * 0.026 + emerg * 0.034 - hole * 0.014;
+	float keep = smoothstep(crown - 0.006, crown + 0.012, vy);
 	if (keep < 0.22) {
 		discard;
 	}
