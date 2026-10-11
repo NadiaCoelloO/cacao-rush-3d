@@ -46,6 +46,14 @@ const MAYA_BACK_FILL_RANGE := 3.0
 const MAYA_BACK_FILL_ATTEN := 1.5
 const MAYA_RIM_ENERGY := 0.10
 const MAYA_RIM_RANGE := 2.6
+## Same authored offset as LOOK001_FILL / RIM relative to the 1.8 m body
+## center. Scaled by current height / standing height so crouch and prone
+## keep the light on the body center. Standing (scale 1) is unchanged.
+const MAYA_FILL_ABOVE := 1.22 - 0.9
+const MAYA_RIM_ABOVE := 1.48 - 0.9
+const MAYA_FILL_Z := 0.88
+const MAYA_RIM_X := 0.50
+const MAYA_RIM_Z := -0.60
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
 ## volumetric fog on the Environment covers that role in Forward+).
@@ -302,7 +310,8 @@ func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	_maya_fill.light_volumetric_fog_energy = 0.0
 	_maya_fill.light_cull_mask = MAYA_FOLLOW_LAYER
 	# Behind/above her back relative to PlayerMaya/Camera3D (+Z follow-cam).
-	_maya_fill.position = Vector3(0.0, 1.22, 0.88)
+	# Y is the standing center plus MAYA_FILL_ABOVE; _process tracks `_h`.
+	_maya_fill.position = Vector3(0.0, 0.9 + MAYA_FILL_ABOVE, 0.88)
 	player.add_child(_maya_fill)
 	_maya_rim = OmniLight3D.new()
 	_maya_rim.name = "LOOK001_RIM_MayaFollow"
@@ -314,8 +323,29 @@ func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	_maya_rim.shadow_enabled = false
 	_maya_rim.light_volumetric_fog_energy = 0.0
 	_maya_rim.light_cull_mask = MAYA_FOLLOW_LAYER
-	_maya_rim.position = Vector3(0.50, 1.48, -0.60)
+	_maya_rim.position = Vector3(0.50, 0.9 + MAYA_RIM_ABOVE, -0.60)
 	player.add_child(_maya_rim)
+	_aim_maya_follow_lights()
+
+
+func _process(_delta: float) -> void:
+	_aim_maya_follow_lights()
+
+
+func _aim_maya_follow_lights() -> void:
+	if _maya_fill == null and _maya_rim == null:
+		return
+	var player := _maya_fill.get_parent() if _maya_fill else _maya_rim.get_parent()
+	if player == null or not player.get("_h"):
+		return
+	var h := float(player.get("_h"))
+	var stand := float(player.get("_stand_h")) if player.get("_stand_h") else 1.8
+	var scale := h / stand if stand > 0.0 else 1.0
+	var center_y := h * 0.5
+	if _maya_fill:
+		_maya_fill.position = Vector3(0.0, center_y + MAYA_FILL_ABOVE * scale, MAYA_FILL_Z * scale)
+	if _maya_rim:
+		_maya_rim.position = Vector3(MAYA_RIM_X * scale, center_y + MAYA_RIM_ABOVE * scale, MAYA_RIM_Z * scale)
 
 
 func _set_maya_follow_for_shot(player: Node, gameplay: bool) -> void:

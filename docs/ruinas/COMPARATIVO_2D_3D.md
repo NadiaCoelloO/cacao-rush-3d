@@ -4,7 +4,7 @@ Piloto greybox Godot 4.2. Escala **24 px = 1 m**. Y 2D hacia abajo; Y Godot haci
 
 ## Fuente
 
-El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` no se pudo leer desde aquí (404). El layout y los timings salen de `NadiaCoelloO/Cacao.Game@77e55b5278` `levels.ts` / `sim.ts` (`ruinas-1`, `linkSecrets`, `sitSpikes`, `freeCoins`). QA confirmó que ese pin coincide con lo usado: geometría con 0 faltantes. Los oneways de `selva-1` de ese archivo coinciden con `docs/ONEWAY_DELTA_selva.md`.
+El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` no se pudo leer ni ejecutar desde aquí (404 en el repo y en la API). `renderGame` sí se ejecutó, desde `NadiaCoelloO/Cacao.Game@77e55b5278` `src/game/render.ts`, con el `ruinas-1` de `levels.ts` de ese mismo commit. El paquete de sprites no se cargó: la función dibuja su geometría propia y Maya con `character.color` `#3d8a72`. No es el esquema de depuración anterior. El layout y los timings de ese archivo (`linkSecrets`, `sitSpikes`, `freeCoins`) son los que QA ya contrastó con el pin: geometría con 0 faltantes. Los oneways de `selva-1` coinciden con `docs/ONEWAY_DELTA_selva.md`.
 
 `jardin-1` y `pichincha-1` no existen en este proyecto. El warp deja un log y devuelve a Maya al último spawn. No congela la escena.
 
@@ -25,7 +25,7 @@ Eso iguala la ventana 2D de 960×540 px (1 m = 32 px, 42 px × 720/540 = 56 px).
 
 ## Tomas
 
-Misma pose en los dos renders. 2D: `renderGame`, 960×540, `camLook = 48`, `time = 0`, escalado nearest a 1280×720. 3D: viewport 1280×720, HUD oculto, 60 frames para asentar el follow y el clampeo. La forma teal del 2D es Maya (`character.color` `#3d8a72` porque el preview no carga sprites). En 3D Maya queda crema, con el fill y el rim de LOOK-001 en la capa 2.
+Misma pose en los dos renders. 2D: `renderGame` ejecutado (ver Fuente), 960×540, `time = 0`, foco asentado con look-ahead de 48 px y el mismo clampeo que la escena, escalado nearest a 1280×720. 3D: viewport 1280×720, HUD oculto. La forma teal del 2D es Maya (`character.color` `#3d8a72`, sin sprites). En 3D Maya queda crema. El fill y el rim (`cull_mask` capa 2) se colocan en el centro del cuerpo actual, con el offset de pie escalado por `_h / _stand_h`, así que en pie siguen en y 1.22 y 1.48.
 
 | id | pies 2D | pies 3D m | nota |
 |---|---|---|---|
@@ -177,11 +177,11 @@ En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. 
 
 ## Look
 
-Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC` con borde `#2C1810`, sin emisión. Láser: el ancho del hurtbox, 0.4167 m, `#E85A3A` al 0.88, núcleo `#FFF0D2` de 0.125 m. Cacao: óvalo de frente a cámara, el mismo tamaño que la elipse 2D (16×22 px a 540, unos 20×30 px en el patio a 720p), base `#6B3A1F` con un poco de `#C46A3A`. El radio de recogida sigue en 28 px. El pozo tiene un fondo verde entre las lianas. Fill y rim de Maya, `cull_mask` solo de su capa, colores de LOOK-001.
+Fondo `#1E1714`. Niebla de profundidad `#2C241E` (marrón, no tiñe de verde los muros cercanos). Piedra `#4A382C`, labio `#6B5440`, bisel claro en la arista superior delantera. Sol cenital cálido, energía 0.42, sombras. El verde queda en el pozo: haz corto desde el suelo, lámina emisiva, lianas claras con alpha-scissor (hueco alrededor de x ≈ 17.3) y musgo en la base. La cara cercana de la piedra (la que tapa a Maya) se descarta con dither solo donde cae sobre ella; la colisión no se mueve. Pinchos: triángulos `#C9C4BC` con borde `#2C1810`, sin emisión. Láser: el ancho del hurtbox, 0.4167 m, `#E85A3A` al 0.88, núcleo `#FFF0D2` de 0.125 m. Cacao: óvalo de frente a cámara, el mismo tamaño que la elipse 2D (16×22 px a 540, unos 20×30 px en el patio a 720p), base `#6B3A1F` con un poco de `#C46A3A`. El radio de recogida sigue en 28 px. El pozo tiene un fondo verde entre las lianas. Fill y rim de Maya, crema `(1, 0.86, 0.70)`, `cull_mask` solo de su capa. En cuclillas y en arrastre el offset se escala con la altura y apunta al centro del cuerpo de esa pose, no a la altura de pie.
 
 ## Zigzag y arrastre jugados
 
-Misma ventana de cámara (foco clampeado, 40 × 22.5 m). Izquierda: planta 2D del layout. Derecha: viewport 1280×720 del probe.
+Misma ventana de cámara (foco clampeado, 40 × 22.5 m). Izquierda: `renderGame` del pin de Cacao.Game citado arriba, nearest a 1280×720. Derecha: viewport 1280×720. El zigzag y el cuelgue salen del probe (pies zigzag 16.245, 42.402; cuelgue 18.588, 38.591). El arrastre de la derecha es la toma nueva, con las luces ya bajas.
 
 ![zigzag](cmp_zigzag.png)
 
@@ -189,13 +189,18 @@ Misma ventana de cámara (foco clampeado, 40 × 22.5 m). Izquierda: planta 2D de
 
 ![arrastre](cmp_crawl.png)
 
-Secuencias: [zigzag.gif](zigzag.gif), [crawl.gif](crawl.gif).
+Still del arrastre, solo el viewport: [crawl_still.png](crawl_still.png).
+
+Secuencias anteriores (el gif del arrastre es de antes de bajar las luces): [zigzag.gif](zigzag.gif), [crawl.gif](crawl.gif).
+
+En prone (`pose=drag`, pies (28.09, 12.00), `_h` 0.583 m) el fill queda en y local 0.395 y el rim en 0.480, los dos con `cull_mask` 2. En cuclillas (`_h` 1.0 m) quedan en 0.678 y 0.822. El p10 del cuerpo contra el fondo es **4.50**. Luminancia relativa Rec.709, sRGB lineal. El cuerpo son los píxeles que cambian al ocultar a Maya, dentro de su caja en pantalla, sin la sombra (el píxel de la toma no es más oscuro que la placa). El fondo es la mediana de esa placa en los mismos píxeles. El p10 de la luminancia del cuerpo, dividido por esa mediana, tiene que dar ≥ 4.4.
 
 | archivo | sha256 |
 |---|---|
-| `cmp_zigzag.png` | `72e7021434121104f2585bcd81a0169d2075440ffa53f7713149c418c85aa7e7` |
-| `cmp_zigzag_hang.png` | `e0e9474cf4829d9a03d96e13114ddae149e702f6874ae43821bbbbb8294b05a9` |
-| `cmp_crawl.png` | `57d1bfb2b40717cb76ac0a7645550c1f1c9b653e2f9d4d7065f07e154ad65232` |
+| `cmp_zigzag.png` | `b1ab1b6642308be25cfc4605ed3cd250c80f9b9e1b623fe9009794c3e2101b50` |
+| `cmp_zigzag_hang.png` | `f201961c1857181edac2aabf188cb8a87a14d37bd4d9e09f4bbe9f5dccde21be` |
+| `cmp_crawl.png` | `e19df0f88722b9e37254d216f89d7fcf1bdecf52a8c76ec29381c29888634c13` |
+| `crawl_still.png` | `c27a40cdafefd0d0a87850b434dc0cd019113d5172320c753efc474a5065ff3e` |
 | `zigzag.gif` | `5cfaeb4619b2734b8fc40ede6c4f2b68ae499455f1922b483fdbdec6dbed0152` |
 | `crawl.gif` | `693ff8e99823abb6f510cc3e7e560643423f43b38590f5eff2590c0512027db1` |
 

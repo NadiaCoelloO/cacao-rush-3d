@@ -5,8 +5,8 @@ extends Node3D
 ## player_maya.gd, its feel, and Maya's collision capsule are not modified.
 ## High-poly HOLD. Oneway collision drops while Maya's feet are below the lip
 ## (jump-through) and while player_maya's _drop_timer is running (down+jump,
-## 0.18 s). Mantle still queries every solid on Maya's collision_mask; excluding
-## oneways from that query needs a change in player_maya.gd, so it is not done.
+## 0.18 s). Mantle skips bodies in group "oneway" or with meta kind=oneway
+## (sand-vivid-dawn-sail @ 5fd45031 solids() drops kind == "oneway").
 ##
 ## sim.ts values used here: hazard inset (x+4, y+8, w-8, h-10), coin radius 28 px,
 ## laser duty 0.42, kill invuln 0.8 / hitstop 0.08 / deathT 0.55 / respawn invuln
@@ -24,6 +24,21 @@ const VIEW_H_M := 540.0 * PX
 ## fov 50 vertical, dolly set so the view covers the 2D 960×540 window.
 const CAM_DOLLY := 24.1256
 const MAYA_LAYER := 2
+## Authored fill/rim position minus the standing body center (1.8 m / 2).
+## Omni lights have no aim cone. The offset is scaled by `_h / _stand_h`, so
+## standing stays at (1.22, z 0.88) and (1.48, z -0.60), and crouch / prone
+## keep that same vector toward the current body center.
+const MAYA_FILL_ABOVE := 1.22 - 0.9
+const MAYA_RIM_ABOVE := 1.48 - 0.9
+const MAYA_FILL_X := 0.0
+const MAYA_FILL_Z := 0.88
+const MAYA_RIM_X := 0.50
+const MAYA_RIM_Z := -0.60
+const MAYA_FILL_ENERGY := 0.34
+const MAYA_RIM_ENERGY := 0.10
+## Under a crawl lid the sun misses her. Standing (scale 1) keeps 0.34 / 0.10.
+## Shorter poses raise energy so the body p10 stays above the stone.
+const MAYA_LOW_ENERGY := 0.22
 
 const COL_STONE := Color("4a382c")
 const COL_STONE_LIP := Color("6b5440")
@@ -49,6 +64,8 @@ const FALL_Y := -(80.0 + 42.0) * PX
 var _layout: Dictionary = {}
 var _player: CharacterBody3D
 var _oneways: Array = []
+var _maya_fill: OmniLight3D
+var _maya_rim: OmniLight3D
 var _crumbles: Array = []
 var _movers: Array = []
 var _lasers: Array = []
@@ -141,6 +158,7 @@ func late_physics(delta: float) -> void:
 	if _player == null:
 		return
 	_tick_crumbles(delta)
+	_aim_maya_lights()
 	if _capturing:
 		_player.velocity = Vector3.ZERO
 		_player.global_position = _shot_feet
@@ -784,8 +802,9 @@ func _attach_maya_lights() -> void:
 	fill.shadow_enabled = false
 	fill.light_volumetric_fog_energy = 0.0
 	fill.light_cull_mask = MAYA_LAYER
-	fill.position = Vector3(0.0, 1.22, 0.88)
+	fill.position = Vector3(0.0, 0.9 + MAYA_FILL_ABOVE, 0.88)
 	_player.add_child(fill)
+	_maya_fill = fill
 	var rim := OmniLight3D.new()
 	rim.name = "LOOK001_RIM_MayaFollow"
 	rim.light_color = Color(1.0, 0.86, 0.70)
@@ -796,8 +815,26 @@ func _attach_maya_lights() -> void:
 	rim.shadow_enabled = false
 	rim.light_volumetric_fog_energy = 0.0
 	rim.light_cull_mask = MAYA_LAYER
-	rim.position = Vector3(0.50, 1.48, -0.60)
+	rim.position = Vector3(0.50, 0.9 + MAYA_RIM_ABOVE, -0.60)
 	_player.add_child(rim)
+	_maya_rim = rim
+	_aim_maya_lights()
+
+
+func _aim_maya_lights() -> void:
+	if _player == null:
+		return
+	var h := float(_player._h)
+	var stand := float(_player._stand_h)
+	var scale := h / stand if stand > 0.0 else 1.0
+	var center_y := h * 0.5
+	var boost := 1.0 + MAYA_LOW_ENERGY * (1.0 - scale)
+	if _maya_fill:
+		_maya_fill.position = Vector3(MAYA_FILL_X * scale, center_y + MAYA_FILL_ABOVE * scale, MAYA_FILL_Z * scale)
+		_maya_fill.light_energy = MAYA_FILL_ENERGY * boost
+	if _maya_rim:
+		_maya_rim.position = Vector3(MAYA_RIM_X * scale, center_y + MAYA_RIM_ABOVE * scale, MAYA_RIM_Z * scale)
+		_maya_rim.light_energy = MAYA_RIM_ENERGY * boost
 
 
 func _match_framing() -> void:
