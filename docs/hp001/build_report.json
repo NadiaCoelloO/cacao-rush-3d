@@ -834,8 +834,8 @@
    "dock": "PASA",
    "fern": "PASA",
    "cacao_leaves": "PASA",
-   "canopy_e2": "NO PASA \u2014 not imported; LOOK dosel kept",
-   "water_lily": "NO PASA \u2014 mesh in GLB, never instanced"
+   "canopy_e2": "NO PASA — not imported; LOOK dosel kept",
+   "water_lily": "NO PASA — mesh in GLB, never instanced"
   },
   "deck_align_m": {
    "deck_top_local": 0.4011,
@@ -969,7 +969,7 @@
  },
  "e2b": {
   "pass": "E2b",
-  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 \u2192 Cacao.Game jungle-sky.jpg.",
+  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 → Cacao.Game jungle-sky.jpg.",
   "bundle_sha256_ok": true,
   "canopy_instances": 36,
   "canopy_multimeshes": 69,
@@ -1223,8 +1223,8 @@
  },
  "e2d": {
   "pass": "E2d",
-  "note": "QA add-on: pit \u221218.4167, Maya outline + dusk play-band, hitbox frogs/rocks, striped wind, leafy dosel fringe, Vulkan Forward+ stills, pin subtitle Laguna negra de Sucumb\u00edos, spawn-to-G00 probe PASS.",
-  "subtitle": "Laguna negra de Sucumb\u00edos",
+  "note": "QA add-on: pit −18.4167, Maya outline + dusk play-band, hitbox frogs/rocks, striped wind, leafy dosel fringe, Vulkan Forward+ stills, pin subtitle Laguna negra de Sucumbíos, spawn-to-G00 probe PASS.",
+  "subtitle": "Laguna negra de Sucumbíos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1239,7 +1239,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -1368,8 +1368,8 @@
  },
  "e2e": {
   "pass": "E2e",
-  "note": "Identity + QA add-on: golden dawn (no cyan), painted cumulus band, curved lianas (no bamboo), earth #3E2C20 + lip, 4 thin wind strokes, warm dark vignette so Maya BODY \u22654.4:1 (not only outline), outline covers head+hands and holds \u22654.4:1 in the wind zone. Pit \u221218.4167, hitbox hazards, probe G00 PASS.",
-  "subtitle": "Laguna negra de Sucumb\u00edos",
+  "note": "Identity + QA add-on: golden dawn (no cyan), painted cumulus band, curved lianas (no bamboo), earth #3E2C20 + lip, 4 thin wind strokes, warm dark vignette so Maya BODY ≥4.4:1 (not only outline), outline covers head+hands and holds ≥4.4:1 in the wind zone. Pit −18.4167, hitbox hazards, probe G00 PASS.",
+  "subtitle": "Laguna negra de Sucumbíos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1384,7 +1384,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -1577,8 +1577,8 @@
  },
  "e2f": {
   "pass": "E2f",
-  "note": "Drop Maya disk. 2D-style bands: golden cumulus on top, continuous shadowed mid-jungle play band (olive/brown foliage + warm crown haze, irregular dithered crown). Body vs real jungle \u22654.4 at 8 x. Cacao warm rim \u22654.4 on dark. Cumulus in LOOK-001_manifest.json. Pit \u221218.4167, probe G00, 54/54.",
-  "subtitle": "Laguna negra de Sucumb\u00edos",
+  "note": "Drop Maya disk. 2D-style bands: golden cumulus on top, continuous shadowed mid-jungle play band (olive/brown foliage + warm crown haze, irregular dithered crown). Body vs real jungle ≥4.4 at 8 x. Cacao warm rim ≥4.4 on dark. Cumulus in LOOK-001_manifest.json. Pit −18.4167, probe G00, 54/54.",
+  "subtitle": "Laguna negra de Sucumbíos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1593,7 +1593,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -2094,6 +2094,1217 @@
    "hp001_jungle_sky_2d.jpg": "1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac",
    "hp001_cumulus_band.jpg": "f4b54542b6aa82442f11c03cbe0de2512211ce8ecdf9f290f1d2a9db8a4d7da1"
   },
-  "head": "abc62332fff66586e200a8fff0419dcfa38d242d"
+  "head": "abc62332fff66586e200a8fff0419dcfa38d242d",
+  "replaced_by": "e2g",
+  "captures_status": {
+   "replaced_by": "e2g",
+   "note": "3d_* stills overwritten by E2g recapture"
+  }
+ },
+ "e2g": {
+  "pass": "E2g",
+  "note": "Thin 1-2 px Maya silhouette (no 27 px torso pill). Body+shadows vs jungle >=4.4 at 8 x (x66 8.66, x87 9.19). Painted sil canopy crown, no noise dither. 24 grains warm rim median-of-medians 13.54 min 9.48. No 220 m earth fill under pits. Corridor bank hidden on follow cam. 2D renderGame grain refs 2d_grains_c06/c16.",
+  "subtitle": "Laguna negra de Sucumbíos",
+  "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
+  "pit_kill_y": -18.4167,
+  "player_maya_gd": "untouched",
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS (constants + instantiated pilot_cuyabeno.tscn)",
+  "selva_check": "platforms=21 hazards=6 pickups=24 checks=2 goal=1",
+  "selva_run_probe": {
+   "result": "PASS",
+   "ticks": 1556,
+   "far_x": 194.32,
+   "goal": 1,
+   "deaths": 0,
+   "pit_kill_verified": true,
+   "pit_y": -18.45,
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+  },
+  "p01_top_m": 6.6667,
+  "camera_offset": [
+   0.0,
+   1.0,
+   24.1256
+  ],
+  "view_m_measured": [
+   40.0342,
+   22.547
+  ],
+  "maya_px_at_720p": 55.68,
+  "maya_contrast_wcag": {
+   "threshold": 4.4,
+   "note": "Median of whole body including shadows vs play-jungle just outside.",
+   "sweep": [
+    {
+     "file": "3d_x04.png",
+     "x_m": 4.54,
+     "cream_n": 52,
+     "body_n": 52,
+     "outline_n": 0,
+     "body_bg_n": 1182,
+     "center_px": [
+      225.7,
+      205.9
+     ],
+     "body_rgb": [
+      218,
+      188,
+      92
+     ],
+     "body_bg_rgb": [
+      27,
+      33,
+      14
+     ],
+     "outline_rgb": [
+      18,
+      12,
+      8
+     ],
+     "outline_bg_rgb": [
+      227,
+      200,
+      105
+     ],
+     "body_ratio": 8.92,
+     "outline_ratio": 11.77,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x36.png",
+     "x_m": 36.0,
+     "cream_n": 231,
+     "body_n": 414,
+     "outline_n": 210,
+     "body_bg_n": 4126,
+     "center_px": [
+      573.2,
+      388.7
+     ],
+     "body_rgb": [
+      220,
+      177,
+      108
+     ],
+     "body_bg_rgb": [
+      27,
+      34,
+      14
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      169,
+      127,
+      74
+     ],
+     "body_ratio": 8.23,
+     "outline_ratio": 5.73,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x66.png",
+     "x_m": 66.0,
+     "cream_n": 238,
+     "body_n": 427,
+     "outline_n": 210,
+     "body_bg_n": 4116,
+     "center_px": [
+      573.2,
+      388.5
+     ],
+     "body_rgb": [
+      219,
+      176,
+      107
+     ],
+     "body_bg_rgb": [
+      22,
+      28,
+      12
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      167,
+      126,
+      73
+     ],
+     "body_ratio": 8.66,
+     "outline_ratio": 5.63,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x87.png",
+     "x_m": 86.67,
+     "cream_n": 225,
+     "body_n": 414,
+     "outline_n": 210,
+     "body_bg_n": 4128,
+     "center_px": [
+      573.2,
+      388.9
+     ],
+     "body_rgb": [
+      220,
+      176,
+      109
+     ],
+     "body_bg_rgb": [
+      16,
+      22,
+      7
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      170,
+      128,
+      74
+     ],
+     "body_ratio": 9.19,
+     "outline_ratio": 5.8,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x95.png",
+     "x_m": 95.33,
+     "cream_n": 79,
+     "body_n": 96,
+     "outline_n": 78,
+     "body_bg_n": 949,
+     "center_px": [
+      572.2,
+      412.6
+     ],
+     "body_rgb": [
+      201,
+      170,
+      102
+     ],
+     "body_bg_rgb": [
+      28,
+      34,
+      16
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      176,
+      138,
+      81
+     ],
+     "body_ratio": 7.33,
+     "outline_ratio": 6.49,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x133.png",
+     "x_m": 133.33,
+     "cream_n": 79,
+     "body_n": 95,
+     "outline_n": 78,
+     "body_bg_n": 949,
+     "center_px": [
+      572.2,
+      412.5
+     ],
+     "body_rgb": [
+      202,
+      171,
+      102
+     ],
+     "body_bg_rgb": [
+      28,
+      35,
+      15
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      177,
+      139,
+      80
+     ],
+     "body_ratio": 7.35,
+     "outline_ratio": 6.57,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x163.png",
+     "x_m": 162.67,
+     "cream_n": 80,
+     "body_n": 102,
+     "outline_n": 87,
+     "body_bg_n": 1876,
+     "center_px": [
+      572.2,
+      412.1
+     ],
+     "body_rgb": [
+      203,
+      172,
+      103
+     ],
+     "body_bg_rgb": [
+      28,
+      36,
+      16
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      229,
+      188,
+      111
+     ],
+     "body_ratio": 7.36,
+     "outline_ratio": 11.56,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    },
+    {
+     "file": "3d_x193.png",
+     "x_m": 193.33,
+     "cream_n": 111,
+     "body_n": 137,
+     "outline_n": 85,
+     "body_bg_n": 906,
+     "center_px": [
+      975.1,
+      412.1
+     ],
+     "body_rgb": [
+      222,
+      179,
+      98
+     ],
+     "body_bg_rgb": [
+      27,
+      34,
+      15
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      196,
+      155,
+      84
+     ],
+     "body_ratio": 8.37,
+     "outline_ratio": 8.03,
+     "body_pass": true,
+     "outline_pass": true,
+     "measure": "body+shadows vs jungle just outside"
+    }
+   ]
+  },
+  "grain_contrast_wcag": {
+   "n": 24,
+   "median_of_medians": 13.54,
+   "min_median": 9.48,
+   "min_p15": 9.47,
+   "all_median_ge_4_4": true,
+   "all_min_ge_3": true,
+   "rows": [
+    {
+     "id": "C00",
+     "file": "3d_x04.png",
+     "n": 97,
+     "proj_px": [
+      213.3,
+      297.3
+     ],
+     "found_px": [
+      205.5,
+      290.9
+     ],
+     "grain_rgb": [
+      255,
+      237,
+      180
+     ],
+     "grain_p15_rgb": [
+      255,
+      231,
+      172
+     ],
+     "bg_rgb": [
+      24,
+      30,
+      12
+     ],
+     "median_ratio": 14.66,
+     "min_ratio": 14.05,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C01",
+     "file": "3d_x04.png",
+     "n": 315,
+     "proj_px": [
+      290.1,
+      281.3
+     ],
+     "found_px": [
+      289.3,
+      289.4
+     ],
+     "grain_rgb": [
+      255,
+      230,
+      171
+     ],
+     "grain_p15_rgb": [
+      255,
+      228,
+      167
+     ],
+     "bg_rgb": [
+      23,
+      30,
+      11
+     ],
+     "median_ratio": 13.98,
+     "min_ratio": 13.78,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C02",
+     "file": "3d_x04.png",
+     "n": 467,
+     "proj_px": [
+      366.9,
+      297.3
+     ],
+     "found_px": [
+      365.6,
+      291.8
+     ],
+     "grain_rgb": [
+      255,
+      230,
+      170
+     ],
+     "grain_p15_rgb": [
+      255,
+      228,
+      167
+     ],
+     "bg_rgb": [
+      23,
+      30,
+      11
+     ],
+     "median_ratio": 13.98,
+     "min_ratio": 13.78,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C03",
+     "file": "3d_x04.png",
+     "n": 22,
+     "proj_px": [
+      341.3,
+      84.0
+     ],
+     "found_px": [
+      216.9,
+      71.1
+     ],
+     "grain_rgb": [
+      255,
+      238,
+      166
+     ],
+     "grain_p15_rgb": [
+      255,
+      238,
+      164
+     ],
+     "bg_rgb": [
+      63,
+      61,
+      34
+     ],
+     "median_ratio": 9.48,
+     "min_ratio": 9.47,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C04",
+     "file": "3d_x04.png",
+     "n": 452,
+     "proj_px": [
+      768.0,
+      84.0
+     ],
+     "found_px": [
+      769.4,
+      82.7
+     ],
+     "grain_rgb": [
+      255,
+      230,
+      170
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      163
+     ],
+     "bg_rgb": [
+      56,
+      54,
+      29
+     ],
+     "median_ratio": 10.01,
+     "min_ratio": 9.66,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C05",
+     "file": "3d_x36.png",
+     "n": 460,
+     "proj_px": [
+      533.3,
+      297.3
+     ],
+     "found_px": [
+      532.5,
+      300.4
+     ],
+     "grain_rgb": [
+      255,
+      229,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      226,
+      164
+     ],
+     "bg_rgb": [
+      25,
+      32,
+      13
+     ],
+     "median_ratio": 13.58,
+     "min_ratio": 13.29,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C06",
+     "file": "3d_x36.png",
+     "n": 458,
+     "proj_px": [
+      618.7,
+      268.0
+     ],
+     "found_px": [
+      618.2,
+      263.1
+     ],
+     "grain_rgb": [
+      255,
+      228,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      163
+     ],
+     "bg_rgb": [
+      25,
+      32,
+      13
+     ],
+     "median_ratio": 13.49,
+     "min_ratio": 13.2,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C07",
+     "file": "3d_x36.png",
+     "n": 455,
+     "proj_px": [
+      704.0,
+      297.3
+     ],
+     "found_px": [
+      703.6,
+      300.7
+     ],
+     "grain_rgb": [
+      255,
+      228,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      163
+     ],
+     "bg_rgb": [
+      25,
+      32,
+      13
+     ],
+     "median_ratio": 13.49,
+     "min_ratio": 13.2,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C08",
+     "file": "3d_cacao.png",
+     "n": 426,
+     "proj_px": [
+      260.0,
+      580.0
+     ],
+     "found_px": [
+      264.4,
+      580.7
+     ],
+     "grain_rgb": [
+      255,
+      233,
+      175
+     ],
+     "grain_p15_rgb": [
+      255,
+      232,
+      173
+     ],
+     "bg_rgb": [
+      21,
+      27,
+      11
+     ],
+     "median_ratio": 14.69,
+     "min_ratio": 14.58,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C09",
+     "file": "3d_cacao.png",
+     "n": 434,
+     "proj_px": [
+      409.3,
+      580.0
+     ],
+     "found_px": [
+      411.6,
+      579.4
+     ],
+     "grain_rgb": [
+      255,
+      231,
+      172
+     ],
+     "grain_p15_rgb": [
+      255,
+      231,
+      171
+     ],
+     "bg_rgb": [
+      20,
+      25,
+      10
+     ],
+     "median_ratio": 14.73,
+     "min_ratio": 14.72,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C10",
+     "file": "3d_x66.png",
+     "n": 453,
+     "proj_px": [
+      597.3,
+      297.3
+     ],
+     "found_px": [
+      596.8,
+      302.0
+     ],
+     "grain_rgb": [
+      255,
+      228,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      226,
+      164
+     ],
+     "bg_rgb": [
+      24,
+      30,
+      13
+     ],
+     "median_ratio": 13.75,
+     "min_ratio": 13.55,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C11",
+     "file": "3d_x87.png",
+     "n": 464,
+     "proj_px": [
+      191.9,
+      382.7
+     ],
+     "found_px": [
+      192.3,
+      376.8
+     ],
+     "grain_rgb": [
+      255,
+      233,
+      174
+     ],
+     "grain_p15_rgb": [
+      255,
+      230,
+      171
+     ],
+     "bg_rgb": [
+      25,
+      30,
+      14
+     ],
+     "median_ratio": 14.2,
+     "min_ratio": 13.91,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C12",
+     "file": "3d_x87.png",
+     "n": 462,
+     "proj_px": [
+      533.2,
+      297.3
+     ],
+     "found_px": [
+      532.5,
+      291.6
+     ],
+     "grain_rgb": [
+      255,
+      229,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      226,
+      164
+     ],
+     "bg_rgb": [
+      16,
+      21,
+      6
+     ],
+     "median_ratio": 15.04,
+     "min_ratio": 14.72,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C13",
+     "file": "3d_x95.png",
+     "n": 466,
+     "proj_px": [
+      426.8,
+      297.3
+     ],
+     "found_px": [
+      425.6,
+      291.8
+     ],
+     "grain_rgb": [
+      255,
+      230,
+      170
+     ],
+     "grain_p15_rgb": [
+      255,
+      227,
+      166
+     ],
+     "bg_rgb": [
+      18,
+      24,
+      8
+     ],
+     "median_ratio": 14.79,
+     "min_ratio": 14.48,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C14",
+     "file": "3d_x95.png",
+     "n": 460,
+     "proj_px": [
+      597.4,
+      297.3
+     ],
+     "found_px": [
+      596.7,
+      292.1
+     ],
+     "grain_rgb": [
+      255,
+      228,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      164
+     ],
+     "bg_rgb": [
+      19,
+      25,
+      8
+     ],
+     "median_ratio": 14.45,
+     "min_ratio": 14.15,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C15",
+     "file": "3d_x109.png",
+     "n": 270,
+     "proj_px": [
+      512.0,
+      422.7
+     ],
+     "found_px": [
+      512.0,
+      422.9
+     ],
+     "grain_rgb": [
+      255,
+      228,
+      167
+     ],
+     "grain_p15_rgb": [
+      255,
+      227,
+      165
+     ],
+     "bg_rgb": [
+      37,
+      44,
+      22
+     ],
+     "median_ratio": 11.66,
+     "min_ratio": 11.57,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C16",
+     "file": "3d_x109.png",
+     "n": 272,
+     "proj_px": [
+      640.0,
+      422.7
+     ],
+     "found_px": [
+      639.5,
+      422.6
+     ],
+     "grain_rgb": [
+      255,
+      227,
+      166
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      163
+     ],
+     "bg_rgb": [
+      35,
+      42,
+      21
+     ],
+     "median_ratio": 11.88,
+     "min_ratio": 11.71,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C17",
+     "file": "3d_hazard.png",
+     "n": 475,
+     "proj_px": [
+      149.3,
+      341.3
+     ],
+     "found_px": [
+      148.9,
+      343.5
+     ],
+     "grain_rgb": [
+      255,
+      234,
+      175
+     ],
+     "grain_p15_rgb": [
+      255,
+      231,
+      171
+     ],
+     "bg_rgb": [
+      37,
+      45,
+      23
+     ],
+     "median_ratio": 12.03,
+     "min_ratio": 11.78,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C18",
+     "file": "3d_hazard.png",
+     "n": 460,
+     "proj_px": [
+      490.7,
+      298.7
+     ],
+     "found_px": [
+      489.7,
+      299.4
+     ],
+     "grain_rgb": [
+      255,
+      229,
+      169
+     ],
+     "grain_p15_rgb": [
+      255,
+      226,
+      165
+     ],
+     "bg_rgb": [
+      26,
+      33,
+      13
+     ],
+     "median_ratio": 13.44,
+     "min_ratio": 13.16,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C19",
+     "file": "3d_hazard.png",
+     "n": 462,
+     "proj_px": [
+      917.3,
+      469.3
+     ],
+     "found_px": [
+      915.0,
+      468.0
+     ],
+     "grain_rgb": [
+      255,
+      231,
+      171
+     ],
+     "grain_p15_rgb": [
+      255,
+      226,
+      165
+     ],
+     "bg_rgb": [
+      24,
+      31,
+      12
+     ],
+     "median_ratio": 13.93,
+     "min_ratio": 13.45,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C20",
+     "file": "3d_x163.png",
+     "n": 279,
+     "proj_px": [
+      234.6,
+      212.0
+     ],
+     "found_px": [
+      234.9,
+      209.5
+     ],
+     "grain_rgb": [
+      255,
+      231,
+      172
+     ],
+     "grain_p15_rgb": [
+      255,
+      228,
+      167
+     ],
+     "bg_rgb": [
+      37,
+      44,
+      22
+     ],
+     "median_ratio": 11.91,
+     "min_ratio": 11.66,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C21",
+     "file": "3d_x163.png",
+     "n": 456,
+     "proj_px": [
+      575.9,
+      297.3
+     ],
+     "found_px": [
+      575.4,
+      294.5
+     ],
+     "grain_rgb": [
+      255,
+      228,
+      168
+     ],
+     "grain_p15_rgb": [
+      255,
+      226,
+      164
+     ],
+     "bg_rgb": [
+      34,
+      42,
+      20
+     ],
+     "median_ratio": 12.0,
+     "min_ratio": 11.83,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C22",
+     "file": "3d_x163.png",
+     "n": 464,
+     "proj_px": [
+      917.2,
+      254.7
+     ],
+     "found_px": [
+      918.3,
+      250.4
+     ],
+     "grain_rgb": [
+      255,
+      230,
+      170
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      163
+     ],
+     "bg_rgb": [
+      32,
+      39,
+      18
+     ],
+     "median_ratio": 12.61,
+     "min_ratio": 12.17,
+     "median_pass": true,
+     "min_pass": true
+    },
+    {
+     "id": "C23",
+     "file": "3d_x193.png",
+     "n": 471,
+     "proj_px": [
+      938.7,
+      297.3
+     ],
+     "found_px": [
+      939.0,
+      301.2
+     ],
+     "grain_rgb": [
+      255,
+      230,
+      170
+     ],
+     "grain_p15_rgb": [
+      255,
+      225,
+      163
+     ],
+     "bg_rgb": [
+      38,
+      45,
+      23
+     ],
+     "median_ratio": 11.67,
+     "min_ratio": 11.26,
+     "median_pass": true,
+     "min_pass": true
+    }
+   ]
+  },
+  "cacao_contrast_wcag": [
+   {
+    "file": "HP001_E2g_engine_totem_pods_v4.png",
+    "pod_n": 923,
+    "center_px": [
+     607.3,
+     742.2
+    ],
+    "pod_rgb": [
+     217,
+     187,
+     119
+    ],
+    "bg_rgb": [
+     81,
+     55,
+     22
+    ],
+    "ratio": 5.94,
+    "pass": true
+   }
+  ],
+  "look001_perf": {
+   "gameplay": {
+    "primitives": 109547,
+    "draw_calls": 192
+   },
+   "laguna": {
+    "primitives": 101758,
+    "draw_calls": 150
+   },
+   "dosel": {
+    "primitives": 243303,
+    "draw_calls": 207
+   },
+   "dock": {
+    "primitives": 71275,
+    "draw_calls": 79
+   },
+   "pods": {
+    "primitives": 101356,
+    "draw_calls": 92
+   },
+   "cmp_bg": {
+    "primitives": 120968,
+    "draw_calls": 63
+   }
+  },
+  "selva_perf": {
+   "entrance": {
+    "primitives": 45809,
+    "draw_calls": 93
+   },
+   "hazard": {
+    "primitives": 12099,
+    "draw_calls": 35
+   },
+   "cacao": {
+    "primitives": 13902,
+    "draw_calls": 52
+   }
+  },
+  "uhd_vram_mb": 148,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "captures": {
+   "3d_entrance.png": "c0bee39cf8551ef34fa19a54a1c66887985033bed5cc5c0359508540f26b1173",
+   "3d_hazard.png": "9aaf70e789eb1f2edee1659c4813862cd8d16d5af739b27586318f5cb37f9b91",
+   "3d_cacao.png": "96c40296c05257793a17a92b62306879fa19e6346b7431b33607cd32b39fcd25",
+   "3d_x04.png": "d2bc1b973fffbd3e88e23a01005ec4a6c7eb5292a398c3e31951868f547018cd",
+   "3d_x36.png": "332ba05c3da6c2629f803b61ddd0e97d0c668234fc1faac8b5619ff985964b27",
+   "3d_x66.png": "c162501aedb23b6b487f80a25eea27021584c74c68ab3882e7fe8c976c1cda30",
+   "3d_x87.png": "d8d22f7ca2691b9398af0285fc88fbaaa06144d19409c5efdcd00756f108e99e",
+   "3d_x95.png": "0bad2cf4d52daef0bd95ca6893d6417bbeb7b2d7069cef3faa5b591359770afb",
+   "3d_x133.png": "d6cd074239d2c66bf0aa7ed9c20a13c7c6b17f30d84b3b1d8a2a3bb8c2c43449",
+   "3d_x163.png": "d3cdf08730e660e02d40d4f7c9b6b8312acae0bddff03c2fb2823e4378c2dba5",
+   "3d_x193.png": "fec7df0f968403949212d382ee01778132e435c164e51a7ee12e48cb4eb692ed",
+   "3d_x109.png": "d708db984b8b03a3a9363561610271b067cf66d72a892c72e07f9ace319fcc19",
+   "2d_entrance.png": "659420aa0cd5f622cc2e7b344cac70d68e141bf4975beafe2337ce496c6d9418",
+   "2d_hazard.png": "5df9c022beb649060c8381cd3196e5d20f524d85de3c31ffd6d91194a044a6c9",
+   "2d_cacao.png": "3bfc1f5c8d2c38168ff00684e7f44bbde063c896bd6eb3c6d57832b3c4de868f",
+   "2d_grains_c06.png": "c1dfaa852554fd5f0b04f5de5ef46eaaca0d0b9a49636f79360194ba3bc0e6b5",
+   "2d_grains_c16.png": "5aa1006f1ebac828b0cc726b834a4cb25a1ea0ca0317dfca7ac578e97e7d8bc8",
+   "cmp_cuyabeno_2d_3d.png": "1a6ba0f2f1f223a79b14e79f4265bebb8fbfeb412b40d49a35c604739288000a",
+   "HP001_E2g_engine_gameplay.png": "3d1282596f2042097d48c431b88c45167abc923f4ebcb63da93c5452df3d3b09",
+   "HP001_E2g_engine_laguna.png": "0d59c6437f2000b43cfaf8db09080ec7f64a966eb95392768ea8862faca79534",
+   "HP001_E2g_engine_dosel.png": "7366ad2bbb298f7bd3e5e18178fbff02831220ef1ef296c71534445de1ab01c5",
+   "HP001_E2g_engine_dock_closeup.png": "3ce3b1b478591f3148978d92c137814e62128fe2ba347824422a9c5395c75366",
+   "HP001_E2g_engine_totem_pods_v4.png": "bfc48252de590291f19452231c5d34f8bff26d7fb3651a5cf935640f8e67c56c",
+   "HP001_E2g_engine_cmp_bg.png": "f39c580e43f37458210a7c6b707c9f31b380df24aaded893a200317d2b188bdc"
+  },
+  "head": "PENDING"
  }
 }

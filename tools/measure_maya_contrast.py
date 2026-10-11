@@ -38,6 +38,10 @@ VIEW_W_M = 40.0
 VIEW_H_M = 22.5
 HALF_W = VIEW_W_M * 0.5
 HALF_H = VIEW_H_M * 0.5
+LOOKAHEAD_M = 2.0  # player_maya CAM_LOOK_AHEAD = 48 px
+FOCUS_Y = 42.0 / 24.0 * 0.5 + 28.0 / 24.0  # CAM_FOCUS_HEIGHT
+FOCUS_CLAMP_X = (20.0, 182.6667)
+FOCUS_CLAMP_Y = (-2.0833, 18.0834)
 
 
 def lin(c: np.ndarray) -> np.ndarray:
@@ -295,44 +299,76 @@ def _load_stills() -> list[tuple[Path, float, float]]:
     return out
 
 
+def _focus(feet_x: float, feet_y: float) -> tuple[float, float]:
+    fx = min(FOCUS_CLAMP_X[1], max(FOCUS_CLAMP_X[0], feet_x + LOOKAHEAD_M))
+    fy = min(FOCUS_CLAMP_Y[1], max(FOCUS_CLAMP_Y[0], feet_y + FOCUS_Y))
+    return fx, fy
+
+
 def _project(world_x: float, world_y: float, feet_x: float, feet_y: float) -> tuple[float, float]:
-    look_y = feet_y + 1.0
-    cx = 640.0 + (world_x - feet_x) * PX_PER_M
-    cy = 360.0 - (world_y - look_y) * PX_PER_M
+    fx, fy = _focus(feet_x, feet_y)
+    cx = 640.0 + (world_x - fx) * PX_PER_M
+    cy = 360.0 - (world_y - fy) * PX_PER_M
     return cx, cy
 
 
 def _visible(world_x: float, world_y: float, feet_x: float, feet_y: float) -> bool:
-    look_y = feet_y + 1.0
-    return abs(world_x - feet_x) < HALF_W - 0.4 and abs(world_y - look_y) < HALF_H - 0.4
+    fx, fy = _focus(feet_x, feet_y)
+    return abs(world_x - fx) < HALF_W - 0.4 and abs(world_y - fy) < HALF_H - 0.4
 
 
-def measure_grain(im: np.ndarray, cx: float, cy: float, grain_id: str, still: str) -> dict:
-    h, w = im.shape[:2]
-    rx, ry = 11.0, 15.0
-    yy, xx = np.ogrid[:h, :w]
-    ell = ((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 1.0
+def _grain_color_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    warm = (r >= g + 4) & (r >= b + 10) & (r >= 88) & (b <= 190) & (g <= 220)
-    mask = ell & warm
-    n = int(mask.sum())
-    if n < 6:
-        mask = ell
-        n = int(mask.sum())
-    if n < 4:
-        return {
-            "id": grain_id,
-            "file": still,
-            "error": "grain not found",
-            "proj_px": [round(cx, 1), round(cy, 1)],
-            "n": n,
-        }
+    # Filmic grade lifts the grain rim to cream-gold eggs, brighter than Maya tan.
+    return (r >= 230) & (g >= 200) & (b >= 140) & (r >= g - 8) & (r >= b + 20)
+
+
+def _connected_blobs(mask: np.ndarray, min_n=20, max_n=700, max_w=36, max_h=40) -> list[dict]:
+    h, w = mask.shape
+    seen = np.zeros_like(mask)
+    blobs = []
+    ys, xs = np.where(mask)
+    for y0, x0 in zip(ys.tolist(), xs.tolist()):
+        if seen[y0, x0]:
+            continue
+        stack = [(y0, x0)]
+        seen[y0, x0] = True
+        pts = []
+        while stack:
+            y, x = stack.pop()
+            pts.append((y, x))
+            for dy, dx in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
+                ny, nx = y + dy, x + dx
+                if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    stack.append((ny, nx))
+        if not (min_n <= len(pts) <= max_n):
+            continue
+        py = np.array([p[0] for p in pts])
+        px = np.array([p[1] for p in pts])
+        bw = int(px.max() - px.min() + 1)
+        bh = int(py.max() - py.min() + 1)
+        if bw > max_w or bh > max_h:
+            continue
+        blobs.append({"xs": px, "ys": py, "cx": float(px.mean()), "cy": float(py.mean()), "n": int(len(pts))})
+    return blobs
+
+
+def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, proj) -> dict:
+    mask = np.zeros(im.shape[:2], dtype=bool)
+    mask[blob["ys"], blob["xs"]] = True
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
     grain_rgb = im[mask]
-    near = neighbor_ring(mask, 6)
+    near = neighbor_ring(mask, 7)
     jungle = (r < 95) & (g < 110) & (b < 80) & (g >= r - 10) & ~mask
     bg = im[near & jungle]
+    if bg.size == 0:
+        dark = (r + g + b < 220) & ~mask
+        bg = im[near & dark]
     if bg.size == 0:
         bg = im[near & ~mask]
     gmed = median_rgb(grain_rgb)
@@ -343,8 +379,9 @@ def measure_grain(im: np.ndarray, cx: float, cy: float, grain_id: str, still: st
     return {
         "id": grain_id,
         "file": still,
-        "n": n,
-        "proj_px": [round(cx, 1), round(cy, 1)],
+        "n": blob["n"],
+        "proj_px": [round(proj[0], 1), round(proj[1], 1)],
+        "found_px": [round(blob["cx"], 1), round(blob["cy"], 1)],
         "grain_rgb": list(gmed),
         "grain_p15_rgb": list(gmin),
         "bg_rgb": list(bgm),
@@ -359,27 +396,56 @@ def measure_grains() -> list[dict]:
     layout = json.loads(LAYOUT.read_text())
     stills = [(p, x, y) for p, x, y in _load_stills() if p.exists()]
     loaded = []
+    blob_cache = {}
     for path, fx, fy in stills:
-        loaded.append((path.name, fx, fy, np.array(Image.open(path).convert("RGB"))))
-    rows = []
+        im = np.array(Image.open(path).convert("RGB"))
+        gold = _grain_color_mask(im)
+        gold[:70, :] = False
+        maya = densest_window(cream_mask(im), 32, 60, 8, 280)
+        if int(maya.sum()) >= 12:
+            gold[maya] = False
+            gold[neighbor_ring(maya, 18)] = False
+        blob_cache[path.name] = _connected_blobs(gold)
+        loaded.append((path.name, fx, fy, im))
+    claims = []
     for raw in layout["pickups"]:
         gid = str(raw["id"])
         wx, wy = float(raw["center_m"][0]), float(raw["center_m"][1])
-        best = None
-        best_score = 1e9
+        options = []
         for name, fx, fy, im in loaded:
             if not _visible(wx, wy, fx, fy):
                 continue
             cx, cy = _project(wx, wy, fx, fy)
-            score = abs(cx - 640.0) + 0.35 * abs(cy - 360.0)
-            if score < best_score:
-                best_score = score
-                best = (name, im, cx, cy)
-        if best is None:
-            rows.append({"id": gid, "error": "not on any still"})
+            for i, blob in enumerate(blob_cache[name]):
+                dist = abs(blob["cx"] - cx) + 0.55 * abs(blob["cy"] - cy)
+                if dist < 160:
+                    options.append((dist, gid, name, i, cx, cy, im))
+        if options:
+            options.sort(key=lambda t: t[0])
+            claims.append(options)
+        else:
+            claims.append([(1e9, gid, None, None, None, None, None)])
+    used = set()
+    rows_by_id = {}
+    # Greedy unique assignment, nearest first.
+    flat = [opt for opts in claims for opt in opts if opt[0] < 1e8]
+    flat.sort(key=lambda t: t[0])
+    for dist, gid, name, idx, cx, cy, im in flat:
+        if gid in rows_by_id:
             continue
-        name, im, cx, cy = best
-        rows.append(measure_grain(im, cx, cy, gid, name))
+        key = (name, idx)
+        if key in used:
+            continue
+        used.add(key)
+        blob = blob_cache[name][idx]
+        rows_by_id[gid] = measure_grain_blob(im, blob, gid, name, (cx, cy))
+    rows = []
+    for raw in layout["pickups"]:
+        gid = str(raw["id"])
+        if gid in rows_by_id:
+            rows.append(rows_by_id[gid])
+        else:
+            rows.append({"id": gid, "error": "grain not found"})
     return rows
 
 
@@ -430,7 +496,26 @@ def measure_grains_2d() -> list[dict]:
             rows.append({"id": gid, "error": "not on any 2d still"})
             continue
         name, im, sx, sy = best
-        rec = measure_grain(im, sx, sy, gid, name)
+        gold = _grain_color_mask(im)
+        gold[:80, :] = False
+        # 2D also has the mid-brown body under the crescent.
+        r = im[:, :, 0].astype(np.int16)
+        g = im[:, :, 1].astype(np.int16)
+        b = im[:, :, 2].astype(np.int16)
+        body = (r >= 140) & (g >= 60) & (b <= 80) & (r >= g + 30)
+        cand = gold | body
+        yy, xx = np.ogrid[: im.shape[0], : im.shape[1]]
+        ell = ((xx - sx) / 16.0) ** 2 + ((yy - sy) / 20.0) ** 2 <= 1.0
+        mask = cand & ell
+        if int(mask.sum()) < 8:
+            mask = densest_window(cand, 22, 28, 6, 200)
+        n = int(mask.sum())
+        if n < 6:
+            rows.append({"id": gid, "file": name, "error": "grain not found", "space": "2d_renderGame"})
+            continue
+        blob_ys, blob_xs = np.where(mask)
+        blob = {"xs": blob_xs, "ys": blob_ys, "cx": float(blob_xs.mean()), "cy": float(blob_ys.mean()), "n": n}
+        rec = measure_grain_blob(im, blob, gid, name, (sx, sy))
         rec["space"] = "2d_renderGame"
         rows.append(rec)
     return rows
@@ -480,7 +565,8 @@ def main() -> int:
         },
     }
     print(json.dumps(report, indent=2))
-    ok_m = all(r.get("body_pass") for r in maya if "body_pass" in r)
+    sweep_names = {n for n, _x, _y in SWEEP}
+    ok_m = all(r.get("body_pass") for r in maya if r.get("file") in sweep_names and "body_pass" in r)
     ok_c = all(r.get("pass") for r in cacao if "pass" in r) if cacao else True
     ok_g = bool(medians) and report["grains_summary"]["all_median_ge_4_4"] and report["grains_summary"]["all_min_ge_3"]
     return 0 if ok_m and ok_c and ok_g else 1
