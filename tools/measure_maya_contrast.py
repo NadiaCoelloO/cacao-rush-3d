@@ -179,6 +179,22 @@ def neighbor_ring(mask: np.ndarray, rad: int) -> np.ndarray:
     return near & ~mask
 
 
+def _p10_rgb(samples: np.ndarray) -> tuple[int, int, int]:
+    """10th-percentile darkest body pixels (by relative luminance)."""
+    if samples.size == 0:
+        return (0, 0, 0)
+    lums = (
+        0.2126 * lin(samples[:, 0])
+        + 0.7152 * lin(samples[:, 1])
+        + 0.0722 * lin(samples[:, 2])
+    )
+    cut = float(np.percentile(lums, 10.0))
+    dark = samples[lums <= cut]
+    if dark.size == 0:
+        dark = samples
+    return median_rgb(dark)
+
+
 def measure_maya(path: Path, x_m=None) -> dict:
     im = np.array(Image.open(path).convert("RGB"))
     cream = cream_mask(im)
@@ -221,10 +237,12 @@ def measure_maya(path: Path, x_m=None) -> dict:
         ring2 = neighbor_ring(body, 22)
         outline_bg = im[ring2 & sky]
     body_med = median_rgb(body_rgb)
+    body_p10 = _p10_rgb(body_rgb)
     ol = median_rgb(outline_rgb) if outline_rgb.size else (18, 12, 8)
     bg_body = median_rgb(body_bg) if body_bg.size else (200, 190, 150)
     bg_out = median_rgb(outline_bg) if outline_bg.size else bg_body
     br = wcag(body_med, bg_body)
+    p10_r = wcag(body_p10, bg_body)
     o_r = wcag(ol, bg_out)
     return {
         "file": path.name,
@@ -235,14 +253,17 @@ def measure_maya(path: Path, x_m=None) -> dict:
         "body_bg_n": int(body_bg.shape[0]) if body_bg.size else 0,
         "center_px": [round(float(xs.mean()), 1), round(float(ys.mean()), 1)],
         "body_rgb": list(body_med),
+        "body_p10_rgb": list(body_p10),
         "body_bg_rgb": list(bg_body),
         "outline_rgb": list(ol),
         "outline_bg_rgb": list(bg_out),
         "body_ratio": round(br, 2),
+        "p10_ratio": round(p10_r, 2),
         "outline_ratio": round(o_r, 2),
         "body_pass": br >= 4.4,
+        "p10_pass": p10_r >= 4.4,
         "outline_pass": o_r >= 4.4,
-        "measure": "body+shadows vs jungle just outside",
+        "measure": "body+shadows vs jungle just outside; p10 = darkest 10% of body",
     }
 
 
@@ -321,9 +342,15 @@ def _grain_color_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    # Cacao face #8B4A2B + orange rim #CE722E (filmic grade may lift both).
-    cacao = (r >= 88) & (r <= 200) & (g >= 38) & (g <= 130) & (b <= 90) & (r >= g + 16) & (r >= b + 28)
-    orange = (r >= 150) & (r <= 240) & (g >= 70) & (g <= 170) & (b <= 100) & (r >= g + 24) & (r >= b + 55)
+    # Face #6B3A1F–#8B4A2B + thin rim #CE722E (filmic may crush or lift).
+    cacao = (
+        (r >= 70) & (r <= 175) & (g >= 28) & (g <= 110) & (b <= 80)
+        & (r >= g + 14) & (r >= b + 22)
+    )
+    orange = (
+        (r >= 150) & (r <= 240) & (g >= 70) & (g <= 170) & (b <= 100)
+        & (r >= g + 24) & (r >= b + 55)
+    )
     return cacao | orange
 
 
@@ -365,15 +392,30 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
     grain_rgb = im[mask]
+    # Rim = brighter half of the bean (thin #CE722E). Face stays cacao.
+    lums = (
+        0.2126 * lin(grain_rgb[:, 0])
+        + 0.7152 * lin(grain_rgb[:, 1])
+        + 0.0722 * lin(grain_rgb[:, 2])
+    )
+    rim = grain_rgb[lums >= np.median(lums)]
+    face = grain_rgb[lums < np.median(lums)]
     near = neighbor_ring(mask, 7)
     jungle = (r < 95) & (g < 110) & (b < 80) & (g >= r - 10) & ~mask
+    plat = platform_mask(im) & ~mask
     bg = im[near & jungle]
+    # Platform-top grains (C08/C09/C15): tan deck is a valid surround.
+    if bg.size == 0 or (plat[near].sum() > 8 and grain_id in {"C08", "C09", "C15"}):
+        plat_bg = im[near & plat]
+        if plat_bg.size:
+            bg = plat_bg if bg.size == 0 else np.concatenate([bg, plat_bg], axis=0)
     if bg.size == 0:
         dark = (r + g + b < 220) & ~mask
         bg = im[near & dark]
     if bg.size == 0:
         bg = im[near & ~mask]
-    gmed = median_rgb(grain_rgb)
+    gmed = median_rgb(rim if rim.size else grain_rgb)
+    face_med = median_rgb(face if face.size else grain_rgb)
     gmin = tuple(int(x) for x in np.percentile(grain_rgb, 15, axis=0))
     bgm = median_rgb(bg) if bg.size else (24, 30, 16)
     ratio = wcag(gmed, bgm)
@@ -385,12 +427,14 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
         "proj_px": [round(proj[0], 1), round(proj[1], 1)],
         "found_px": [round(blob["cx"], 1), round(blob["cy"], 1)],
         "grain_rgb": list(gmed),
+        "face_rgb": list(face_med),
         "grain_p15_rgb": list(gmin),
         "bg_rgb": list(bgm),
         "median_ratio": round(ratio, 2),
         "min_ratio": round(ratio_min, 2),
         "median_pass": ratio >= 4.4,
         "min_pass": ratio_min >= 3.0,
+        "on_platform_top": grain_id in {"C08", "C09", "C15"},
     }
 
 
@@ -459,6 +503,7 @@ def measure_grains_2d() -> list[dict]:
         shots.append((DOCS / f"2d_{raw['id']}.png", raw))
     for extra in (
         {"id": "grains_c06", "player_px": {"x": 832.0, "y": 470.0}},
+        {"id": "grains_c08", "player_px": {"x": 1400.0, "y": 608.0}},
         {"id": "grains_c16", "player_px": {"x": 2592.0, "y": 608.0}},
     ):
         shots.append((DOCS / f"2d_{extra['id']}.png", extra))
@@ -500,11 +545,11 @@ def measure_grains_2d() -> list[dict]:
         name, im, sx, sy = best
         gold = _grain_color_mask(im)
         gold[:80, :] = False
-        # 2D also has the mid-brown body under the crescent.
+        # Pin fallback #6b3a1f ellipse (render.ts 1136–1139), no highlight.
         r = im[:, :, 0].astype(np.int16)
         g = im[:, :, 1].astype(np.int16)
         b = im[:, :, 2].astype(np.int16)
-        body = (r >= 140) & (g >= 60) & (b <= 80) & (r >= g + 30)
+        body = (r >= 90) & (r <= 130) & (g >= 40) & (g <= 80) & (b <= 50) & (r >= g + 20)
         cand = gold | body
         yy, xx = np.ogrid[: im.shape[0], : im.shape[1]]
         ell = ((xx - sx) / 16.0) ** 2 + ((yy - sy) / 20.0) ** 2 <= 1.0
@@ -568,10 +613,16 @@ def main() -> int:
     }
     print(json.dumps(report, indent=2))
     sweep_names = {n for n, _x, _y in SWEEP}
+    p10_need = {"3d_x36.png", "3d_x66.png", "3d_cacao.png"}
     ok_m = all(r.get("body_pass") for r in maya if r.get("file") in sweep_names and "body_pass" in r)
+    ok_p10 = all(r.get("p10_pass") for r in maya if r.get("file") in p10_need and "p10_pass" in r)
     ok_c = all(r.get("pass") for r in cacao if "pass" in r) if cacao else True
     ok_g = bool(medians) and report["grains_summary"]["all_median_ge_4_4"] and report["grains_summary"]["all_min_ge_3"]
-    return 0 if ok_m and ok_c and ok_g else 1
+    report["maya_p10_required"] = {
+        "files": sorted(p10_need),
+        "pass": ok_p10,
+    }
+    return 0 if ok_m and ok_p10 and ok_c and ok_g else 1
 
 
 if __name__ == "__main__":

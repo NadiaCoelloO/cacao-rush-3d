@@ -661,6 +661,9 @@ func _wire_dock(pilot: Node3D) -> void:
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			else:
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			# Follow cam already culls layer 12 (water). Keep the pier on
+			# lagoon/dock art cameras; do not let the deck box cover Maya at spawn.
+			mi.layers = 1 << 11
 			root.add_child(mi)
 	print(
 		"HP001 dock deck_top_local=%.4f collision_top=%.4f visual_y=%.4f delta=%.4f"

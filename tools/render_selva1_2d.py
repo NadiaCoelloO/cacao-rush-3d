@@ -4,6 +4,9 @@
 followCam at time=0 with camLook=48 (facing right, settled). Same 2D AABB as
 levels.ts after sitSpikes/freeCoins. No sprites: Maya is the teal preview box
 (#3d8a72) used when art.character is missing.
+
+Cacao.Game itself is a Vite app and was not executed here. Coin fill uses the
+pin fallback from render.ts:1136–1139 (`#6b3a1f` ellipse, no highlight).
 """
 from __future__ import annotations
 
@@ -31,8 +34,10 @@ SPIKE = (201, 196, 188)
 FROG = (62, 118, 56)
 ROCK = (96, 76, 56)
 WIND = (200, 220, 184)
-BEAN = (139, 74, 43)
-BEAN_RIM = (206, 114, 46)
+# render.ts coins fallback when art.bean is missing (lines 1136–1139):
+#   ctx.fillStyle = "#6b3a1f"; ellipse 8×11; no highlight, no outline.
+# Cacao.Game renderGame was not executed here (Vite app). Pin fallback only.
+BEAN = (107, 58, 31)
 POLE = (106, 90, 74)
 GOAL = (166, 106, 42)
 
@@ -120,7 +125,7 @@ def draw_shot(layout, shot, out_path: Path) -> None:
         if not vis(x - r, y - r, r * 2, r * 2):
             continue
         sx, sy = x - cam_x, y - cam_y
-        d.ellipse([sx - 8, sy - 11, sx + 8, sy + 11], fill=BEAN, outline=BEAN_RIM, width=3)
+        d.ellipse([sx - 8, sy - 11, sx + 8, sy + 11], fill=BEAN)
 
     for k in layout["checkpoints"]:
         box = k["px"]
@@ -140,10 +145,10 @@ def draw_shot(layout, shot, out_path: Path) -> None:
     print(f"wrote {out_path} cam=({cam_x:.1f},{cam_y:.1f}) player=({px},{py})")
 
 
-# Extra renderGame frames so grain contrast has a real 2D reference
-# (C06 cluster + C15/C16 low beans that miss the three layout shots).
+# Extra frames so C06 cluster and platform-top beans (C08/C09/C15) have a 2D pin.
 EXTRA_SHOTS = [
     {"id": "grains_c06", "player_px": {"x": 832.0, "y": 470.0}},
+    {"id": "grains_c08", "player_px": {"x": 1400.0, "y": 608.0}},
     {"id": "grains_c16", "player_px": {"x": 2592.0, "y": 608.0}},
 ]
 

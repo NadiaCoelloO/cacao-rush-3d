@@ -31,9 +31,11 @@ const COL_CRUMBLE := Color(0.16, 0.11, 0.07)
 const COL_SPIKE := Color("c9c4bc")
 const COL_SPIKE_EDGE := Color("2c1810")
 const COL_FROG := Color(0.28, 0.46, 0.22)
-const COL_ROCK := Color(0.38, 0.30, 0.22)
+const COL_ROCK := Color(0.34, 0.36, 0.40)
 const COL_WIND := Color(0.78, 0.86, 0.72)
 const COL_BEAN := Color("8b4a2b")
+const COL_BEAN_LO := Color("6b3a1f")
+const COL_BEAN_RIM := Color("ce722e")
 const COL_POLE := Color("6a5a4a")
 const COL_POLE_ON := Color("3d8a72")
 
@@ -442,20 +444,26 @@ func _add_frog(visual: Node3D, h: Dictionary) -> MeshInstance3D:
 
 
 func _add_rock(visual: Node3D, h: Dictionary) -> MeshInstance3D:
-	# Hitbox 22×20 px = 0.917×0.833 m. Coconut-sized ellipsoid, same as 2D.
+	# Hitbox 22×20 px. Faceted cool-slate block — not an oval cacao bean.
+	# Root is the MeshInstance3D so _tick_rocks can slide the whole stone.
 	var sz := _vec(h["size_m"])
 	var mi := MeshInstance3D.new()
 	mi.name = String(h["id"])
-	var mesh := SphereMesh.new()
-	mesh.radius = sz.x * 0.50
-	mesh.height = sz.y
-	mesh.radial_segments = 10
-	mesh.rings = 6
-	mi.mesh = mesh
+	var box := BoxMesh.new()
+	box.size = Vector3(sz.x * 0.92, sz.y * 0.78, sz.x * 0.70)
+	mi.mesh = box
 	mi.position = _vec(h["center_m"])
-	var mat := _mat(Color(0.52, 0.34, 0.18), 0.78)
+	mi.rotation = Vector3(deg_to_rad(12.0), deg_to_rad(28.0), deg_to_rad(-8.0))
+	var mat := _mat(COL_ROCK, 0.92)
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mi.material_override = mat
+	var cap := MeshInstance3D.new()
+	var prism := PrismMesh.new()
+	prism.size = Vector3(sz.x * 0.70, sz.y * 0.42, sz.x * 0.55)
+	cap.mesh = prism
+	cap.position = Vector3(0.06, sz.y * 0.28, 0.0)
+	cap.material_override = mat
+	mi.add_child(cap)
 	visual.add_child(mi)
 	return mi
 
@@ -535,19 +543,23 @@ func _bean_mat() -> ShaderMaterial:
 	var shader := Shader.new()
 	shader.code = """shader_type spatial;
 render_mode unshaded, fog_disabled, cull_back, specular_disabled;
-uniform vec4 albedo : source_color;
+uniform vec4 albedo_lo : source_color;
+uniform vec4 albedo_hi : source_color;
 uniform vec4 rim_col : source_color;
 void fragment() {
 	vec3 n = normalize(NORMAL);
-	// Face stays cacao. Legibility is a thick orange ring only — no key on the face.
-	float ring = length(n.xy);
-	float rim = smoothstep(0.20, 0.55, ring);
-	ALBEDO = mix(albedo.rgb, rim_col.rgb, rim);
+	// Face stays cacao #6b3a1f–#8B4A2B. No cream/#f8d090 mix.
+	// Legibility is a thin orange rim #CE722E on the silhouette only.
+	float mottling = clamp(0.35 + 0.65 * n.y, 0.0, 1.0);
+	vec3 face = mix(albedo_lo.rgb, albedo_hi.rgb, mottling);
+	float rim = smoothstep(0.70, 0.94, length(n.xy));
+	ALBEDO = mix(face, rim_col.rgb, rim);
 }
 """
 	mat.shader = shader
-	mat.set_shader_parameter("albedo", Color("8b4a2b"))
-	mat.set_shader_parameter("rim_col", Color("ce722e"))
+	mat.set_shader_parameter("albedo_lo", COL_BEAN_LO)
+	mat.set_shader_parameter("albedo_hi", COL_BEAN)
+	mat.set_shader_parameter("rim_col", COL_BEAN_RIM)
 	return mat
 
 
