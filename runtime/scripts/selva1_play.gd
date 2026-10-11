@@ -70,6 +70,7 @@ var _message_t := 0.0
 var _hint: Label
 var _root: Node3D
 var _feel := false
+var _skins = null
 
 
 func _ready() -> void:
@@ -133,6 +134,7 @@ func _physics_process(delta: float) -> void:
 	_tick_oneways()
 	_tick_rocks()
 	_bob_coins()
+	_tick_lid_fade()
 	if not _capturing:
 		_tick_play(delta)
 
@@ -198,13 +200,22 @@ func _disable_slice_boxes(pilot: Node3D, keep_feel_ledge: bool) -> void:
 		(oneway as CSGShape3D).use_collision = false
 	# Play: hide the 24 m feel slab so P00 (1:1 earth) is the floor, not a
 	# second dark box covering the first gap.
+	# The LOOK oneway at (6, 1, 0) and the 1 m CSGPlatform (left face 4.5)
+	# read as a spawn table / ledge behind Maya. Push them behind the play
+	# plane and hide the whole anchor — collision stays off.
 	if not keep_feel_ledge:
 		if floor_csg:
 			(floor_csg as Node3D).visible = false
 		if ledge:
 			(ledge as Node3D).visible = false
+			(ledge as Node3D).position.z = -2.8
 		if oneway:
 			(oneway as Node3D).visible = false
+			(oneway as Node3D).position.z = -2.8
+		var oneway_anchor: Node = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor")
+		if oneway_anchor is Node3D:
+			(oneway_anchor as Node3D).visible = false
+			(oneway_anchor as Node3D).position.z = -2.8
 
 
 func _build_world() -> void:
@@ -365,9 +376,17 @@ func _build_world() -> void:
 
 func _dress_skins(play: Node3D) -> void:
 	# Visual only. CollisionShape3D on each of the 21 bodies is untouched.
-	var skins = load("res://scripts/selva1_skins.gd").new()
-	if skins.load_kit():
-		skins.dress(play, _layout["platforms"])
+	_skins = load("res://scripts/selva1_skins.gd").new()
+	if _skins.load_kit():
+		_skins.dress(play, _layout["platforms"])
+	else:
+		_skins = null
+
+
+func _tick_lid_fade() -> void:
+	if _skins == null or _player == null or _layout.is_empty():
+		return
+	_skins.tick_under_fade(_player, _layout["platforms"])
 
 
 func _add_box(host: Node3D, center: Array, size: Array, mat: Material, collide: bool) -> void:

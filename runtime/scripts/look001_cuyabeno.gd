@@ -1239,6 +1239,12 @@ func _set_spawn_crate_visible(pilot: Node3D, vis: bool) -> void:
 		var n: Node = pilot.get_node_or_null(path)
 		if n:
 			(n as Node3D).visible = vis
+	# LOOK oneway at (6, 1, 0) is the ~1 m spawn table. Keep it behind the
+	# play plane on every camera so it never reads as a ledge behind Maya.
+	var oneway_anchor: Node = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor")
+	if oneway_anchor is Node3D:
+		(oneway_anchor as Node3D).visible = false
+		(oneway_anchor as Node3D).position.z = -2.8
 	var anchor: Node = pilot.get_node_or_null("WorldRoot/TotemWarpAnchor")
 	if anchor == null:
 		return

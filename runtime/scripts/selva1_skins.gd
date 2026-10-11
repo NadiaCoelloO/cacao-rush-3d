@@ -30,6 +30,7 @@ const P16_Y_SCALE := 1.125
 var _pieces: Array = [{}, {}, {}]
 var _mat_solid: ShaderMaterial
 var _mat_oneway: ShaderMaterial
+var _skin_mis: Dictionary = {}
 var dressed := 0
 var colliders := 0
 
@@ -57,9 +58,43 @@ func load_kit() -> bool:
 	return true
 
 
+func tick_under_fade(player: Node3D, platforms: Array) -> void:
+	# Visual only. A lid is any solid whose bottom sits over Maya's headroom
+	# on the play plane (P13 squeeze, P06 crawl, and any future cover).
+	# Colliders and feel are not read or written.
+	if player == null:
+		return
+	var feet := player.global_position
+	for raw in platforms:
+		var p: Dictionary = raw
+		var pid := String(p["id"])
+		if String(p["kind"]) == "oneway":
+			_set_fade(pid, 0.0)
+			continue
+		var cx := float(p["center_m"][0])
+		var cy := float(p["center_m"][1])
+		var sx := float(p["size_m"][0])
+		var sy := float(p["size_m"][1])
+		var bottom := cy - sy * 0.5
+		var left := cx - sx * 0.5
+		var right := cx + sx * 0.5
+		var overhead := bottom > feet.y + 0.12 and bottom < feet.y + 2.20
+		var x_hit := feet.x > left - 0.45 and feet.x < right + 0.45
+		_set_fade(pid, 1.0 if overhead and x_hit else 0.0)
+
+
+func _set_fade(pid: String, fade: float) -> void:
+	if not _skin_mis.has(pid):
+		return
+	for mi in _skin_mis[pid]:
+		if mi is GeometryInstance3D:
+			(mi as GeometryInstance3D).set_instance_shader_parameter("under_fade", fade)
+
+
 func dress(play: Node3D, platforms: Array) -> void:
 	dressed = 0
 	colliders = 0
+	_skin_mis.clear()
 	var fascia := play.get_node_or_null("P00_EarthFascia") as Node3D
 	if fascia:
 		fascia.visible = false
@@ -230,4 +265,8 @@ func _commit(body: Node3D, pid: String, lod: int, st: SurfaceTool, mat: Material
 	mi.visibility_range_begin_margin = LOD_MARGIN
 	mi.visibility_range_end_margin = LOD_MARGIN
 	mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+	mi.set_instance_shader_parameter("under_fade", 0.0)
 	body.add_child(mi)
+	if not _skin_mis.has(pid):
+		_skin_mis[pid] = []
+	(_skin_mis[pid] as Array).append(mi)
