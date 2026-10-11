@@ -13,9 +13,9 @@ const CAM_DOLLY := 24.1256
 const MAYA_LAYER := 2
 const DEPTH := 64.0 * PX
 
-const COL_BANK := Color("2c1810")
-const COL_LIP := Color("3a2820")
-const COL_CRATE := Color("322018")
+const COL_BANK := Color("5c4030")
+const COL_LIP := Color("8a6244")
+const COL_CRATE := Color("6b4632")
 const COL_SPIKE := Color("c9c4bc")
 const COL_SPIKE_EDGE := Color("2c1810")
 const COL_BEAN_EDGE := Color("2c1810")
@@ -60,6 +60,7 @@ var _hud_label: Label
 var _fade_mats: Array = []
 var _water_mat: ShaderMaterial
 var _wind_mats: Array = []
+var _input_driver: Node = null
 
 
 func _ready() -> void:
@@ -92,6 +93,13 @@ func _ready() -> void:
 		probe.name = "RioProbe"
 		probe.set_script(load("res://scripts/rio_probe.gd"))
 		add_child(probe)
+		_input_driver = probe
+	if OS.get_environment("RIO_WARP") != "":
+		var warp := Node.new()
+		warp.name = "RioWarpCheck"
+		warp.set_script(load("res://scripts/rio_warp_check.gd"))
+		add_child(warp)
+		_input_driver = warp
 	if _wants_capture():
 		_capturing = true
 		if _hud:
@@ -106,6 +114,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player == null:
 		return
+	# Same physics frame as Maya, and before her, so just_pressed('jump') lands.
+	if _input_driver and _input_driver.has_method("drive"):
+		_input_driver.call("drive", delta)
 	if not _capturing and _status == "playing" and _hitstop <= 0.0:
 		_time += delta
 	_tick_movers()
@@ -301,15 +312,14 @@ func _add_river(visual: Node3D, h: Dictionary) -> void:
 	var s := _vec(h["size_m"])
 	var mesh := MeshInstance3D.new()
 	mesh.name = String(h["id"])
-	var box := BoxMesh.new()
-	# Full X/Y of the lava AABB. Z sits behind the bank faces so the stone
-	# occludes the volume inside a bank and the open channel stays visible.
-	box.size = Vector3(s.x, s.y, 1.6)
-	mesh.mesh = box
-	mesh.position = Vector3(c.x, c.y, -0.55)
+	# Vertical sheet the size of the lava AABB. A box's top face read as a
+	# fake amber floor from this camera; the 2D draws a side-on rectangle.
+	var quad := QuadMesh.new()
+	quad.size = Vector2(s.x, s.y)
+	mesh.mesh = quad
+	mesh.position = Vector3(c.x, c.y, -0.45)
 	_water_mat = ShaderMaterial.new()
 	_water_mat.shader = load("res://materials/m_rio_water.gdshader")
-	_water_mat.set_shader_parameter("water_top", c.y + s.y * 0.5)
 	_water_mat.set_shader_parameter("sim_time", 0.0)
 	mesh.material_override = _water_mat
 	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -345,8 +355,9 @@ func _add_spikes(visual: Node3D, h: Dictionary, pale: SurfaceTool, edge: Surface
 	var n := maxi(1, int(round(w / tooth)))
 	var tw := w / float(n)
 	for i in n:
-		_stamp_wedge(edge, x0 + tw * i - 0.02, tw + 0.04, bottom, height * 1.06, 1.02, 0.22)
-		_stamp_wedge(pale, x0 + tw * i, tw, bottom, height, 1.14, 0.34)
+		# In front of the bank's near face (z = +1.33) so the teeth aren't buried.
+		_stamp_wedge(edge, x0 + tw * i - 0.02, tw + 0.04, bottom, height * 1.06, 1.50, 1.22)
+		_stamp_wedge(pale, x0 + tw * i, tw, bottom, height, 1.62, 1.30)
 	# visual is parented later via the committed mesh; wedges are in world space
 	visual.set_meta("spikes_ready", true)
 
@@ -401,8 +412,8 @@ func _make_bean(bean_name: String, center: Vector3, bean_scale: Vector3, fill: M
 	var outline := MeshInstance3D.new()
 	outline.name = "Outline"
 	outline.mesh = sphere
-	outline.scale = Vector3(1.07, 1.07, 1.0)
-	outline.position = Vector3(0.0, 0.0, -0.04)
+	outline.scale = Vector3(1.18, 1.18, 1.0)
+	outline.position = Vector3(0.0, 0.0, -0.08)
 	outline.material_override = edge
 	outline.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(outline)
@@ -442,16 +453,38 @@ func _add_mist(visual: Node3D) -> void:
 
 
 func _paint_maya() -> void:
-	var shader := load("res://materials/m_rio_maya.gdshader")
-	for path in ["MeshPlaceholder/BodyCapsule", "MeshPlaceholder/HeadSphere"]:
-		var node := _player.get_node_or_null(path)
-		if node == null:
-			continue
-		var mat := ShaderMaterial.new()
-		mat.shader = shader
-		if node is GeometryInstance3D:
-			(node as GeometryInstance3D).material_override = mat
-			(node as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# CSG ignored material_override under the GL capture and stayed a lit grey.
+	# Mesh instances carry the cream shader. Collision stays the capsule.
+	var shader: Shader = load("res://materials/m_rio_maya.gdshader")
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	var holder := _player.get_node("MeshPlaceholder") as Node3D
+	var body := holder.get_node_or_null("BodyCapsule")
+	if body:
+		body.visible = false
+	var head := holder.get_node_or_null("HeadSphere")
+	if head:
+		head.visible = false
+	var torso := MeshInstance3D.new()
+	torso.name = "MayaBody"
+	var cap := CapsuleMesh.new()
+	cap.radius = 0.32
+	cap.height = 1.45
+	torso.mesh = cap
+	torso.position = Vector3(0.0, 0.78, 0.0)
+	torso.material_override = mat
+	torso.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	holder.add_child(torso)
+	var skull := MeshInstance3D.new()
+	skull.name = "MayaHead"
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.26
+	sphere.height = 0.52
+	skull.mesh = sphere
+	skull.position = Vector3(0.0, 1.62, 0.0)
+	skull.material_override = mat
+	skull.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	holder.add_child(skull)
 
 
 func _tag_maya_layer(node: Node) -> void:

@@ -1,15 +1,15 @@
 shader_type spatial;
+render_mode unshaded, fog_disabled, cull_disabled;
 
-uniform vec4 albedo : source_color = vec4(0.173, 0.094, 0.063, 1.0);
+uniform vec4 albedo : source_color = vec4(0.361, 0.251, 0.188, 1.0);
 uniform float roughness_value = 0.94;
 uniform vec3 maya_pos = vec3(0.0);
 
-// Drops the face that sits between the camera (+Z) and Maya.
-// Collision stays where the layout put it.
+// Unshaded so the bank stays the cacao brown we set. A lit shader with the
+// low river ambient was crushing it to black. The discard only opens the
+// face that sits between the camera (+Z) and Maya. Collision is unchanged.
 void fragment() {
 	ALBEDO = albedo.rgb;
-	ROUGHNESS = roughness_value;
-	METALLIC = 0.0;
 	vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float in_front = smoothstep(0.15, 0.55, world_pos.z - maya_pos.z);
 	vec4 maya_clip = PROJECTION_MATRIX * (VIEW_MATRIX * vec4(maya_pos, 1.0));

@@ -7,9 +7,13 @@ uniform vec4 rim_col : source_color = vec4(0.808, 0.447, 0.180, 1.0);
 
 void fragment() {
 	// 3/4 face sits toward +X (camera looks along -Z, Maya's right is +X).
-	float face = clamp(NORMAL.x * 0.75 + NORMAL.y * 0.2 + 0.25, 0.0, 1.0);
+	float face = clamp(NORMAL.x * 0.55 + 0.15, 0.0, 1.0);
 	vec3 body = mix(dark_col.rgb, mid_col.rgb, face);
-	float rim = pow(1.0 - clamp(abs(NORMAL.z), 0.0, 1.0), 2.4);
-	body = mix(body, rim_col.rgb, smoothstep(0.35, 0.78, rim));
+	// Thin #CE722E rim on the 3/4 (+X) cheek and along the silhouette.
+	// View-space NORMAL.x is only modest at the rasterized limb, so the
+	// 3/4 cheek starts early and reaches the full #CE722E.
+	float cheek = smoothstep(0.12, 0.42, NORMAL.x);
+	float edge = smoothstep(0.35, 0.75, 1.0 - abs(NORMAL.z));
+	body = mix(body, rim_col.rgb, clamp(max(cheek, edge), 0.0, 1.0));
 	ALBEDO = body;
 }
