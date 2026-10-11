@@ -1,0 +1,5720 @@
+{
+  "method": "QA E2i: grain FACE vs immediate local bg; Maya p10 exclude 2 px AA",
+  "maya": [
+    {
+      "file": "3d_x04.png",
+      "x_m": 4.54,
+      "cream_n": 218,
+      "body_n": 408,
+      "body_core_n": 17,
+      "p10_n": 2,
+      "outline_n": 183,
+      "body_bg_n": 2759,
+      "body_center_px": [
+        152.9,
+        393.5
+      ],
+      "body_bbox_px": [
+        145,
+        365,
+        166,
+        424
+      ],
+      "body_samples_px": [
+        [
+          153,
+          394
+        ],
+        [
+          145,
+          369
+        ],
+        [
+          150,
+          365
+        ],
+        [
+          166,
+          380
+        ],
+        [
+          145,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        150.0,
+        396.0
+      ],
+      "p10_bbox_px": [
+        146,
+        370,
+        154,
+        422
+      ],
+      "p10_samples_px": [
+        [
+          146,
+          370
+        ],
+        [
+          154,
+          422
+        ]
+      ],
+      "bg_center_px": [
+        156.2,
+        381.1
+      ],
+      "bg_bbox_px": [
+        129,
+        349,
+        182,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          156,
+          381
+        ],
+        [
+          129,
+          353
+        ],
+        [
+          134,
+          349
+        ],
+        [
+          182,
+          364
+        ],
+        [
+          129,
+          419
+        ]
+      ],
+      "body_rgb": [
+        188,
+        158,
+        97
+      ],
+      "body_p10_rgb": [
+        180,
+        147,
+        94
+      ],
+      "body_bg_rgb": [
+        23,
+        29,
+        11
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        198,
+        171,
+        124
+      ],
+      "body_ratio": 6.74,
+      "p10_ratio": 5.98,
+      "outline_ratio": 9.36,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x36.png",
+      "x_m": 36.0,
+      "cream_n": 223,
+      "body_n": 353,
+      "body_core_n": 42,
+      "p10_n": 6,
+      "outline_n": 173,
+      "body_bg_n": 3855,
+      "body_center_px": [
+        576.4,
+        384.0
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.5,
+        380.0
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        380
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.5
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          381
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        221,
+        174,
+        115
+      ],
+      "body_p10_rgb": [
+        222,
+        166,
+        90
+      ],
+      "body_bg_rgb": [
+        26,
+        33,
+        14
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        214,
+        176,
+        116
+      ],
+      "body_ratio": 8.18,
+      "p10_ratio": 7.66,
+      "outline_ratio": 10.15,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x66.png",
+      "x_m": 66.0,
+      "cream_n": 225,
+      "body_n": 350,
+      "body_core_n": 42,
+      "p10_n": 7,
+      "outline_n": 173,
+      "body_bg_n": 3861,
+      "body_center_px": [
+        576.4,
+        384.0
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.1,
+        380.1
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        381
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ],
+        [
+          572,
+          381
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.6
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          381
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        220,
+        173,
+        113
+      ],
+      "body_p10_rgb": [
+        221,
+        165,
+        89
+      ],
+      "body_bg_rgb": [
+        22,
+        28,
+        12
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        213,
+        175,
+        115
+      ],
+      "body_ratio": 8.51,
+      "p10_ratio": 7.96,
+      "outline_ratio": 10.04,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x87.png",
+      "x_m": 86.67,
+      "cream_n": 224,
+      "body_n": 351,
+      "body_core_n": 42,
+      "p10_n": 6,
+      "outline_n": 173,
+      "body_bg_n": 3853,
+      "body_center_px": [
+        576.4,
+        383.9
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.5,
+        380.0
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        380
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.5
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          380
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        221,
+        174,
+        115
+      ],
+      "body_p10_rgb": [
+        222,
+        167,
+        90
+      ],
+      "body_bg_rgb": [
+        17,
+        22,
+        7
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        208,
+        174,
+        116
+      ],
+      "body_ratio": 9.09,
+      "p10_ratio": 8.57,
+      "outline_ratio": 9.83,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x95.png",
+      "x_m": 95.33,
+      "cream_n": 51,
+      "body_n": 66,
+      "body_core_n": 9,
+      "p10_n": 1,
+      "outline_n": 68,
+      "body_bg_n": 864,
+      "body_center_px": [
+        581.0,
+        412.1
+      ],
+      "body_bbox_px": [
+        580,
+        400,
+        582,
+        424
+      ],
+      "body_samples_px": [
+        [
+          581,
+          412
+        ],
+        [
+          580,
+          403
+        ],
+        [
+          581,
+          400
+        ],
+        [
+          582,
+          400
+        ],
+        [
+          580,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        581.0,
+        420.0
+      ],
+      "p10_bbox_px": [
+        581,
+        420,
+        581,
+        420
+      ],
+      "p10_samples_px": [
+        [
+          581,
+          420
+        ]
+      ],
+      "bg_center_px": [
+        583.7,
+        402.6
+      ],
+      "bg_bbox_px": [
+        564,
+        384,
+        598,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          403
+        ],
+        [
+          564,
+          387
+        ],
+        [
+          565,
+          384
+        ],
+        [
+          598,
+          392
+        ],
+        [
+          564,
+          419
+        ]
+      ],
+      "body_rgb": [
+        199,
+        166,
+        113
+      ],
+      "body_p10_rgb": [
+        189,
+        153,
+        101
+      ],
+      "body_bg_rgb": [
+        28,
+        34,
+        16
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        211,
+        177,
+        104
+      ],
+      "body_ratio": 7.09,
+      "p10_ratio": 6.15,
+      "outline_ratio": 10.09,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x133.png",
+      "x_m": 133.33,
+      "cream_n": 51,
+      "body_n": 66,
+      "body_core_n": 9,
+      "p10_n": 1,
+      "outline_n": 68,
+      "body_bg_n": 864,
+      "body_center_px": [
+        581.0,
+        412.1
+      ],
+      "body_bbox_px": [
+        580,
+        400,
+        582,
+        424
+      ],
+      "body_samples_px": [
+        [
+          581,
+          412
+        ],
+        [
+          580,
+          403
+        ],
+        [
+          581,
+          400
+        ],
+        [
+          582,
+          400
+        ],
+        [
+          580,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        581.0,
+        420.0
+      ],
+      "p10_bbox_px": [
+        581,
+        420,
+        581,
+        420
+      ],
+      "p10_samples_px": [
+        [
+          581,
+          420
+        ]
+      ],
+      "bg_center_px": [
+        583.7,
+        402.6
+      ],
+      "bg_bbox_px": [
+        564,
+        384,
+        598,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          403
+        ],
+        [
+          564,
+          387
+        ],
+        [
+          565,
+          384
+        ],
+        [
+          598,
+          392
+        ],
+        [
+          564,
+          419
+        ]
+      ],
+      "body_rgb": [
+        199,
+        166,
+        112
+      ],
+      "body_p10_rgb": [
+        189,
+        153,
+        101
+      ],
+      "body_bg_rgb": [
+        27,
+        35,
+        15
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        211,
+        176,
+        104
+      ],
+      "body_ratio": 7.05,
+      "p10_ratio": 6.11,
+      "outline_ratio": 10.02,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x163.png",
+      "x_m": 162.67,
+      "cream_n": 51,
+      "body_n": 65,
+      "body_core_n": 9,
+      "p10_n": 1,
+      "outline_n": 75,
+      "body_bg_n": 1717,
+      "body_center_px": [
+        581.0,
+        412.3
+      ],
+      "body_bbox_px": [
+        580,
+        400,
+        582,
+        424
+      ],
+      "body_samples_px": [
+        [
+          581,
+          412
+        ],
+        [
+          580,
+          404
+        ],
+        [
+          581,
+          400
+        ],
+        [
+          582,
+          400
+        ],
+        [
+          580,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        581.0,
+        420.0
+      ],
+      "p10_bbox_px": [
+        581,
+        420,
+        581,
+        420
+      ],
+      "p10_samples_px": [
+        [
+          581,
+          420
+        ]
+      ],
+      "bg_center_px": [
+        582.6,
+        416.9
+      ],
+      "bg_bbox_px": [
+        564,
+        384,
+        598,
+        440
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          417
+        ],
+        [
+          564,
+          388
+        ],
+        [
+          565,
+          384
+        ],
+        [
+          598,
+          392
+        ],
+        [
+          564,
+          440
+        ]
+      ],
+      "body_rgb": [
+        199,
+        166,
+        112
+      ],
+      "body_p10_rgb": [
+        188,
+        152,
+        101
+      ],
+      "body_bg_rgb": [
+        29,
+        36,
+        16
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        236,
+        198,
+        135
+      ],
+      "body_ratio": 6.95,
+      "p10_ratio": 5.96,
+      "outline_ratio": 12.78,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_x193.png",
+      "x_m": 193.33,
+      "cream_n": 47,
+      "body_n": 42,
+      "body_core_n": 42,
+      "p10_n": 5,
+      "outline_n": 90,
+      "body_bg_n": 819,
+      "body_center_px": [
+        973.2,
+        413.2
+      ],
+      "body_bbox_px": [
+        972,
+        396,
+        974,
+        424
+      ],
+      "body_samples_px": [
+        [
+          973,
+          413
+        ],
+        [
+          972,
+          421
+        ],
+        [
+          973,
+          396
+        ],
+        [
+          974,
+          414
+        ],
+        [
+          973,
+          424
+        ]
+      ],
+      "p10_center_px": [
+        972.8,
+        412.2
+      ],
+      "p10_bbox_px": [
+        972,
+        396,
+        973,
+        424
+      ],
+      "p10_samples_px": [
+        [
+          973,
+          420
+        ],
+        [
+          972,
+          422
+        ],
+        [
+          973,
+          396
+        ],
+        [
+          973,
+          424
+        ]
+      ],
+      "bg_center_px": [
+        967.5,
+        402.4
+      ],
+      "bg_bbox_px": [
+        956,
+        380,
+        990,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          968,
+          402
+        ],
+        [
+          956,
+          405
+        ],
+        [
+          957,
+          380
+        ],
+        [
+          990,
+          398
+        ],
+        [
+          956,
+          419
+        ]
+      ],
+      "body_rgb": [
+        228,
+        180,
+        93
+      ],
+      "body_p10_rgb": [
+        212,
+        163,
+        82
+      ],
+      "body_bg_rgb": [
+        27,
+        34,
+        15
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        224,
+        179,
+        104
+      ],
+      "body_ratio": 8.57,
+      "p10_ratio": 7.14,
+      "outline_ratio": 10.64,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_entrance.png",
+      "x_m": 4.54,
+      "cream_n": 226,
+      "body_n": 388,
+      "body_core_n": 30,
+      "p10_n": 3,
+      "outline_n": 192,
+      "body_bg_n": 3079,
+      "body_center_px": [
+        154.0,
+        391.0
+      ],
+      "body_bbox_px": [
+        145,
+        365,
+        170,
+        421
+      ],
+      "body_samples_px": [
+        [
+          154,
+          391
+        ],
+        [
+          145,
+          369
+        ],
+        [
+          150,
+          365
+        ],
+        [
+          170,
+          387
+        ],
+        [
+          145,
+          421
+        ]
+      ],
+      "p10_center_px": [
+        150.3,
+        395.0
+      ],
+      "p10_bbox_px": [
+        146,
+        370,
+        153,
+        412
+      ],
+      "p10_samples_px": [
+        [
+          153,
+          403
+        ],
+        [
+          146,
+          370
+        ],
+        [
+          152,
+          412
+        ]
+      ],
+      "bg_center_px": [
+        158.2,
+        382.5
+      ],
+      "bg_bbox_px": [
+        129,
+        349,
+        186,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          158,
+          383
+        ],
+        [
+          129,
+          353
+        ],
+        [
+          134,
+          349
+        ],
+        [
+          186,
+          371
+        ],
+        [
+          129,
+          419
+        ]
+      ],
+      "body_rgb": [
+        177,
+        147,
+        89
+      ],
+      "body_p10_rgb": [
+        179,
+        152,
+        99
+      ],
+      "body_bg_rgb": [
+        23,
+        29,
+        11
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        177,
+        147,
+        95
+      ],
+      "body_ratio": 5.91,
+      "p10_ratio": 6.24,
+      "outline_ratio": 7.09,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_hazard.png",
+      "x_m": 133.33,
+      "cream_n": 48,
+      "body_n": 40,
+      "body_core_n": 40,
+      "p10_n": 4,
+      "outline_n": 63,
+      "body_bg_n": 1301,
+      "body_center_px": [
+        580.7,
+        351.8
+      ],
+      "body_bbox_px": [
+        580,
+        344,
+        582,
+        361
+      ],
+      "body_samples_px": [
+        [
+          581,
+          352
+        ],
+        [
+          580,
+          344
+        ],
+        [
+          582,
+          344
+        ],
+        [
+          580,
+          361
+        ]
+      ],
+      "p10_center_px": [
+        580.0,
+        357.5
+      ],
+      "p10_bbox_px": [
+        580,
+        356,
+        580,
+        359
+      ],
+      "p10_samples_px": [
+        [
+          580,
+          357
+        ],
+        [
+          580,
+          356
+        ],
+        [
+          580,
+          359
+        ]
+      ],
+      "bg_center_px": [
+        582.6,
+        355.2
+      ],
+      "bg_bbox_px": [
+        564,
+        328,
+        598,
+        377
+      ],
+      "bg_samples_px": [
+        [
+          584,
+          355
+        ],
+        [
+          564,
+          328
+        ],
+        [
+          598,
+          329
+        ],
+        [
+          564,
+          377
+        ]
+      ],
+      "body_rgb": [
+        198,
+        168,
+        110
+      ],
+      "body_p10_rgb": [
+        190,
+        154,
+        103
+      ],
+      "body_bg_rgb": [
+        32,
+        39,
+        19
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        220,
+        189,
+        141
+      ],
+      "body_ratio": 6.78,
+      "p10_ratio": 5.88,
+      "outline_ratio": 11.52,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    },
+    {
+      "file": "3d_cacao.png",
+      "x_m": 65.88,
+      "cream_n": 227,
+      "body_n": 351,
+      "body_core_n": 42,
+      "p10_n": 6,
+      "outline_n": 174,
+      "body_bg_n": 3859,
+      "body_center_px": [
+        576.4,
+        384.0
+      ],
+      "body_bbox_px": [
+        570,
+        360,
+        593,
+        403
+      ],
+      "body_samples_px": [
+        [
+          576,
+          384
+        ],
+        [
+          570,
+          372
+        ],
+        [
+          574,
+          360
+        ],
+        [
+          593,
+          387
+        ],
+        [
+          573,
+          403
+        ]
+      ],
+      "p10_center_px": [
+        574.5,
+        380.0
+      ],
+      "p10_bbox_px": [
+        572,
+        380,
+        577,
+        380
+      ],
+      "p10_samples_px": [
+        [
+          574,
+          380
+        ],
+        [
+          572,
+          380
+        ],
+        [
+          577,
+          380
+        ]
+      ],
+      "bg_center_px": [
+        580.4,
+        380.6
+      ],
+      "bg_bbox_px": [
+        554,
+        344,
+        609,
+        419
+      ],
+      "bg_samples_px": [
+        [
+          583,
+          381
+        ],
+        [
+          554,
+          356
+        ],
+        [
+          558,
+          344
+        ],
+        [
+          609,
+          371
+        ],
+        [
+          557,
+          419
+        ]
+      ],
+      "body_rgb": [
+        220,
+        173,
+        113
+      ],
+      "body_p10_rgb": [
+        221,
+        165,
+        89
+      ],
+      "body_bg_rgb": [
+        22,
+        28,
+        12
+      ],
+      "outline_rgb": [
+        6,
+        2,
+        0
+      ],
+      "outline_bg_rgb": [
+        213,
+        175,
+        115
+      ],
+      "body_ratio": 8.51,
+      "p10_ratio": 7.96,
+      "outline_ratio": 10.04,
+      "body_pass": true,
+      "p10_pass": true,
+      "outline_pass": true,
+      "measure": "p10 of body excluding 2 px AA edge; bg = jungle just outside"
+    }
+  ],
+  "cacao": [
+    {
+      "file": "HP001_E2i_engine_totem_pods_v4.png",
+      "pod_n": 134,
+      "center_px": [
+        828.4,
+        790.7
+      ],
+      "pod_rgb": [
+        218,
+        192,
+        125
+      ],
+      "bg_rgb": [
+        224,
+        200,
+        137
+      ],
+      "ratio": 1.08,
+      "pass": false
+    }
+  ],
+  "grains": [
+    {
+      "id": "C00",
+      "file": "3d_x04.png",
+      "n": 280,
+      "face_n": 10,
+      "bg_n": 136,
+      "proj_px": [
+        213.3,
+        297.3
+      ],
+      "found_px": [
+        206.3,
+        289.7
+      ],
+      "face_center_px": [
+        203.9,
+        295.6
+      ],
+      "face_bbox_px": [
+        203,
+        287,
+        206,
+        301
+      ],
+      "face_samples_px": [
+        [
+          203,
+          295
+        ],
+        [
+          203,
+          287
+        ],
+        [
+          206,
+          301
+        ]
+      ],
+      "bg_center_px": [
+        204.4,
+        293.6
+      ],
+      "bg_bbox_px": [
+        199,
+        277,
+        216,
+        310
+      ],
+      "bg_samples_px": [
+        [
+          201,
+          294
+        ],
+        [
+          199,
+          286
+        ],
+        [
+          204,
+          277
+        ],
+        [
+          216,
+          277
+        ],
+        [
+          212,
+          310
+        ]
+      ],
+      "face_rgb": [
+        154,
+        78,
+        37
+      ],
+      "face_p15_rgb": [
+        152,
+        77,
+        36
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.8,
+      "min_ratio": 4.89,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C01",
+      "file": "3d_x04.png",
+      "n": 524,
+      "face_n": 196,
+      "bg_n": 214,
+      "proj_px": [
+        290.1,
+        281.3
+      ],
+      "found_px": [
+        289.6,
+        290.0
+      ],
+      "face_center_px": [
+        288.6,
+        290.6
+      ],
+      "face_bbox_px": [
+        280,
+        278,
+        297,
+        299
+      ],
+      "face_samples_px": [
+        [
+          289,
+          291
+        ],
+        [
+          280,
+          285
+        ],
+        [
+          295,
+          278
+        ],
+        [
+          297,
+          282
+        ],
+        [
+          288,
+          299
+        ]
+      ],
+      "bg_center_px": [
+        290.0,
+        290.4
+      ],
+      "bg_bbox_px": [
+        276,
+        268,
+        301,
+        304
+      ],
+      "bg_samples_px": [
+        [
+          298,
+          292
+        ],
+        [
+          276,
+          281
+        ],
+        [
+          290,
+          268
+        ],
+        [
+          301,
+          281
+        ],
+        [
+          288,
+          304
+        ]
+      ],
+      "face_rgb": [
+        155,
+        78,
+        37
+      ],
+      "face_p15_rgb": [
+        152,
+        76,
+        36
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.77,
+      "min_ratio": 4.93,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C02",
+      "file": "3d_x04.png",
+      "n": 751,
+      "face_n": 373,
+      "bg_n": 284,
+      "proj_px": [
+        366.9,
+        297.3
+      ],
+      "found_px": [
+        365.6,
+        291.7
+      ],
+      "face_center_px": [
+        365.6,
+        291.8
+      ],
+      "face_bbox_px": [
+        357,
+        279,
+        374,
+        305
+      ],
+      "face_samples_px": [
+        [
+          366,
+          292
+        ],
+        [
+          357,
+          288
+        ],
+        [
+          364,
+          279
+        ],
+        [
+          374,
+          288
+        ],
+        [
+          366,
+          305
+        ]
+      ],
+      "bg_center_px": [
+        365.6,
+        291.6
+      ],
+      "bg_bbox_px": [
+        353,
+        274,
+        378,
+        310
+      ],
+      "bg_samples_px": [
+        [
+          376,
+          292
+        ],
+        [
+          353,
+          287
+        ],
+        [
+          363,
+          274
+        ],
+        [
+          378,
+          287
+        ],
+        [
+          365,
+          310
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.71,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C03",
+      "file": "3d_x04.png",
+      "n": 617,
+      "face_n": 330,
+      "bg_n": 564,
+      "proj_px": [
+        341.3,
+        84.0
+      ],
+      "found_px": [
+        336.6,
+        82.0
+      ],
+      "face_center_px": [
+        336.6,
+        80.3
+      ],
+      "face_bbox_px": [
+        328,
+        71,
+        345,
+        92
+      ],
+      "face_samples_px": [
+        [
+          337,
+          80
+        ],
+        [
+          328,
+          74
+        ],
+        [
+          329,
+          71
+        ],
+        [
+          345,
+          75
+        ],
+        [
+          336,
+          92
+        ]
+      ],
+      "bg_center_px": [
+        334.7,
+        78.5
+      ],
+      "bg_bbox_px": [
+        318,
+        61,
+        355,
+        97
+      ],
+      "bg_samples_px": [
+        [
+          326,
+          79
+        ],
+        [
+          318,
+          61
+        ],
+        [
+          355,
+          71
+        ],
+        [
+          335,
+          97
+        ]
+      ],
+      "face_rgb": [
+        156,
+        78,
+        38
+      ],
+      "face_p15_rgb": [
+        152,
+        76,
+        36
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.74,
+      "min_ratio": 4.93,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C04",
+      "file": "3d_x04.png",
+      "n": 693,
+      "face_n": 370,
+      "bg_n": 299,
+      "proj_px": [
+        768.0,
+        84.0
+      ],
+      "found_px": [
+        769.3,
+        84.2
+      ],
+      "face_center_px": [
+        769.3,
+        82.9
+      ],
+      "face_bbox_px": [
+        761,
+        71,
+        778,
+        96
+      ],
+      "face_samples_px": [
+        [
+          769,
+          83
+        ],
+        [
+          761,
+          78
+        ],
+        [
+          765,
+          71
+        ],
+        [
+          778,
+          79
+        ],
+        [
+          769,
+          96
+        ]
+      ],
+      "bg_center_px": [
+        769.9,
+        82.6
+      ],
+      "bg_bbox_px": [
+        757,
+        64,
+        788,
+        101
+      ],
+      "bg_samples_px": [
+        [
+          779,
+          87
+        ],
+        [
+          757,
+          78
+        ],
+        [
+          768,
+          64
+        ],
+        [
+          788,
+          79
+        ],
+        [
+          768,
+          101
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.71,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C05",
+      "file": "3d_x36.png",
+      "n": 742,
+      "face_n": 365,
+      "bg_n": 282,
+      "proj_px": [
+        533.3,
+        297.3
+      ],
+      "found_px": [
+        532.6,
+        300.3
+      ],
+      "face_center_px": [
+        532.6,
+        300.4
+      ],
+      "face_bbox_px": [
+        524,
+        288,
+        541,
+        313
+      ],
+      "face_samples_px": [
+        [
+          533,
+          300
+        ],
+        [
+          524,
+          297
+        ],
+        [
+          530,
+          288
+        ],
+        [
+          541,
+          297
+        ],
+        [
+          531,
+          313
+        ]
+      ],
+      "bg_center_px": [
+        532.6,
+        300.2
+      ],
+      "bg_bbox_px": [
+        520,
+        282,
+        545,
+        318
+      ],
+      "bg_samples_px": [
+        [
+          543,
+          300
+        ],
+        [
+          520,
+          296
+        ],
+        [
+          532,
+          282
+        ],
+        [
+          545,
+          296
+        ],
+        [
+          530,
+          318
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C06",
+      "file": "3d_x36.png",
+      "n": 732,
+      "face_n": 367,
+      "bg_n": 270,
+      "proj_px": [
+        618.7,
+        268.0
+      ],
+      "found_px": [
+        618.1,
+        263.3
+      ],
+      "face_center_px": [
+        618.2,
+        263.2
+      ],
+      "face_bbox_px": [
+        610,
+        250,
+        627,
+        276
+      ],
+      "face_samples_px": [
+        [
+          618,
+          263
+        ],
+        [
+          610,
+          259
+        ],
+        [
+          618,
+          250
+        ],
+        [
+          627,
+          261
+        ],
+        [
+          616,
+          276
+        ]
+      ],
+      "bg_center_px": [
+        617.8,
+        263.3
+      ],
+      "bg_bbox_px": [
+        606,
+        245,
+        630,
+        281
+      ],
+      "bg_samples_px": [
+        [
+          608,
+          263
+        ],
+        [
+          606,
+          258
+        ],
+        [
+          617,
+          245
+        ],
+        [
+          630,
+          258
+        ],
+        [
+          616,
+          281
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C07",
+      "file": "3d_x36.png",
+      "n": 730,
+      "face_n": 365,
+      "bg_n": 271,
+      "proj_px": [
+        704.0,
+        297.3
+      ],
+      "found_px": [
+        703.8,
+        300.8
+      ],
+      "face_center_px": [
+        703.6,
+        300.8
+      ],
+      "face_bbox_px": [
+        695,
+        288,
+        712,
+        314
+      ],
+      "face_samples_px": [
+        [
+          704,
+          301
+        ],
+        [
+          695,
+          298
+        ],
+        [
+          702,
+          288
+        ],
+        [
+          712,
+          297
+        ],
+        [
+          703,
+          314
+        ]
+      ],
+      "bg_center_px": [
+        704.0,
+        300.6
+      ],
+      "bg_bbox_px": [
+        692,
+        283,
+        716,
+        319
+      ],
+      "bg_samples_px": [
+        [
+          714,
+          301
+        ],
+        [
+          692,
+          294
+        ],
+        [
+          702,
+          283
+        ],
+        [
+          716,
+          296
+        ],
+        [
+          703,
+          319
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C08",
+      "file": "3d_cacao.png",
+      "n": 595,
+      "face_n": 340,
+      "bg_n": 169,
+      "proj_px": [
+        260.0,
+        580.0
+      ],
+      "found_px": [
+        264.3,
+        579.8
+      ],
+      "face_center_px": [
+        264.4,
+        580.7
+      ],
+      "face_bbox_px": [
+        256,
+        569,
+        273,
+        591
+      ],
+      "face_samples_px": [
+        [
+          264,
+          581
+        ],
+        [
+          256,
+          577
+        ],
+        [
+          263,
+          569
+        ],
+        [
+          273,
+          578
+        ],
+        [
+          259,
+          591
+        ]
+      ],
+      "bg_center_px": [
+        264.2,
+        577.8
+      ],
+      "bg_bbox_px": [
+        252,
+        567,
+        277,
+        592
+      ],
+      "bg_samples_px": [
+        [
+          273,
+          574
+        ],
+        [
+          252,
+          577
+        ],
+        [
+          257,
+          567
+        ],
+        [
+          277,
+          577
+        ],
+        [
+          254,
+          592
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        154,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.84,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C09",
+      "file": "3d_cacao.png",
+      "n": 588,
+      "face_n": 346,
+      "bg_n": 154,
+      "proj_px": [
+        409.3,
+        580.0
+      ],
+      "found_px": [
+        411.8,
+        579.3
+      ],
+      "face_center_px": [
+        411.7,
+        579.3
+      ],
+      "face_bbox_px": [
+        403,
+        568,
+        420,
+        591
+      ],
+      "face_samples_px": [
+        [
+          412,
+          579
+        ],
+        [
+          403,
+          577
+        ],
+        [
+          408,
+          568
+        ],
+        [
+          420,
+          575
+        ],
+        [
+          409,
+          591
+        ]
+      ],
+      "bg_center_px": [
+        412.3,
+        579.0
+      ],
+      "bg_bbox_px": [
+        400,
+        567,
+        424,
+        592
+      ],
+      "bg_samples_px": [
+        [
+          422,
+          579
+        ],
+        [
+          400,
+          573
+        ],
+        [
+          403,
+          567
+        ],
+        [
+          424,
+          575
+        ],
+        [
+          403,
+          592
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C10",
+      "file": "3d_x66.png",
+      "n": 729,
+      "face_n": 362,
+      "bg_n": 273,
+      "proj_px": [
+        597.3,
+        297.3
+      ],
+      "found_px": [
+        596.8,
+        302.1
+      ],
+      "face_center_px": [
+        596.8,
+        302.1
+      ],
+      "face_bbox_px": [
+        588,
+        289,
+        605,
+        315
+      ],
+      "face_samples_px": [
+        [
+          597,
+          302
+        ],
+        [
+          588,
+          300
+        ],
+        [
+          596,
+          289
+        ],
+        [
+          605,
+          298
+        ],
+        [
+          596,
+          315
+        ]
+      ],
+      "bg_center_px": [
+        596.8,
+        302.1
+      ],
+      "bg_bbox_px": [
+        585,
+        284,
+        609,
+        320
+      ],
+      "bg_samples_px": [
+        [
+          607,
+          302
+        ],
+        [
+          585,
+          296
+        ],
+        [
+          595,
+          284
+        ],
+        [
+          609,
+          298
+        ],
+        [
+          595,
+          320
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C11",
+      "file": "3d_x87.png",
+      "n": 752,
+      "face_n": 368,
+      "bg_n": 288,
+      "proj_px": [
+        191.9,
+        382.7
+      ],
+      "found_px": [
+        192.4,
+        376.8
+      ],
+      "face_center_px": [
+        192.3,
+        376.8
+      ],
+      "face_bbox_px": [
+        183,
+        364,
+        201,
+        389
+      ],
+      "face_samples_px": [
+        [
+          192,
+          377
+        ],
+        [
+          183,
+          375
+        ],
+        [
+          191,
+          364
+        ],
+        [
+          201,
+          374
+        ],
+        [
+          190,
+          389
+        ]
+      ],
+      "bg_center_px": [
+        192.5,
+        376.7
+      ],
+      "bg_bbox_px": [
+        180,
+        359,
+        205,
+        395
+      ],
+      "bg_samples_px": [
+        [
+          203,
+          377
+        ],
+        [
+          180,
+          371
+        ],
+        [
+          190,
+          359
+        ],
+        [
+          205,
+          373
+        ],
+        [
+          192,
+          395
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C12",
+      "file": "3d_x87.png",
+      "n": 741,
+      "face_n": 367,
+      "bg_n": 279,
+      "proj_px": [
+        533.2,
+        297.3
+      ],
+      "found_px": [
+        532.5,
+        291.6
+      ],
+      "face_center_px": [
+        532.5,
+        291.5
+      ],
+      "face_bbox_px": [
+        524,
+        279,
+        541,
+        304
+      ],
+      "face_samples_px": [
+        [
+          532,
+          292
+        ],
+        [
+          524,
+          288
+        ],
+        [
+          530,
+          279
+        ],
+        [
+          541,
+          288
+        ],
+        [
+          530,
+          304
+        ]
+      ],
+      "bg_center_px": [
+        532.5,
+        291.8
+      ],
+      "bg_bbox_px": [
+        520,
+        274,
+        545,
+        310
+      ],
+      "bg_samples_px": [
+        [
+          522,
+          292
+        ],
+        [
+          520,
+          287
+        ],
+        [
+          530,
+          274
+        ],
+        [
+          545,
+          288
+        ],
+        [
+          532,
+          310
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.71,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C13",
+      "file": "3d_x95.png",
+      "n": 748,
+      "face_n": 372,
+      "bg_n": 282,
+      "proj_px": [
+        426.8,
+        297.3
+      ],
+      "found_px": [
+        425.5,
+        291.8
+      ],
+      "face_center_px": [
+        425.6,
+        291.7
+      ],
+      "face_bbox_px": [
+        417,
+        279,
+        434,
+        305
+      ],
+      "face_samples_px": [
+        [
+          426,
+          292
+        ],
+        [
+          417,
+          288
+        ],
+        [
+          424,
+          279
+        ],
+        [
+          434,
+          288
+        ],
+        [
+          426,
+          305
+        ]
+      ],
+      "bg_center_px": [
+        425.4,
+        292.0
+      ],
+      "bg_bbox_px": [
+        413,
+        274,
+        438,
+        310
+      ],
+      "bg_samples_px": [
+        [
+          415,
+          292
+        ],
+        [
+          413,
+          287
+        ],
+        [
+          423,
+          274
+        ],
+        [
+          438,
+          287
+        ],
+        [
+          425,
+          310
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C14",
+      "file": "3d_x95.png",
+      "n": 730,
+      "face_n": 367,
+      "bg_n": 269,
+      "proj_px": [
+        597.4,
+        297.3
+      ],
+      "found_px": [
+        596.8,
+        292.1
+      ],
+      "face_center_px": [
+        596.7,
+        292.1
+      ],
+      "face_bbox_px": [
+        588,
+        279,
+        605,
+        305
+      ],
+      "face_samples_px": [
+        [
+          597,
+          292
+        ],
+        [
+          588,
+          289
+        ],
+        [
+          596,
+          279
+        ],
+        [
+          605,
+          288
+        ],
+        [
+          596,
+          305
+        ]
+      ],
+      "bg_center_px": [
+        597.0,
+        292.1
+      ],
+      "bg_bbox_px": [
+        585,
+        274,
+        609,
+        310
+      ],
+      "bg_samples_px": [
+        [
+          607,
+          292
+        ],
+        [
+          585,
+          286
+        ],
+        [
+          595,
+          274
+        ],
+        [
+          609,
+          288
+        ],
+        [
+          595,
+          310
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C15",
+      "file": "3d_x109.png",
+      "n": 399,
+      "face_n": 191,
+      "bg_n": 142,
+      "proj_px": [
+        512.0,
+        422.7
+      ],
+      "found_px": [
+        512.0,
+        423.8
+      ],
+      "face_center_px": [
+        512.0,
+        422.4
+      ],
+      "face_bbox_px": [
+        504,
+        417,
+        520,
+        430
+      ],
+      "face_samples_px": [
+        [
+          512,
+          422
+        ],
+        [
+          504,
+          417
+        ],
+        [
+          520,
+          417
+        ],
+        [
+          511,
+          430
+        ]
+      ],
+      "bg_center_px": [
+        511.9,
+        426.2
+      ],
+      "bg_bbox_px": [
+        500,
+        416,
+        524,
+        434
+      ],
+      "bg_samples_px": [
+        [
+          509,
+          431
+        ],
+        [
+          500,
+          416
+        ],
+        [
+          524,
+          416
+        ],
+        [
+          507,
+          434
+        ]
+      ],
+      "face_rgb": [
+        155,
+        78,
+        37
+      ],
+      "face_p15_rgb": [
+        152,
+        76,
+        36
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.77,
+      "min_ratio": 4.93,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": true,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C16",
+      "file": "3d_x109.png",
+      "n": 386,
+      "face_n": 190,
+      "bg_n": 128,
+      "proj_px": [
+        640.0,
+        422.7
+      ],
+      "found_px": [
+        639.5,
+        423.8
+      ],
+      "face_center_px": [
+        639.5,
+        422.3
+      ],
+      "face_bbox_px": [
+        631,
+        417,
+        648,
+        430
+      ],
+      "face_samples_px": [
+        [
+          639,
+          422
+        ],
+        [
+          631,
+          417
+        ],
+        [
+          648,
+          417
+        ],
+        [
+          639,
+          430
+        ]
+      ],
+      "bg_center_px": [
+        639.5,
+        426.8
+      ],
+      "bg_bbox_px": [
+        628,
+        416,
+        651,
+        434
+      ],
+      "bg_samples_px": [
+        [
+          637,
+          431
+        ],
+        [
+          628,
+          416
+        ],
+        [
+          651,
+          416
+        ],
+        [
+          635,
+          434
+        ]
+      ],
+      "face_rgb": [
+        155,
+        78,
+        37
+      ],
+      "face_p15_rgb": [
+        152,
+        76,
+        36
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.77,
+      "min_ratio": 4.93,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C17",
+      "file": "3d_hazard.png",
+      "n": 755,
+      "face_n": 378,
+      "bg_n": 280,
+      "proj_px": [
+        149.3,
+        341.3
+      ],
+      "found_px": [
+        148.7,
+        343.4
+      ],
+      "face_center_px": [
+        148.9,
+        343.5
+      ],
+      "face_bbox_px": [
+        140,
+        331,
+        158,
+        356
+      ],
+      "face_samples_px": [
+        [
+          149,
+          344
+        ],
+        [
+          140,
+          340
+        ],
+        [
+          146,
+          331
+        ],
+        [
+          158,
+          341
+        ],
+        [
+          147,
+          356
+        ]
+      ],
+      "bg_center_px": [
+        148.4,
+        343.3
+      ],
+      "bg_bbox_px": [
+        136,
+        326,
+        162,
+        361
+      ],
+      "bg_samples_px": [
+        [
+          138,
+          343
+        ],
+        [
+          136,
+          339
+        ],
+        [
+          145,
+          326
+        ],
+        [
+          162,
+          347
+        ],
+        [
+          147,
+          361
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.71,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C18",
+      "file": "3d_hazard.png",
+      "n": 680,
+      "face_n": 367,
+      "bg_n": 236,
+      "proj_px": [
+        490.7,
+        298.7
+      ],
+      "found_px": [
+        489.8,
+        298.4
+      ],
+      "face_center_px": [
+        489.7,
+        299.5
+      ],
+      "face_bbox_px": [
+        481,
+        287,
+        498,
+        312
+      ],
+      "face_samples_px": [
+        [
+          490,
+          299
+        ],
+        [
+          481,
+          297
+        ],
+        [
+          487,
+          287
+        ],
+        [
+          498,
+          295
+        ],
+        [
+          488,
+          312
+        ]
+      ],
+      "bg_center_px": [
+        490.1,
+        297.5
+      ],
+      "bg_bbox_px": [
+        478,
+        282,
+        502,
+        318
+      ],
+      "bg_samples_px": [
+        [
+          500,
+          298
+        ],
+        [
+          478,
+          293
+        ],
+        [
+          487,
+          282
+        ],
+        [
+          502,
+          295
+        ],
+        [
+          490,
+          318
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C19",
+      "file": "3d_hazard.png",
+      "n": 704,
+      "face_n": 364,
+      "bg_n": 244,
+      "proj_px": [
+        917.3,
+        469.3
+      ],
+      "found_px": [
+        915.0,
+        468.1
+      ],
+      "face_center_px": [
+        915.1,
+        468.0
+      ],
+      "face_bbox_px": [
+        906,
+        455,
+        924,
+        481
+      ],
+      "face_samples_px": [
+        [
+          915,
+          468
+        ],
+        [
+          906,
+          470
+        ],
+        [
+          915,
+          455
+        ],
+        [
+          924,
+          466
+        ],
+        [
+          915,
+          481
+        ]
+      ],
+      "bg_center_px": [
+        914.9,
+        468.2
+      ],
+      "bg_bbox_px": [
+        903,
+        450,
+        927,
+        486
+      ],
+      "bg_samples_px": [
+        [
+          905,
+          472
+        ],
+        [
+          903,
+          462
+        ],
+        [
+          915,
+          450
+        ],
+        [
+          927,
+          462
+        ],
+        [
+          914,
+          486
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C20",
+      "file": "3d_hazard.png",
+      "n": 735,
+      "face_n": 377,
+      "bg_n": 263,
+      "proj_px": [
+        1173.3,
+        384.0
+      ],
+      "found_px": [
+        1171.7,
+        382.3
+      ],
+      "face_center_px": [
+        1171.8,
+        382.3
+      ],
+      "face_bbox_px": [
+        1163,
+        370,
+        1181,
+        395
+      ],
+      "face_samples_px": [
+        [
+          1172,
+          382
+        ],
+        [
+          1163,
+          379
+        ],
+        [
+          1170,
+          370
+        ],
+        [
+          1181,
+          380
+        ],
+        [
+          1170,
+          395
+        ]
+      ],
+      "bg_center_px": [
+        1171.4,
+        382.2
+      ],
+      "bg_bbox_px": [
+        1159,
+        365,
+        1184,
+        400
+      ],
+      "bg_samples_px": [
+        [
+          1161,
+          382
+        ],
+        [
+          1159,
+          378
+        ],
+        [
+          1169,
+          365
+        ],
+        [
+          1184,
+          376
+        ],
+        [
+          1169,
+          400
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C21",
+      "file": "3d_x163.png",
+      "n": 731,
+      "face_n": 363,
+      "bg_n": 273,
+      "proj_px": [
+        575.9,
+        297.3
+      ],
+      "found_px": [
+        575.2,
+        294.5
+      ],
+      "face_center_px": [
+        575.4,
+        294.5
+      ],
+      "face_bbox_px": [
+        567,
+        282,
+        584,
+        307
+      ],
+      "face_samples_px": [
+        [
+          575,
+          295
+        ],
+        [
+          567,
+          291
+        ],
+        [
+          573,
+          282
+        ],
+        [
+          584,
+          292
+        ],
+        [
+          573,
+          307
+        ]
+      ],
+      "bg_center_px": [
+        574.9,
+        294.5
+      ],
+      "bg_bbox_px": [
+        563,
+        276,
+        587,
+        313
+      ],
+      "bg_samples_px": [
+        [
+          565,
+          294
+        ],
+        [
+          563,
+          290
+        ],
+        [
+          575,
+          276
+        ],
+        [
+          587,
+          288
+        ],
+        [
+          575,
+          313
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.71,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C22",
+      "file": "3d_x163.png",
+      "n": 753,
+      "face_n": 373,
+      "bg_n": 283,
+      "proj_px": [
+        917.2,
+        254.7
+      ],
+      "found_px": [
+        918.3,
+        250.4
+      ],
+      "face_center_px": [
+        918.3,
+        250.5
+      ],
+      "face_bbox_px": [
+        910,
+        238,
+        927,
+        263
+      ],
+      "face_samples_px": [
+        [
+          918,
+          251
+        ],
+        [
+          910,
+          246
+        ],
+        [
+          916,
+          238
+        ],
+        [
+          927,
+          247
+        ],
+        [
+          915,
+          263
+        ]
+      ],
+      "bg_center_px": [
+        918.4,
+        250.1
+      ],
+      "bg_bbox_px": [
+        906,
+        232,
+        931,
+        269
+      ],
+      "bg_samples_px": [
+        [
+          908,
+          250
+        ],
+        [
+          906,
+          245
+        ],
+        [
+          918,
+          232
+        ],
+        [
+          931,
+          246
+        ],
+        [
+          918,
+          269
+        ]
+      ],
+      "face_rgb": [
+        156,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.71,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    },
+    {
+      "id": "C23",
+      "file": "3d_x193.png",
+      "n": 747,
+      "face_n": 378,
+      "bg_n": 272,
+      "proj_px": [
+        938.7,
+        297.3
+      ],
+      "found_px": [
+        938.8,
+        301.5
+      ],
+      "face_center_px": [
+        938.9,
+        301.3
+      ],
+      "face_bbox_px": [
+        930,
+        289,
+        948,
+        314
+      ],
+      "face_samples_px": [
+        [
+          939,
+          301
+        ],
+        [
+          930,
+          299
+        ],
+        [
+          936,
+          289
+        ],
+        [
+          948,
+          299
+        ],
+        [
+          937,
+          314
+        ]
+      ],
+      "bg_center_px": [
+        938.7,
+        301.7
+      ],
+      "bg_bbox_px": [
+        926,
+        283,
+        951,
+        319
+      ],
+      "bg_samples_px": [
+        [
+          929,
+          306
+        ],
+        [
+          926,
+          299
+        ],
+        [
+          939,
+          283
+        ],
+        [
+          951,
+          295
+        ],
+        [
+          936,
+          319
+        ]
+      ],
+      "face_rgb": [
+        157,
+        79,
+        38
+      ],
+      "face_p15_rgb": [
+        153,
+        77,
+        37
+      ],
+      "bg_rgb": [
+        255,
+        229,
+        124
+      ],
+      "median_ratio": 4.68,
+      "min_ratio": 4.87,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle"
+    }
+  ],
+  "grains_2d": [
+    {
+      "id": "C00",
+      "file": "2d_entrance.png",
+      "n": 536,
+      "face_n": 536,
+      "bg_n": 620,
+      "proj_px": [
+        213.3,
+        297.3
+      ],
+      "found_px": [
+        213.5,
+        297.5
+      ],
+      "face_center_px": [
+        213.5,
+        297.5
+      ],
+      "face_bbox_px": [
+        203,
+        283,
+        224,
+        312
+      ],
+      "face_samples_px": [
+        [
+          213,
+          297
+        ],
+        [
+          203,
+          293
+        ],
+        [
+          211,
+          283
+        ],
+        [
+          224,
+          293
+        ],
+        [
+          211,
+          312
+        ]
+      ],
+      "bg_center_px": [
+        213.5,
+        297.5
+      ],
+      "bg_bbox_px": [
+        198,
+        278,
+        229,
+        317
+      ],
+      "bg_samples_px": [
+        [
+          202,
+          297
+        ],
+        [
+          198,
+          288
+        ],
+        [
+          206,
+          278
+        ],
+        [
+          229,
+          288
+        ],
+        [
+          206,
+          317
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        168,
+        162,
+        128
+      ],
+      "median_ratio": 3.62,
+      "min_ratio": 3.62,
+      "median_pass": false,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C01",
+      "file": "2d_entrance.png",
+      "n": 536,
+      "face_n": 536,
+      "bg_n": 620,
+      "proj_px": [
+        290.1,
+        281.3
+      ],
+      "found_px": [
+        289.5,
+        281.5
+      ],
+      "face_center_px": [
+        289.5,
+        281.5
+      ],
+      "face_bbox_px": [
+        279,
+        267,
+        300,
+        296
+      ],
+      "face_samples_px": [
+        [
+          289,
+          281
+        ],
+        [
+          279,
+          277
+        ],
+        [
+          287,
+          267
+        ],
+        [
+          300,
+          277
+        ],
+        [
+          287,
+          296
+        ]
+      ],
+      "bg_center_px": [
+        289.5,
+        281.5
+      ],
+      "bg_bbox_px": [
+        274,
+        262,
+        305,
+        301
+      ],
+      "bg_samples_px": [
+        [
+          278,
+          281
+        ],
+        [
+          274,
+          272
+        ],
+        [
+          282,
+          262
+        ],
+        [
+          305,
+          272
+        ],
+        [
+          282,
+          301
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        199,
+        176,
+        128
+      ],
+      "median_ratio": 4.42,
+      "min_ratio": 4.42,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C02",
+      "file": "2d_entrance.png",
+      "n": 552,
+      "face_n": 552,
+      "bg_n": 19,
+      "proj_px": [
+        366.9,
+        297.3
+      ],
+      "found_px": [
+        366.8,
+        297.5
+      ],
+      "face_center_px": [
+        366.8,
+        297.5
+      ],
+      "face_bbox_px": [
+        356,
+        283,
+        378,
+        312
+      ],
+      "face_samples_px": [
+        [
+          367,
+          297
+        ],
+        [
+          356,
+          293
+        ],
+        [
+          364,
+          283
+        ],
+        [
+          378,
+          293
+        ],
+        [
+          364,
+          312
+        ]
+      ],
+      "bg_center_px": [
+        346.4,
+        292.9
+      ],
+      "bg_bbox_px": [
+        346,
+        283,
+        347,
+        308
+      ],
+      "bg_samples_px": [
+        [
+          347,
+          291
+        ],
+        [
+          346,
+          283
+        ],
+        [
+          347,
+          287
+        ],
+        [
+          347,
+          308
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        50,
+        38,
+        14
+      ],
+      "median_ratio": 1.59,
+      "min_ratio": 1.59,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C03",
+      "file": "2d_entrance.png",
+      "n": 536,
+      "face_n": 536,
+      "bg_n": 45,
+      "proj_px": [
+        341.3,
+        84.0
+      ],
+      "found_px": [
+        341.5,
+        84.2
+      ],
+      "face_center_px": [
+        341.5,
+        84.2
+      ],
+      "face_bbox_px": [
+        331,
+        69,
+        352,
+        99
+      ],
+      "face_samples_px": [
+        [
+          341,
+          84
+        ],
+        [
+          331,
+          80
+        ],
+        [
+          339,
+          69
+        ],
+        [
+          352,
+          80
+        ],
+        [
+          339,
+          99
+        ]
+      ],
+      "bg_center_px": [
+        343.8,
+        79.2
+      ],
+      "bg_bbox_px": [
+        341,
+        59,
+        352,
+        108
+      ],
+      "bg_samples_px": [
+        [
+          343,
+          68
+        ],
+        [
+          341,
+          59
+        ],
+        [
+          352,
+          104
+        ],
+        [
+          352,
+          108
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        38,
+        33,
+        10
+      ],
+      "median_ratio": 1.73,
+      "min_ratio": 1.73,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C04",
+      "file": "2d_entrance.png",
+      "n": 805,
+      "face_n": 805,
+      "bg_n": 2157,
+      "proj_px": [
+        768.0,
+        84.0
+      ],
+      "found_px": [
+        768.1,
+        86.9
+      ],
+      "face_center_px": [
+        768.1,
+        86.9
+      ],
+      "face_bbox_px": [
+        752,
+        69,
+        784,
+        104
+      ],
+      "face_samples_px": [
+        [
+          768,
+          87
+        ],
+        [
+          752,
+          84
+        ],
+        [
+          765,
+          69
+        ],
+        [
+          784,
+          84
+        ],
+        [
+          768,
+          104
+        ]
+      ],
+      "bg_center_px": [
+        767.9,
+        86.4
+      ],
+      "bg_bbox_px": [
+        742,
+        59,
+        794,
+        114
+      ],
+      "bg_samples_px": [
+        [
+          758,
+          79
+        ],
+        [
+          742,
+          59
+        ],
+        [
+          794,
+          60
+        ],
+        [
+          742,
+          114
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        248,
+        216,
+        148
+      ],
+      "median_ratio": 6.77,
+      "min_ratio": 6.77,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C05",
+      "file": "2d_grains_c06.png",
+      "n": 415,
+      "face_n": 415,
+      "bg_n": 630,
+      "proj_px": [
+        558.7,
+        425.3
+      ],
+      "found_px": [
+        557.1,
+        427.7
+      ],
+      "face_center_px": [
+        557.1,
+        427.7
+      ],
+      "face_bbox_px": [
+        548,
+        411,
+        570,
+        440
+      ],
+      "face_samples_px": [
+        [
+          557,
+          428
+        ],
+        [
+          548,
+          421
+        ],
+        [
+          556,
+          411
+        ],
+        [
+          570,
+          427
+        ],
+        [
+          556,
+          440
+        ]
+      ],
+      "bg_center_px": [
+        557.8,
+        426.6
+      ],
+      "bg_bbox_px": [
+        543,
+        406,
+        575,
+        445
+      ],
+      "bg_samples_px": [
+        [
+          561,
+          423
+        ],
+        [
+          543,
+          416
+        ],
+        [
+          551,
+          406
+        ],
+        [
+          575,
+          422
+        ],
+        [
+          551,
+          445
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        180,
+        172,
+        133
+      ],
+      "median_ratio": 4.08,
+      "min_ratio": 4.08,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C06",
+      "file": "2d_grains_c06.png",
+      "n": 550,
+      "face_n": 550,
+      "bg_n": 640,
+      "proj_px": [
+        644.0,
+        396.0
+      ],
+      "found_px": [
+        644.2,
+        396.2
+      ],
+      "face_center_px": [
+        644.2,
+        396.2
+      ],
+      "face_bbox_px": [
+        633,
+        381,
+        655,
+        411
+      ],
+      "face_samples_px": [
+        [
+          644,
+          396
+        ],
+        [
+          633,
+          392
+        ],
+        [
+          641,
+          381
+        ],
+        [
+          655,
+          392
+        ],
+        [
+          641,
+          411
+        ]
+      ],
+      "bg_center_px": [
+        644.1,
+        396.1
+      ],
+      "bg_bbox_px": [
+        628,
+        376,
+        660,
+        416
+      ],
+      "bg_samples_px": [
+        [
+          634,
+          401
+        ],
+        [
+          628,
+          387
+        ],
+        [
+          636,
+          376
+        ],
+        [
+          660,
+          387
+        ],
+        [
+          636,
+          416
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        188,
+        169,
+        124
+      ],
+      "median_ratio": 4.05,
+      "min_ratio": 4.05,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C07",
+      "file": "2d_grains_c06.png",
+      "n": 540,
+      "face_n": 540,
+      "bg_n": 98,
+      "proj_px": [
+        729.3,
+        425.3
+      ],
+      "found_px": [
+        729.6,
+        425.4
+      ],
+      "face_center_px": [
+        729.6,
+        425.4
+      ],
+      "face_bbox_px": [
+        719,
+        407,
+        740,
+        440
+      ],
+      "face_samples_px": [
+        [
+          730,
+          425
+        ],
+        [
+          719,
+          421
+        ],
+        [
+          735,
+          407
+        ],
+        [
+          740,
+          421
+        ],
+        [
+          727,
+          440
+        ]
+      ],
+      "bg_center_px": [
+        743.6,
+        406.2
+      ],
+      "bg_bbox_px": [
+        735,
+        399,
+        750,
+        411
+      ],
+      "bg_samples_px": [
+        [
+          744,
+          406
+        ],
+        [
+          735,
+          405
+        ],
+        [
+          749,
+          399
+        ],
+        [
+          750,
+          399
+        ],
+        [
+          745,
+          411
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        228,
+        194,
+        131
+      ],
+      "median_ratio": 5.49,
+      "min_ratio": 5.49,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C08",
+      "file": "2d_grains_c08.png",
+      "n": 550,
+      "face_n": 550,
+      "bg_n": 129,
+      "proj_px": [
+        484.0,
+        396.0
+      ],
+      "found_px": [
+        484.2,
+        396.2
+      ],
+      "face_center_px": [
+        484.2,
+        396.2
+      ],
+      "face_bbox_px": [
+        473,
+        381,
+        495,
+        411
+      ],
+      "face_samples_px": [
+        [
+          484,
+          396
+        ],
+        [
+          473,
+          392
+        ],
+        [
+          481,
+          381
+        ],
+        [
+          495,
+          392
+        ],
+        [
+          481,
+          411
+        ]
+      ],
+      "bg_center_px": [
+        484.0,
+        388.0
+      ],
+      "bg_bbox_px": [
+        463,
+        371,
+        505,
+        421
+      ],
+      "bg_samples_px": [
+        [
+          484,
+          372
+        ],
+        [
+          463,
+          371
+        ],
+        [
+          505,
+          371
+        ],
+        [
+          463,
+          421
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        62,
+        44,
+        28
+      ],
+      "median_ratio": 1.42,
+      "min_ratio": 1.42,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": true,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C09",
+      "file": "2d_grains_c08.png",
+      "n": 536,
+      "face_n": 536,
+      "bg_n": 126,
+      "proj_px": [
+        633.3,
+        396.0
+      ],
+      "found_px": [
+        633.5,
+        396.2
+      ],
+      "face_center_px": [
+        633.5,
+        396.2
+      ],
+      "face_bbox_px": [
+        623,
+        381,
+        644,
+        411
+      ],
+      "face_samples_px": [
+        [
+          633,
+          396
+        ],
+        [
+          623,
+          392
+        ],
+        [
+          631,
+          381
+        ],
+        [
+          644,
+          392
+        ],
+        [
+          631,
+          411
+        ]
+      ],
+      "bg_center_px": [
+        633.5,
+        388.0
+      ],
+      "bg_bbox_px": [
+        613,
+        371,
+        654,
+        421
+      ],
+      "bg_samples_px": [
+        [
+          633,
+          372
+        ],
+        [
+          613,
+          371
+        ],
+        [
+          654,
+          371
+        ],
+        [
+          613,
+          421
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        62,
+        44,
+        28
+      ],
+      "median_ratio": 1.42,
+      "min_ratio": 1.42,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": true,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C10",
+      "file": "2d_cacao.png",
+      "n": 919,
+      "face_n": 919,
+      "bg_n": 1433,
+      "proj_px": [
+        601.3,
+        297.3
+      ],
+      "found_px": [
+        601.5,
+        296.2
+      ],
+      "face_center_px": [
+        601.5,
+        296.2
+      ],
+      "face_bbox_px": [
+        586,
+        278,
+        617,
+        315
+      ],
+      "face_samples_px": [
+        [
+          602,
+          296
+        ],
+        [
+          586,
+          292
+        ],
+        [
+          598,
+          278
+        ],
+        [
+          617,
+          294
+        ],
+        [
+          608,
+          315
+        ]
+      ],
+      "bg_center_px": [
+        601.1,
+        292.8
+      ],
+      "bg_bbox_px": [
+        576,
+        268,
+        627,
+        325
+      ],
+      "bg_samples_px": [
+        [
+          588,
+          286
+        ],
+        [
+          576,
+          268
+        ],
+        [
+          627,
+          272
+        ],
+        [
+          617,
+          325
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        246,
+        212,
+        147
+      ],
+      "median_ratio": 6.56,
+      "min_ratio": 6.56,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C11",
+      "file": "2d_cacao.png",
+      "n": 613,
+      "face_n": 613,
+      "bg_n": 55,
+      "proj_px": [
+        857.3,
+        382.7
+      ],
+      "found_px": [
+        857.7,
+        384.1
+      ],
+      "face_center_px": [
+        857.7,
+        384.1
+      ],
+      "face_bbox_px": [
+        844,
+        368,
+        871,
+        398
+      ],
+      "face_samples_px": [
+        [
+          858,
+          384
+        ],
+        [
+          844,
+          393
+        ],
+        [
+          855,
+          368
+        ],
+        [
+          871,
+          387
+        ],
+        [
+          848,
+          398
+        ]
+      ],
+      "bg_center_px": [
+        865.3,
+        397.0
+      ],
+      "bg_bbox_px": [
+        843,
+        393,
+        879,
+        400
+      ],
+      "bg_samples_px": [
+        [
+          867,
+          399
+        ],
+        [
+          843,
+          393
+        ],
+        [
+          879,
+          396
+        ],
+        [
+          871,
+          400
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        226,
+        197,
+        136
+      ],
+      "median_ratio": 5.59,
+      "min_ratio": 5.59,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C12",
+      "file": "2d_cacao.png",
+      "n": 872,
+      "face_n": 872,
+      "bg_n": 1108,
+      "proj_px": [
+        1198.7,
+        297.3
+      ],
+      "found_px": [
+        1197.2,
+        295.9
+      ],
+      "face_center_px": [
+        1197.2,
+        295.9
+      ],
+      "face_bbox_px": [
+        1183,
+        278,
+        1214,
+        316
+      ],
+      "face_samples_px": [
+        [
+          1197,
+          296
+        ],
+        [
+          1183,
+          294
+        ],
+        [
+          1195,
+          278
+        ],
+        [
+          1214,
+          292
+        ],
+        [
+          1195,
+          316
+        ]
+      ],
+      "bg_center_px": [
+        1192.6,
+        287.6
+      ],
+      "bg_bbox_px": [
+        1173,
+        268,
+        1224,
+        326
+      ],
+      "bg_samples_px": [
+        [
+          1186,
+          285
+        ],
+        [
+          1173,
+          295
+        ],
+        [
+          1176,
+          268
+        ],
+        [
+          1224,
+          268
+        ],
+        [
+          1173,
+          326
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        242,
+        208,
+        142
+      ],
+      "median_ratio": 6.31,
+      "min_ratio": 6.31,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C13",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C14",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C15",
+      "file": "2d_grains_c16.png",
+      "n": 550,
+      "face_n": 550,
+      "bg_n": 756,
+      "proj_px": [
+        516.0,
+        398.7
+      ],
+      "found_px": [
+        516.2,
+        398.8
+      ],
+      "face_center_px": [
+        516.2,
+        398.8
+      ],
+      "face_bbox_px": [
+        505,
+        384,
+        527,
+        414
+      ],
+      "face_samples_px": [
+        [
+          516,
+          399
+        ],
+        [
+          505,
+          395
+        ],
+        [
+          513,
+          384
+        ],
+        [
+          527,
+          395
+        ],
+        [
+          513,
+          414
+        ]
+      ],
+      "bg_center_px": [
+        516.0,
+        390.0
+      ],
+      "bg_bbox_px": [
+        495,
+        374,
+        537,
+        424
+      ],
+      "bg_samples_px": [
+        [
+          516,
+          383
+        ],
+        [
+          495,
+          374
+        ],
+        [
+          537,
+          374
+        ],
+        [
+          495,
+          424
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        62,
+        44,
+        28
+      ],
+      "median_ratio": 1.42,
+      "min_ratio": 1.42,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": true,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C16",
+      "file": "2d_grains_c16.png",
+      "n": 550,
+      "face_n": 550,
+      "bg_n": 756,
+      "proj_px": [
+        644.0,
+        398.7
+      ],
+      "found_px": [
+        644.2,
+        398.8
+      ],
+      "face_center_px": [
+        644.2,
+        398.8
+      ],
+      "face_bbox_px": [
+        633,
+        384,
+        655,
+        414
+      ],
+      "face_samples_px": [
+        [
+          644,
+          399
+        ],
+        [
+          633,
+          395
+        ],
+        [
+          641,
+          384
+        ],
+        [
+          655,
+          395
+        ],
+        [
+          641,
+          414
+        ]
+      ],
+      "bg_center_px": [
+        644.0,
+        390.0
+      ],
+      "bg_bbox_px": [
+        623,
+        374,
+        665,
+        424
+      ],
+      "bg_samples_px": [
+        [
+          644,
+          383
+        ],
+        [
+          623,
+          374
+        ],
+        [
+          665,
+          374
+        ],
+        [
+          623,
+          424
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        62,
+        44,
+        28
+      ],
+      "median_ratio": 1.42,
+      "min_ratio": 1.42,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C17",
+      "file": "2d_hazard.png",
+      "n": 536,
+      "face_n": 536,
+      "bg_n": 106,
+      "proj_px": [
+        149.3,
+        341.3
+      ],
+      "found_px": [
+        149.5,
+        341.5
+      ],
+      "face_center_px": [
+        149.5,
+        341.5
+      ],
+      "face_bbox_px": [
+        139,
+        327,
+        160,
+        356
+      ],
+      "face_samples_px": [
+        [
+          149,
+          341
+        ],
+        [
+          139,
+          337
+        ],
+        [
+          147,
+          327
+        ],
+        [
+          160,
+          337
+        ],
+        [
+          147,
+          356
+        ]
+      ],
+      "bg_center_px": [
+        132.5,
+        339.3
+      ],
+      "bg_bbox_px": [
+        131,
+        317,
+        135,
+        366
+      ],
+      "bg_samples_px": [
+        [
+          132,
+          339
+        ],
+        [
+          131,
+          317
+        ],
+        [
+          135,
+          328
+        ],
+        [
+          132,
+          366
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        42,
+        40,
+        15
+      ],
+      "median_ratio": 1.6,
+      "min_ratio": 1.6,
+      "median_pass": false,
+      "min_pass": false,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C18",
+      "file": "2d_hazard.png",
+      "n": 688,
+      "face_n": 688,
+      "bg_n": 635,
+      "proj_px": [
+        490.7,
+        298.7
+      ],
+      "found_px": [
+        489.3,
+        297.3
+      ],
+      "face_center_px": [
+        489.3,
+        297.3
+      ],
+      "face_bbox_px": [
+        475,
+        279,
+        502,
+        318
+      ],
+      "face_samples_px": [
+        [
+          489,
+          297
+        ],
+        [
+          475,
+          295
+        ],
+        [
+          488,
+          279
+        ],
+        [
+          502,
+          295
+        ],
+        [
+          487,
+          318
+        ]
+      ],
+      "bg_center_px": [
+        487.6,
+        280.0
+      ],
+      "bg_bbox_px": [
+        465,
+        269,
+        512,
+        318
+      ],
+      "bg_samples_px": [
+        [
+          487,
+          279
+        ],
+        [
+          465,
+          317
+        ],
+        [
+          472,
+          269
+        ],
+        [
+          512,
+          269
+        ],
+        [
+          465,
+          318
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        223,
+        192,
+        133
+      ],
+      "median_ratio": 5.34,
+      "min_ratio": 5.34,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C19",
+      "file": "2d_hazard.png",
+      "n": 593,
+      "face_n": 593,
+      "bg_n": 715,
+      "proj_px": [
+        917.3,
+        469.3
+      ],
+      "found_px": [
+        917.0,
+        470.2
+      ],
+      "face_center_px": [
+        917.0,
+        470.2
+      ],
+      "face_bbox_px": [
+        902,
+        455,
+        932,
+        487
+      ],
+      "face_samples_px": [
+        [
+          917,
+          470
+        ],
+        [
+          902,
+          475
+        ],
+        [
+          915,
+          455
+        ],
+        [
+          932,
+          462
+        ],
+        [
+          911,
+          487
+        ]
+      ],
+      "bg_center_px": [
+        914.2,
+        487.4
+      ],
+      "bg_bbox_px": [
+        892,
+        457,
+        942,
+        497
+      ],
+      "bg_samples_px": [
+        [
+          911,
+          488
+        ],
+        [
+          892,
+          457
+        ],
+        [
+          942,
+          463
+        ],
+        [
+          892,
+          497
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        231,
+        201,
+        138
+      ],
+      "median_ratio": 5.83,
+      "min_ratio": 5.83,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C20",
+      "file": "2d_hazard.png",
+      "n": 621,
+      "face_n": 621,
+      "bg_n": 499,
+      "proj_px": [
+        1173.3,
+        384.0
+      ],
+      "found_px": [
+        1173.5,
+        386.2
+      ],
+      "face_center_px": [
+        1173.5,
+        386.2
+      ],
+      "face_bbox_px": [
+        1160,
+        369,
+        1187,
+        403
+      ],
+      "face_samples_px": [
+        [
+          1173,
+          386
+        ],
+        [
+          1160,
+          393
+        ],
+        [
+          1171,
+          369
+        ],
+        [
+          1187,
+          393
+        ],
+        [
+          1169,
+          403
+        ]
+      ],
+      "bg_center_px": [
+        1174.7,
+        405.8
+      ],
+      "bg_bbox_px": [
+        1150,
+        393,
+        1197,
+        413
+      ],
+      "bg_samples_px": [
+        [
+          1175,
+          406
+        ],
+        [
+          1150,
+          393
+        ],
+        [
+          1197,
+          403
+        ],
+        [
+          1150,
+          413
+        ]
+      ],
+      "face_rgb": [
+        107,
+        58,
+        31
+      ],
+      "face_p15_rgb": [
+        107,
+        58,
+        31
+      ],
+      "bg_rgb": [
+        222,
+        190,
+        125
+      ],
+      "median_ratio": 5.23,
+      "min_ratio": 5.23,
+      "median_pass": true,
+      "min_pass": true,
+      "on_platform_top": false,
+      "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+      "space": "2d_renderGame"
+    },
+    {
+      "id": "C21",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C22",
+      "error": "not on any 2d still"
+    },
+    {
+      "id": "C23",
+      "error": "not on any 2d still"
+    }
+  ],
+  "grains_summary": {
+    "n": 24,
+    "median_of_medians": 4.68,
+    "min_median": 4.68,
+    "min_of_mins": 4.84,
+    "pin_median": 4.03,
+    "pin_min": 1.95,
+    "all_median_ge_4_03": true,
+    "all_min_ge_1_95": true
+  },
+  "maya_p10_required": {
+    "files": [
+      "3d_x04.png",
+      "3d_x133.png",
+      "3d_x163.png",
+      "3d_x193.png",
+      "3d_x36.png",
+      "3d_x66.png",
+      "3d_x87.png",
+      "3d_x95.png"
+    ],
+    "threshold": 4.4,
+    "pass": true
+  }
+}

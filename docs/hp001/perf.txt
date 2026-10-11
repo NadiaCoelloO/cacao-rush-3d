@@ -1,0 +1,3 @@
+entrance tris=70061 draws=98 objects=98
+hazard tris=38407 draws=44 objects=44
+cacao tris=45280 draws=60 objects=60
