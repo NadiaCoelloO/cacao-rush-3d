@@ -1272,7 +1272,7 @@
       "Mobile/Compatibility fallback (do not change the project renderer): Environment depth fog (density 0.012, light colour (0.55,0.60,0.66), aerial_perspective 0.3) + 6-10 soft unshaded alpha cards (alpha 0.15-0.3) at the bank positions."
     ],
     "sky": [
-      "HP-001 E2f: 2D-style bands on the 40×22.5 follow cam. Golden cumulus stays in the TOP of the frame (hp001_cumulus_band.jpg, vine panel cropped, horizontal wrap crossfaded). No Maya halo/disk.",
+      "HP-001 E2g: thin 1–2 px Maya silhouette (no torso pill). Play-jungle crown is the painted sil canopy, not noise dither. Mid-route band darkened for body+shadow ≥4.4. Collectible grains get a warm rim. No brown false floor under pits. Corridor bank hidden on the follow cam.",
       "Play strip sits on a CONTINUOUS mid-jungle band (olive / dark brown, foliage mottling from hp001_selva_silhouette.png + warm crown haze). Crown is irregular and well above platform tops so pits do not read a false floor. Opaque — covers the old clear-color stripe.",
       "Foreground lianas: curved catenaries with large irregular leaves, darker than the dawn sky. No square beads.",
       "Corridor MultiMesh trunks/crowns (LOD) run the full selva-1 length at z < 0. Hidden on laguna/dosel/dock/pods art cameras.",

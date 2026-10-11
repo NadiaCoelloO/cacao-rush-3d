@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""WCAG contrast of Maya body vs the real backdrop, and cacao pods.
+"""WCAG contrast of Maya body (incl. shadows), collectible grains, and cacao.
 
-Maya: samples 3d_x*.png sweep (8 x along selva-1) plus entrance/hazard/cacao.
-Body vs immediate non-Maya neighbors (play-jungle band). Outline vs dawn/wind.
+Maya: samples 3d_x*.png sweep plus entrance/hazard/cacao.
+Body median includes shaded cream/tan, not only lit pixels. Backdrop is the
+play-jungle band just outside the silhouette.
+Grains: project C00–C23 from selva1_layout.json onto the stills (32 px/m,
+follow cam, no X lookahead). Optional 2D renderGame reference.
 Cacao: HP001_*_engine_totem_pods*.png pods vs their neighbors.
 Does not change pixels. Numpy so a 1280×720 scan finishes in milliseconds.
 """
@@ -15,18 +18,26 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-DOCS = Path(__file__).resolve().parents[1] / "docs" / "hp001"
+ROOT = Path(__file__).resolve().parents[1]
+DOCS = ROOT / "docs" / "hp001"
+LAYOUT = ROOT / "runtime" / "data" / "selva1_layout.json"
 
 SWEEP = [
-    ("3d_x04.png", 4.54),
-    ("3d_x36.png", 36.0),
-    ("3d_x66.png", 66.0),
-    ("3d_x87.png", 86.67),
-    ("3d_x95.png", 95.33),
-    ("3d_x133.png", 133.33),
-    ("3d_x163.png", 162.67),
-    ("3d_x193.png", 193.33),
+    ("3d_x04.png", 4.54, 0.0),
+    ("3d_x36.png", 36.0, 4.0),
+    ("3d_x66.png", 66.0, 8.0),
+    ("3d_x87.png", 86.67, 8.0),
+    ("3d_x95.png", 95.33, 14.6667),
+    ("3d_x133.png", 133.33, 16.0),
+    ("3d_x163.png", 162.67, 10.6667),
+    ("3d_x193.png", 193.33, 9.3333),
 ]
+
+PX_PER_M = 32.0
+VIEW_W_M = 40.0
+VIEW_H_M = 22.5
+HALF_W = VIEW_W_M * 0.5
+HALF_H = VIEW_H_M * 0.5
 
 
 def lin(c: np.ndarray) -> np.ndarray:
@@ -73,6 +84,20 @@ def cream_mask(im: np.ndarray) -> np.ndarray:
         & (b >= (0.32 * r))
         & (b <= (0.62 * r))
     )
+
+
+def tan_body_mask(im: np.ndarray) -> np.ndarray:
+    """Lit cream plus shaded torso — median of the whole body, not only highlights."""
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    ratio_g = g.astype(np.float64) / np.maximum(r, 1)
+    ratio_b = b.astype(np.float64) / np.maximum(r, 1)
+    warm = (r >= g - 2) & (r >= b + 8)
+    hue = (ratio_g >= 0.52) & (ratio_g <= 0.95) & (ratio_b >= 0.26) & (ratio_b <= 0.64)
+    lum = (r >= 78) & (r <= 232) & ((r + g + b) >= 175)
+    not_sky = ~((r >= 140) & (g >= 110) & ((r + g + b) > 360) & (r < g + 28))
+    return warm & hue & lum & not_sky
 
 
 def outline_mask(im: np.ndarray) -> np.ndarray:
@@ -144,7 +169,6 @@ def densest_window(mask: np.ndarray, ww: int, hh: int, lo: int, hi: int) -> np.n
 def neighbor_ring(mask: np.ndarray, rad: int) -> np.ndarray:
     from numpy.lib.stride_tricks import sliding_window_view
 
-    h, w = mask.shape
     pad = np.pad(mask, rad, mode="constant", constant_values=False)
     win = sliding_window_view(pad, (2 * rad + 1, 2 * rad + 1))
     near = win.any(axis=(-1, -2))
@@ -154,45 +178,59 @@ def neighbor_ring(mask: np.ndarray, rad: int) -> np.ndarray:
 def measure_maya(path: Path, x_m=None) -> dict:
     im = np.array(Image.open(path).convert("RGB"))
     cream = cream_mask(im)
-    n_cream = int(cream.sum())
     cream = densest_window(cream, 32, 60, 8, 280)
     n_cream = int(cream.sum())
     if n_cream < 12:
         return {"file": path.name, "x_m": x_m, "error": "maya body not found", "cream_n": n_cream}
     ys, xs = np.where(cream)
-    body_rgb = im[cream]
+    y0 = max(0, int(ys.min()) - 10)
+    y1 = min(im.shape[0], int(ys.max()) + 16)
+    x0 = max(0, int(xs.min()) - 12)
+    x1 = min(im.shape[1], int(xs.max()) + 12)
+    tan = tan_body_mask(im)
     outline = outline_mask(im)
     plat = platform_mask(im)
+    win = np.zeros(cream.shape, dtype=bool)
+    win[y0:y1, x0:x1] = True
+    body = (cream | (win & tan)) & ~outline & ~plat
+    body = densest_window(body, 40, 70, 12, 900)
+    n_body = int(body.sum())
+    if n_body < 12:
+        body = cream
+        n_body = n_cream
+    ys, xs = np.where(body)
+    body_rgb = im[body]
     sky = sky_mask(im)
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    jungle = (r < 90) & (g < 105) & (b < 75) & (g >= r - 8) & ~cream & ~outline & ~plat
-    near = neighbor_ring(cream, 8)
+    jungle = (r < 90) & (g < 105) & (b < 75) & (g >= r - 8) & ~body & ~outline & ~plat
+    near = neighbor_ring(body, 8)
     outline_rgb = im[near & outline]
     body_bg = im[near & jungle]
-    ring = neighbor_ring(cream, 16)
+    ring = neighbor_ring(body, 16)
     outline_bg = im[ring & sky]
     extra_body = im[ring & jungle]
     if extra_body.size:
         body_bg = extra_body if body_bg.size == 0 else np.concatenate([body_bg, extra_body], axis=0)
     if outline_bg.shape[0] < 16:
-        ring2 = neighbor_ring(cream, 22)
+        ring2 = neighbor_ring(body, 22)
         outline_bg = im[ring2 & sky]
-    body = median_rgb(body_rgb)
+    body_med = median_rgb(body_rgb)
     ol = median_rgb(outline_rgb) if outline_rgb.size else (18, 12, 8)
     bg_body = median_rgb(body_bg) if body_bg.size else (200, 190, 150)
     bg_out = median_rgb(outline_bg) if outline_bg.size else bg_body
-    br = wcag(body, bg_body)
+    br = wcag(body_med, bg_body)
     o_r = wcag(ol, bg_out)
     return {
         "file": path.name,
         "x_m": x_m,
         "cream_n": n_cream,
+        "body_n": n_body,
         "outline_n": int(outline_rgb.shape[0]) if outline_rgb.size else 0,
         "body_bg_n": int(body_bg.shape[0]) if body_bg.size else 0,
         "center_px": [round(float(xs.mean()), 1), round(float(ys.mean()), 1)],
-        "body_rgb": list(body),
+        "body_rgb": list(body_med),
         "body_bg_rgb": list(bg_body),
         "outline_rgb": list(ol),
         "outline_bg_rgb": list(bg_out),
@@ -200,6 +238,7 @@ def measure_maya(path: Path, x_m=None) -> dict:
         "outline_ratio": round(o_r, 2),
         "body_pass": br >= 4.4,
         "outline_pass": o_r >= 4.4,
+        "measure": "body+shadows vs jungle just outside",
     }
 
 
@@ -236,9 +275,170 @@ def measure_cacao(path: Path) -> dict:
     }
 
 
+def _load_stills() -> list[tuple[Path, float, float]]:
+    extra = {
+        "3d_entrance.png": (4.5417, 0.0),
+        "3d_hazard.png": (133.3333, 18.0),
+        "3d_cacao.png": (65.875, 8.0),
+        "3d_x109.png": (108.6667, 3.0),
+    }
+    out = []
+    seen = set()
+    for name, x, y in SWEEP:
+        p = DOCS / name
+        out.append((p, x, y))
+        seen.add(name)
+    for name, (x, y) in extra.items():
+        p = DOCS / name
+        if p.exists() and name not in seen:
+            out.append((p, x, y))
+    return out
+
+
+def _project(world_x: float, world_y: float, feet_x: float, feet_y: float) -> tuple[float, float]:
+    look_y = feet_y + 1.0
+    cx = 640.0 + (world_x - feet_x) * PX_PER_M
+    cy = 360.0 - (world_y - look_y) * PX_PER_M
+    return cx, cy
+
+
+def _visible(world_x: float, world_y: float, feet_x: float, feet_y: float) -> bool:
+    look_y = feet_y + 1.0
+    return abs(world_x - feet_x) < HALF_W - 0.4 and abs(world_y - look_y) < HALF_H - 0.4
+
+
+def measure_grain(im: np.ndarray, cx: float, cy: float, grain_id: str, still: str) -> dict:
+    h, w = im.shape[:2]
+    rx, ry = 11.0, 15.0
+    yy, xx = np.ogrid[:h, :w]
+    ell = ((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 1.0
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    warm = (r >= g + 4) & (r >= b + 10) & (r >= 88) & (b <= 190) & (g <= 220)
+    mask = ell & warm
+    n = int(mask.sum())
+    if n < 6:
+        mask = ell
+        n = int(mask.sum())
+    if n < 4:
+        return {
+            "id": grain_id,
+            "file": still,
+            "error": "grain not found",
+            "proj_px": [round(cx, 1), round(cy, 1)],
+            "n": n,
+        }
+    grain_rgb = im[mask]
+    near = neighbor_ring(mask, 6)
+    jungle = (r < 95) & (g < 110) & (b < 80) & (g >= r - 10) & ~mask
+    bg = im[near & jungle]
+    if bg.size == 0:
+        bg = im[near & ~mask]
+    gmed = median_rgb(grain_rgb)
+    gmin = tuple(int(x) for x in np.percentile(grain_rgb, 15, axis=0))
+    bgm = median_rgb(bg) if bg.size else (24, 30, 16)
+    ratio = wcag(gmed, bgm)
+    ratio_min = wcag(gmin, bgm)
+    return {
+        "id": grain_id,
+        "file": still,
+        "n": n,
+        "proj_px": [round(cx, 1), round(cy, 1)],
+        "grain_rgb": list(gmed),
+        "grain_p15_rgb": list(gmin),
+        "bg_rgb": list(bgm),
+        "median_ratio": round(ratio, 2),
+        "min_ratio": round(ratio_min, 2),
+        "median_pass": ratio >= 4.4,
+        "min_pass": ratio_min >= 3.0,
+    }
+
+
+def measure_grains() -> list[dict]:
+    layout = json.loads(LAYOUT.read_text())
+    stills = [(p, x, y) for p, x, y in _load_stills() if p.exists()]
+    loaded = []
+    for path, fx, fy in stills:
+        loaded.append((path.name, fx, fy, np.array(Image.open(path).convert("RGB"))))
+    rows = []
+    for raw in layout["pickups"]:
+        gid = str(raw["id"])
+        wx, wy = float(raw["center_m"][0]), float(raw["center_m"][1])
+        best = None
+        best_score = 1e9
+        for name, fx, fy, im in loaded:
+            if not _visible(wx, wy, fx, fy):
+                continue
+            cx, cy = _project(wx, wy, fx, fy)
+            score = abs(cx - 640.0) + 0.35 * abs(cy - 360.0)
+            if score < best_score:
+                best_score = score
+                best = (name, im, cx, cy)
+        if best is None:
+            rows.append({"id": gid, "error": "not on any still"})
+            continue
+        name, im, cx, cy = best
+        rows.append(measure_grain(im, cx, cy, gid, name))
+    return rows
+
+
+def measure_grains_2d() -> list[dict]:
+    """renderGame 2D reference — same layout, 960×540 nearest-scaled to 1280×720."""
+    layout = json.loads(LAYOUT.read_text())
+    shots = []
+    for raw in layout["shots"]:
+        shots.append((DOCS / f"2d_{raw['id']}.png", raw))
+    for extra in (
+        {"id": "grains_c06", "player_px": {"x": 832.0, "y": 470.0}},
+        {"id": "grains_c16", "player_px": {"x": 2592.0, "y": 608.0}},
+    ):
+        shots.append((DOCS / f"2d_{extra['id']}.png", extra))
+    loaded = []
+    for path, shot in shots:
+        if not path.exists():
+            continue
+        px, py = float(shot["player_px"]["x"]), float(shot["player_px"]["y"])
+        loaded.append((path.name, px, py, np.array(Image.open(path).convert("RGB"))))
+    if not loaded:
+        return []
+    lw = float(layout["meta"]["level_w_px"])
+    lh = float(layout["meta"]["level_h_px"])
+    view_w, view_h = 960.0, 540.0
+    scale = 1280.0 / view_w
+    rows = []
+    for raw in layout["pickups"]:
+        gid = str(raw["id"])
+        bx, by = float(raw["px"]["x"]), float(raw["px"]["y"])
+        best = None
+        best_score = 1e9
+        for name, px, py, im in loaded:
+            cam_look = 48.0
+            tx = px + 26.0 / 2.0 - view_w / 2.0 + cam_look
+            ty = py + 42.0 / 2.0 - view_h / 2.0 - 28.0
+            tx = max(0.0, min(tx, lw - view_w))
+            ty = max(0.0, min(ty, lh - view_h))
+            sx = (bx - tx) * scale
+            sy = (by - ty) * scale
+            if not (8 <= sx <= 1272 and 8 <= sy <= 712):
+                continue
+            score = abs(sx - 640.0) + 0.35 * abs(sy - 360.0)
+            if score < best_score:
+                best_score = score
+                best = (name, im, sx, sy)
+        if best is None:
+            rows.append({"id": gid, "error": "not on any 2d still"})
+            continue
+        name, im, sx, sy = best
+        rec = measure_grain(im, sx, sy, gid, name)
+        rec["space"] = "2d_renderGame"
+        rows.append(rec)
+    return rows
+
+
 def main() -> int:
     maya = []
-    files = [(DOCS / n, x) for n, x in SWEEP]
+    files = [(DOCS / n, x) for n, x, _y in SWEEP]
     extras = {
         "3d_entrance.png": 4.54,
         "3d_hazard.png": 133.33,
@@ -255,16 +455,35 @@ def main() -> int:
             continue
         maya.append(measure_maya(path, x_m))
     cacao = []
-    pods = sorted(DOCS.glob("HP001_E2f_engine_totem_pods*.png"))
+    pods = sorted(DOCS.glob("HP001_E2g_engine_totem_pods*.png"))
     if not pods:
-        pods = sorted(DOCS.glob("HP001_*engine_totem_pods*.png"))[-1:]
+        pods = sorted(DOCS.glob("HP001_*engine_totem_pods*.png"))
+        pods = pods[-1:] if pods else []
     for p in pods:
         cacao.append(measure_cacao(p))
-    report = {"maya": maya, "cacao": cacao}
+    grains = measure_grains()
+    grains_2d = measure_grains_2d()
+    medians = [r["median_ratio"] for r in grains if "median_ratio" in r]
+    mins = [r["min_ratio"] for r in grains if "min_ratio" in r]
+    report = {
+        "maya": maya,
+        "cacao": cacao,
+        "grains": grains,
+        "grains_2d": grains_2d,
+        "grains_summary": {
+            "n": len(medians),
+            "median_of_medians": round(float(np.median(medians)), 2) if medians else None,
+            "min_median": round(min(medians), 2) if medians else None,
+            "min_p15": round(min(mins), 2) if mins else None,
+            "all_median_ge_4_4": all(r.get("median_pass") for r in grains if "median_pass" in r),
+            "all_min_ge_3": all(r.get("min_pass") for r in grains if "min_pass" in r),
+        },
+    }
     print(json.dumps(report, indent=2))
     ok_m = all(r.get("body_pass") for r in maya if "body_pass" in r)
     ok_c = all(r.get("pass") for r in cacao if "pass" in r) if cacao else True
-    return 0 if ok_m and ok_c else 1
+    ok_g = bool(medians) and report["grains_summary"]["all_median_ge_4_4"] and report["grains_summary"]["all_min_ge_3"]
+    return 0 if ok_m and ok_c and ok_g else 1
 
 
 if __name__ == "__main__":

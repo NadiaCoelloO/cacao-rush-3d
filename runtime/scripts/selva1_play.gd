@@ -215,26 +215,16 @@ func _build_world() -> void:
 	var play := Node3D.new()
 	play.name = "Selva1Geo"
 	_root.add_child(play)
-	# The 40×22.5 side cam sees ~11 m below y=0. Blackwater is a y≈0 plane
-	# toward the lens, so P00's 13 m box reads as a thin lip. A +Z fascia
-	# in front of the water (below Maya's feet) keeps the floor wet-earth.
-	var dirt := MeshInstance3D.new()
-	dirt.name = "P00_EarthFill"
-	var dirt_q := QuadMesh.new()
-	dirt_q.size = Vector2(220.0, 22.0)
-	dirt.mesh = dirt_q
-	dirt.position = Vector3(100.0, -11.0, -1.55)
-	dirt.material_override = _earth(COL_EARTH, 0.9)
-	dirt.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	play.add_child(dirt)
+	# P00's own 13.3 m box is the entrance earth. Do NOT span a brown strip
+	# across pits (P00→P02 at 13.3–18.7 m and later gaps). Follow cam culls
+	# water, so pits show the mid-jungle / sky, like the 2D.
 	var fascia := MeshInstance3D.new()
 	fascia.name = "P00_EarthFascia"
 	var fascia_q := QuadMesh.new()
-	fascia_q.size = Vector2(28.0, 14.0)
+	fascia_q.size = Vector2(13.2, 13.4)
 	fascia.mesh = fascia_q
-	# Top at y≈−0.35 so Maya (y≥0) and platform tops stay clear. z=6 sits
-	# between the follow cam (~24) and the water hit, covering P00's face.
-	fascia.position = Vector3(6.67, -7.35, 6.0)
+	# Width stays inside P00 (0–13.3). Top below Maya's feet.
+	fascia.position = Vector3(6.67, -6.85, 6.0)
 	fascia.material_override = _earth(COL_EARTH, 0.9)
 	fascia.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	play.add_child(fascia)
@@ -543,10 +533,24 @@ func _mat(color: Color, rough: float, _emit := false, alpha := 1.0) -> StandardM
 func _bean_mat() -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	var shader := Shader.new()
-	shader.code = "shader_type spatial;\nrender_mode unshaded, fog_disabled, cull_back;\nuniform vec4 albedo : source_color = vec4(0.420, 0.227, 0.122, 1.0);\nuniform vec4 warm : source_color = vec4(0.769, 0.416, 0.227, 1.0);\nvoid fragment() {\n\tALBEDO = mix(albedo.rgb, warm.rgb, 0.2) * 0.70;\n}\n"
+	shader.code = """shader_type spatial;
+render_mode unshaded, fog_disabled, cull_back, specular_disabled;
+uniform vec4 albedo : source_color;
+uniform vec4 warm : source_color;
+void fragment() {
+	vec3 n = normalize(NORMAL);
+	vec3 v = normalize(VIEW);
+	float ndv = abs(dot(n, v));
+	float rim = pow(1.0 - clamp(ndv, 0.0, 1.0), 1.15);
+	float key = clamp(dot(n, normalize(vec3(0.42, 0.70, 0.58))), 0.0, 1.0);
+	float wrap = pow(key, 0.45);
+	float lift = clamp(0.28 + wrap * 0.62 + rim * 0.90, 0.0, 1.0);
+	ALBEDO = mix(albedo.rgb, warm.rgb, lift);
+}
+"""
 	mat.shader = shader
-	mat.set_shader_parameter("albedo", Color("6b3a1f"))
-	mat.set_shader_parameter("warm", Color("c46a3a"))
+	mat.set_shader_parameter("albedo", Color("c87838"))
+	mat.set_shader_parameter("warm", Color("f8d090"))
 	return mat
 
 
@@ -899,6 +903,7 @@ func _run_capture() -> void:
 			{"id": "x133", "feet": Vector3(133.3333, 16.0, 0.0)},
 			{"id": "x163", "feet": Vector3(162.6667, 10.6667, 0.0)},
 			{"id": "x193", "feet": Vector3(193.3333, 9.3333, 0.0)},
+			{"id": "x109", "feet": Vector3(108.6667, 3.0, 0.0)},
 		]
 		for raw_s in sweep:
 			var s: Dictionary = raw_s

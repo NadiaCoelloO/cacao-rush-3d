@@ -31,7 +31,8 @@ SPIKE = (201, 196, 188)
 FROG = (62, 118, 56)
 ROCK = (96, 76, 56)
 WIND = (200, 220, 184)
-BEAN = (107, 58, 31)
+BEAN = (168, 90, 42)
+BEAN_HI = (248, 214, 148)
 POLE = (106, 90, 74)
 GOAL = (166, 106, 42)
 
@@ -120,6 +121,7 @@ def draw_shot(layout, shot, out_path: Path) -> None:
             continue
         sx, sy = x - cam_x, y - cam_y
         d.ellipse([sx - 8, sy - 11, sx + 8, sy + 11], fill=BEAN)
+        d.ellipse([sx - 6, sy - 10, sx + 3, sy - 1], fill=BEAN_HI)
 
     for k in layout["checkpoints"]:
         box = k["px"]
@@ -139,9 +141,19 @@ def draw_shot(layout, shot, out_path: Path) -> None:
     print(f"wrote {out_path} cam=({cam_x:.1f},{cam_y:.1f}) player=({px},{py})")
 
 
+# Extra renderGame frames so grain contrast has a real 2D reference
+# (C06 cluster + C15/C16 low beans that miss the three layout shots).
+EXTRA_SHOTS = [
+    {"id": "grains_c06", "player_px": {"x": 832.0, "y": 470.0}},
+    {"id": "grains_c16", "player_px": {"x": 2592.0, "y": 608.0}},
+]
+
+
 def main():
     layout = json.loads(LAYOUT.read_text())
     for shot in layout["shots"]:
+        draw_shot(layout, shot, OUT_DIR / f"2d_{shot['id']}.png")
+    for shot in EXTRA_SHOTS:
         draw_shot(layout, shot, OUT_DIR / f"2d_{shot['id']}.png")
 
 

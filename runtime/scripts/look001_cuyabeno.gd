@@ -49,6 +49,7 @@ const PLAT_EMIT_ENERGY := 0.28
 const DOSEL_CARD_LAYER := 10
 const HANG_BEAD_LAYER := 11
 const WATER_LAYER := 12
+const CORRIDOR_LAYER := 13
 const CACAO_Y := Color("d6ab3d")
 const CACAO_O := Color("ce722e")
 const CACAO_R := Color("a64b36")
@@ -58,7 +59,7 @@ const MAYA_FOLLOW_LAYER := 2
 ## Warm white near #FFF4E6. Slightly less G/B than 1/0.957/0.902 so the
 ## lit back sits in hue 28–35° against Maya_Body albedo (pure #FFF4E6 → ~37°).
 const MAYA_FOLLOW_LIGHT := Color(1.0, 0.86, 0.70)
-const MAYA_BACK_FILL_ENERGY := 0.46
+const MAYA_BACK_FILL_ENERGY := 0.90
 const MAYA_BACK_FILL_RANGE := 3.0
 const MAYA_BACK_FILL_ATTEN := 1.5
 const MAYA_RIM_ENERGY := 0.14
@@ -471,37 +472,33 @@ func _outline_hero_meshes(n: Node) -> void:
 	if n is MeshInstance3D:
 		var src := n as MeshInstance3D
 		if src.mesh and src.get_node_or_null("MayaOutline") == null:
-			_add_outline_mesh(src, "MayaOutline", src.mesh, Vector3.ZERO, 0.048)
+			_add_outline_mesh(src, "MayaOutline", src.mesh, Vector3.ZERO, 0.040)
 	for c in n.get_children():
 		_outline_hero_meshes(c)
 
 
 func _add_maya_outline(pilot: Node3D) -> void:
-	# Inverted hull on the hero mesh so the stroke covers head and hands,
-	# plus extra capsules for the T-pose extremities. Visual only.
+	# Thin inverted hull only (≈1 px at 720p). No extra torso capsule —
+	# that read as a 27 px dark pill behind Maya.
 	var player: Node3D = pilot.get_node_or_null("PlayerMaya") as Node3D
 	if player == null:
 		return
 	if player.get_node_or_null("MayaOutline") != null:
 		return
 	_outline_hero_meshes(player)
-	var body := CapsuleMesh.new()
-	body.radius = 0.38
-	body.height = 1.62
-	_add_outline_mesh(player, "MayaOutline", body, Vector3(0.0, 0.82, 0.0), 0.040)
 	var head := SphereMesh.new()
-	head.radius = 0.18
-	head.height = 0.36
+	head.radius = 0.16
+	head.height = 0.32
 	head.radial_segments = 10
 	head.rings = 6
-	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.045)
+	_add_outline_mesh(player, "MayaOutlineHead", head, Vector3(0.0, 1.68, 0.04), 0.022)
 	var hand := SphereMesh.new()
-	hand.radius = 0.12
-	hand.height = 0.24
+	hand.radius = 0.10
+	hand.height = 0.20
 	hand.radial_segments = 8
 	hand.rings = 4
-	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.040)
-	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.040)
+	_add_outline_mesh(player, "MayaOutlineHandL", hand, Vector3(-0.70, 1.16, 0.06), 0.020)
+	_add_outline_mesh(player, "MayaOutlineHandR", hand, Vector3(0.70, 1.16, 0.06), 0.020)
 
 
 func _attach_maya_follow_fill(pilot: Node3D) -> void:
@@ -1244,8 +1241,9 @@ void fragment() {
 
 func _play_jungle_mat() -> ShaderMaterial:
 	# Mid-jungle play band: desaturated olive / dark brown, foliage mottling,
-	# warm haze only on the irregular crown. Opaque in the play strip so the
-	# clear color never shows. No disk on Maya — this IS the body backdrop.
+	# painted canopy crown (sil texture, soft cut — no noise dither).
+	# Extra-dark mid-route so Maya body+shadows stay ≥4.4:1 (x66 / x87).
+	# Opaque in the play strip. No disk on Maya — this IS the body backdrop.
 	# QuadMesh UV.y = 0 is the TOP of the card (Godot 4).
 	var mat := ShaderMaterial.new()
 	var sh := Shader.new()
@@ -1268,28 +1266,28 @@ void fragment() {
 	n += 0.24 * sin((vx * 0.50 + par * 0.4) * 6.4 + vy * 8.2);
 	n += 0.16 * sin((vx + par * 0.22) * 33.0 + vy * 23.0);
 	float clump = smoothstep(0.24, 0.86, n);
-	vec3 earth = vec3(0.014, 0.011, 0.006);
-	vec3 olive = vec3(0.022, 0.030, 0.012);
-	vec3 moss = vec3(0.030, 0.038, 0.016);
+	vec3 earth = vec3(0.010, 0.008, 0.004);
+	vec3 olive = vec3(0.016, 0.022, 0.008);
+	vec3 moss = vec3(0.022, 0.028, 0.012);
 	vec3 col = mix(earth, olive, leaf);
 	col = mix(col, moss, clump * 0.70);
-	col = mix(col * 0.78, col * 1.10, clump);
-	col *= mix(0.70, 1.04, smoothstep(1.0, 0.30, vy));
-	col *= 0.86;
-	col *= mix(0.80, 1.0, smoothstep(10.0, 28.0, eye.x));
-	float scallop = 0.058 * sin((vx + par * 0.28) * 6.6);
-	scallop += 0.038 * sin(vx * 13.5 + 0.9);
-	scallop += 0.024 * sin(vx * 27.0 + 2.2);
-	scallop += 0.014 * sin(vx * 55.0 + par);
-	scallop -= 0.042 * smoothstep(0.58, 0.94, sin(vx * 19.0 + par) * sin(vx * 8.6));
-	float wave = 0.10 + scallop;
-	float edge = (vy - (wave - 0.03)) / 0.16;
-	float dither = fract(sin(dot(UV * vec2(97.0, 53.0), vec2(12.9898, 78.233))) * 43758.5453);
-	if (edge + dither * 0.62 < 0.48) {
+	col = mix(col * 0.78, col * 1.06, clump);
+	col *= mix(0.68, 1.00, smoothstep(1.0, 0.30, vy));
+	col *= 0.76;
+	col *= mix(0.74, 1.0, smoothstep(10.0, 28.0, eye.x));
+	float mid = smoothstep(50.0, 60.0, eye.x) * (1.0 - smoothstep(92.0, 108.0, eye.x));
+	col *= mix(1.0, 0.58, mid);
+	// Painted canopy crown (sil strip: white sky / dark foliage). UV.y=0 is TOP.
+	// Soft threshold, no noise dither — that read as speckled fragments.
+	vec2 crown_uv = vec2(fract(vx * 0.52 + par * 0.40), mix(0.0, 0.38, clamp(vy / 0.22, 0.0, 1.0)));
+	float crown_lum = dot(texture(sil, crown_uv).rgb, vec3(0.30, 0.59, 0.11));
+	float keep = 1.0 - smoothstep(0.18, 0.72, crown_lum);
+	keep = smoothstep(0.12, 0.42, keep);
+	if (keep < 0.20) {
 		discard;
 	}
-	float haze = 1.0 - smoothstep(wave, wave + 0.22, vy);
-	col = mix(col, vec3(0.16, 0.12, 0.05), haze * 0.20);
+	float haze = 1.0 - smoothstep(0.0, 0.20, vy);
+	col = mix(col, vec3(0.14, 0.11, 0.05), haze * 0.16 * keep);
 	ALBEDO = col;
 }
 """
@@ -1313,6 +1311,7 @@ func _build_side_follow_art(pilot: Node3D) -> void:
 	if play_cam:
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (WATER_LAYER - 1))
 		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (HANG_BEAD_LAYER - 1))
+		play_cam.cull_mask = play_cam.cull_mask & ~(1 << (CORRIDOR_LAYER - 1))
 	# Sky lives in the upper third. Overscan so the wrap never hits the frame.
 	_add_card(hold, "HP001_CloudBand", Vector3(0.0, 8.4, -42.0), Vector2(100.0, 28.0), Vector3.ZERO, _cloud_card_mat())
 	# Play band: NDC ≈ −1.3 … +0.72 at z=−28 after the wavy crown cut

@@ -471,6 +471,8 @@ func _wire_corridor_bank(pilot: Node3D) -> void:
 				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 				_apply_lod_range(mmi, LOD_BEGIN[lod], LOD_END[lod], LOD_MARGIN)
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				# Visual layer 13 — follow cam culls corridor trunks (cmp row-4 fragments).
+				mmi.layers = 1 << 12
 				root.add_child(mmi)
 				cluster_mmis.append(mmi)
 				mm_count += 1
@@ -545,6 +547,8 @@ func _wire_corridor_bank(pilot: Node3D) -> void:
 				mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 				_apply_lod_range(mmi, CANOPY_LOD_BEGIN[lod], CANOPY_LOD_END[lod], CANOPY_LOD_MARGIN)
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				# Visual layer 13 — follow cam culls corridor crowns.
+				mmi.layers = 1 << 12
 				root.add_child(mmi)
 				cluster_mmis.append(mmi)
 				mm_count += 1
