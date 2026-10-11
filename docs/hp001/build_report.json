@@ -834,8 +834,8 @@
    "dock": "PASA",
    "fern": "PASA",
    "cacao_leaves": "PASA",
-   "canopy_e2": "NO PASA — not imported; LOOK dosel kept",
-   "water_lily": "NO PASA — mesh in GLB, never instanced"
+   "canopy_e2": "NO PASA \u2014 not imported; LOOK dosel kept",
+   "water_lily": "NO PASA \u2014 mesh in GLB, never instanced"
   },
   "deck_align_m": {
    "deck_top_local": 0.4011,
@@ -969,7 +969,7 @@
  },
  "e2b": {
   "pass": "E2b",
-  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 → Cacao.Game jungle-sky.jpg.",
+  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 \u2192 Cacao.Game jungle-sky.jpg.",
   "bundle_sha256_ok": true,
   "canopy_instances": 36,
   "canopy_multimeshes": 69,
@@ -1223,8 +1223,8 @@
  },
  "e2d": {
   "pass": "E2d",
-  "note": "QA add-on: pit −18.4167, Maya outline + dusk play-band, hitbox frogs/rocks, striped wind, leafy dosel fringe, Vulkan Forward+ stills, pin subtitle Laguna negra de Sucumbíos, spawn-to-G00 probe PASS.",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "note": "QA add-on: pit \u221218.4167, Maya outline + dusk play-band, hitbox frogs/rocks, striped wind, leafy dosel fringe, Vulkan Forward+ stills, pin subtitle Laguna negra de Sucumb\u00edos, spawn-to-G00 probe PASS.",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1239,7 +1239,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -1368,8 +1368,8 @@
  },
  "e2e": {
   "pass": "E2e",
-  "note": "Identity + QA add-on: golden dawn (no cyan), painted cumulus band, curved lianas (no bamboo), earth #3E2C20 + lip, 4 thin wind strokes, warm dark vignette so Maya BODY ≥4.4:1 (not only outline), outline covers head+hands and holds ≥4.4:1 in the wind zone. Pit −18.4167, hitbox hazards, probe G00 PASS.",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "note": "Identity + QA add-on: golden dawn (no cyan), painted cumulus band, curved lianas (no bamboo), earth #3E2C20 + lip, 4 thin wind strokes, warm dark vignette so Maya BODY \u22654.4:1 (not only outline), outline covers head+hands and holds \u22654.4:1 in the wind zone. Pit \u221218.4167, hitbox hazards, probe G00 PASS.",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1384,7 +1384,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -1520,6 +1520,580 @@
    "hp001_jungle_sky_2d.jpg": "1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac",
    "hp001_cumulus_band.jpg": "f4b54542b6aa82442f11c03cbe0de2512211ce8ecdf9f290f1d2a9db8a4d7da1"
   },
-  "head": "8d282ecc02124925f9923cd06c103a649abd6d7c"
+  "head": "8d282ecc02124925f9923cd06c103a649abd6d7c",
+  "replaced_by": "e2f",
+  "captures_status": {
+   "3d_entrance.png": {
+    "sha256": "a8b6c73972219267487d852bea3bd8d4556cc2b219fcd532520ec32dc56da98a",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "3d_hazard.png": {
+    "sha256": "61c61bdb07a79d73cfc9b3549ad8131fa73c7d49350a77ebf04b28a96821f4af",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "3d_cacao.png": {
+    "sha256": "afd6b5713d8855afdc353f5256d76f76840e6ffdf32fe9cc25b11925e6fe390b",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "cmp_cuyabeno_2d_3d.png": {
+    "sha256": "8dfd5564900827b210449009f39960e86d042bcf951b8b630f69490865853e6d",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "HP001_E2e_engine_gameplay.png": {
+    "sha256": "0922878583d01a8de6873b72b32a58334d674717f64e8f8b8f6da956562d578a",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "HP001_E2e_engine_laguna.png": {
+    "sha256": "d006ffbd4c1e1485629dd76c0044e2a689f30826ce15c98a6d6821976c141099",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "HP001_E2e_engine_dosel.png": {
+    "sha256": "5c7f2e100c202535b5a229ade74653d84671d014e8e34605e724a36e1912ff00",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "HP001_E2e_engine_dock_closeup.png": {
+    "sha256": "3a5c83a8dd6fe9787595c4d59b4bc92241a5372f41fa1a319d1d5ddb1167e78c",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "HP001_E2e_engine_totem_pods_v4.png": {
+    "sha256": "96bd8f4886c7ad686fa3bb5eba967c480771ca61f6c9463f7e33dbcc8516477c",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   },
+   "HP001_E2e_engine_cmp_bg.png": {
+    "sha256": "68ec80de3df654a16a6f1f7fbb5849538a4bf0b39e0023be91c19ba3e6802100",
+    "status": "replaced",
+    "replaced_by": "e2f"
+   }
+  }
+ },
+ "e2f": {
+  "pass": "E2f",
+  "note": "Drop Maya disk. 2D-style bands: golden cumulus on top, continuous shadowed mid-jungle play band (olive/brown foliage + warm crown haze, irregular dithered crown). Body vs real jungle \u22654.4 at 8 x. Cacao warm rim \u22654.4 on dark. Cumulus in LOOK-001_manifest.json. Pit \u221218.4167, probe G00, 54/54.",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
+  "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
+  "pit_kill_y": -18.4167,
+  "player_maya_gd": "untouched",
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS (constants + instantiated pilot_cuyabeno.tscn)",
+  "selva_check": "platforms=21 hazards=6 pickups=24 checks=2 goal=1",
+  "selva_run_probe": {
+   "result": "PASS",
+   "ticks": 1556,
+   "far_x": 194.32,
+   "goal": 1,
+   "deaths": 0,
+   "pit_kill_verified": true,
+   "pit_y": -18.45,
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
+  },
+  "p01_top_m": 6.6667,
+  "camera_offset": [
+   0.0,
+   1.0,
+   24.1256
+  ],
+  "view_m_measured": [
+   40.0342,
+   22.547
+  ],
+  "maya_px_at_720p": 55.68,
+  "maya_contrast_wcag": {
+   "threshold": 4.4,
+   "note": "Body vs play-jungle band (real backdrop). Outline vs dawn/wind. No Maya disk.",
+   "sweep": [
+    {
+     "file": "3d_x04.png",
+     "x_m": 4.54,
+     "cream_n": 163,
+     "outline_n": 158,
+     "body_bg_n": 1409,
+     "center_px": [
+      143.4,
+      379.7
+     ],
+     "body_rgb": [
+      226,
+      182,
+      115
+     ],
+     "body_bg_rgb": [
+      34,
+      42,
+      21
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      218,
+      190,
+      136
+     ],
+     "body_ratio": 7.92,
+     "outline_ratio": 11.51,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x36.png",
+     "x_m": 36.0,
+     "cream_n": 279,
+     "outline_n": 446,
+     "body_bg_n": 2101,
+     "center_px": [
+      575.1,
+      382.2
+     ],
+     "body_rgb": [
+      201,
+      153,
+      90
+     ],
+     "body_bg_rgb": [
+      38,
+      47,
+      24
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      185,
+      143,
+      80
+     ],
+     "body_ratio": 5.45,
+     "outline_ratio": 6.99,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x66.png",
+     "x_m": 66.0,
+     "cream_n": 201,
+     "outline_n": 342,
+     "body_bg_n": 1980,
+     "center_px": [
+      575.0,
+      378.2
+     ],
+     "body_rgb": [
+      202,
+      150,
+      81
+     ],
+     "body_bg_rgb": [
+      49,
+      59,
+      32
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      194,
+      153,
+      84
+     ],
+     "body_ratio": 4.5,
+     "outline_ratio": 7.85,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x87.png",
+     "x_m": 86.67,
+     "cream_n": 277,
+     "outline_n": 446,
+     "body_bg_n": 2103,
+     "center_px": [
+      575.1,
+      382.0
+     ],
+     "body_rgb": [
+      202,
+      153,
+      90
+     ],
+     "body_bg_rgb": [
+      36,
+      45,
+      22
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      185,
+      142,
+      80
+     ],
+     "body_ratio": 5.62,
+     "outline_ratio": 6.93,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x95.png",
+     "x_m": 95.33,
+     "cream_n": 210,
+     "outline_n": 342,
+     "body_bg_n": 2058,
+     "center_px": [
+      575.3,
+      378.1
+     ],
+     "body_rgb": [
+      215,
+      163,
+      85
+     ],
+     "body_bg_rgb": [
+      45,
+      55,
+      29
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      207,
+      167,
+      95
+     ],
+     "body_ratio": 5.53,
+     "outline_ratio": 9.19,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x133.png",
+     "x_m": 133.33,
+     "cream_n": 209,
+     "outline_n": 329,
+     "body_bg_n": 1780,
+     "center_px": [
+      575.2,
+      378.1
+     ],
+     "body_rgb": [
+      215,
+      163,
+      85
+     ],
+     "body_bg_rgb": [
+      45,
+      54,
+      28
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      186,
+      169,
+      104
+     ],
+     "body_ratio": 5.59,
+     "outline_ratio": 8.82,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x163.png",
+     "x_m": 162.67,
+     "cream_n": 212,
+     "outline_n": 342,
+     "body_bg_n": 2058,
+     "center_px": [
+      575.3,
+      378.0
+     ],
+     "body_rgb": [
+      214,
+      163,
+      85
+     ],
+     "body_bg_rgb": [
+      37,
+      46,
+      23
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      207,
+      165,
+      95
+     ],
+     "body_ratio": 6.23,
+     "outline_ratio": 9.05,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_x193.png",
+     "x_m": 193.33,
+     "cream_n": 276,
+     "outline_n": 321,
+     "body_bg_n": 2159,
+     "center_px": [
+      980.4,
+      377.7
+     ],
+     "body_rgb": [
+      217,
+      164,
+      93
+     ],
+     "body_bg_rgb": [
+      41,
+      50,
+      26
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      213,
+      169,
+      96
+     ],
+     "body_ratio": 6.02,
+     "outline_ratio": 9.52,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_entrance.png",
+     "x_m": 4.54,
+     "cream_n": 203,
+     "outline_n": 171,
+     "body_bg_n": 1598,
+     "center_px": [
+      145.3,
+      379.4
+     ],
+     "body_rgb": [
+      211,
+      180,
+      115
+     ],
+     "body_bg_rgb": [
+      34,
+      42,
+      21
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      218,
+      190,
+      145
+     ],
+     "body_ratio": 7.48,
+     "outline_ratio": 11.57,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_hazard.png",
+     "x_m": 133.33,
+     "cream_n": 241,
+     "outline_n": 309,
+     "body_bg_n": 1790,
+     "center_px": [
+      574.9,
+      315.5
+     ],
+     "body_rgb": [
+      215,
+      163,
+      86
+     ],
+     "body_bg_rgb": [
+      49,
+      57,
+      30
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      188,
+      171,
+      106
+     ],
+     "body_ratio": 5.34,
+     "outline_ratio": 9.02,
+     "body_pass": true,
+     "outline_pass": true
+    },
+    {
+     "file": "3d_cacao.png",
+     "x_m": 65.88,
+     "cream_n": 201,
+     "outline_n": 342,
+     "body_bg_n": 1980,
+     "center_px": [
+      575.0,
+      378.2
+     ],
+     "body_rgb": [
+      202,
+      150,
+      81
+     ],
+     "body_bg_rgb": [
+      49,
+      59,
+      32
+     ],
+     "outline_rgb": [
+      6,
+      2,
+      0
+     ],
+     "outline_bg_rgb": [
+      195,
+      153,
+      85
+     ],
+     "body_ratio": 4.5,
+     "outline_ratio": 7.88,
+     "body_pass": true,
+     "outline_pass": true
+    }
+   ],
+   "cacao": [
+    {
+     "file": "HP001_E2f_engine_totem_pods_v4.png",
+     "pod_n": 923,
+     "center_px": [
+      607.3,
+      742.2
+     ],
+     "pod_rgb": [
+      218,
+      189,
+      120
+     ],
+     "bg_rgb": [
+      81,
+      56,
+      23
+     ],
+     "ratio": 5.98,
+     "pass": true
+    }
+   ]
+  },
+  "engine_perf": {
+   "gameplay": {
+    "primitives": 131692,
+    "draw_calls": 220
+   },
+   "laguna": {
+    "primitives": 105214,
+    "draw_calls": 151
+   },
+   "dosel": {
+    "primitives": 239529,
+    "draw_calls": 203
+   },
+   "dock": {
+    "primitives": 71275,
+    "draw_calls": 79
+   },
+   "pods": {
+    "primitives": 81474,
+    "draw_calls": 84
+   },
+   "cmp_bg": {
+    "primitives": 120968,
+    "draw_calls": 63
+   }
+  },
+  "selva_capture_perf": {
+   "entrance": {
+    "primitives": 67954,
+    "draw_calls": 121
+   },
+   "hazard": {
+    "primitives": 43882,
+    "draw_calls": 77
+   },
+   "cacao": {
+    "primitives": 45701,
+    "draw_calls": 96
+   }
+  },
+  "uhd_vram_mb": 148,
+  "uhd_vram_cap_mb": 192,
+  "visible_tris_hard": 350000,
+  "visible_tris_target": 250000,
+  "draws_cap": 250,
+  "captures": {
+   "3d_entrance.png": "d94e46778e796f0a539ed276da6f239204042176aed7e0e15fde326305676b88",
+   "3d_hazard.png": "cb4517e267246e50f513cccc3f58e20e1ded59c942ec5dc6833a631b083da511",
+   "3d_cacao.png": "3636d901acabdb92899bf33cb0f15119605ff02867a880566c6201f5dfc565cf",
+   "3d_x04.png": "164ecf650e72bf2af9808a76794cb8e2f409b9af578dde57f4313ac8479551f6",
+   "3d_x36.png": "d65dc226f5b67e9308ccad5e8435718f0466cfcaf70930bdfd1679c251dd840d",
+   "3d_x66.png": "b3f8c075fb8fea46efc3d0215137df892a8d964e9a6f12004362fdb90c32eead",
+   "3d_x87.png": "5170baa37f25c14da8016bf26a5d9680158293a623ed3ab0fee879ca49d620a6",
+   "3d_x95.png": "882f6a6077543cb727b275dccc502794370d81c8805a82db51d506bca7cf8f8b",
+   "3d_x133.png": "250c4077809ac6bd8d1b28d479026cbef9d0aa94ffb59b84ffe4d455e4dbc156",
+   "3d_x163.png": "78f4c24102e89f18994568ba90255980b18e2e621ddeb36ef7b6113a30fb8ddb",
+   "3d_x193.png": "c8fcf67399514d86277637e4bd7274b63f2f49beff69b59666c4de353b989498",
+   "2d_entrance.png": "da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39",
+   "2d_hazard.png": "b181184b3af1d01769948443e455996eb09de96ced50a8c75d1bcb7aabe4e795",
+   "2d_cacao.png": "497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598",
+   "cmp_cuyabeno_2d_3d.png": "70b0c104f1bdf4405246528a6317ca0118b5463f60db78d681a914f21eb64e43",
+   "HP001_E2f_engine_gameplay.png": "a730421803d47f2bab87949e8cb018d7271e54c7046ff3394a0345eb65316f90",
+   "HP001_E2f_engine_laguna.png": "02ed21acad50cf95f919f57b831d17e22e1b78c32f961a8dde1e29650ee61f24",
+   "HP001_E2f_engine_dosel.png": "e7f3531d43e6743654868ee8310fa2b754b41b985c18e3d3d6226af26a00f55d",
+   "HP001_E2f_engine_dock_closeup.png": "9549314eabe91fdce936effa2e77ef3cd6999f4592b99482817b761fb434d89c",
+   "HP001_E2f_engine_totem_pods_v4.png": "0ecdaed17de901b045e6c379cb2dabb0574f61435333fd9ccbdef9b36530f5e9",
+   "HP001_E2f_engine_cmp_bg.png": "c505dbfd550d6f62ed2c290777ec07e541cfdebf5cc3bb1369b7a250b1a46f6e"
+  },
+  "textures": {
+   "hp001_cuyabeno_sky_2k.png": "5bb9b19567cec3f1131e4121b73a0b59722e9f1350abbd12a0b6995144edbeb3",
+   "hp001_selva_silhouette.png": "0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157",
+   "hp001_fg_liana.png": "c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90",
+   "hp001_jungle_sky_2d.jpg": "1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac",
+   "hp001_cumulus_band.jpg": "f4b54542b6aa82442f11c03cbe0de2512211ce8ecdf9f290f1d2a9db8a4d7da1"
+  },
+  "head": "ff9a20b859555b82320034254457cd60fa9511b8"
  }
 }

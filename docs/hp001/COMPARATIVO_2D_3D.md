@@ -151,9 +151,41 @@ P01 / P07 / P10 / P16 son one-way reales (drop-through), no una caja sólida. P0
 
 En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. En 3D el mantle sigue viendo el mask de colisión; sacarlos exige tocar `player_maya.gd`. No se tocó.
 
-## Look (E2e)
+## Look (E2f)
 
-La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos pintados (`jungle-sky.jpg` / `hp001_cumulus_band.jpg`, solo la franja de nubes; cerros y cascadas recortados + bruma), **2 franjas** de selva lejana, y lianas curvas marrón-verdoso a la izquierda (catenarias + hojas; sin varas de bambú). Copas y troncos de fondo a lo largo de todo selva-1. Cielo: gradiente de amanecer dorado, sin cian. Plataformas #3E2C20 con labio claro. Viento: 4 trazos finos curvos. Maya crema: viñeteo cálido oscuro detrás del **cuerpo** (no solo el outline) para ≥4.4:1 contra el fondo inmediato; el outline cubre cabeza y manos y se mide también en la zona de viento. QA: pozo −18.4167, peligros al hitbox, probe G00. Capturas Vulkan Forward+. `player_maya.gd` no se tocó.
+QA e Identidad se contradecían sobre el disco negro pegado a Maya (QA: otro outline, cuerpo 1.0–1.6:1 contra el cielo dorado; Identidad: cápsula negra). E2f lo saca.
+
+Composición tipo 2D, hijas de la cámara 40×22.5:
+
+1. Outline fino solamente (cabeza y manos). Sin disco / halo / viñeteo en Maya.
+2. Cielo dorado + cúmulos (`hp001_cumulus_band.jpg`) **arriba** del cuadro. Detrás de la franja de juego (agua/tierra hasta ~salto de Maya) va una capa **continua** de selva media en sombra: oliva / marrón oscuro desaturado, mottling de follaje, niebla cálida suave en la corona. El borde superior es irregular y difuso (dither + scallop), muy por encima de los tops, para que no se lea como piso falso sobre los pozos. Opaca — tapa el clear color negro. Esta capa **es** el fondo real del cuerpo.
+3. Contraste del cuerpo vs esa selva en 8 x a lo largo de la ruta; si un tramo no llega a 4.4 se oscurece la franja ahí, no a Maya. La entrada/muelle va más oscura.
+4. Wrap del panorama con crossfade (sin costura vertical dura).
+5. Cacao con rim cálido claro, ≥4.4:1 sobre zonas oscuras.
+6. `hp001_cumulus_band.jpg` en `LOOK-001_manifest.json`.
+
+Plataformas #3E2C20 con labio claro. Viento: 4 trazos finos. QA: pozo −18.4167, peligros al hitbox, probe G00. Capturas Vulkan Forward+. `player_maya.gd` no se tocó.
+
+### Contraste Maya (WCAG, cuerpo vs selva media)
+
+| x m | still | body RGB | jungle RGB | cuerpo | outline | ≥4.4 |
+|---:|---|---|---|---:|---:|:---:|
+| 4.54 | `3d_x04.png` | 201,173,86 | 34,42,21 | **7.92** | 11.51 | sí |
+| 36.00 | `3d_x36.png` | 201,153,90 | 38,47,24 | **5.45** | 6.99 | sí |
+| 66.00 | `3d_x66.png` | 202,150,81 | 49,59,32 | **4.50** | 7.85 | sí |
+| 86.67 | `3d_x87.png` | 202,153,90 | 36,45,22 | **5.62** | 6.93 | sí |
+| 95.33 | `3d_x95.png` | 215,163,85 | 45,55,29 | **5.53** | 9.19 | sí |
+| 133.33 | `3d_x133.png` | 215,163,85 | 45,54,28 | **5.59** | 8.82 | sí |
+| 162.67 | `3d_x163.png` | 214,163,85 | 37,46,23 | **6.23** | 9.05 | sí |
+| 193.33 | `3d_x193.png` | 217,164,93 | 41,50,26 | **6.02** | 9.52 | sí |
+
+Entrada 7.48 / viento H03 5.34 / cacao 4.50. Mínimo del sweep: **4.50** en x=66.
+
+### Contraste cacao (rim vs zona oscura)
+
+| still | pod RGB | bg RGB | ratio | ≥4.4 |
+|---|---|---|---:|:---:|
+| `HP001_E2f_engine_totem_pods_v4.png` | 218,189,120 | 81,56,23 | **5.98** | sí |
 
 ## Checks
 
@@ -165,27 +197,35 @@ La cámara lateral 40×22.5 lleva hijas fijas: banda de cúmulos pintados (`jung
 | `selva1_run_probe` | **PASS** ticks=1556 · far_x=194.32 · G00=1 · 0 muertes. Pozo verificado y=−18.45 |
 | `player_maya.gd` | no tocado |
 | capturas | Vulkan 1.4 Forward+ (llvmpipe), no OpenGL |
-| contraste Maya (WCAG) | entrada **cuerpo 5.00:1** / outline **7.77:1**. Viento H03 **cuerpo 4.69:1** / outline **7.62:1** |
+| contraste Maya (WCAG) | 8 x ≥4.4; mínimo **4.50:1** en x=66. Entrada **7.48**. Viento **5.34**. Cacao rim **5.98** |
 
 ## sha256
 
-SHA de E2d `d85361ff…` y stills E2d: **reemplazados** (ver `build_report.json`).
+SHA de E2e y stills E2e: **reemplazados** (ver `build_report.json`). HEAD de este commit de stills.
 
 | archivo | sha256 |
 |---|---|
-| `3d_entrance.png` | `a8b6c73972219267487d852bea3bd8d4556cc2b219fcd532520ec32dc56da98a` |
-| `3d_hazard.png` | `61c61bdb07a79d73cfc9b3549ad8131fa73c7d49350a77ebf04b28a96821f4af` |
-| `3d_cacao.png` | `afd6b5713d8855afdc353f5256d76f76840e6ffdf32fe9cc25b11925e6fe390b` |
+| `3d_entrance.png` | `d94e46778e796f0a539ed276da6f239204042176aed7e0e15fde326305676b88` |
+| `3d_hazard.png` | `cb4517e267246e50f513cccc3f58e20e1ded59c942ec5dc6833a631b083da511` |
+| `3d_cacao.png` | `3636d901acabdb92899bf33cb0f15119605ff02867a880566c6201f5dfc565cf` |
+| `3d_x04.png` | `164ecf650e72bf2af9808a76794cb8e2f409b9af578dde57f4313ac8479551f6` |
+| `3d_x36.png` | `d65dc226f5b67e9308ccad5e8435718f0466cfcaf70930bdfd1679c251dd840d` |
+| `3d_x66.png` | `b3f8c075fb8fea46efc3d0215137df892a8d964e9a6f12004362fdb90c32eead` |
+| `3d_x87.png` | `5170baa37f25c14da8016bf26a5d9680158293a623ed3ab0fee879ca49d620a6` |
+| `3d_x95.png` | `882f6a6077543cb727b275dccc502794370d81c8805a82db51d506bca7cf8f8b` |
+| `3d_x133.png` | `250c4077809ac6bd8d1b28d479026cbef9d0aa94ffb59b84ffe4d455e4dbc156` |
+| `3d_x163.png` | `78f4c24102e89f18994568ba90255980b18e2e621ddeb36ef7b6113a30fb8ddb` |
+| `3d_x193.png` | `c8fcf67399514d86277637e4bd7274b63f2f49beff69b59666c4de353b989498` |
 | `2d_entrance.png` | `da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39` |
 | `2d_hazard.png` | `b181184b3af1d01769948443e455996eb09de96ced50a8c75d1bcb7aabe4e795` |
 | `2d_cacao.png` | `497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598` |
-| `cmp_cuyabeno_2d_3d.png` | `8dfd5564900827b210449009f39960e86d042bcf951b8b630f69490865853e6d` |
-| `HP001_E2e_engine_gameplay.png` | `0922878583d01a8de6873b72b32a58334d674717f64e8f8b8f6da956562d578a` |
-| `HP001_E2e_engine_laguna.png` | `d006ffbd4c1e1485629dd76c0044e2a689f30826ce15c98a6d6821976c141099` |
-| `HP001_E2e_engine_dosel.png` | `5c7f2e100c202535b5a229ade74653d84671d014e8e34605e724a36e1912ff00` |
-| `HP001_E2e_engine_dock_closeup.png` | `3a5c83a8dd6fe9787595c4d59b4bc92241a5372f41fa1a319d1d5ddb1167e78c` |
-| `HP001_E2e_engine_totem_pods_v4.png` | `96bd8f4886c7ad686fa3bb5eba967c480771ca61f6c9463f7e33dbcc8516477c` |
-| `HP001_E2e_engine_cmp_bg.png` | `68ec80de3df654a16a6f1f7fbb5849538a4bf0b39e0023be91c19ba3e6802100` |
+| `cmp_cuyabeno_2d_3d.png` | `70b0c104f1bdf4405246528a6317ca0118b5463f60db78d681a914f21eb64e43` |
+| `HP001_E2f_engine_gameplay.png` | `a730421803d47f2bab87949e8cb018d7271e54c7046ff3394a0345eb65316f90` |
+| `HP001_E2f_engine_laguna.png` | `02ed21acad50cf95f919f57b831d17e22e1b78c32f961a8dde1e29650ee61f24` |
+| `HP001_E2f_engine_dosel.png` | `e7f3531d43e6743654868ee8310fa2b754b41b985c18e3d3d6226af26a00f55d` |
+| `HP001_E2f_engine_dock_closeup.png` | `9549314eabe91fdce936effa2e77ef3cd6999f4592b99482817b761fb434d89c` |
+| `HP001_E2f_engine_totem_pods_v4.png` | `0ecdaed17de901b045e6c379cb2dabb0574f61435333fd9ccbdef9b36530f5e9` |
+| `HP001_E2f_engine_cmp_bg.png` | `c505dbfd550d6f62ed2c290777ec07e541cfdebf5cc3bb1369b7a250b1a46f6e` |
 | `hp001_selva_silhouette.png` | `0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157` |
 | `hp001_fg_liana.png` | `c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90` |
 | `hp001_jungle_sky_2d.jpg` | `1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac` |
