@@ -151,16 +151,15 @@ P01 / P07 / P10 / P16 son one-way reales (drop-through), no una caja sólida. P0
 
 En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. En 3D el mantle sigue viendo el mask de colisión; sacarlos exige tocar `player_maya.gd`. No se tocó.
 
-## Look (E2i)
+## Look (E2j)
 
-Identidad ya PASABA. QA no reproduce el rim-vs-selva de E2h y da NO PASA solo en legibilidad. Este pase usa **su método** y las coordenadas de cada muestra. Fill Maya **0.90**. `player_maya.gd` no se tocó.
+QA ya PASABA en `ff07d81`. Identidad marca regresión solo en dos puntos: el anillo `#FFC060` cerrado lee como moneda dorada, y la corona de lóbulos anchos lee como lomas. Maya wrap/fill 0.90 y las rocas `#4A4440` no se tocaron. Fill Maya **0.90**. `player_maya.gd` no se tocó.
 
-1. Granos: cara cacao `#6b3a1f`–`#8B4A2B` ≈(157,79,38). Rim naranja subido `#FFC060` (filmic ~255,229,124) **dentro** de un outline oscuro `#2c1810` (filmic ~51,24,14). Medida: mediana de la CARA contra el rim/outline inmediato (2–10 px), no el rim contra la selva lejana. 24/24 vs pin 2D (mediana 4.03 / mín 1.95): mediana de medianas **4.68**, mínimo **4.68**, mín-de-mín **4.84**. C08/C09/C15 sobre tops incluidos.
-2. Maya: p10 del cuerpo **excluyendo 2 px de antialiasing** (y el bleed marrón del hull). ≥4.4 en los **8 x**. Mínimo del sweep **5.96** (x163). x36 **7.66** (QA tenía 4.24). Crema, sin naranja. Wrap cream en layer 2; fill 0.90 no se tocó.
-3. `SELVA_GP_Platforms` oculto en follow cam (ledge visual x −6.4…5.75, sin colisión). Siguen ocultos `PlatformSolid*` / Floor / FloorClutter.
-4. Corona: lóbulos anchos de várzea (coseno de baja frecuencia) + alguna emergente aislada. Sin picos de cordillera.
-5. H04/H05: tronco caído `#4A4440`, cilindro acostado + extremo facetado. Distintos del grano por forma. Sin rim naranja.
-6. Baseline 2D: Cacao.Game (Vite) **no se ejecutó**. Pin fallback `#6b3a1f` (`render.ts:1136–1139`).
+1. Granos: cara cacao `#6b3a1f`–`#8B4A2B`. Rim fino `#CE722E` (filmic ~240,150,52) solo arriba + 3/4, no un anillo cerrado. Outline oscuro fino `#2c1810` (filmic ~51,24,14) completo — es lo que QA usa contra los tops claros. Forma: óvalo vertical con surco central. Medida QA: silueta = max(rim vs fondo local, outline vs fondo local). Fondo local = lip del top para C08/C09/C15/C16; selva para el resto. 24/24 vs pin 2D (mediana 4.03 / mín 3.7): mediana de medianas **7.20**, mínimo **4.12**. C08/C09/C15/C16 = **4.12** (outline vs lip). Stills extra `3d_grains_c07.png`, `3d_grains_c16.png`, `3d_grains_c21.png`.
+2. Maya: p10 del cuerpo **excluyendo 2 px de antialiasing**. ≥4.4 en los **8 x**. Mínimo del sweep **5.96** (x163). Crema, sin naranja. Wrap cream en layer 2; fill 0.90 no se tocó.
+3. `SELVA_GP_Platforms` sigue oculto. H04/H05 siguen tronco caído `#4A4440`.
+4. Corona: casi horizontal, muchas copas redondeadas chicas y medianas de várzea (semicírculos superpuestos), alguna emergente y huecos de cielo chicos. Sin ondas grandes ni picos. El corte queda muy por encima de los tops.
+5. Baseline 2D: Cacao.Game (Vite) **no se ejecutó**. Pin fallback `#6b3a1f` (`render.ts:1136–1139`).
 
 Piso falso y corredor en layer 13 se mantienen. Vulkan Forward+.
 
@@ -170,49 +169,49 @@ Cuerpo = cream/tan. p10 = 10 % más oscuro **después** de erosionar 2 px (AA / 
 
 | x m | still | body RGB | p10 RGB | jungle RGB | cuerpo | p10 | p10 center px | p10 samples px | bg center px |
 |---:|---|---|---|---|---:|---:|---|---|---|
-| 4.54 | `3d_x04.png` | 188,158,97 | 180,147,94 | 23,29,11 | **6.74** | **5.98** | 150.0, 396.0 | (146,370) (154,422) | 156.2, 381.1 |
+| 4.54 | `3d_x04.png` | 188,158,98 | 180,147,94 | 23,29,11 | **6.74** | **5.98** | 150.0, 396.0 | (146,370) (154,422) | 156.2, 381.1 |
 | 36.00 | `3d_x36.png` | 221,174,115 | 222,166,90 | 26,33,14 | **8.18** | **7.66** | 574.5, 380.0 | (574,380) (572,380) (577,380) | 580.4, 380.5 |
 | 66.00 | `3d_x66.png` | 220,173,113 | 221,165,89 | 22,28,12 | **8.51** | **7.96** | 574.1, 380.1 | (574,380) (572,380) (577,380) (572,381) | 580.4, 380.6 |
-| 86.67 | `3d_x87.png` | 221,174,115 | 222,167,90 | 17,22,7 | **9.09** | **8.57** | 574.5, 380.0 | (574,380) (572,380) (577,380) | 580.4, 380.5 |
+| 86.67 | `3d_x87.png` | 221,174,115 | 222,166,90 | 17,22,7 | **9.09** | **8.50** | 574.5, 380.0 | (574,380) (572,380) (577,380) | 580.4, 380.5 |
 | 95.33 | `3d_x95.png` | 199,166,113 | 189,153,101 | 28,34,16 | **7.09** | **6.15** | 581.0, 420.0 | (581,420) | 583.7, 402.6 |
 | 133.33 | `3d_x133.png` | 199,166,112 | 189,153,101 | 27,35,15 | **7.05** | **6.11** | 581.0, 420.0 | (581,420) | 583.7, 402.6 |
 | 162.67 | `3d_x163.png` | 199,166,112 | 188,152,101 | 29,36,16 | **6.95** | **5.96** | 581.0, 420.0 | (581,420) | 582.6, 416.9 |
 | 193.33 | `3d_x193.png` | 228,180,93 | 212,163,82 | 27,34,15 | **8.57** | **7.14** | 972.8, 412.2 | (973,420) (972,422) (973,396) (973,424) | 967.5, 402.4 |
 
-`3d_cacao` p10 **7.96** @ (574.5, 380.0). Los 8 x p10 ≥4.4. JSON: `e2i_contrast.json`.
+`3d_cacao` p10 **7.96** @ (574.1, 380.1). Los 8 x p10 ≥4.4. JSON: `e2j_contrast.json`.
 
-### Contraste granos C00–C23 (QA: cara vs fondo local inmediato)
+### Contraste granos C00–C23 (QA: silueta max(rim, outline) vs fondo local)
 
-Cara = cacao interior. Fondo = rim `#FFC060` (filmic 255,229,124) que rodea la cara; el outline `#2c1810` queda por fuera. Pin 2D a vencer: mediana 4.03 / mín 1.95.
+Rim = `#CE722E` filmic (240,150,52), 3/4 superior. Outline = `#2c1810` filmic (51,24,14), hull completo. Fondo local = lip tan en C08/C09/C15/C16; selva en el resto. Silueta = el máximo de los dos contrastes. Pin 2D a vencer: mediana 4.03 / mín 3.7.
 
-| id | still | face RGB | bg RGB | med | min | face center px | face bbox | face samples px | bg center px |
-|---|---|---|---|---:|---:|---|---|---|---|
-| C00 | `3d_x04.png` | 154,78,37 | 255,229,124 | **4.80** | 4.89 | 203.9, 295.6 | 203,287–206,301 | (203,295) (203,287) (206,301) | 204.4, 293.6 |
-| C01 | `3d_x04.png` | 155,78,37 | 255,229,124 | **4.77** | 4.93 | 288.6, 290.6 | 280,278–297,299 | (289,291) (280,285) (297,282) | 290.0, 290.4 |
-| C02 | `3d_x04.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 365.6, 291.8 | 357,279–374,305 | (366,292) (357,288) (374,288) | 365.6, 291.6 |
-| C03 | `3d_x04.png` | 156,78,38 | 255,229,124 | **4.74** | 4.93 | 336.6, 80.3 | 328,71–345,92 | (337,80) (328,74) (345,75) | 334.7, 78.5 |
-| C04 | `3d_x04.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 769.3, 82.9 | 761,71–778,96 | (769,83) (761,78) (778,79) | 769.9, 82.6 |
-| C05 | `3d_x36.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 532.6, 300.4 | 524,288–541,313 | (533,300) (524,297) (541,297) | 532.6, 300.2 |
-| C06 | `3d_x36.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 618.2, 263.2 | 610,250–627,276 | (618,263) (610,259) (627,261) | 617.8, 263.3 |
-| C07 | `3d_x36.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 703.6, 300.8 | 695,288–712,314 | (704,301) (695,298) (712,297) | 704.0, 300.6 |
-| C08 | `3d_cacao.png` | 157,79,38 | 255,229,124 | **4.68** | 4.84 | 264.4, 580.7 | 256,569–273,591 | (264,581) (256,577) (273,578) | 264.2, 577.8 |
-| C09 | `3d_cacao.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 411.7, 579.3 | 403,568–420,591 | (412,579) (403,577) (420,575) | 412.3, 579.0 |
-| C10 | `3d_x66.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 596.8, 302.1 | 588,289–605,315 | (597,302) (588,300) (605,298) | 596.8, 302.1 |
-| C11 | `3d_x87.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 192.3, 376.8 | 183,364–201,389 | (192,377) (183,375) (201,374) | 192.5, 376.7 |
-| C12 | `3d_x87.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 532.5, 291.5 | 524,279–541,304 | (532,292) (524,288) (541,288) | 532.5, 291.8 |
-| C13 | `3d_x95.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 425.6, 291.7 | 417,279–434,305 | (426,292) (417,288) (434,288) | 425.4, 292.0 |
-| C14 | `3d_x95.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 596.7, 292.1 | 588,279–605,305 | (597,292) (588,289) (605,288) | 597.0, 292.1 |
-| C15 | `3d_x109.png` | 155,78,37 | 255,229,124 | **4.77** | 4.93 | 512.0, 422.4 | 504,417–520,430 | (512,422) (504,417) (520,417) | 511.9, 426.2 |
-| C16 | `3d_x109.png` | 155,78,37 | 255,229,124 | **4.77** | 4.93 | 639.5, 422.3 | 631,417–648,430 | (639,422) (631,417) (648,417) | 639.5, 426.8 |
-| C17 | `3d_hazard.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 148.9, 343.5 | 140,331–158,356 | (149,344) (140,340) (158,341) | 148.4, 343.3 |
-| C18 | `3d_hazard.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 489.7, 299.5 | 481,287–498,312 | (490,299) (481,297) (498,295) | 490.1, 297.5 |
-| C19 | `3d_hazard.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 915.1, 468.0 | 906,455–924,481 | (915,468) (906,470) (924,466) | 914.9, 468.2 |
-| C20 | `3d_hazard.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 1171.8, 382.3 | 1163,370–1181,395 | (1172,382) (1163,379) (1181,380) | 1171.4, 382.2 |
-| C21 | `3d_x163.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 575.4, 294.5 | 567,282–584,307 | (575,295) (567,291) (584,292) | 574.9, 294.5 |
-| C22 | `3d_x163.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 918.3, 250.5 | 910,238–927,263 | (918,251) (910,246) (927,247) | 918.4, 250.1 |
-| C23 | `3d_x193.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 938.9, 301.3 | 930,289–948,314 | (939,301) (930,299) (948,299) | 938.7, 301.7 |
+| id | still | rim RGB | outline RGB | bg RGB | rim | outline | sil | gana | sil center px | sil bbox | sil samples px | bg center px |
+|---|---|---|---|---|---:|---:|---:|---|---|---|---|---|
+| C00 | `3d_x04.png` | 240,150,52 | 53,25,14 | 24,30,12 | 7.41 | 1.05 | **7.41** | rim | 207.8, 281.4 | 202,273–218,298 | (205,281) (202,287) (209,273) (218,278) (203,298) | 205.8, 284.8 |
+| C01 | `3d_x04.png` | 240,150,52 | 52,24,14 | 23,30,11 | 7.43 | 1.05 | **7.43** | rim | 291.3, 282.9 | 279,268–298,293 | (297,283) (279,283) (290,268) (298,281) (280,293) | 291.0, 289.3 |
+| C02 | `3d_x04.png` | 240,150,52 | 51,24,14 | 23,30,12 | 7.43 | 1.04 | **7.43** | rim | 365.5, 283.7 | 356,273–375,298 | (359,282) (356,287) (364,273) (375,286) (357,298) | 365.5, 288.7 |
+| C03 | `3d_x04.png` | 240,150,52 | 51,24,14 | 33,25,1 | 7.57 | 1.06 | **7.57** | rim | 345.0, 75.6 | 342,66–346,86 | (345,76) (342,66) (346,73) (345,86) | 349.7, 66.0 |
+| C04 | `3d_x36.png` | 240,150,52 | 51,24,14 | 28,34,14 | 7.10 | 1.01 | **7.10** | rim | 190.3, 204.6 | 179,194–198,220 | (194,202) (179,214) (187,194) (198,209) (180,220) | 187.2, 214.0 |
+| C05 | `3d_grains_c07.png` | 240,150,52 | 51,24,14 | 28,35,15 | 7.03 | 1.01 | **7.03** | rim | 468.8, 356.0 | 460,346–478,371 | (463,353) (460,357) (467,346) (478,357) (460,371) | 469.0, 361.8 |
+| C06 | `3d_grains_c07.png` | 240,150,52 | 51,24,14 | 25,32,13 | 7.27 | 1.02 | **7.27** | rim | 553.8, 319.2 | 545,309–563,334 | (548,316) (545,320) (552,309) (563,320) (545,334) | 553.9, 324.4 |
+| C07 | `3d_x36.png` | 240,150,52 | 51,24,14 | 25,32,13 | 7.27 | 1.02 | **7.27** | rim | 703.7, 292.7 | 694,282–713,307 | (698,289) (694,297) (702,282) (713,295) (695,307) | 703.6, 297.6 |
+| C08 | `3d_x66.png` | 240,150,52 | 51,24,14 | 161,120,60 | 1.73 | 4.12 | **4.12** | outline | 251.1, 580.1 | 250,567–254,591 | (250,580) (250,572) (252,567) (254,591) (251,591) | 251.9, 592.5 |
+| C09 | `3d_x66.png` | 240,150,52 | 51,24,14 | 161,120,60 | 1.73 | 4.12 | **4.12** | outline | 398.5, 581.0 | 397,567–402,591 | (398,581) (397,573) (399,567) (402,590) (399,591) | 400.0, 592.4 |
+| C10 | `3d_x66.png` | 240,150,52 | 51,24,14 | 24,30,13 | 7.41 | 1.04 | **7.41** | rim | 596.8, 294.3 | 587,283–606,309 | (603,291) (587,298) (596,283) (606,296) (588,309) | 596.6, 299.5 |
+| C11 | `3d_x87.png` | 240,150,52 | 51,24,14 | 25,30,14 | 7.39 | 1.04 | **7.39** | rim | 192.1, 368.8 | 183,358–202,383 | (186,366) (183,370) (191,358) (202,374) (184,383) | 192.4, 373.8 |
+| C12 | `3d_x87.png` | 240,150,52 | 51,24,14 | 16,21,6 | 8.05 | 1.13 | **8.05** | rim | 532.5, 283.6 | 523,273–542,298 | (526,281) (523,287) (530,273) (542,287) (524,298) | 532.5, 288.6 |
+| C13 | `3d_x95.png` | 240,150,52 | 51,24,14 | 19,24,8 | 7.85 | 1.10 | **7.85** | rim | 425.5, 283.7 | 416,273–435,298 | (432,282) (416,287) (424,273) (435,287) (417,298) | 425.5, 288.6 |
+| C14 | `3d_x95.png` | 240,150,52 | 51,24,14 | 19,25,9 | 7.79 | 1.09 | **7.79** | rim | 596.7, 284.4 | 587,273–606,299 | (590,282) (587,288) (596,273) (606,286) (588,299) | 596.6, 289.4 |
+| C15 | `3d_x109.png` | 240,150,52 | 51,24,14 | 161,120,60 | 1.73 | 4.12 | **4.12** | outline | 519.3, 429.1 | 509,418–523,435 | (519,429) (509,434) (522,418) (523,418) (509,435) | 517.5, 437.0 |
+| C16 | `3d_x109.png` | 240,150,52 | 51,24,14 | 161,120,60 | 1.73 | 4.12 | **4.12** | outline | 639.5, 429.5 | 629,418–650,435 | (639,435) (629,418) (650,418) (632,435) | 639.5, 436.7 |
+| C17 | `3d_hazard.png` | 240,150,52 | 51,24,14 | 38,45,23 | 6.20 | 1.15 | **6.20** | rim | 148.5, 335.2 | 139,325–158,350 | (142,334) (139,340) (146,325) (158,338) (140,350) | 148.6, 340.7 |
+| C18 | `3d_hazard.png` | 240,150,52 | 51,24,14 | 25,33,13 | 7.21 | 1.01 | **7.21** | rim | 489.4, 291.4 | 480,281–499,306 | (484,288) (480,296) (488,281) (499,293) (481,306) | 489.5, 294.5 |
+| C19 | `3d_grains_c21.png` | 240,150,52 | 51,24,14 | 37,44,22 | 6.29 | 1.14 | **6.29** | rim | 41.7, 329.9 | 33,321–51,346 | (46,326) (33,331) (40,321) (51,333) (33,346) | 41.9, 336.6 |
+| C20 | `3d_grains_c21.png` | 240,150,52 | 51,24,14 | 36,43,22 | 6.37 | 1.12 | **6.37** | rim | 298.1, 246.9 | 288,234–306,259 | (304,246) (288,243) (294,234) (306,248) (289,259) | 302.7, 249.4 |
+| C21 | `3d_grains_c21.png` | 240,150,52 | 51,24,14 | 26,33,14 | 7.19 | 1.01 | **7.19** | rim | 639.5, 329.5 | 630,319–649,344 | (633,327) (630,333) (637,319) (649,333) (631,344) | 639.5, 335.0 |
+| C22 | `3d_grains_c21.png` | 240,150,52 | 51,24,14 | 34,42,20 | 6.47 | 1.10 | **6.47** | rim | 981.8, 285.6 | 972,275–991,300 | (976,282) (972,290) (980,275) (991,287) (973,300) | 981.6, 290.8 |
+| C23 | `3d_x193.png` | 240,150,52 | 51,24,14 | 38,45,23 | 6.20 | 1.15 | **6.20** | rim | 938.9, 293.4 | 929,283–948,308 | (933,290) (929,300) (937,283) (948,294) (930,308) | 938.7, 298.7 |
 
-Mediana de medianas **4.68**. Mínimo **4.68**. Mín-de-mín **4.84**. Pin 2D **4.03 / 1.95**. Cacao.Game no se ejecutó. Samples extra en `e2i_contrast.json`.
+Mediana de medianas **7.20**. Mínimo **4.12**. Mín-de-mín **4.12**. Pin 2D **4.03 / 3.7**. C08/C09/C15/C16 = outline vs lip **4.12**. Stills extra C07/C16/C21. Cacao.Game no se ejecutó. Samples extra en `e2j_contrast.json`.
 
 ## Checks
 
@@ -225,39 +224,42 @@ Mediana de medianas **4.68**. Mínimo **4.68**. Mín-de-mín **4.84**. Pin 2D **
 | `player_maya.gd` | no tocado |
 | capturas | Vulkan 1.4 Forward+ (llvmpipe), no OpenGL |
 | contraste Maya | 8 x cuerpo ≥4.4; p10 (sin AA) en los 8 x, mín **5.96** (x163); x36 **7.66** |
-| contraste granos | 24/24 cara vs rim local ≥4.03 / ≥1.95. Mediana de medianas **4.68**, mín **4.68** |
+| contraste granos | 24/24 silueta max(rim, outline) vs fondo local ≥4.03 / ≥3.7. Mediana **7.20**, mín **4.12** (C08/C09/C15) |
 
 ## sha256
 
-SHA de E2h 3d_* stills: **reemplazados**. HEAD de este commit de stills.
+SHA de E2i 3d_* stills: **reemplazados**. HEAD de este commit de stills.
 
 | archivo | sha256 |
 |---|---|
-| `3d_entrance.png` | `70b059680a19306409665f7ca999496a913a01061d25843cc79983c097cd1c1c` |
-| `3d_hazard.png` | `a9bd0cec80afbfa9c95927050ce80cfb43079ea9cf12f2065e5cfa1f2b5c2d60` |
-| `3d_cacao.png` | `16ab7a042eed3f358068c3f73feeaf7e11a469d430861eaaf832f3e35390c7d0` |
-| `3d_x04.png` | `adf48f68d754199a594256b4884ab74cf9c9bfa64f762b9131c03cf0d9721481` |
-| `3d_x36.png` | `40b3bc872998dc3e0af886d703013fcc746d1c3f99c131d6074b8de49ab385dd` |
-| `3d_x66.png` | `13eaadb2b74be665f69b79b07e60562b96744b28821b121c29374c37b93d526d` |
-| `3d_x87.png` | `d4f521ab4ed8b903c45898908de870dabe7c80063721e9775bee3e91a9d9977c` |
-| `3d_x95.png` | `df3cbdca209dc0850f74cd10e3ef045dc2226a2ba0eb912c04e5a3d2923afb38` |
-| `3d_x133.png` | `0748d90c061b0f129b54499bdb8d73ca323d834e493ebf3334af6c04dbcf65d7` |
-| `3d_x163.png` | `3af28e7aed0f22552cf220ca7365e294a73185a6c40c4e1e8377b9f7f384b437` |
-| `3d_x193.png` | `2baa8074e97c0764af1f255fb02c140aa170373c6a90e64543a51a935d49cc4c` |
-| `3d_x109.png` | `7adc3efc166dea861c20cd21388ff9f8c472b43847f4c82b0ede263132715f91` |
+| `3d_entrance.png` | `db1cebfc4c6e5f6bedfa6e2f3c90eb5aede3e22a29809e7888f604af761fad25` |
+| `3d_hazard.png` | `a48ebce376473cfe313963a9dabdea57c2a547f5f47d81c3be04fc9c309a1885` |
+| `3d_cacao.png` | `c7e4d38117c4f68bffb5fc626bba5a6653329f45cc65b1122a9e24be96c04ce4` |
+| `3d_x04.png` | `918db0f8be3e2bfa2e32b317e47bc676294d9fd7f280b5a530641ffa2c8dcdf5` |
+| `3d_x36.png` | `0c90c85b8386833126ebb34bfe849fa091c4c2cfce1ad3a755e84b952d9edccc` |
+| `3d_x66.png` | `8a1936d4fc6da6c7ad58dda552896e7ff3cf867c70b8b4bbfb4ceb1d3a9987bd` |
+| `3d_x87.png` | `bccdea87bffe410d3e203d580fe6f43f0664ac607af0661bef8654cec84b6381` |
+| `3d_x95.png` | `b042a564258eab28e25ae0705369f94c554ab8ba2712087a93860755ae89319f` |
+| `3d_x133.png` | `7ebd23024987b58cc8506d7e5d569e5774f6b7d736b662e2a25762f2a70a13d4` |
+| `3d_x163.png` | `b330688b7ccf8f54b6e140756a4178f77c755481bdc7644af02d8b05884e6986` |
+| `3d_x193.png` | `f01c8de20487d1f8eca918b15a2549668269a92caaf03722b2b43df0e97bbef9` |
+| `3d_x109.png` | `52a4cb318a644f36f6298ed6492d280d713ef0917743b5d9566542cb18d30dfb` |
+| `3d_grains_c07.png` | `5fb3fdf4d43924e4e38cb4250213f98f1f64609e072f59a2b1740feadde74272` |
+| `3d_grains_c16.png` | `4da293d136e282b5f565f2af8f43733b12591d7132415999bd0a8fac572d874a` |
+| `3d_grains_c21.png` | `b33fc55d45da200cbe0d42c591a7293ac1bd303c5eba53055d5e037d04c0b8db` |
 | `2d_entrance.png` | `da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39` |
 | `2d_hazard.png` | `b181184b3af1d01769948443e455996eb09de96ced50a8c75d1bcb7aabe4e795` |
 | `2d_cacao.png` | `497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598` |
 | `2d_grains_c06.png` | `cbce134e3cd6f599eb98431c4b906ddd2f872e16f0061fe89544ed0c549c9315` |
 | `2d_grains_c08.png` | `fb570ec524a5092b79b79fe2136c3a5d15231d4f87623ff70d6798ebefce07d4` |
 | `2d_grains_c16.png` | `81d83b681de4728f0f6dbace8b00c1b9e295bb376c82b60c5665b705fe5743ae` |
-| `cmp_cuyabeno_2d_3d.png` | `3d2928eeffc9c51694f4e17d2d428f7773ce6398ee16cc0a58cbb5d2e46afa25` |
-| `HP001_E2i_engine_gameplay.png` | `4cef83eb78a1c53f6aaf7281d540eadea5caa63651667bc237533b587578d218` |
-| `HP001_E2i_engine_laguna.png` | `d3339c0adf1ffd294caccc4a0b0adaf44e43b6501e9078ae7272edf971eb3f4a` |
-| `HP001_E2i_engine_dosel.png` | `b4bf61cc0b7b9d40bdd8c72f72053d0427c531a138eb54ca4c21e54953097f8a` |
-| `HP001_E2i_engine_dock_closeup.png` | `1740396ee33f99de4763d27fa3dd9312c37215cdcc27073355fc71b5043fa142` |
-| `HP001_E2i_engine_totem_pods_v4.png` | `96c4cc01bb2772b6127f14f3446303b21e52532e69c32809c2b8bf7d73aefdc0` |
-| `HP001_E2i_engine_cmp_bg.png` | `bbd1e98392214ac824b8678b15cdf8360c3d42b8a7b03e2dbca2af994260f06c` |
+| `cmp_cuyabeno_2d_3d.png` | `7b86447b4f76a2d802fb89378e6cfe1ff502242341624d459c79613e43d82e4f` |
+| `HP001_E2j_engine_gameplay.png` | `bce9926ebead29f1ea1991644f40139baf5f3ea60b4930c8215362a5f29f700d` |
+| `HP001_E2j_engine_laguna.png` | `a4fce65aa17a1dccdf464e8a284b146f25b6438df3c8c1d7dedccf163043c2f3` |
+| `HP001_E2j_engine_dosel.png` | `c27154c092b3020610eda621763ff067636863f5832564efb61c6e977dbe8e8e` |
+| `HP001_E2j_engine_dock_closeup.png` | `5bb13b09f0fa3cc560852316e3c00d358d29e80de41f0d5a7d55497c640933d7` |
+| `HP001_E2j_engine_totem_pods_v4.png` | `44be09c922945515e0ef47eeb3505be846b1a6e8ecb48ddd4331846c58fcbf6b` |
+| `HP001_E2j_engine_cmp_bg.png` | `55c1d34263bd9a007956c41c42c668710f210836de9d4ba5d11f927b53614b42` |
 | `hp001_selva_silhouette.png` | `0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157` |
 | `hp001_fg_liana.png` | `c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90` |
 | `hp001_jungle_sky_2d.jpg` | `1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac` |
