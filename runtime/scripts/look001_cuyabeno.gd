@@ -361,6 +361,12 @@ func _bind_look_meshes() -> void:
 func _walk_look(n: Node) -> void:
 	if n.name.begins_with("SELVA_GP_Oneway"):
 		n.visible = false
+	# Feel-ledge crate (4×1×3 at x=6.5) and floor clutter sit on P00 and
+	# cover Maya at spawn. Play uses selva-1 P00, not the LOOK greybox slab.
+	if n.name.begins_with("SELVA_GP_PlatformSolid") \
+			or n.name.begins_with("SELVA_GP_FloorClutter") \
+			or n.name == "SELVA_GP_Floor":
+		n.visible = false
 	if n is MeshInstance3D:
 		var mi := n as MeshInstance3D
 		if n.name.begins_with("LOOK001_Blackwater"):
