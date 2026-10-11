@@ -24,7 +24,15 @@ const COL_POLE := Color("6a5a4a")
 const COL_POLE_ON := Color("c4a07a")
 const COL_SECRET := Color("f0c020")
 const COL_SKY := Color("1a100c")
-const COL_MIST := Color("2a1812")
+const COL_MIST := Color("c48458")
+const TOTEM_GLB := "res://models/totem_warp_cuyabeno.glb"
+const COL_WOOD := Color("654B34")
+const COL_WOOD_DARK := Color("3E2E21")
+const COL_POD_Y := Color("D6AB3D")
+const COL_POD_O := Color("CE722E")
+const COL_POD_R := Color("A64B36")
+const COL_BEAM := Color("FFD16A")
+const COL_VINE := Color("3C5634")
 const FALL_Y := -(80.0 + 42.0) * PX
 
 var _layout: Dictionary = {}
@@ -169,15 +177,15 @@ func _style_light() -> void:
 	if env_node and env_node.environment:
 		var env := env_node.environment
 		env.background_mode = Environment.BG_COLOR
-		env.background_color = COL_SKY
+		env.background_color = Color("5c4032")
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 		env.ambient_light_color = COL_SKY
 		env.ambient_light_energy = 0.16
 		env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 		env.fog_enabled = true
-		env.fog_light_color = COL_SKY
-		env.fog_density = 0.01
-		env.fog_aerial_perspective = 0.0
+		env.fog_light_color = Color("c4895a")
+		env.fog_density = 0.02
+		env.fog_aerial_perspective = 0.42
 		env.volumetric_fog_enabled = false
 		env.glow_enabled = false
 
@@ -367,24 +375,20 @@ func _add_pole(visual: Node3D, k: Dictionary) -> void:
 	var secret := bool(k["warp_random"])
 	var pole := MeshInstance3D.new()
 	pole.name = String(k["id"])
-	var box := BoxMesh.new()
-	# 2D fallback draws an 8×72 px post inside the 36×72 hitbox.
-	box.size = Vector3(8.0 * PX, float(k["px"]["h"]) * PX, 0.22)
-	pole.mesh = box
-	pole.position = center
-	pole.material_override = _flat(COL_SECRET if secret else COL_POLE, 1.0)
+	if secret:
+		# Hitbox stays the layout AABB. The mesh is the Kakaw post, not a collider.
+		var base_y := center.y - float(k["size_m"][1]) * 0.5
+		pole.position = Vector3(center.x, base_y, center.z)
+		_mount_kakaw_totem(pole)
+	else:
+		var box := BoxMesh.new()
+		# 2D fallback draws an 8×72 px post inside the 36×72 hitbox.
+		box.size = Vector3(8.0 * PX, float(k["px"]["h"]) * PX, 0.22)
+		pole.mesh = box
+		pole.position = center
+		pole.material_override = _flat(COL_POLE, 1.0)
 	pole.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	visual.add_child(pole)
-	if secret:
-		var beam := MeshInstance3D.new()
-		beam.name = "SecretBeam"
-		var beam_box := BoxMesh.new()
-		beam_box.size = Vector3(0.7, 2.0, 0.08)
-		beam.mesh = beam_box
-		beam.position = center + Vector3(0.0, 2.2, 0.05)
-		beam.material_override = _flat(COL_SECRET, 0.82)
-		beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		visual.add_child(beam)
 	var spawn: Array = k["spawn_feet_m"]
 	_poles.append({
 		"id": String(k["id"]),
@@ -394,6 +398,156 @@ func _add_pole(visual: Node3D, k: Dictionary) -> void:
 		"mesh": pole,
 		"spawn": Vector3(float(spawn[0]), float(spawn[1]), float(spawn[2])),
 	})
+
+
+func _mount_kakaw_totem(anchor: Node3D) -> void:
+	var spawned := false
+	if ResourceLoader.exists(TOTEM_GLB):
+		var packed: Resource = load(TOTEM_GLB)
+		if packed is PackedScene:
+			var inst := (packed as PackedScene).instantiate()
+			inst.name = "TotemWarpCuyabeno"
+			anchor.add_child(inst)
+			_recolor_totem(inst)
+			var spawn := _find_named(inst, "VFX_WarpBeam_Spawn")
+			var origin := Marker3D.new()
+			origin.name = "BeamOrigin"
+			if spawn:
+				spawn.add_child(origin)
+			else:
+				origin.position = Vector3(0.0, 3.03, 0.0)
+				anchor.add_child(origin)
+			_add_warm_beam(origin)
+			spawned = true
+	if not spawned:
+		_add_carved_fallback(anchor)
+		var origin := Marker3D.new()
+		origin.name = "BeamOrigin"
+		origin.position = Vector3(0.0, 3.03, 0.0)
+		anchor.add_child(origin)
+		_add_warm_beam(origin)
+	_add_yor_pods(anchor)
+
+
+func _recolor_totem(node: Node) -> void:
+	var n := node.name.to_lower()
+	if "lod1" in n or "maya" in n or "stub" in n:
+		if node is Node3D:
+			(node as Node3D).visible = false
+		return
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if mi.mesh:
+			for s in mi.mesh.get_surface_count():
+				var kind := _totem_surface_kind(mi.get_active_material(s))
+				if kind == "cyan":
+					mi.set_surface_override_material(s, _flat(COL_WOOD_DARK, 1.0))
+				elif kind == "gold":
+					mi.set_surface_override_material(s, _flat(Color("c4a05a"), 1.0))
+				elif kind == "vine":
+					mi.set_surface_override_material(s, _flat(COL_VINE, 1.0))
+				else:
+					mi.set_surface_override_material(s, _flat(COL_WOOD, 1.0))
+	for child in node.get_children():
+		_recolor_totem(child)
+
+
+func _totem_surface_kind(mat: Material) -> String:
+	if mat == null:
+		return "wood"
+	var label := mat.resource_name.to_lower()
+	if "cyan" in label:
+		return "cyan"
+	if "gold" in label:
+		return "gold"
+	if "liana" in label or "vine" in label:
+		return "vine"
+	if mat is StandardMaterial3D:
+		var em: Color = (mat as StandardMaterial3D).emission
+		if em.b > em.r + 0.25 and em.g > em.r + 0.15:
+			return "cyan"
+	if "stone" in label:
+		return "wood"
+	return "wood"
+
+
+func _find_named(node: Node, wanted: String) -> Node:
+	if node.name == wanted:
+		return node
+	for child in node.get_children():
+		var found := _find_named(child, wanted)
+		if found:
+			return found
+	return null
+
+
+func _add_warm_beam(origin: Node3D) -> void:
+	# Gold cone only. The LOOK preview's cyan core stays out of the river.
+	var mesh := CylinderMesh.new()
+	mesh.bottom_radius = 0.07
+	mesh.top_radius = 0.34
+	mesh.height = 5.6
+	mesh.radial_segments = 8
+	var beam := MeshInstance3D.new()
+	beam.name = "WarmBeam"
+	beam.mesh = mesh
+	beam.position = Vector3(0.0, mesh.height * 0.5, 0.0)
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://shaders/warp_beam.gdshader")
+	mat.set_shader_parameter("beam_color", COL_BEAM)
+	# Additive. Above ~0.9 the gold clips to white and the cone reads as a bar.
+	mat.set_shader_parameter("strength", 0.72)
+	mat.set_shader_parameter("height_m", mesh.height)
+	beam.material_override = mat
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	origin.add_child(beam)
+
+
+func _add_yor_pods(anchor: Node3D) -> void:
+	# Camera looks from +Z. Pods sit on the left face so they read beside Maya.
+	var pods := [
+		{"at": Vector3(-0.58, 2.22, 0.46), "color": COL_POD_Y},
+		{"at": Vector3(-0.50, 1.42, 0.50), "color": COL_POD_O},
+		{"at": Vector3(-0.62, 0.68, 0.44), "color": COL_POD_R},
+	]
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.2
+	sphere.height = 0.62
+	sphere.radial_segments = 10
+	sphere.rings = 6
+	for i in pods.size():
+		var spec: Dictionary = pods[i]
+		var pod := MeshInstance3D.new()
+		pod.name = "PodYOR%d" % i
+		pod.mesh = sphere
+		pod.position = spec["at"]
+		pod.material_override = _flat(spec["color"], 1.0)
+		pod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		anchor.add_child(pod)
+
+
+func _add_carved_fallback(anchor: Node3D) -> void:
+	var wood := _flat(COL_WOOD, 1.0)
+	var dark := _flat(COL_WOOD_DARK, 1.0)
+	var parts := [
+		{"at": Vector3(0, 0.18, 0), "size": Vector3(0.72, 0.36, 0.72), "mat": dark},
+		{"at": Vector3(0, 0.95, 0), "size": Vector3(0.46, 1.10, 0.46), "mat": wood},
+		{"at": Vector3(0, 1.55, 0), "size": Vector3(0.62, 0.12, 0.62), "mat": dark},
+		{"at": Vector3(0, 2.08, 0), "size": Vector3(0.38, 0.90, 0.38), "mat": wood},
+		{"at": Vector3(0, 2.55, 0), "size": Vector3(0.52, 0.12, 0.52), "mat": dark},
+	]
+	for i in parts.size():
+		var spec: Dictionary = parts[i]
+		var mesh := MeshInstance3D.new()
+		mesh.name = "CarvedPost%d" % i
+		var box := BoxMesh.new()
+		box.size = spec["size"]
+		mesh.mesh = box
+		mesh.position = spec["at"]
+		mesh.material_override = spec["mat"]
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		anchor.add_child(mesh)
 
 
 func _make_bean(bean_name: String, center: Vector3, bean_scale: Vector3, fill: Material, edge: Material) -> MeshInstance3D:
@@ -421,33 +575,207 @@ func _make_bean(bean_name: String, center: Vector3, bean_scale: Vector3, fill: M
 
 
 func _add_backdrop(visual: Node3D) -> void:
-	var wall := MeshInstance3D.new()
-	wall.name = "RiverBackdrop"
-	var box := BoxMesh.new()
-	box.size = Vector3(LEVEL_W_PX * PX + 16.0, 48.0, 0.4)
-	wall.mesh = box
-	wall.position = Vector3(LEVEL_W_PX * PX * 0.5, 16.0, -6.0)
-	wall.material_override = _flat(COL_SKY, 1.0)
-	wall.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	visual.add_child(wall)
+	# Warm sky behind a broken canopy line. The mass stays dark where Maya
+	# and the beans sit; the crowns poke into the fog so the frame is not a wall.
+	var sky := SurfaceTool.new()
+	var far := SurfaceTool.new()
+	var mass_a := SurfaceTool.new()
+	var mass_b := SurfaceTool.new()
+	var trunk := SurfaceTool.new()
+	var cane := SurfaceTool.new()
+	sky.begin(Mesh.PRIMITIVE_TRIANGLES)
+	far.begin(Mesh.PRIMITIVE_TRIANGLES)
+	mass_a.begin(Mesh.PRIMITIVE_TRIANGLES)
+	mass_b.begin(Mesh.PRIMITIVE_TRIANGLES)
+	trunk.begin(Mesh.PRIMITIVE_TRIANGLES)
+	cane.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var span := LEVEL_W_PX * PX + 36.0
+	_stamp_box(sky, Vector3(LEVEL_W_PX * PX * 0.5, 22.0, -30.0), Vector3(span, 48.0, 0.4))
+	var x := -6.0
+	var i := 0
+	while x < LEVEL_W_PX * PX + 8.0:
+		var top := _foliage_top(x)
+		var peak := top + 2.4 + float(i % 5) * 1.15
+		var mass: SurfaceTool = mass_a if i % 2 == 0 else mass_b
+		var y := 7.0
+		while y < top:
+			var rx := 4.6 + float(i % 3) * 0.45
+			_disc(mass, Vector3(x + float(i % 2) * 0.7, y, -8.2), rx, 3.4)
+			y += 4.6
+		_disc(mass, Vector3(x + 1.1, peak - 1.8, -7.4), 3.8, 2.9)
+		_disc(far, Vector3(x + 2.4, peak + 1.6, -16.0 - float(i % 3)), 5.2, 3.6)
+		_disc(far, Vector3(x - 1.0, peak + 4.2, -20.0), 4.4, 2.8)
+		if not _near_shot_x(x + 0.8) and not _near_bean_x(x + 0.8):
+			var th := peak - 3.0
+			_stamp_box(trunk, Vector3(x + 0.8, 4.0 + th * 0.5, -6.4), Vector3(0.55, th, 0.22))
+		x += 5.4
+		i += 1
+	var cx := 1.5
+	var ci := 0
+	while cx < LEVEL_W_PX * PX:
+		for k in 4:
+			var lean := 0.55 if (k + ci) % 2 == 0 else -0.4
+			var h := 2.2 + float((k + ci) % 3) * 0.55
+			_cane(cane, Vector3(cx + float(k) * 0.34, 4.02, -1.55), h, lean)
+		cx += 11.0
+		ci += 1
+	for fx in [26.0, 68.0, 118.0, 158.0]:
+		for k in 3:
+			_cane(cane, Vector3(fx + float(k) * 0.4, 4.1, 3.1), 2.6 + float(k) * 0.35, 0.3 if k != 1 else -0.35)
+	_commit_layer(visual, "SelvaSky", sky, _sil(Color("6a4530")))
+	_commit_layer(visual, "SelvaFar", far, _sil(Color("1e3428")))
+	# Near mass stays a warm dark so Maya and the bean rim hold 4.4.
+	# The green is the far crown layer, the lianas and the cane.
+	_commit_layer(visual, "SelvaMassA", mass_a, _flat(Color("14110e"), 1.0))
+	_commit_layer(visual, "SelvaMassB", mass_b, _flat(Color("1c1612"), 1.0))
+	_commit_layer(visual, "SelvaTrunk", trunk, _flat(Color("3a2c22"), 1.0))
+	_commit_layer(visual, "SelvaCane", cane, _flat(Color("b89658"), 1.0))
+	_add_foreground_lianas(visual)
+
+
+func _foliage_top(x: float) -> float:
+	var top := 14.8
+	var guards := [
+		[4.54, 14.6],
+		[57.0, 17.2],
+		[96.2, 25.2],
+		[136.5, 14.6],
+		[194.5, 25.2],
+	]
+	for g in guards:
+		if absf(x - float(g[0])) < 2.6:
+			top = maxf(top, float(g[1]))
+	for raw in _layout["pickups"]:
+		var p: Array = raw["center_m"]
+		if absf(x - float(p[0])) < 1.7:
+			top = maxf(top, float(p[1]) + 1.2)
+	return top
+
+
+func _near_bean_x(x: float) -> bool:
+	for raw in _layout["pickups"]:
+		var p: Array = raw["center_m"]
+		if absf(x - float(p[0])) < 1.15:
+			return true
+	return false
+
+
+func _near_shot_x(x: float) -> bool:
+	for s in [4.54, 57.0, 96.2, 136.5, 194.5]:
+		if absf(x - s) < 1.7:
+			return true
+	return false
+
+
+func _disc(st: SurfaceTool, c: Vector3, rx: float, ry: float) -> void:
+	var n := 12
+	var prev := c + Vector3(rx, 0.0, 0.0)
+	for i in n:
+		var a := TAU * float(i + 1) / float(n)
+		var p := c + Vector3(cos(a) * rx, sin(a) * ry, 0.0)
+		_tri(st, c, prev, p)
+		prev = p
+
+
+func _cane(st: SurfaceTool, base: Vector3, h: float, lean: float) -> void:
+	var w := 0.11
+	var top := base + Vector3(lean, h, 0.04)
+	var a := base + Vector3(-w, 0.0, 0.0)
+	var b := base + Vector3(w, 0.0, 0.0)
+	var c := top + Vector3(w * 0.4, 0.0, 0.0)
+	var d := top + Vector3(-w * 0.4, 0.0, 0.0)
+	_tri(st, a, b, c)
+	_tri(st, a, c, d)
+
+
+func _commit_layer(visual: Node3D, layer_name: String, st: SurfaceTool, mat: Material) -> void:
+	st.generate_normals()
+	var mesh := MeshInstance3D.new()
+	mesh.name = layer_name
+	mesh.mesh = st.commit()
+	mesh.material_override = mat
+	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	visual.add_child(mesh)
+
+
+func _sil(color: Color) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://materials/m_rio_sil.gdshader")
+	mat.set_shader_parameter("albedo", color)
+	return mat
+
+
+func _add_foreground_lianas(visual: Node3D) -> void:
+	# In front of the lane ( +Z ), curved, kept off the five Maya stills.
+	var xs := [14.0, 32.0, 44.0, 72.0, 82.0, 112.0, 124.0, 152.0, 172.0, 186.0]
+	var mat := _flat(COL_VINE, 1.0)
+	for i in xs.size():
+		var x: float = xs[i]
+		var bow := 2.2 if i % 2 == 0 else -2.0
+		var pts := PackedVector3Array()
+		var n := 9
+		for k in n + 1:
+			var t := float(k) / float(n)
+			var y := lerpf(23.5, 8.2, t)
+			var sag := sin(t * PI) * bow
+			pts.append(Vector3(x + sag, y, 3.55 + sin(t * PI) * 0.45))
+		_ribbon(visual, "LianaFG%d" % i, pts, 0.16, mat)
+		if i % 2 == 0:
+			var pts2 := PackedVector3Array()
+			for k in n + 1:
+				var t := float(k) / float(n)
+				var y := lerpf(21.0, 11.0, t)
+				pts2.append(Vector3(x + 1.4 - sin(t * PI) * bow * 0.45, y, 4.15))
+			_ribbon(visual, "LianaFG%dB" % i, pts2, 0.09, mat)
+		var mid := PackedVector3Array()
+		for k in n + 1:
+			var t := float(k) / float(n)
+			var y := lerpf(26.0, 13.5, t)
+			mid.append(Vector3(x - 2.2 + sin(t * PI) * bow, y, -3.4))
+		_ribbon(visual, "LianaMid%d" % i, mid, 0.1, mat)
+
+
+func _ribbon(visual: Node3D, rname: String, pts: PackedVector3Array, half_w: float, mat: Material) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in pts.size() - 1:
+		var a: Vector3 = pts[i]
+		var b: Vector3 = pts[i + 1]
+		var dir := b - a
+		var side := dir.cross(Vector3(0.0, 0.0, 1.0))
+		if side.length_squared() < 0.0001:
+			side = Vector3(1.0, 0.0, 0.0)
+		side = side.normalized()
+		var a0 := a + side * half_w
+		var a1 := a - side * half_w
+		var b0 := b + side * half_w
+		var b1 := b - side * half_w
+		_tri(st, a0, b0, a1)
+		_tri(st, a1, b0, b1)
+	_commit_layer(visual, rname, st, mat)
 
 
 func _add_mist(visual: Node3D) -> void:
-	var mat := _flat(COL_MIST, 0.2)
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://materials/m_rio_mist.gdshader")
+	mat.set_shader_parameter("albedo", COL_MIST)
+	mat.set_shader_parameter("alpha", 0.46)
 	var bands := [
-		{"y": 5.6, "z": -2.4, "h": 2.2},
-		{"y": 7.4, "z": -3.1, "h": 1.6},
-		{"y": 4.6, "z": -2.0, "h": 1.1},
+		{"y": 5.4, "z": -3.2, "h": 2.8, "a": 0.5},
+		{"y": 7.2, "z": -4.4, "h": 1.8, "a": 0.28},
+		{"y": 4.3, "z": -2.4, "h": 1.5, "a": 0.34},
 	]
 	for i in bands.size():
 		var b: Dictionary = bands[i]
 		var sheet := MeshInstance3D.new()
 		sheet.name = "Mist%d" % i
 		var quad := QuadMesh.new()
-		quad.size = Vector2(LEVEL_W_PX * PX, float(b["h"]))
+		quad.size = Vector2(LEVEL_W_PX * PX + 8.0, float(b["h"]))
 		sheet.mesh = quad
 		sheet.position = Vector3(LEVEL_W_PX * PX * 0.5, float(b["y"]), float(b["z"]))
-		sheet.material_override = mat
+		var band := mat.duplicate() as ShaderMaterial
+		band.set_shader_parameter("alpha", float(b["a"]))
+		sheet.material_override = band
 		sheet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		visual.add_child(sheet)
 

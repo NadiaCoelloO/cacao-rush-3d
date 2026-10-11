@@ -24,7 +24,7 @@ El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` responde 404 desde es
 
 ## Encuadres
 
-2D es `renderGame` a 960×540, con los movers ya en la pose t = 0 de `sim.ts` (el preview no avanza el tiempo). 3D es el viewport 1280×720. La barra central de cada PNG es de 5 px.
+2D es `renderGame` a 960×540 con el arte pintado de `rio`: `cocoa-sky.jpg` y `cocoa-tile.jpg` de `Cacao.Game@77e55b5278` (`public/game/maps`). El cielo ya no es el relleno de niebla del render sin `art`. Los movers están en la pose t = 0 de `sim.ts` (el preview no avanza el tiempo). 3D es el viewport 1280×720. La barra central de cada PNG es de 5 px.
 
 | id | pies 3D (m) | foco 2D (px) | qué se compara |
 | --- | --- | --- | --- |
@@ -44,7 +44,7 @@ El pin pedido `NadiaCoelloO/sand-vivid-dawn-sail@5fd45031` responde 404 desde es
 
 ![Meta](cmp_meta.png)
 
-En t = 0 el 2D pinta el frame azul del tótem secreto (`#3aa7ff`, haz cian). El 3D usa el frame dorado `#f0c020` de la misma animación, para no meter un acento cian en el río.
+En t = 0 el 2D pinta el frame azul del tótem secreto (`#3aa7ff`, haz cian). En 3D, K01 instancia `totem_warp_cuyabeno.glb`: poste tallado, la punta cian reapintada en madera `#3E2E21`, tres vainas `#D6AB3D` / `#CE722E` / `#A64B36`, y un haz oro `#FFD16A` desde `BeamOrigin` (`VFX_WarpBeam_Spawn`). No hay cian ni magenta. El AABB del checkpoint no cambia. Detrás del carril hay silueta de orilla (masa oscura, copas verdes lejanas, niebla cálida, lianas curvas en primer plano y cañas).
 
 ## Plataformas
 
@@ -112,7 +112,7 @@ El viento suma `(vx/mass)·dt` a la velocidad y el mismo paso a la posición, co
 | id | rect 2D px | spawn de los pies (m) | uso |
 | --- | --- | --- | --- |
 | K00 | (1312, 504, 36, 72) | (55.375, 13.333) | poste normal. Un salto nuevo graba el spawn. |
-| K01 | (2336, 312, 36, 72) | (98.042, 21.333) | `warpRandom`. El segundo salto nuevo registra `RIO_WARP world=secret level=stub no 3D scene`, reaparece en el último spawn, no gasta vida y no congela. No hay escena 3D del destino. |
+| K01 | (2336, 312, 36, 72) | (98.042, 21.333) | `warpRandom`. Visual: tótem Kakaw (GLB + 3 vainas Y/O/R + haz cálido). El segundo salto nuevo registra `RIO_WARP world=secret level=stub no 3D scene`, reaparece en el último spawn, no gasta vida y no congela. No hay escena 3D del destino. |
 | K02 | (3168, 568, 36, 72) | (132.708, 10.667) | poste normal |
 | G00 | (4736, 328, 48, 56) | centro (198.333, 22.500) | meta cacao. El grano visible sigue la elipse de fallback 16×22 px (`#d4a84b`); el trigger es el AABB entero. |
 
@@ -124,13 +124,13 @@ p10 del interior de Maya contra el frame sin ella. Diferencia de color > 36, dos
 
 | encuadre | interior | p10 | mín | cuerpo mediano | fondo p10 |
 | --- | --- | --- | --- | --- | --- |
-| embarque | 262 | 7.34 | 5.08 | (213, 195, 170) | (23, 11, 6) |
-| pinchos | 124 | 5.17 | 2.35 | (182, 159, 130) | (23, 11, 6) |
-| secreto | 124 | 5.29 | 5.29 | (182, 159, 130) | (23, 11, 6) |
-| viento | 124 | 5.29 | 5.29 | (182, 159, 130) | (23, 11, 6) |
-| meta | 169 | 7.55 | 5.27 | (182, 159, 130) | (23, 11, 6) |
+| embarque | 262 | 5.72 | 4.56 | (223, 190, 159) | (16, 13, 9) |
+| pinchos | 124 | 5.91 | 2.89 | (200, 163, 127) | (16, 13, 9) |
+| secreto | 124 | 6.20 | 6.20 | (200, 163, 127) | (25, 18, 14) |
+| viento | 124 | 6.49 | 6.49 | (200, 163, 127) | (16, 13, 9) |
+| meta | 169 | 7.94 | 6.20 | (200, 163, 127) | (25, 18, 14) |
 
-Todos los p10 están sobre 4.4. El mínimo 2.35 de pinchos son tres píxeles del borde contra el labio de la orilla; no se les añadió un halo.
+Todos los p10 están sobre 4.4. El mínimo 2.89 de pinchos son píxeles del borde contra el labio de la orilla; no se les añadió un disco. El grano sigue en `#6b3a1f` con el filo `#CE722E`.
 
 ## Probe
 
@@ -146,18 +146,18 @@ OpenGL 3, 1280×720, primitivas y draws visibles.
 
 | encuadre | tris | draws | tris del mundo | draws del mundo |
 | --- | --- | --- | --- | --- |
-| embarque | 3789 | 31 | 2434 | 22 |
-| pinchos | 4021 | 36 | 2666 | 27 |
-| secreto | 4447 | 35 | 3092 | 26 |
-| viento | 2713 | 29 | 1358 | 20 |
-| meta | 2915 | 19 | 1560 | 10 |
+| embarque | 7313 | 42 | 5958 | 33 |
+| pinchos | 7545 | 47 | 6190 | 38 |
+| secreto | 9127 | 50 | 7772 | 41 |
+| viento | 6219 | 39 | 4864 | 30 |
+| meta | 6245 | 28 | 4890 | 19 |
 
 ## sha256
 
 ```
-e9d747c9213097df9dd46bfcb74b08eb407a923deb3689d91d5a987e8467f976  cmp_embarque.png
-1238ff0a1f3c28ca4a288709479906677c3b3f84bb4b17d5d0c67792eba182a9  cmp_pinchos.png
-78a69c13c3836a87450cef5491e2bf32c5f6657284182a3e18672c917c6a0b14  cmp_secreto.png
-1271f0c10fd23366ed37dda8c04ac82513622ccac23799a7a1cde568e1ab1627  cmp_viento.png
-ab03b228588f0a820b4a580cb872ec10a4b68bb4ab026bb6b452b268c06b4fd5  cmp_meta.png
+e2db28456117821010dc5a7810a5914103459a0b14c8f1cc28260d0c7746256d  cmp_embarque.png
+541efe64276bccf03a91e26197d630dc73f48293573e0f861005c2c39fdd5d2a  cmp_pinchos.png
+9e56787265eb6ed74fa1505d8b3a6933c3c8539e5f121ffa16856e97187e2503  cmp_secreto.png
+44ab36be52698802f0c0b3174d5069337c21b974823af89e8fa3b1af31f01cc8  cmp_viento.png
+5694928e90a58dea17b4ea231bd644188e843373cfb326f55398f75211f89507  cmp_meta.png
 ```
