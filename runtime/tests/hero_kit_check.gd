@@ -1,8 +1,13 @@
 extends SceneTree
 ## Shared-kit check: wall-jump, zigzag, ledge, mantle, crouch, prone/crawl,
-## coyote and jump buffer — one case per hero. Expected numbers are the 2D sim
-## (sand-vivid-dawn-sail @ 5fd45031 characters.ts + sim.ts), scaled 24 px = 1 m.
-## Maya's own 54 expectations stay in maya_feel_check.gd and are not edited here.
+## coyote, jump buffer, raft leave and wind — one case per hero. Expected
+## numbers are the 2D sim (sand-vivid-dawn-sail @ 5fd45031 characters.ts +
+## sim.ts), scaled 24 px = 1 m. Maya's own 54 expectations stay in
+## maya_feel_check.gd and are not edited here.
+## Raft leave: qa/t-pr8/raft_leave.gd is not in this repo (404 on every
+## branch). The case is the contract that file was meant to lock — sim.ts
+## resolveX:395 adds riding.dx to position only, resolveY:441-442 clears
+## riding the same tick — so a no-steer jump keeps the body's own vx.
 ##   godot --headless --fixed-fps 60 --path runtime -s res://tests/hero_kit_check.gd
 
 const PX := 24.0
@@ -27,6 +32,14 @@ const HEROES := {
 const COYOTE_LAST := 6.0
 ## sim.ts BUFFER 0.12. maya_feel_check already locks Maya at "8 early works, 9 does not".
 const BUFFER_TICKS := 8.0
+## Raft travels +3 m/s (72 px/s). Inheriting that on leave fails the 0.5 px band.
+const RAFT_SPEED := 3.0
+const RAFT_X := 160.0
+## applyWind sample. vx is px/s; mass = max(0.72, gravityMul). Two airborne
+## ticks so the position delta is the second tick's velocity times dt, not
+## that plus another copy of the impulse (the Río position push).
+const WIND_VX := 240.0
+const WIND_X := 200.0
 
 const TALL_X := -61.5
 const TALL_TOP := 5.5
@@ -88,6 +101,15 @@ func _run() -> void:
 
 		_expect("%s coyote last air tick" % hero, await _coyote_last(), COYOTE_LAST, 0.0)
 		_expect("%s jump buffer ticks" % hero, await _buffer_window(), BUFFER_TICKS, 0.0)
+
+		var raft := await _raft_leave()
+		_expect("%s raft leave vx stays 0" % hero, raft.x, 0.0, 0.5)
+		_expect("%s raft leave vy = jump - gravUp tick" % hero, raft.y, vy, 0.5)
+
+		var wind := await _wind_velocity()
+		var wind_vx := 2.0 * (WIND_VX / grav) * DT
+		_expect("%s wind vx = 2*(vx/mass)*dt" % hero, wind.x, wind_vx, 0.02)
+		_expect("%s wind moves by velocity, not twice" % hero, wind.y, wind_vx * DT, 0.002)
 
 	_root.queue_free()
 	print("HERO KIT CHECK: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
@@ -408,6 +430,65 @@ func _buffer_window() -> float:
 	if await _buffer_jumps(9, land):
 		win = 9.0
 	return win
+
+
+## No-steer jump off a raft moving at RAFT_SPEED. Returns (vx px/s, vy px/s)
+## measured on the leave frame. ADD_VELOCITY would report vx ≈ 72.
+func _raft_leave() -> Vector2:
+	var raft := AnimatableBody3D.new()
+	raft.sync_to_physics = true
+	var col := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(6, 0.4, 4)
+	col.shape = box
+	raft.add_child(col)
+	raft.position = Vector3(RAFT_X, 2.2, 0)
+	var scr := GDScript.new()
+	scr.source_code = "extends AnimatableBody3D\nfunc _physics_process(delta: float) -> void:\n\tglobal_position.x += %s * delta\n" % RAFT_SPEED
+	scr.reload()
+	raft.set_script(scr)
+	_root.add_child(raft)
+	_reset_body()
+	_p.global_position = Vector3(RAFT_X, 2.45, 0)
+	_p.velocity = Vector3.ZERO
+	for i in 30:
+		await _step(0.0, false)
+	if not _p.is_on_floor():
+		print("    raft miss pos %s" % str(_p.global_position))
+		raft.queue_free()
+		return Vector2(-999, -999)
+	await _step(0.0, true)
+	var out := Vector2(_p.velocity.x * PX, _p.velocity.y * PX)
+	for i in 10:
+		await _step(0.0, false)
+	raft.queue_free()
+	return out
+
+
+## Two airborne ticks inside a wind zone. Returns (vx px/s, dx px) of the
+## second tick. dx must equal vx*dt: wind writes velocity before move_and_slide
+## and does not add the same impulse to position.
+func _wind_velocity() -> Vector2:
+	var zone := Node3D.new()
+	zone.add_to_group("wind")
+	zone.set_meta("vx", WIND_VX)
+	zone.set_meta("ay", 0.0)
+	zone.set_meta("aabb", AABB(Vector3(WIND_X - 15.0, 8.0, -4.0), Vector3(30.0, 30.0, 8.0)))
+	_root.add_child(zone)
+	_reset_body()
+	_p.global_position = Vector3(WIND_X, 18.0, 0)
+	_p.velocity = Vector3.ZERO
+	_p._grounded = false
+	_p._jumps_left = 0
+	_p._coyote_timer = 0.0
+	await _step(0.0, false)
+	var x0 := _p.global_position.x
+	await _step(0.0, false)
+	var out := Vector2(_p.velocity.x * PX, (_p.global_position.x - x0) * PX)
+	zone.queue_free()
+	for i in 5:
+		await _step(0.0, false)
+	return out
 
 
 func _expect(label: String, got: float, want: float, tol: float) -> void:

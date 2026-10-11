@@ -13,8 +13,11 @@ extends CharacterBody3D
 ## them; the kit leaves every slot off.
 ##
 ## Step order per tick, same as sim.ts updateGame(): wallLock tick → applyRun →
-## applyJump → _tick_powers → applyGravity → resolve → wall sense →
+## applyJump → _tick_powers → applyGravity → applyWind → resolve → wall sense →
 ## (hanging ? tickMantle : ledgeGrab) → updateCrouch → kill → followCam.
+## Leaving a mover (sim.ts resolveX:395 adds riding.dx to position only;
+## resolveY:441-442 clears riding the same tick) does not copy its velocity.
+## applyWind adds vx/vy only — it never writes position.
 ##
 ## Units: 2D px → metres at PX_TO_M. Scale is set by the collision box, not the
 ## sprite: PH=42 px ≈ Maya 1.75 m (capsule 1.8 m) → 24 px/m, T=32 px = 1.333 m,
@@ -192,6 +195,9 @@ var _tint_cache := {}
 
 
 func _ready() -> void:
+	# Godot's default ADD_VELOCITY copies the platform into velocity on jump.
+	# 2D riding is a position delta only, dropped the frame you leave.
+	platform_on_leave = PLATFORM_ON_LEAVE_DO_NOTHING
 	_visual = _mesh_placeholder
 	# Try to instance greybox glTF if present under res://models/.
 	_try_attach_hero_mesh()
@@ -222,11 +228,12 @@ func _physics_process(delta: float) -> void:
 	# jump later this tick is not consumed until the next tick.
 	_wall_lock = maxf(0.0, _wall_lock - delta)
 	# Same order as sim.ts updateGame(): applyRun → applyJump → (powers) →
-	# applyGravity → resolve → wall sense → tickMantle | ledgeGrab → updateCrouch.
+	# applyGravity → applyWind → resolve → wall sense → tickMantle | ledgeGrab → updateCrouch.
 	_apply_run(delta)
 	_apply_jump(delta)
 	_tick_powers(delta)
 	_apply_gravity(delta)
+	_apply_wind(delta)
 
 	if _hanging:
 		# 2D: vx = vy = 0 during the hang; tickMantle owns x/y until it lands.
@@ -321,6 +328,45 @@ func _apply_gravity(delta: float) -> void:
 		grav = GRAV_APEX if velocity.y < APEX else GRAV_UP
 	velocity.y -= grav * _gravity_mul * delta
 	velocity.y = maxf(velocity.y, -MAX_FALL)
+
+
+## sim.ts applyWind (after gravity, before resolve). vx/ay are px/s, ay downward.
+## mass = max(0.72, gravityMul). Velocity only: llamaShove is what writes x.
+## Zones are group "wind" with meta vx, ay and either meta aabb or a BoxShape.
+func _apply_wind(delta: float) -> void:
+	var mass := maxf(0.72, _gravity_mul)
+	var body := _body_rect()
+	for node in get_tree().get_nodes_in_group("wind"):
+		if not _wind_hits(body, node):
+			continue
+		var vx_px := float(node.get_meta("vx", 0.0))
+		var ay_px := float(node.get_meta("ay", 0.0))
+		velocity.x += (vx_px / mass) * PX_TO_M * delta
+		velocity.y -= (ay_px / mass) * PX_TO_M * delta
+
+
+func _body_rect() -> Rect2:
+	return Rect2(global_position.x - _pw * 0.5, global_position.y, _pw, _h)
+
+
+func _wind_hits(body: Rect2, node: Node) -> bool:
+	var zone := Rect2()
+	var have := false
+	if node.has_meta("aabb"):
+		var box: AABB = node.get_meta("aabb")
+		zone = Rect2(box.position.x, box.position.y, box.size.x, box.size.y)
+		have = true
+	else:
+		var shape_node := node.get_node_or_null("CollisionShape3D") as CollisionShape3D
+		if shape_node and shape_node.shape is BoxShape3D:
+			var box_shape := shape_node.shape as BoxShape3D
+			var origin: Vector3 = shape_node.global_position
+			var size := box_shape.size
+			zone = Rect2(origin.x - size.x * 0.5, origin.y - size.y * 0.5, size.x, size.y)
+			have = true
+	if not have or zone.size.x <= 0.0 or zone.size.y <= 0.0:
+		return false
+	return body.intersects(zone)
 
 
 func _update_ground(delta: float) -> void:

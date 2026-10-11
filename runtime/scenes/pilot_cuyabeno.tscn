@@ -79,6 +79,7 @@ far = 250.0
 [node name="PlayerMaya" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 floor_stop_on_slope = true
+platform_on_leave = 2
 script = ExtResource("2_maya")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerMaya"]
