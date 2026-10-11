@@ -1,0 +1,92 @@
+[gd_scene load_steps=5 format=3 uid="uid://cacao_pilot_rio"]
+
+[ext_resource type="Script" path="res://scripts/pilot_rio.gd" id="1_pilot"]
+[ext_resource type="Script" path="res://scripts/player_maya.gd" id="2_maya"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_maya"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="Environment" id="Environment_rio"]
+background_mode = 1
+background_color = Color(0.101961, 0.062745, 0.047059, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.101961, 0.062745, 0.047059, 1)
+ambient_light_energy = 0.16
+tonemap_mode = 0
+fog_enabled = true
+fog_light_color = Color(0.101961, 0.062745, 0.047059, 1)
+fog_density = 0.01
+
+[node name="PilotRio" type="Node3D"]
+script = ExtResource("1_pilot")
+
+[node name="WorldRoot" type="Node3D" parent="."]
+
+[node name="Visual" type="Node3D" parent="WorldRoot"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 18, 10)
+light_color = Color(0.768627, 0.627451, 0.478431, 1)
+light_energy = 0.22
+shadow_enabled = false
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_rio")
+
+[node name="PlayerMaya" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.541667, 14.25, 0)
+floor_stop_on_slope = true
+script = ExtResource("2_maya")
+camera_offset = Vector3(0, 1, 24.1256)
+kill_y = -1000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerMaya"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_maya")
+
+[node name="MeshPlaceholder" type="Node3D" parent="PlayerMaya"]
+
+[node name="BodyCapsule" type="CSGCylinder3D" parent="PlayerMaya/MeshPlaceholder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+radius = 0.35
+height = 1.4
+
+[node name="HeadSphere" type="CSGSphere3D" parent="PlayerMaya/MeshPlaceholder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+radius = 0.28
+
+[node name="Camera3D" type="Camera3D" parent="PlayerMaya"]
+transform = Transform3D(1, 0, 0, 0, 0.92, 0.392, 0, -0.392, 0.92, 0, 3.2, 6.5)
+current = true
+fov = 50.0
+far = 400.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Hud" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="WorldLabel" type="Label" parent="UI/Hud"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 720.0
+offset_bottom = 40.0
+text = "Río de Chocolate  ·  id rio  ·  greybox"
+
+[node name="HintLabel" type="Label" parent="UI/Hud"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -48.0
+offset_right = 640.0
+offset_bottom = -16.0
+grow_vertical = 0
+text = "A/D move · Space/W jump · S+jump drop"
