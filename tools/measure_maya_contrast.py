@@ -271,11 +271,13 @@ def measure_maya(path: Path, x_m=None) -> dict:
         body = cream
         n_body = n_cream
     # Drop 2 px of antialiased silhouette before p10 (QA method).
-    body_core = erode_mask(body, 2)
+    # Brown outline-mix (r<165) is AA / hull bleed, not body cream.
+    cream_core = cream & body
+    body_core = erode_mask(cream_core if int(cream_core.sum()) >= 8 else body, 2)
     if int(body_core.sum()) < 8:
-        body_core = erode_mask(body, 1)
+        body_core = erode_mask(cream_core if int(cream_core.sum()) >= 8 else body, 1)
     if int(body_core.sum()) < 8:
-        body_core = body
+        body_core = cream_core if int(cream_core.sum()) >= 8 else body
     core_rgb = im[body_core]
     sky = sky_mask(im)
     r = im[:, :, 0].astype(np.int16)
@@ -425,10 +427,11 @@ def _cacao_face_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    # Face only: #6B3A1F–#8B4A2B (filmic may lift toward ~155,78,37).
+    # Face only: #6B3A1F–#8B4A2B (filmic ~147–160,73–80,34–39).
+    # r>=115 keeps earth faces (~77,51,34) out of the grain mask.
     return (
-        (r >= 70) & (r <= 175) & (g >= 28) & (g <= 110) & (b <= 80)
-        & (r >= g + 14) & (r >= b + 22)
+        (r >= 115) & (r <= 185) & (g >= 50) & (g <= 110) & (b <= 70)
+        & (r >= g + 28) & (r >= b + 50)
     )
 
 
@@ -436,9 +439,10 @@ def _orange_rim_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
+    # Raised gold rim #FFC060 films to ~ (255,229,124). Must not match cacao face.
     return (
-        (r >= 150) & (r <= 240) & (g >= 70) & (g <= 170) & (b <= 100)
-        & (r >= g + 24) & (r >= b + 55)
+        (r >= 220) & (g >= 170) & (g <= 250) & (b >= 70) & (b <= 180)
+        & (r >= g) & (r >= b + 50)
     )
 
 
@@ -515,16 +519,42 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
         face = cacao
     if int(face.sum()) < 4:
         face = mask
-    # Immediate local bg: 2 px outside the FACE, not the orange rim, not
-    # another grain. Includes the dark outline and the local scene.
-    other_grain = _grain_color_mask(im) & ~hull
-    ring = neighbor_ring(face, 2)
-    bg_mask = ring & ~orange & ~other_grain
+    # Immediate local bg of the FACE = gold rim + #2c1810 outline against it.
+    # Window first so C08/C09 hit the hull, not the tan lip 2 px further out.
+    other_face = _cacao_face_mask(im) & ~hull
+    outline = _dark_outline_mask(im)
+    bg_mask = np.zeros_like(face)
+    fys, fxs = np.where(face)
+    if fys.size:
+        y0 = max(0, int(fys.min()) - 10)
+        y1 = min(im.shape[0], int(fys.max()) + 11)
+        x0 = max(0, int(fxs.min()) - 10)
+        x1 = min(im.shape[1], int(fxs.max()) + 11)
+        win = np.zeros_like(face)
+        win[y0:y1, x0:x1] = True
+        # Rim sits against the face; outline is one ring further out.
+        rim_bg = win & orange & ~face
+        ol_bg = win & outline & ~face
+        if int(rim_bg.sum()) >= 6:
+            bg_mask = rim_bg
+        elif int(ol_bg.sum()) >= 6:
+            bg_mask = ol_bg
     if int(bg_mask.sum()) < 6:
-        ring3 = neighbor_ring(face, 3)
-        bg_mask = ring3 & ~orange & ~other_grain
+        for rad in (2, 3, 4, 5):
+            ring = neighbor_ring(face, rad) & ~other_face
+            rim_bg = ring & orange
+            if int(rim_bg.sum()) >= 6:
+                bg_mask = rim_bg
+                break
+            ol_bg = ring & outline
+            if int(ol_bg.sum()) >= 6:
+                bg_mask = ol_bg
+                break
+            scene = ring & ~_cacao_face_mask(im)
+            if int(scene.sum()) >= 6:
+                bg_mask = scene
     if int(bg_mask.sum()) < 6:
-        bg_mask = ring & ~other_grain
+        bg_mask = neighbor_ring(face, 3) & ~other_face
     face_rgb = im[face]
     bg = im[bg_mask]
     face_med = median_rgb(face_rgb)

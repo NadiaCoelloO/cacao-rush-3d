@@ -35,7 +35,7 @@ const COL_ROCK := Color("4a4440")
 const COL_WIND := Color(0.78, 0.86, 0.72)
 const COL_BEAN := Color("8b4a2b")
 const COL_BEAN_LO := Color("6b3a1f")
-const COL_BEAN_RIM := Color("ce722e")
+const COL_BEAN_RIM := Color("ffc060")
 const COL_BEAN_OUTLINE := Color("2c1810")
 const COL_POLE := Color("6a5a4a")
 const COL_POLE_ON := Color("3d8a72")
@@ -285,8 +285,8 @@ func _build_world() -> void:
 	var bean_mat := _bean_mat()
 	# Orange rim (grow 0.045) inside a darker #2c1810 hull (grow 0.088) so
 	# the cacao face reads on light platform lips and dark jungle.
-	var bean_rim := _bean_hull_mat(0.045, COL_BEAN_RIM)
-	var bean_outline := _bean_hull_mat(0.088, COL_BEAN_OUTLINE)
+	var bean_rim := _bean_hull_mat(0.058, COL_BEAN_RIM)
+	var bean_outline := _bean_hull_mat(0.100, COL_BEAN_OUTLINE)
 	for raw_c in _layout["pickups"]:
 		var c: Dictionary = raw_c
 		var center := _vec(c["center_m"])

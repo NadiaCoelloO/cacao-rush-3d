@@ -834,8 +834,8 @@
    "dock": "PASA",
    "fern": "PASA",
    "cacao_leaves": "PASA",
-   "canopy_e2": "NO PASA — not imported; LOOK dosel kept",
-   "water_lily": "NO PASA — mesh in GLB, never instanced"
+   "canopy_e2": "NO PASA \u2014 not imported; LOOK dosel kept",
+   "water_lily": "NO PASA \u2014 mesh in GLB, never instanced"
   },
   "deck_align_m": {
    "deck_top_local": 0.4011,
@@ -969,7 +969,7 @@
  },
  "e2b": {
   "pass": "E2b",
-  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 → Cacao.Game jungle-sky.jpg.",
+  "note": "Canopy v2 MultiMesh + dock v2 + lily flower cream ~1/4.5 + dawn light. 5fd45031 404 \u2192 Cacao.Game jungle-sky.jpg.",
   "bundle_sha256_ok": true,
   "canopy_instances": 36,
   "canopy_multimeshes": 69,
@@ -1223,8 +1223,8 @@
  },
  "e2d": {
   "pass": "E2d",
-  "note": "QA add-on: pit −18.4167, Maya outline + dusk play-band, hitbox frogs/rocks, striped wind, leafy dosel fringe, Vulkan Forward+ stills, pin subtitle Laguna negra de Sucumbíos, spawn-to-G00 probe PASS.",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "note": "QA add-on: pit \u221218.4167, Maya outline + dusk play-band, hitbox frogs/rocks, striped wind, leafy dosel fringe, Vulkan Forward+ stills, pin subtitle Laguna negra de Sucumb\u00edos, spawn-to-G00 probe PASS.",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1239,7 +1239,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -1368,8 +1368,8 @@
  },
  "e2e": {
   "pass": "E2e",
-  "note": "Identity + QA add-on: golden dawn (no cyan), painted cumulus band, curved lianas (no bamboo), earth #3E2C20 + lip, 4 thin wind strokes, warm dark vignette so Maya BODY ≥4.4:1 (not only outline), outline covers head+hands and holds ≥4.4:1 in the wind zone. Pit −18.4167, hitbox hazards, probe G00 PASS.",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "note": "Identity + QA add-on: golden dawn (no cyan), painted cumulus band, curved lianas (no bamboo), earth #3E2C20 + lip, 4 thin wind strokes, warm dark vignette so Maya BODY \u22654.4:1 (not only outline), outline covers head+hands and holds \u22654.4:1 in the wind zone. Pit \u221218.4167, hitbox hazards, probe G00 PASS.",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1384,7 +1384,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -1577,8 +1577,8 @@
  },
  "e2f": {
   "pass": "E2f",
-  "note": "Drop Maya disk. 2D-style bands: golden cumulus on top, continuous shadowed mid-jungle play band (olive/brown foliage + warm crown haze, irregular dithered crown). Body vs real jungle ≥4.4 at 8 x. Cacao warm rim ≥4.4 on dark. Cumulus in LOOK-001_manifest.json. Pit −18.4167, probe G00, 54/54.",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "note": "Drop Maya disk. 2D-style bands: golden cumulus on top, continuous shadowed mid-jungle play band (olive/brown foliage + warm crown haze, irregular dithered crown). Body vs real jungle \u22654.4 at 8 x. Cacao warm rim \u22654.4 on dark. Cumulus in LOOK-001_manifest.json. Pit \u221218.4167, probe G00, 54/54.",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -1593,7 +1593,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -2104,7 +2104,7 @@
  "e2g": {
   "pass": "E2g",
   "note": "Thin 1-2 px Maya silhouette (no 27 px torso pill). Body+shadows vs jungle >=4.4 at 8 x (x66 8.66, x87 9.19). Painted sil canopy crown, no noise dither. 24 grains warm rim median-of-medians 13.54 min 9.48. No 220 m earth fill under pits. Corridor bank hidden on follow cam. 2D renderGame grain refs 2d_grains_c06/c16.",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -2119,7 +2119,7 @@
    "deaths": 0,
    "pit_kill_verified": true,
    "pit_y": -18.45,
-   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (−18.4167)."
+   "note": "Inputs-only auto-runner from spawn to G00. Feet (194.32, 9.33). Pit line matches sim.ts (\u221218.4167)."
   },
   "p01_top_m": 6.6667,
   "camera_offset": [
@@ -3315,7 +3315,7 @@
  "e2h": {
   "pass": "E2h",
   "note": "Cacao face #6b3a1f-#8B4A2B, thin #CE722E hull, no cream mix. 24/24 grains median-of-medians 7.27 min 4.41 (C08/C09/C15 included). H04/H05 slate blocks. Maya fill 0.90; p10 >=4.4 at x36/x66/cacao. LOOK PlatformSolid crate hidden so spawn does not cover Maya. Painted sil ALPHA crown. 2D pin fallback #6b3a1f (Cacao.Game not executed).",
-  "subtitle": "Laguna negra de Sucumbíos",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
   "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
   "pit_kill_y": -18.4167,
   "player_maya_gd": "untouched",
@@ -3370,6 +3370,83 @@
    "3d_x109.png": "245484b13381f4283dc29b6225038d3fbdb1d8ba24bab6c7a1598845fc7b5660",
    "2d_grains_c08.png": "fb570ec524a5092b79b79fe2136c3a5d15231d4f87623ff70d6798ebefce07d4",
    "cmp_cuyabeno_2d_3d.png": "0fdad0f4949b19d0c6c68caec4ac43e5a411f68c73c05ed33545107adf901dc9"
+  },
+  "replaced_by": "e2i",
+  "captures_status": {
+   "replaced_by": "e2i",
+   "note": "3d_* stills overwritten by E2i recapture"
+  }
+ },
+ "e2i": {
+  "pass": "E2i",
+  "note": "QA method: grain FACE vs immediate local rim/outline (not rim vs jungle); Maya p10 exclude 2px AA. Dark #2c1810 hull outside raised #FFC060 rim; cacao face. Hide SELVA_GP_Platforms. Varzea crown lobes. H04/H05 fallen trunks #4A4440. Fill 0.90 + cream wrap. 24/24 grains median-of-medians 4.68 min 4.68 (pin 4.03/1.95). Maya p10 all 8 x min 5.96 (x36 7.66).",
+  "subtitle": "Laguna negra de Sucumb\u00edos",
+  "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
+  "pit_kill_y": -18.4167,
+  "player_maya_gd": "untouched",
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS",
+  "selva_check": "platforms=21 hazards=6 pickups=24 checks=2 goal=1",
+  "selva_run_probe": {
+   "result": "PASS",
+   "ticks": 1556,
+   "far_x": 194.32,
+   "goal": 1,
+   "deaths": 0,
+   "pit_kill_verified": true,
+   "pit_y": -18.45
+  },
+  "maya_fill": 0.9,
+  "maya_contrast_wcag": {
+   "method": "p10 of body excluding 2 px AA",
+   "threshold": 4.4,
+   "p10_all_8x": true,
+   "p10_required": {
+    "3d_x04.png": 5.98,
+    "3d_x36.png": 7.66,
+    "3d_x66.png": 7.96,
+    "3d_x87.png": 8.57,
+    "3d_x95.png": 6.15,
+    "3d_x133.png": 6.11,
+    "3d_x163.png": 5.96,
+    "3d_x193.png": 7.14,
+    "3d_cacao.png": 7.96
+   },
+   "body_min_sweep": 6.74
+  },
+  "grains": {
+   "n": 24,
+   "method": "face vs immediate local rim",
+   "median_of_medians": 4.68,
+   "min_median": 4.68,
+   "min_of_mins": 4.84,
+   "pin_median": 4.03,
+   "pin_min": 1.95,
+   "face": "#6b3a1f-#8B4A2B",
+   "rim": "#FFC060",
+   "outline": "#2c1810",
+   "cream_mix": false
+  },
+  "2d_baseline": {
+   "executed_renderGame": false,
+   "fallback": "#6b3a1f ellipse render.ts:1136-1139",
+   "note": "Cacao.Game is a Vite app and was not run here."
+  },
+  "captures": {
+   "3d_entrance.png": "70b059680a19306409665f7ca999496a913a01061d25843cc79983c097cd1c1c",
+   "3d_hazard.png": "a9bd0cec80afbfa9c95927050ce80cfb43079ea9cf12f2065e5cfa1f2b5c2d60",
+   "3d_cacao.png": "16ab7a042eed3f358068c3f73feeaf7e11a469d430861eaaf832f3e35390c7d0",
+   "3d_x04.png": "adf48f68d754199a594256b4884ab74cf9c9bfa64f762b9131c03cf0d9721481",
+   "3d_x36.png": "40b3bc872998dc3e0af886d703013fcc746d1c3f99c131d6074b8de49ab385dd",
+   "3d_x66.png": "13eaadb2b74be665f69b79b07e60562b96744b28821b121c29374c37b93d526d",
+   "3d_x87.png": "d4f521ab4ed8b903c45898908de870dabe7c80063721e9775bee3e91a9d9977c",
+   "3d_x95.png": "df3cbdca209dc0850f74cd10e3ef045dc2226a2ba0eb912c04e5a3d2923afb38",
+   "3d_x133.png": "0748d90c061b0f129b54499bdb8d73ca323d834e493ebf3334af6c04dbcf65d7",
+   "3d_x163.png": "3af28e7aed0f22552cf220ca7365e294a73185a6c40c4e1e8377b9f7f384b437",
+   "3d_x193.png": "2baa8074e97c0764af1f255fb02c140aa170373c6a90e64543a51a935d49cc4c",
+   "3d_x109.png": "7adc3efc166dea861c20cd21388ff9f8c472b43847f4c82b0ede263132715f91",
+   "cmp_cuyabeno_2d_3d.png": "3d2928eeffc9c51694f4e17d2d428f7773ce6398ee16cc0a58cbb5d2e46afa25",
+   "HP001_E2i_engine_gameplay.png": "4cef83eb78a1c53f6aaf7281d540eadea5caa63651667bc237533b587578d218"
   }
  }
 }

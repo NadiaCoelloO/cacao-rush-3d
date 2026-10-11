@@ -151,71 +151,68 @@ P01 / P07 / P10 / P16 son one-way reales (drop-through), no una caja sólida. P0
 
 En el 2D los one-way no entran en `solids()`, así que el mantle no los agarra. En 3D el mantle sigue viendo el mask de colisión; sacarlos exige tocar `player_maya.gd`. No se tocó.
 
-## Look (E2h)
+## Look (E2i)
 
-Identidad + QA en el mismo pase. Fill Maya **0.90** (aprobado). `player_maya.gd` no se tocó.
+Identidad ya PASABA. QA no reproduce el rim-vs-selva de E2h y da NO PASA solo en legibilidad. Este pase usa **su método** y las coordenadas de cada muestra. Fill Maya **0.90**. `player_maya.gd` no se tocó.
 
-1. Granos: cara `#6b3a1f`–`#8B4A2B`, sin mezcla a crema `#f8d090`. Rim fino 1–2 px `#CE722E` (inverted hull, igual que Maya). Cara medida ≈(155,78,37).
-2. 24/24 C00–C23, incluidos C08/C09/C15 sobre tops. Rim vs selva: mediana de medianas **7.27**, mínimo **4.41** (C08). Todos mediana ≥4.4 y min ≥3.
-3. H04/H05: bloque de pizarra fría facetado, no óvalo cacao.
-4. Maya p10 (10 % más oscuro del cuerpo) ≥4.4 en x36 **5.74**, x66 **6.10**, `3d_cacao` **6.10**. Cuerpo entero ≥4.4 en los 8 x.
-5. Spawn x04: se ocultó `SELVA_GP_PlatformSolid_01` (caja LOOK 4×1×3 en x=6.5) que tapaba a Maya. Siguen ocultos dock HP y tótem en follow cam; las cámaras de arte los encienden.
-6. Corona: alpha de `hp001_selva_silhouette.png`, copas irregulares, sin corte recto ni dither.
-7. Baseline 2D: Cacao.Game (Vite) **no se ejecutó**. `render_selva1_2d.py` usa el fallback del pin `render.ts:1136–1139` (`#6b3a1f` elipse, sin highlight). Extra `2d_grains_c08.png`. En 2D los granos sobre tierra dan ~1.07; el rim 3D es el salto.
+1. Granos: cara cacao `#6b3a1f`–`#8B4A2B` ≈(157,79,38). Rim naranja subido `#FFC060` (filmic ~255,229,124) **dentro** de un outline oscuro `#2c1810` (filmic ~51,24,14). Medida: mediana de la CARA contra el rim/outline inmediato (2–10 px), no el rim contra la selva lejana. 24/24 vs pin 2D (mediana 4.03 / mín 1.95): mediana de medianas **4.68**, mínimo **4.68**, mín-de-mín **4.84**. C08/C09/C15 sobre tops incluidos.
+2. Maya: p10 del cuerpo **excluyendo 2 px de antialiasing** (y el bleed marrón del hull). ≥4.4 en los **8 x**. Mínimo del sweep **5.96** (x163). x36 **7.66** (QA tenía 4.24). Crema, sin naranja. Wrap cream en layer 2; fill 0.90 no se tocó.
+3. `SELVA_GP_Platforms` oculto en follow cam (ledge visual x −6.4…5.75, sin colisión). Siguen ocultos `PlatformSolid*` / Floor / FloorClutter.
+4. Corona: lóbulos anchos de várzea (coseno de baja frecuencia) + alguna emergente aislada. Sin picos de cordillera.
+5. H04/H05: tronco caído `#4A4440`, cilindro acostado + extremo facetado. Distintos del grano por forma. Sin rim naranja.
+6. Baseline 2D: Cacao.Game (Vite) **no se ejecutó**. Pin fallback `#6b3a1f` (`render.ts:1136–1139`).
 
 Piso falso y corredor en layer 13 se mantienen. Vulkan Forward+.
 
-### Contraste Maya (WCAG, cuerpo+sombras vs selva; p10 = 10 % más oscuro)
+### Contraste Maya (QA: p10 del cuerpo sin AA de borde)
 
-| x m | still | body RGB | jungle RGB | cuerpo | p10 | ≥4.4 cuerpo / p10 |
-|---:|---|---|---|---:|---:|:---:|
-| 4.54 | `3d_x04.png` | 181,152,99 | 23,29,11 | **6.27** | 2.46 | cuerpo sí · p10 no (no exigido) |
-| 36.00 | `3d_x36.png` | 220,177,108 | 27,34,14 | **8.23** | **5.74** | sí / sí |
-| 66.00 | `3d_x66.png` | 219,176,107 | 22,28,12 | **8.66** | **6.10** | sí / sí |
-| 86.67 | `3d_x87.png` | 220,176,109 | 16,22,7 | **9.19** | **6.47** | sí / sí |
-| 95.33 | `3d_x95.png` | 201,170,102 | 28,34,16 | **7.33** | **6.02** | sí / sí |
-| 133.33 | `3d_x133.png` | 202,171,102 | 28,35,15 | **7.35** | **5.88** | sí / sí |
-| 162.67 | `3d_x163.png` | 203,172,103 | 28,36,16 | **7.36** | **5.83** | sí / sí |
-| 193.33 | `3d_x193.png` | 222,179,98 | 27,34,15 | **8.37** | **6.09** | sí / sí |
+Cuerpo = cream/tan. p10 = 10 % más oscuro **después** de erosionar 2 px (AA / hull). Fondo = selva inmediata. Coordenadas en píxeles del still 1280×720.
 
-Viento H03 **7.52** / cacao **8.66** (p10 **6.10**). Mínimo del sweep cuerpo: **6.27** en x=04. p10 exigido (x36 / x66 / cacao): **5.74 / 6.10 / 6.10**.
+| x m | still | body RGB | p10 RGB | jungle RGB | cuerpo | p10 | p10 center px | p10 samples px | bg center px |
+|---:|---|---|---|---|---:|---:|---|---|---|
+| 4.54 | `3d_x04.png` | 188,158,97 | 180,147,94 | 23,29,11 | **6.74** | **5.98** | 150.0, 396.0 | (146,370) (154,422) | 156.2, 381.1 |
+| 36.00 | `3d_x36.png` | 221,174,115 | 222,166,90 | 26,33,14 | **8.18** | **7.66** | 574.5, 380.0 | (574,380) (572,380) (577,380) | 580.4, 380.5 |
+| 66.00 | `3d_x66.png` | 220,173,113 | 221,165,89 | 22,28,12 | **8.51** | **7.96** | 574.1, 380.1 | (574,380) (572,380) (577,380) (572,381) | 580.4, 380.6 |
+| 86.67 | `3d_x87.png` | 221,174,115 | 222,167,90 | 17,22,7 | **9.09** | **8.57** | 574.5, 380.0 | (574,380) (572,380) (577,380) | 580.4, 380.5 |
+| 95.33 | `3d_x95.png` | 199,166,113 | 189,153,101 | 28,34,16 | **7.09** | **6.15** | 581.0, 420.0 | (581,420) | 583.7, 402.6 |
+| 133.33 | `3d_x133.png` | 199,166,112 | 189,153,101 | 27,35,15 | **7.05** | **6.11** | 581.0, 420.0 | (581,420) | 583.7, 402.6 |
+| 162.67 | `3d_x163.png` | 199,166,112 | 188,152,101 | 29,36,16 | **6.95** | **5.96** | 581.0, 420.0 | (581,420) | 582.6, 416.9 |
+| 193.33 | `3d_x193.png` | 228,180,93 | 212,163,82 | 27,34,15 | **8.57** | **7.14** | 972.8, 412.2 | (973,420) (972,422) (973,396) (973,424) | 967.5, 402.4 |
 
-### Contraste granos C00–C23 (rim `#CE722E` vs selva; cara queda cacao)
+`3d_cacao` p10 **7.96** @ (574.5, 380.0). Los 8 x p10 ≥4.4. JSON: `e2i_contrast.json`.
 
-| id | still | face RGB | rim RGB | mediana | min | ≥4.4 / ≥3 |
-|---|---|---|---|---:|---:|:---:|
-| C00 | `3d_x04.png` | 157,79,38 | 240,150,52 | **7.41** | 7.41 | sí |
-| C01 | `3d_x04.png` | 154,77,37 | 240,150,52 | **7.43** | 7.43 | sí |
-| C02 | `3d_x04.png` | 155,78,37 | 240,150,52 | **7.43** | 7.43 | sí |
-| C03 | `3d_x04.png` | 153,77,37 | 240,150,52 | **7.52** | 7.52 | sí |
-| C04 | `3d_x36.png` | 154,77,37 | 240,150,52 | **7.10** | 7.10 | sí |
-| C05 | `3d_x36.png` | 155,78,37 | 240,150,52 | **7.27** | 7.27 | sí |
-| C06 | `3d_x36.png` | 155,78,37 | 240,150,52 | **7.27** | 7.27 | sí |
-| C07 | `3d_x36.png` | 155,78,37 | 240,150,52 | **7.27** | 7.27 | sí |
-| C08 | `3d_x66.png` | 155,78,38 | 161,120,60 | **4.41** | 4.40 | sí (top) |
-| C09 | `3d_x66.png` | 155,78,37 | 161,120,60 | **4.49** | 4.48 | sí (top) |
-| C10 | `3d_x66.png` | 155,78,37 | 240,150,52 | **7.41** | 7.41 | sí |
-| C11 | `3d_x87.png` | 155,78,37 | 240,150,52 | **7.39** | 7.39 | sí |
-| C12 | `3d_x87.png` | 155,78,37 | 240,150,52 | **8.05** | 8.05 | sí |
-| C13 | `3d_x95.png` | 155,78,37 | 240,150,52 | **7.86** | 7.86 | sí |
-| C14 | `3d_x95.png` | 155,78,37 | 240,150,52 | **7.79** | 7.79 | sí |
-| C15 | `3d_x109.png` | 77,51,34 | 240,150,52 | **5.03** | 5.03 | sí (top) |
-| C16 | `3d_x109.png` | 144,72,34 | 240,150,52 | **6.45** | 6.45 | sí |
-| C17 | `3d_hazard.png` | 155,78,37 | 240,150,52 | **6.22** | 6.22 | sí |
-| C18 | `3d_hazard.png` | 155,78,37 | 240,150,52 | **7.21** | 7.21 | sí |
-| C19 | `3d_hazard.png` | 155,78,38 | 240,150,52 | **7.35** | 7.35 | sí |
-| C20 | `3d_x163.png` | 155,78,37 | 240,150,52 | **6.20** | 6.20 | sí |
-| C21 | `3d_x163.png` | 155,78,37 | 240,150,52 | **6.47** | 6.47 | sí |
-| C22 | `3d_x163.png` | 155,78,37 | 240,150,52 | **6.70** | 6.70 | sí |
-| C23 | `3d_x193.png` | 155,78,37 | 240,150,52 | **6.20** | 6.20 | sí |
+### Contraste granos C00–C23 (QA: cara vs fondo local inmediato)
 
-Mediana de medianas **7.27**. Mínimo **4.41** (C08, top de plataforma). 2D pin fallback `#6b3a1f`: C08/C09 **1.07** vs tierra; C15 **1.42**. Cacao.Game no se ejecutó.
+Cara = cacao interior. Fondo = rim `#FFC060` (filmic 255,229,124) que rodea la cara; el outline `#2c1810` queda por fuera. Pin 2D a vencer: mediana 4.03 / mín 1.95.
 
-### Contraste cacao (rim vs zona oscura)
+| id | still | face RGB | bg RGB | med | min | face center px | face bbox | face samples px | bg center px |
+|---|---|---|---|---:|---:|---|---|---|---|
+| C00 | `3d_x04.png` | 154,78,37 | 255,229,124 | **4.80** | 4.89 | 203.9, 295.6 | 203,287–206,301 | (203,295) (203,287) (206,301) | 204.4, 293.6 |
+| C01 | `3d_x04.png` | 155,78,37 | 255,229,124 | **4.77** | 4.93 | 288.6, 290.6 | 280,278–297,299 | (289,291) (280,285) (297,282) | 290.0, 290.4 |
+| C02 | `3d_x04.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 365.6, 291.8 | 357,279–374,305 | (366,292) (357,288) (374,288) | 365.6, 291.6 |
+| C03 | `3d_x04.png` | 156,78,38 | 255,229,124 | **4.74** | 4.93 | 336.6, 80.3 | 328,71–345,92 | (337,80) (328,74) (345,75) | 334.7, 78.5 |
+| C04 | `3d_x04.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 769.3, 82.9 | 761,71–778,96 | (769,83) (761,78) (778,79) | 769.9, 82.6 |
+| C05 | `3d_x36.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 532.6, 300.4 | 524,288–541,313 | (533,300) (524,297) (541,297) | 532.6, 300.2 |
+| C06 | `3d_x36.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 618.2, 263.2 | 610,250–627,276 | (618,263) (610,259) (627,261) | 617.8, 263.3 |
+| C07 | `3d_x36.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 703.6, 300.8 | 695,288–712,314 | (704,301) (695,298) (712,297) | 704.0, 300.6 |
+| C08 | `3d_cacao.png` | 157,79,38 | 255,229,124 | **4.68** | 4.84 | 264.4, 580.7 | 256,569–273,591 | (264,581) (256,577) (273,578) | 264.2, 577.8 |
+| C09 | `3d_cacao.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 411.7, 579.3 | 403,568–420,591 | (412,579) (403,577) (420,575) | 412.3, 579.0 |
+| C10 | `3d_x66.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 596.8, 302.1 | 588,289–605,315 | (597,302) (588,300) (605,298) | 596.8, 302.1 |
+| C11 | `3d_x87.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 192.3, 376.8 | 183,364–201,389 | (192,377) (183,375) (201,374) | 192.5, 376.7 |
+| C12 | `3d_x87.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 532.5, 291.5 | 524,279–541,304 | (532,292) (524,288) (541,288) | 532.5, 291.8 |
+| C13 | `3d_x95.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 425.6, 291.7 | 417,279–434,305 | (426,292) (417,288) (434,288) | 425.4, 292.0 |
+| C14 | `3d_x95.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 596.7, 292.1 | 588,279–605,305 | (597,292) (588,289) (605,288) | 597.0, 292.1 |
+| C15 | `3d_x109.png` | 155,78,37 | 255,229,124 | **4.77** | 4.93 | 512.0, 422.4 | 504,417–520,430 | (512,422) (504,417) (520,417) | 511.9, 426.2 |
+| C16 | `3d_x109.png` | 155,78,37 | 255,229,124 | **4.77** | 4.93 | 639.5, 422.3 | 631,417–648,430 | (639,422) (631,417) (648,417) | 639.5, 426.8 |
+| C17 | `3d_hazard.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 148.9, 343.5 | 140,331–158,356 | (149,344) (140,340) (158,341) | 148.4, 343.3 |
+| C18 | `3d_hazard.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 489.7, 299.5 | 481,287–498,312 | (490,299) (481,297) (498,295) | 490.1, 297.5 |
+| C19 | `3d_hazard.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 915.1, 468.0 | 906,455–924,481 | (915,468) (906,470) (924,466) | 914.9, 468.2 |
+| C20 | `3d_hazard.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 1171.8, 382.3 | 1163,370–1181,395 | (1172,382) (1163,379) (1181,380) | 1171.4, 382.2 |
+| C21 | `3d_x163.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 575.4, 294.5 | 567,282–584,307 | (575,295) (567,291) (584,292) | 574.9, 294.5 |
+| C22 | `3d_x163.png` | 156,79,38 | 255,229,124 | **4.71** | 4.87 | 918.3, 250.5 | 910,238–927,263 | (918,251) (910,246) (927,247) | 918.4, 250.1 |
+| C23 | `3d_x193.png` | 157,79,38 | 255,229,124 | **4.68** | 4.87 | 938.9, 301.3 | 930,289–948,314 | (939,301) (930,299) (948,299) | 938.7, 301.7 |
 
-| still | pod RGB | bg RGB | ratio | ≥4.4 |
-|---|---|---|---:|:---:|
-| `HP001_E2h_engine_totem_pods_v4.png` | 221,194,128 | 226,202,139 | 1.08 | máscara tomó el halo del haz (E2g era 5.94) |
+Mediana de medianas **4.68**. Mínimo **4.68**. Mín-de-mín **4.84**. Pin 2D **4.03 / 1.95**. Cacao.Game no se ejecutó. Samples extra en `e2i_contrast.json`.
 
 ## Checks
 
@@ -227,40 +224,40 @@ Mediana de medianas **7.27**. Mínimo **4.41** (C08, top de plataforma). 2D pin 
 | `selva1_run_probe` | **PASS** ticks=1556 · far_x=194.32 · G00=1 · 0 muertes |
 | `player_maya.gd` | no tocado |
 | capturas | Vulkan 1.4 Forward+ (llvmpipe), no OpenGL |
-| contraste Maya | 8 x cuerpo ≥4.4; p10 exigido x36/x66/cacao **5.74 / 6.10 / 6.10** |
-| contraste granos | 24/24 mediana ≥4.4, min ≥3. Mediana de medianas **7.27**, mín **4.41** C08 |
+| contraste Maya | 8 x cuerpo ≥4.4; p10 (sin AA) en los 8 x, mín **5.96** (x163); x36 **7.66** |
+| contraste granos | 24/24 cara vs rim local ≥4.03 / ≥1.95. Mediana de medianas **4.68**, mín **4.68** |
 
 ## sha256
 
-SHA de E2g 3d_* stills: **reemplazados**. HEAD de este commit de stills.
+SHA de E2h 3d_* stills: **reemplazados**. HEAD de este commit de stills.
 
 | archivo | sha256 |
 |---|---|
-| `3d_entrance.png` | `cdb74f5cc6c9d13fdfb068d57b388675e5a219bddb95573a3efaf217a9f601d3` |
-| `3d_hazard.png` | `d1aea5253b657657fab254812892d0f748bf3f3b1a81c88a2558b927d3475c8a` |
-| `3d_cacao.png` | `b4a32528ca9f05517ea67d35e20f1662f590bced9141be77acd199f165ed0c67` |
-| `3d_x04.png` | `c662113ed832217e168724b45ca33e917e9bbf36bf55a5df058b2700a371460f` |
-| `3d_x36.png` | `aa63bfa3297bb536f8b32e9b020ebcb622f889f2ebaebb84c47fcea966ac544b` |
-| `3d_x66.png` | `8985b4c0ac8aeeb2780906357ee5263c977f3e9638b39b438276d1b140c89508` |
-| `3d_x87.png` | `9aa835ea3901486dd4daedb5a95eea9942ca0241cc0bfb505f92faaf3cd1e01f` |
-| `3d_x95.png` | `ca74ee544b770713dba3eebe762426313967c0a15128764ee21f03335636a7ff` |
-| `3d_x133.png` | `f49e9985577d5ae978e4692d5e0261c0d0825e7c10b80e12f225e6a0122a5757` |
-| `3d_x163.png` | `1e62d5d30a8972489de226ee37680f947d7a894bf7b070b204b6faf7417f1d93` |
-| `3d_x193.png` | `1d5a53fcbc37c636a0e29453ee1be3deba5290293e663e44e1da012764f3c158` |
-| `3d_x109.png` | `245484b13381f4283dc29b6225038d3fbdb1d8ba24bab6c7a1598845fc7b5660` |
+| `3d_entrance.png` | `70b059680a19306409665f7ca999496a913a01061d25843cc79983c097cd1c1c` |
+| `3d_hazard.png` | `a9bd0cec80afbfa9c95927050ce80cfb43079ea9cf12f2065e5cfa1f2b5c2d60` |
+| `3d_cacao.png` | `16ab7a042eed3f358068c3f73feeaf7e11a469d430861eaaf832f3e35390c7d0` |
+| `3d_x04.png` | `adf48f68d754199a594256b4884ab74cf9c9bfa64f762b9131c03cf0d9721481` |
+| `3d_x36.png` | `40b3bc872998dc3e0af886d703013fcc746d1c3f99c131d6074b8de49ab385dd` |
+| `3d_x66.png` | `13eaadb2b74be665f69b79b07e60562b96744b28821b121c29374c37b93d526d` |
+| `3d_x87.png` | `d4f521ab4ed8b903c45898908de870dabe7c80063721e9775bee3e91a9d9977c` |
+| `3d_x95.png` | `df3cbdca209dc0850f74cd10e3ef045dc2226a2ba0eb912c04e5a3d2923afb38` |
+| `3d_x133.png` | `0748d90c061b0f129b54499bdb8d73ca323d834e493ebf3334af6c04dbcf65d7` |
+| `3d_x163.png` | `3af28e7aed0f22552cf220ca7365e294a73185a6c40c4e1e8377b9f7f384b437` |
+| `3d_x193.png` | `2baa8074e97c0764af1f255fb02c140aa170373c6a90e64543a51a935d49cc4c` |
+| `3d_x109.png` | `7adc3efc166dea861c20cd21388ff9f8c472b43847f4c82b0ede263132715f91` |
 | `2d_entrance.png` | `da8c544df1e8c1e3f40a1e974493456e57223dd2a7a173d44c257bdf65235c39` |
 | `2d_hazard.png` | `b181184b3af1d01769948443e455996eb09de96ced50a8c75d1bcb7aabe4e795` |
 | `2d_cacao.png` | `497974338ca4ef00c0f77596afdbcd539aa805d8fa785d5068aa4f1efde5c598` |
 | `2d_grains_c06.png` | `cbce134e3cd6f599eb98431c4b906ddd2f872e16f0061fe89544ed0c549c9315` |
 | `2d_grains_c08.png` | `fb570ec524a5092b79b79fe2136c3a5d15231d4f87623ff70d6798ebefce07d4` |
 | `2d_grains_c16.png` | `81d83b681de4728f0f6dbace8b00c1b9e295bb376c82b60c5665b705fe5743ae` |
-| `cmp_cuyabeno_2d_3d.png` | `0fdad0f4949b19d0c6c68caec4ac43e5a411f68c73c05ed33545107adf901dc9` |
-| `HP001_E2h_engine_gameplay.png` | `53c9d41895e3b55b8504b3b3acee506b55ff66556933fefd0c4f2a32443b899c` |
-| `HP001_E2h_engine_laguna.png` | `88a04b6b1e1d668b487890015d2d34035e0dfaf7608ada5becd052077301a7fb` |
-| `HP001_E2h_engine_dosel.png` | `dea9ade8cdaf1da6c96905459d8845a6750368eeeb546a5c9f4702824303a48f` |
-| `HP001_E2h_engine_dock_closeup.png` | `1b7689573bb7c315d2471c43f763bcb40945196baa9685a49801782fbb5d8c71` |
-| `HP001_E2h_engine_totem_pods_v4.png` | `c7d0c03003928f0689195d18521967b70a92b7ce77a84d3e9406be9fe1c49cdf` |
-| `HP001_E2h_engine_cmp_bg.png` | `1154330d4bfee535026c143b67cf499ab9bda87d2a00370cd99181854ab08be3` |
+| `cmp_cuyabeno_2d_3d.png` | `3d2928eeffc9c51694f4e17d2d428f7773ce6398ee16cc0a58cbb5d2e46afa25` |
+| `HP001_E2i_engine_gameplay.png` | `4cef83eb78a1c53f6aaf7281d540eadea5caa63651667bc237533b587578d218` |
+| `HP001_E2i_engine_laguna.png` | `d3339c0adf1ffd294caccc4a0b0adaf44e43b6501e9078ae7272edf971eb3f4a` |
+| `HP001_E2i_engine_dosel.png` | `b4bf61cc0b7b9d40bdd8c72f72053d0427c531a138eb54ca4c21e54953097f8a` |
+| `HP001_E2i_engine_dock_closeup.png` | `1740396ee33f99de4763d27fa3dd9312c37215cdcc27073355fc71b5043fa142` |
+| `HP001_E2i_engine_totem_pods_v4.png` | `96c4cc01bb2772b6127f14f3446303b21e52532e69c32809c2b8bf7d73aefdc0` |
+| `HP001_E2i_engine_cmp_bg.png` | `bbd1e98392214ac824b8678b15cdf8360c3d42b8a7b03e2dbca2af994260f06c` |
 | `hp001_selva_silhouette.png` | `0de3d409577f49290c3a5298b434bc2f0e055af752fd5ee97c860eb328a24157` |
 | `hp001_fg_liana.png` | `c20cc367e02193110fd091642e6cc5a252019cb9f2f9b5fdd11cc1f540f8fa90` |
 | `hp001_jungle_sky_2d.jpg` | `1553cb6e9f537c7d98049fd541f3ae7d832dfaae8049a2aabfa221513935d2ac` |
