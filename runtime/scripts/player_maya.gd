@@ -39,6 +39,10 @@ const HERO_KIT := {
 	"rok": {"run_px": 250.0, "jump_px": 680.0, "grav": 1.15, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": true, "latent_climb": false, "color": Color("8a5a3c")},
 	"nix": {"run_px": 295.0, "jump_px": 740.0, "grav": 1.0, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": false, "latent_climb": true, "color": Color("5a3488")},
 }
+## Nadia lock: Nix #5a3488 is hair and cape only. Coat, body, boots, pack and
+## the pose arms stay dark gray. Not a whole-mesh tint.
+const NIX_MARK := Color("5a3488")
+const NIX_OUTFIT := Color("242428")
 @export var hero_id := "maya"
 ## Active stats. Initialisers are Maya so a tick before _ready still matches the 54 checks.
 var _run_speed := 290.0 * PX_TO_M
@@ -220,6 +224,10 @@ func _apply_hero_stats() -> void:
 	_jumps = int(s["jumps"]) + power_extra_jumps
 	_latent_extra_jumps = int(s["latent_extra_jumps"])
 	_hero_color = s["color"]
+	if id == "nix":
+		_apply_nix_look()
+	else:
+		_clear_nix_look()
 	_tint_pose_arms()
 
 
@@ -664,6 +672,10 @@ func _set_pose_tint(pose: PoseTint) -> void:
 	if pose == _pose_tint:
 		return
 	_pose_tint = pose
+	# Maya's cream crouch/crawl is T-020. Nix keeps the dark outfit in every pose.
+	if hero_id == "nix":
+		_apply_nix_look()
+		return
 	for slot in _tint_slots:
 		var node: Node = slot["node"]
 		if not is_instance_valid(node):
@@ -905,6 +917,9 @@ func _follow_camera(delta: float) -> void:
 
 var _arm_l: MeshInstance3D
 var _arm_r: MeshInstance3D
+var _nix_cape: MeshInstance3D
+var _nix_hair: MeshInstance3D
+var _nix_painted: Array = []
 
 
 func _build_pose_rig() -> void:
@@ -926,14 +941,122 @@ func _make_arm(node_name: String) -> MeshInstance3D:
 func _tint_pose_arms() -> void:
 	if _arm_l == null or _arm_r == null:
 		return
+	# Pose arms are outfit. Nix's mark stays on hair and cape, not here.
+	var color := NIX_OUTFIT if hero_id == "nix" else _hero_color
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = _hero_color
+	mat.albedo_color = color
 	mat.emission_enabled = true
-	mat.emission = _hero_color
-	mat.emission_energy_multiplier = 0.45
+	mat.emission = color
+	mat.emission_energy_multiplier = 0.45 if hero_id != "nix" else 1.0
 	mat.roughness = 0.85
+	if hero_id == "nix":
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_arm_l.material_override = mat
 	_arm_r.material_override = mat
+
+
+## Hair slot (#5a3488) and everything else on the greybox (dark gray), plus a
+## cape. Reads the glTF material name, not the override, so a re-apply still
+## finds Maya_Hair. Duplicates nothing on the shared resource.
+func _apply_nix_look() -> void:
+	var mark := _nix_flat(NIX_MARK)
+	var outfit := _nix_flat(NIX_OUTFIT)
+	_nix_painted.clear()
+	var hair := false
+	if _visual:
+		hair = _paint_nix(_visual, mark, outfit)
+	if hair:
+		_drop_node(_nix_hair)
+		_nix_hair = null
+	else:
+		_ensure_nix_hair(mark)
+	_ensure_nix_cape(mark)
+
+
+func _paint_nix(node: Node, mark: Material, outfit: Material) -> bool:
+	var hair := false
+	if node.name == "NixCape" or node.name == "NixHair":
+		return false
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		if mi.mesh:
+			for i in mi.mesh.get_surface_count():
+				var src: Material = mi.mesh.surface_get_material(i)
+				var slot_name := src.resource_name if src else ""
+				var is_hair := slot_name.begins_with("Maya_Hair") or slot_name.begins_with("NixHair")
+				mi.set_surface_override_material(i, mark if is_hair else outfit)
+				_nix_painted.append({"node": mi, "surface": i})
+				if is_hair:
+					hair = true
+	elif node is CSGPrimitive3D:
+		var is_hair := str(node.name).find("Hair") >= 0
+		node.set("material", mark if is_hair else outfit)
+		_nix_painted.append({"node": node, "surface": -1})
+		if is_hair:
+			hair = true
+	for child in node.get_children():
+		if _paint_nix(child, mark, outfit):
+			hair = true
+	return hair
+
+
+func _clear_nix_look() -> void:
+	for slot in _nix_painted:
+		var node: Node = slot["node"]
+		if not is_instance_valid(node):
+			continue
+		var surface := int(slot["surface"])
+		if surface >= 0:
+			(node as MeshInstance3D).set_surface_override_material(surface, null)
+		else:
+			node.set("material", null)
+	_nix_painted.clear()
+	_drop_node(_nix_cape)
+	_drop_node(_nix_hair)
+	_nix_cape = null
+	_nix_hair = null
+
+
+func _ensure_nix_cape(mat: Material) -> void:
+	if _nix_cape == null or not is_instance_valid(_nix_cape):
+		_nix_cape = MeshInstance3D.new()
+		_nix_cape.name = "NixCape"
+		var box := BoxMesh.new()
+		box.size = Vector3(0.72, 1.25, 0.08)
+		_nix_cape.mesh = box
+		# hero_grey faces +Z. The cape hangs on the back (-Z), from the shoulders.
+		_nix_cape.position = Vector3(0.0, 0.88, -0.28)
+		var parent: Node = _visual if _visual else self
+		parent.add_child(_nix_cape)
+	_nix_cape.material_override = mat
+
+
+func _ensure_nix_hair(mat: Material) -> void:
+	if _nix_hair == null or not is_instance_valid(_nix_hair):
+		_nix_hair = MeshInstance3D.new()
+		_nix_hair.name = "NixHair"
+		var box := BoxMesh.new()
+		box.size = Vector3(0.36, 0.22, 0.32)
+		_nix_hair.mesh = box
+		_nix_hair.position = Vector3(0.0, 1.72, 0.0)
+		var parent: Node = _visual if _visual else self
+		parent.add_child(_nix_hair)
+	_nix_hair.material_override = mat
+
+
+func _drop_node(node: Node) -> void:
+	if node and is_instance_valid(node):
+		node.queue_free()
+
+
+func _nix_flat(color: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = color
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.roughness = 1.0
+	return mat
 
 
 func _apply_pose() -> void:
