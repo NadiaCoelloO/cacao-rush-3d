@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""WCAG contrast — QA method (E2j).
+"""WCAG contrast — QA method (E3a).
 
 Maya: p10 of the body after eroding 2 px so antialiased edge pixels are out.
 Backdrop is the play-jungle band just outside the silhouette. Unchanged.
 
 Grains: silhouette = max(rim vs local bg, outline vs local bg).
-Local bg is the platform lip for C08/C09/C15 (and C16 on the same ledge);
-jungle otherwise. Rim is thin #CE722E (filmic ~240,150,52) on top+3/4;
+Local bg is the dressed platform top (litter / earth) for C08/C09/C15/C16;
+jungle otherwise. Do not force the old tan-lip mask — E3a tops are litter.
+Rim is thin #CE722E (filmic ~240,150,52) on top+3/4;
 outline is thin #2c1810 (filmic ~51,24,14).
 Pass: median-of-medians ≥ 4.03 (2D pin) and min ≥ 3.7.
 
@@ -476,7 +477,7 @@ def _jungle_bg_mask(im: np.ndarray) -> np.ndarray:
 
 
 def _platform_lip_mask(im: np.ndarray) -> np.ndarray:
-    """Tan earth lip under C08/C09/C15 — not cacao face, not #CE722E rim."""
+    """Tan earth lip (pre-E3a boxes). Kept as a fallback only."""
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
@@ -488,6 +489,21 @@ def _platform_lip_mask(im: np.ndarray) -> np.ndarray:
         & ~_cacao_face_mask(im)
         & ~_orange_rim_mask(im)
     )
+
+
+def _platform_top_mask(im: np.ndarray) -> np.ndarray:
+    """Dressed litter / wet earth under a grain — not cacao, not #CE722E rim."""
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    earth = (
+        (r >= 18) & (r <= 165)
+        & (g >= 14) & (g <= 135)
+        & (b <= 105)
+        & (r >= g - 14)
+        & ((r.astype(np.int32) + g + b) < 360)
+    )
+    return earth & ~_cacao_face_mask(im) & ~_orange_rim_mask(im)
 
 
 def _connected_blobs(mask: np.ndarray, min_n=8, max_n=900, max_w=48, max_h=64) -> list[dict]:
@@ -525,7 +541,7 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
     """QA E2j: silhouette = max(rim vs local bg, outline vs local bg).
 
     Rim = thin #CE722E (top + 3/4). Outline = thin #2c1810 (full hull).
-    Local bg = platform lip for C08/C09/C15/C16; jungle otherwise.
+    Local bg = dressed litter/earth for C08/C09/C15/C16; jungle otherwise.
     Silhouette is the max of the two contrasts against that same local bg.
     """
     mask = np.zeros(im.shape[:2], dtype=bool)
@@ -551,8 +567,9 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
     other_face = _cacao_face_mask(im) & ~hull
     on_top = grain_id in {"C08", "C09", "C15", "C16"}
     lip = _platform_lip_mask(im)
+    top = _platform_top_mask(im)
     jungle = _jungle_bg_mask(im)
-    prefer = lip if on_top else jungle
+    prefer = top if on_top else jungle
     bg_mask = np.zeros_like(face)
     for rad in (2, 3, 4, 5, 6, 8, 10):
         ring = neighbor_ring(hull, rad) & ~other_face & ~orange & ~outline
@@ -569,7 +586,7 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
             x1 = min(im.shape[1], int(hxs.max()) + 7)
             band = np.zeros_like(face)
             band[y0:y1, x0:x1] = True
-            cand = band & lip & ~orange & ~outline & ~other_face
+            cand = band & (top | lip) & ~orange & ~outline & ~other_face
             if int(cand.sum()) >= 6:
                 bg_mask = cand
     if int(bg_mask.sum()) < 8:
@@ -644,7 +661,7 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
         "median_pass": sil >= 4.03,
         "min_pass": sil_min >= 3.7,
         "on_platform_top": on_top,
-        "measure": "silhouette max(rim vs local bg, outline vs local bg)",
+        "measure": "silhouette max(rim vs local bg, outline vs local bg); local bg = litter/earth on tops",
     }
 
 
@@ -862,7 +879,7 @@ def main() -> int:
             continue
         maya.append(measure_maya(path, x_m))
     cacao = []
-    pods = sorted(DOCS.glob("HP001_E2j_engine_totem_pods*.png"))
+    pods = sorted(DOCS.glob("HP001_E3a_engine_totem_pods*.png"))
     if not pods:
         pods = sorted(DOCS.glob("HP001_*engine_totem_pods*.png"))
         pods = pods[-1:] if pods else []
@@ -873,7 +890,7 @@ def main() -> int:
     medians = [r["median_ratio"] for r in grains if "median_ratio" in r]
     mins = [r["min_ratio"] for r in grains if "min_ratio" in r]
     report = {
-        "method": "QA E2j: grain silhouette max(rim, outline) vs local bg; Maya p10 exclude 2 px AA",
+        "method": "QA E3a: grain silhouette max(rim, outline) vs local bg (litter on tops); Maya p10 exclude 2 px AA",
         "maya": maya,
         "cacao": cacao,
         "grains": grains,

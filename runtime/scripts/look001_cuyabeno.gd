@@ -206,7 +206,7 @@ func capture_still(shot: String, out_path: String) -> void:
 	# Laguna / dosel / dock / pods / cmp_bg are art cameras. Hide the 200 m
 	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
 	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
-	if shot != "gameplay":
+	if shot != "gameplay" and shot != "platform":
 		_set_spawn_crate_visible(get_parent(), true)
 		for path in [
 			"WorldRoot/Selva1Geo",
@@ -234,6 +234,23 @@ func capture_still(shot: String, out_path: String) -> void:
 			player.rotation = Vector3.ZERO
 			player.set_physics_process(true)
 		cam = play_cam
+	elif shot == "platform":
+		# Close 3/4 of a dressed P00 top + lip + Maya. Keep selva-1 geo.
+		if player:
+			player.global_position = Vector3(6.4, 1.2, 0.0)
+			player.rotation = Vector3.ZERO
+			player.rotation.y = deg_to_rad(32.0)
+			player.set_physics_process(true)
+			if play_cam:
+				play_cam.current = false
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_PlatformClose"
+		pods_cam.far = 80.0
+		pods_cam.fov = 40.0
+		pods_cam.position = Vector3(8.85, 1.85, 5.35)
+		get_parent().add_child(pods_cam)
+		pods_cam.look_at(Vector3(7.15, 0.22, 0.20), Vector3.UP)
+		cam = pods_cam
 	elif shot == "dock":
 		# Capture-only: side view of the bank/deck joint. Maya stands on the
 		# existing CSGFloor (no new collision) east of the pier so her feet
@@ -321,8 +338,8 @@ func capture_still(shot: String, out_path: String) -> void:
 			print("HP001 totem dist=", cam.global_position.distance_to(tanchor.global_position), " cam=", cam.name)
 	# Follow fill is for the spawn gameplay cam (KEY_Maya does not reach).
 	# Laguna / dosel / pods keep vertex albedo + scene KEY so Maya stays cream.
-	_set_maya_follow_for_shot(player, shot == "gameplay")
-	if shot == "gameplay" or shot == "dock":
+	_set_maya_follow_for_shot(player, shot == "gameplay" or shot == "platform")
+	if shot == "gameplay" or shot == "dock" or shot == "platform":
 		# Let Maya land from y=1.2 so feet sit on the existing collision.
 		for i in 50:
 			await tree.physics_frame

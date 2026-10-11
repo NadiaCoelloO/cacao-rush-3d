@@ -3,6 +3,7 @@ extends Node
 ## Layout 1:1 from Cacao.Game levels.ts / sim.ts (24 px = 1 m). Y shifted so
 ## the entrance floor top is 0 and oneway #0 sits at 6.67 m.
 ## player_maya.gd, its feel, and Maya's collision capsule are not modified.
+## E3a: 21 boxes keep their CollisionShape3D; visuals are tiled Cuyabeno skins.
 ##
 ## sim.ts: hazard inset (x+4, y+8, w-8, h-10), coin radius 28 px,
 ## kill invuln 0.8 / hitstop 0.08 / deathT 0.55 / respawn invuln 1.1 / MAX_LIVES 5,
@@ -253,6 +254,7 @@ func _build_world() -> void:
 			(body as AnimatableBody3D).sync_to_physics = true
 			body.set_meta("move", p["move"])
 			_movers.append(body)
+	_dress_skins(play)
 	var visual := Node3D.new()
 	visual.name = "Selva1Actors"
 	play.add_child(visual)
@@ -359,6 +361,13 @@ func _build_world() -> void:
 	_goal_mesh.position = _vec(goal["center_m"])
 	_goal_mesh.material_override = _bean_mat()
 	visual.add_child(_goal_mesh)
+
+
+func _dress_skins(play: Node3D) -> void:
+	# Visual only. CollisionShape3D on each of the 21 bodies is untouched.
+	var skins = load("res://scripts/selva1_skins.gd").new()
+	if skins.load_kit():
+		skins.dress(play, _layout["platforms"])
 
 
 func _add_box(host: Node3D, center: Array, size: Array, mat: Material, collide: bool) -> void:
@@ -948,6 +957,17 @@ func _print_counts() -> void:
 	print("SELVA_PIT kill_y=%.4f player_kill_y=%.4f subtitle=%s" % [
 		PIT_KILL_Y, _player.kill_y, String(_layout["meta"].get("subtitle", ""))
 	])
+	var colliders := 0
+	var skins := 0
+	var geo := _root.get_node_or_null("Selva1Geo")
+	if geo:
+		for c in geo.get_children():
+			if c is CollisionObject3D and c.get_node_or_null("CollisionShape3D") != null:
+				colliders += 1
+			for k in c.get_children():
+				if String(k.name).begins_with("Selva1Skin_"):
+					skins += 1
+	print("SELVA_SKINS visuals=%d colliders=%d" % [skins, colliders])
 
 
 func _run_capture() -> void:
@@ -985,6 +1005,7 @@ func _run_capture() -> void:
 			{"id": "grains_c07", "feet": Vector3(38.0, 6.0, 0.0)},
 			{"id": "grains_c16", "feet": Vector3(108.6667, 3.0, 0.0)},
 			{"id": "grains_c21", "feet": Vector3(160.667, 12.0, 0.0)},
+			{"id": "platform_close", "feet": Vector3(6.4, 0.0, 0.0)},
 		]
 		for raw_s in sweep:
 			var s: Dictionary = raw_s
