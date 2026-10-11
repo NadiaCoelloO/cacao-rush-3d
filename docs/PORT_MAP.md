@@ -2,7 +2,7 @@
 
 **Tip pin:** `5fd450312c8e6ad0a214f35b68fd81ec2857fec3` (re-verified READ ONLY 2026-09-29)  
 **Runtime:** Godot 4 only · Pilot display **Cuyabeno** (id `selva`)  
-**Feel deltas:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md) (mantle 0.28s · proneClearsLip · Maya cream/tan crouch greybox tint → PR#4 draft @ `f9a879d1` 54/54 · Nix outfit → Assets HOLD · high-poly HOLD)
+**Feel deltas:** [PORT_DELTA_OLEADA3_2026-09-25.md](PORT_DELTA_OLEADA3_2026-09-25.md) (mantle 0.28s · proneClearsLip · Maya cream/tan crouch greybox tint → PR#4 draft 54/54 · Nix outfit → Assets HOLD · high-poly HOLD)
 
 | 2D module | 3D responsibility |
 |---|---|
