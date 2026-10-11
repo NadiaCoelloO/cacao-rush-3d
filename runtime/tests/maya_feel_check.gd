@@ -549,17 +549,25 @@ func _pilot_smoke() -> void:
 	for i in 30:
 		await _step(0.0, false)
 	_expect("pilot: full jump from spawn lands on ledge", 1.0 if on_ledge else 0.0, 1.0, 0.0)
-	# 1 m solid (CSGPlatform x 4.5..7.5, or PR#3 PlatformSolidAnchor x 2..5),
-	# or LOOK-001 CSGOneway 4×0.18×2 at (6,1,0) whose left face is x=4. Jump
-	# straight up beside the left face; the tip is caught on the way down.
+	# Solid lip, not the tagged CSGOneway (sand-vivid-dawn-sail @ 5fd45031
+	# solids() skips kind == "oneway"). CSGPlatform is 3×1×3 at (6, 0.5, 0):
+	# left face x=4.5, top y=1. PlatformSolidAnchor, when present, is the
+	# older 3 m solid whose left face is anchor.x - 1.5. The plank overhangs
+	# the solid face (x 4..8, z -1..1) and still collides, so the jump stands
+	# at z past that slab, where the capsule meets the solid (z to ±1.5) and
+	# misses the plank. The expected stand stays lip + 2 px (want 1.0).
 	var face_x := 4.5
+	var approach_z := 0.0
 	var solid_anchor: Node3D = pilot.get_node_or_null("WorldRoot/PlatformSolidAnchor")
-	var oneway_anchor: Node3D = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor")
+	var csg: CSGBox3D = pilot.get_node_or_null("WorldRoot/FloorPlaceholder/CSGPlatform")
 	if solid_anchor:
 		face_x = solid_anchor.global_position.x - 1.5
-	elif oneway_anchor:
-		face_x = oneway_anchor.global_position.x - 2.0
-	_p.global_position = Vector3(face_x - BODY_R - 0.1, 0.05, 0)
+	elif csg:
+		face_x = csg.global_position.x - csg.size.x * 0.5
+	var oneway: CSGBox3D = pilot.get_node_or_null("WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder/CSGOneway")
+	if oneway and csg and solid_anchor == null:
+		approach_z = oneway.global_position.z + oneway.size.z * 0.5 + BODY_R + 0.05
+	_p.global_position = Vector3(face_x - BODY_R - 0.1, 0.05, approach_z)
 	_p.velocity = Vector3.ZERO
 	for i in 20:
 		await _step(0.0, false)

@@ -1,14 +1,12 @@
 extends CharacterBody3D
 ## Shared kit for Maya, Teko, Luma, Rok and Nix. Maya is the default preset
 ## (`hero_id = "maya"`); there is no per-hero movement branch.
-## 2D truth read: sand-vivid-dawn-sail @ 5fd45031 is 404 from this environment.
-## Fallback NadiaCoelloO/Cacao.Game @ 77e55b5278b30e6d2f7d82daffd2253b87021379
-## src/game/sim.ts + characters.ts (READ ONLY). Movement lines were checked
-## against that file: coyote 0.1, buffer 0.12, cut 0.48, probeWall, wallDir,
-## wallLock 0.14 and vx = -wallDir * runSpeed * 0.95 match. `wallCoyote` is
-## initialised to 0 and never read or written there, so it stays 0 — no grace
-## period was invented. Mantle / proneClearsLip are the oleada-4 port already
-## in this file (not present in that older sim) and stay. Nix climb
+## 2D truth: sand-vivid-dawn-sail @ 5fd45031 src/game/sim.ts + characters.ts
+## (READ ONLY). coyote 0.1, buffer 0.12, cut 0.48, probeWall, wallDir,
+## wallLock 0.14 and vx = -wallDir * runSpeed * 0.95 match that pin.
+## `wallCoyote` is initialised to 0 and never read or written there, so it
+## stays 0 — no grace period was invented. Mantle / proneClearsLip are the
+## oleada-4 port already in this file. Nix climb
 ## (`character.id == "nix" && jumpHeld`, sim.ts ~1592) is NOT implemented.
 ## Hero powers (dash, Teko's third jump, glide, pound, climb) are latent data
 ## plus `power_*` slots. `_tick_powers` is the only place a later phase hangs
@@ -36,7 +34,7 @@ const HERO_KIT := {
 	"teko": {"run_px": 300.0, "jump_px": 860.0, "grav": 0.96, "jumps": 2, "latent_extra_jumps": 1, "latent_dash": false, "latent_glide": false, "latent_pound": false, "latent_climb": false, "color": Color("c45c26")},
 	"luma": {"run_px": 280.0, "jump_px": 700.0, "grav": 0.9, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": true, "latent_pound": false, "latent_climb": false, "color": Color("2f7d62")},
 	"rok": {"run_px": 250.0, "jump_px": 680.0, "grav": 1.15, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": true, "latent_climb": false, "color": Color("8a5a3c")},
-	"nix": {"run_px": 295.0, "jump_px": 740.0, "grav": 1.0, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": false, "latent_climb": true, "color": Color("3a4a62")},
+	"nix": {"run_px": 295.0, "jump_px": 740.0, "grav": 1.0, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": false, "latent_climb": true, "color": Color("5a3488")},
 }
 @export var hero_id := "maya"
 ## Active stats. Initialisers are Maya so a tick before _ready still matches the 54 checks.
@@ -152,8 +150,8 @@ var _buffer_timer := 0.0
 var _drop_timer := 0.0
 var _jumps_left := 0
 var _facing := 1.0
-## sim.ts player.wallDir / wallLock. wallCoyote exists on the 2D struct and is
-## never updated in Cacao.Game@77e55b52, so it stays 0.
+## sim.ts player.wallDir / wallLock (sand-vivid-dawn-sail @ 5fd45031).
+## wallCoyote exists on the 2D struct and is never updated, so it stays 0.
 var _wall_dir := 0
 var _wall_lock := 0.0
 var _wall_coyote := 0.0
@@ -773,9 +771,9 @@ func _solids_in_rect(left: float, bottom: float, w: float, h: float) -> Array[AA
 	return out
 
 
-## 2D solids() drops kind == "oneway". Bodies opt in with group "oneway" or meta kind.
-## The Cuyabeno CSGOneway is intentionally not tagged: maya_feel_check's pilot
-## mantle measures that lip, and retagging it would move the stand point.
+## 2D solids() drops kind == "oneway" (sand-vivid-dawn-sail @ 5fd45031).
+## Bodies opt in with group "oneway" or meta kind. The Cuyabeno CSGOneway
+## carries both, so mantle skips that plank.
 func _collider_is_oneway(collider: Object) -> bool:
 	var n := collider as Node
 	var hops := 0

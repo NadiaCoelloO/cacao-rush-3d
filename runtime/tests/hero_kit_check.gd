@@ -1,7 +1,7 @@
 extends SceneTree
 ## Shared-kit check: wall-jump, zigzag, ledge, mantle, crouch, prone/crawl,
 ## coyote and jump buffer — one case per hero. Expected numbers are the 2D sim
-## (Cacao.Game @ 77e55b52 characters.ts + sim.ts), scaled 24 px = 1 m.
+## (sand-vivid-dawn-sail @ 5fd45031 characters.ts + sim.ts), scaled 24 px = 1 m.
 ## Maya's own 54 expectations stay in maya_feel_check.gd and are not edited here.
 ##   godot --headless --fixed-fps 60 --path runtime -s res://tests/hero_kit_check.gd
 
