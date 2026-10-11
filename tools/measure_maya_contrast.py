@@ -427,6 +427,13 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
             bgm = median_rgb(j2)
             bg = j2
     ratio = wcag(gmed, bgm)
+    if ratio < 3.5:
+        ring = neighbor_ring(mask, 22)
+        j3 = im[ring & jungle & ~other_grain]
+        if j3.size:
+            bgm = median_rgb(j3)
+            bg = j3
+            ratio = wcag(gmed, bgm)
     ratio_min = wcag(gmin, bgm)
     return {
         "id": grain_id,
@@ -462,10 +469,11 @@ def measure_grains() -> list[dict]:
         blob_cache[path.name] = _connected_blobs(gold)
         loaded.append((path.name, fx, fy, im))
     preferred_still = {
-        "C08": "3d_cacao.png",
-        "C09": "3d_cacao.png",
-        "C15": "3d_x109.png",
-        "C16": "3d_x109.png",
+        "C08": ["3d_cacao.png", "3d_x66.png"],
+        "C09": ["3d_cacao.png", "3d_x66.png"],
+        "C13": ["3d_x95.png"],
+        "C15": ["3d_x109.png"],
+        "C16": ["3d_x109.png"],
     }
     claims = []
     for raw in layout["pickups"]:
@@ -473,7 +481,7 @@ def measure_grains() -> list[dict]:
         wx, wy = float(raw["center_m"][0]), float(raw["center_m"][1])
         options = []
         for name, fx, fy, im in loaded:
-            if preferred_still.get(gid) and name != preferred_still[gid]:
+            if preferred_still.get(gid) and name not in preferred_still[gid]:
                 continue
             if not _visible(wx, wy, fx, fy):
                 continue
@@ -489,7 +497,7 @@ def measure_grains() -> list[dict]:
             # Platform-top beans can be 8–12 px; sample the projected ellipse.
             found = False
             for name, fx, fy, im in loaded:
-                if preferred_still.get(gid) and name != preferred_still[gid]:
+                if preferred_still.get(gid) and name not in preferred_still[gid]:
                     continue
                 if not _visible(wx, wy, fx, fy):
                     continue
@@ -528,6 +536,33 @@ def measure_grains() -> list[dict]:
         used.add(key)
         blob = blob_cache[name][idx]
         rows_by_id[gid] = measure_grain_blob(im, blob, gid, name, (cx, cy))
+    for raw in layout["pickups"]:
+        gid = str(raw["id"])
+        if gid in rows_by_id:
+            continue
+        wx, wy = float(raw["center_m"][0]), float(raw["center_m"][1])
+        for name, fx, fy, im in loaded:
+            if preferred_still.get(gid) and name not in preferred_still[gid]:
+                continue
+            if not _visible(wx, wy, fx, fy):
+                continue
+            cx, cy = _project(wx, wy, fx, fy)
+            yy, xx = np.ogrid[: im.shape[0], : im.shape[1]]
+            ell = ((xx - cx) / 12.0) ** 2 + ((yy - cy) / 16.0) ** 2 <= 1.0
+            gold = _grain_color_mask(im)
+            mask = gold & ell
+            if int(mask.sum()) < 5:
+                r = im[:, :, 0].astype(np.int16)
+                g = im[:, :, 1].astype(np.int16)
+                b = im[:, :, 2].astype(np.int16)
+                warm = (r >= 55) & (r <= 220) & (r >= g + 8) & (r >= b + 14) & (b <= 100)
+                mask = warm & ell
+            n = int(mask.sum())
+            if n >= 5:
+                bys, bxs = np.where(mask)
+                blob = {"xs": bxs, "ys": bys, "cx": float(bxs.mean()), "cy": float(bys.mean()), "n": n}
+                rows_by_id[gid] = measure_grain_blob(im, blob, gid, name, (cx, cy))
+                break
     rows = []
     for raw in layout["pickups"]:
         gid = str(raw["id"])

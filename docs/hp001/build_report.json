@@ -3305,6 +3305,71 @@
    "HP001_E2g_engine_totem_pods_v4.png": "bfc48252de590291f19452231c5d34f8bff26d7fb3651a5cf935640f8e67c56c",
    "HP001_E2g_engine_cmp_bg.png": "f39c580e43f37458210a7c6b707c9f31b380df24aaded893a200317d2b188bdc"
   },
-  "head": "82c90b4322818a3d73f145f991ef90997297f8cd"
+  "head": "82c90b4322818a3d73f145f991ef90997297f8cd",
+  "replaced_by": "e2h",
+  "captures_status": {
+   "replaced_by": "e2h",
+   "note": "3d_* stills overwritten by E2h recapture"
+  }
+ },
+ "e2h": {
+  "pass": "E2h",
+  "note": "Cacao face #6b3a1f-#8B4A2B, thin #CE722E hull, no cream mix. 24/24 grains median-of-medians 7.27 min 4.41 (C08/C09/C15 included). H04/H05 slate blocks. Maya fill 0.90; p10 >=4.4 at x36/x66/cacao. LOOK PlatformSolid crate hidden so spawn does not cover Maya. Painted sil ALPHA crown. 2D pin fallback #6b3a1f (Cacao.Game not executed).",
+  "subtitle": "Laguna negra de Sucumbíos",
+  "renderer": "Vulkan 1.4.318 Forward+ (llvmpipe)",
+  "pit_kill_y": -18.4167,
+  "player_maya_gd": "untouched",
+  "maya_feel_check": "54/54 PASS",
+  "lod_hole_check": "PASS",
+  "selva_check": "platforms=21 hazards=6 pickups=24 checks=2 goal=1",
+  "selva_run_probe": {
+   "result": "PASS",
+   "ticks": 1556,
+   "far_x": 194.32,
+   "goal": 1,
+   "deaths": 0,
+   "pit_kill_verified": true,
+   "pit_y": -18.45
+  },
+  "maya_fill": 0.9,
+  "maya_contrast_wcag": {
+   "threshold": 4.4,
+   "p10_required": {
+    "3d_x36.png": 5.74,
+    "3d_x66.png": 6.1,
+    "3d_cacao.png": 6.1
+   },
+   "body_min_sweep": 6.27
+  },
+  "grains": {
+   "n": 24,
+   "median_of_medians": 7.27,
+   "min_median": 4.41,
+   "min_id": "C08",
+   "face": "#6b3a1f-#8B4A2B",
+   "rim": "#CE722E",
+   "cream_mix": false
+  },
+  "2d_baseline": {
+   "executed_renderGame": false,
+   "fallback": "#6b3a1f ellipse render.ts:1136-1139",
+   "note": "Cacao.Game is a Vite app and was not run here."
+  },
+  "captures": {
+   "3d_entrance.png": "cdb74f5cc6c9d13fdfb068d57b388675e5a219bddb95573a3efaf217a9f601d3",
+   "3d_hazard.png": "d1aea5253b657657fab254812892d0f748bf3f3b1a81c88a2558b927d3475c8a",
+   "3d_cacao.png": "b4a32528ca9f05517ea67d35e20f1662f590bced9141be77acd199f165ed0c67",
+   "3d_x04.png": "c662113ed832217e168724b45ca33e917e9bbf36bf55a5df058b2700a371460f",
+   "3d_x36.png": "aa63bfa3297bb536f8b32e9b020ebcb622f889f2ebaebb84c47fcea966ac544b",
+   "3d_x66.png": "8985b4c0ac8aeeb2780906357ee5263c977f3e9638b39b438276d1b140c89508",
+   "3d_x87.png": "9aa835ea3901486dd4daedb5a95eea9942ca0241cc0bfb505f92faaf3cd1e01f",
+   "3d_x95.png": "ca74ee544b770713dba3eebe762426313967c0a15128764ee21f03335636a7ff",
+   "3d_x133.png": "f49e9985577d5ae978e4692d5e0261c0d0825e7c10b80e12f225e6a0122a5757",
+   "3d_x163.png": "1e62d5d30a8972489de226ee37680f947d7a894bf7b070b204b6faf7417f1d93",
+   "3d_x193.png": "1d5a53fcbc37c636a0e29453ee1be3deba5290293e663e44e1da012764f3c158",
+   "3d_x109.png": "245484b13381f4283dc29b6225038d3fbdb1d8ba24bab6c7a1598845fc7b5660",
+   "2d_grains_c08.png": "fb570ec524a5092b79b79fe2136c3a5d15231d4f87623ff70d6798ebefce07d4",
+   "cmp_cuyabeno_2d_3d.png": "0fdad0f4949b19d0c6c68caec4ac43e5a411f68c73c05ed33545107adf901dc9"
+  }
  }
 }
