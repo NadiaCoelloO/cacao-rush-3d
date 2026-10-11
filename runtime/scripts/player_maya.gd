@@ -1,12 +1,23 @@
 extends CharacterBody3D
-## Maya controller for the Fase 2 vertical slice — movement feel ported 1:1
-## from the 2D sim (src/game/sim.ts + characters.ts, id "maya").
-## 2D truth: sand-vivid-dawn-sail @ 5fd450312c8e6ad0a214f35b68fd81ec2857fec3
-## (oleada 3+4: T-019 mantle, T-018 proneClearsLip, T-020 crouch/crawl cream
-## tint; run/jump numbers unchanged since 8e7ce7ad).
-## Step order per tick, same as sim.ts updateGame(): applyRun → applyJump →
-## applyGravity → resolve → (hanging ? tickMantle : ledgeGrab) → updateCrouch →
-## kill (80 px below level) → followCam.
+## Shared kit for Maya, Teko, Luma, Rok and Nix. Maya is the default preset
+## (`hero_id = "maya"`); there is no per-hero movement branch.
+## 2D truth: sand-vivid-dawn-sail @ 5fd45031 src/game/sim.ts + characters.ts
+## (READ ONLY). coyote 0.1, buffer 0.12, cut 0.48, probeWall, wallDir,
+## wallLock 0.14 and vx = -wallDir * runSpeed * 0.95 match that pin.
+## `wallCoyote` is initialised to 0 and never read or written there, so it
+## stays 0 — no grace period was invented. Mantle / proneClearsLip are the
+## oleada-4 port already in this file. Nix climb
+## (`character.id == "nix" && jumpHeld`, sim.ts ~1592) is NOT implemented.
+## Hero powers (dash, Teko's third jump, glide, pound, climb) are latent data
+## plus `power_*` slots. `_tick_powers` is the only place a later phase hangs
+## them; the kit leaves every slot off.
+##
+## Step order per tick, same as sim.ts updateGame(): wallLock tick → applyRun →
+## applyJump → _tick_powers → applyGravity → applyWind → resolve → wall sense →
+## (hanging ? tickMantle : ledgeGrab) → updateCrouch → kill → followCam.
+## Leaving a mover (sim.ts resolveX:395 adds riding.dx to position only;
+## resolveY:441-442 clears riding the same tick) does not copy its velocity.
+## applyWind adds vx/vy only — it never writes position.
 ##
 ## Units: 2D px → metres at PX_TO_M. Scale is set by the collision box, not the
 ## sprite: PH=42 px ≈ Maya 1.75 m (capsule 1.8 m) → 24 px/m, T=32 px = 1.333 m,
@@ -18,11 +29,34 @@ const PX_TO_M := 1.0 / 24.0
 ## 2D FIXED_DT (types.ts). CUT is applied per sim tick, so it is rescaled to delta.
 const FIXED_DT := 1.0 / 60.0
 
-## characters.ts maya
-const RUN_SPEED := 290.0 * PX_TO_M
-const JUMP_VELOCITY := 720.0 * PX_TO_M
-const JUMPS := 2
-const GRAVITY_MUL := 1.0
+## characters.ts shared kit. `jumps` is the kit pool (2). Teko's third jump is
+## `latent_extra_jumps` and is not added until a later phase sets power_extra_jumps.
+## latent_climb / latent_glide / latent_dash / latent_pound are the same kind of slot.
+const HERO_KIT := {
+	"maya": {"run_px": 290.0, "jump_px": 720.0, "grav": 1.0, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": true, "latent_glide": false, "latent_pound": false, "latent_climb": false, "color": Color("3d8a72")},
+	"teko": {"run_px": 300.0, "jump_px": 860.0, "grav": 0.96, "jumps": 2, "latent_extra_jumps": 1, "latent_dash": false, "latent_glide": false, "latent_pound": false, "latent_climb": false, "color": Color("c45c26")},
+	"luma": {"run_px": 280.0, "jump_px": 700.0, "grav": 0.9, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": true, "latent_pound": false, "latent_climb": false, "color": Color("2f7d62")},
+	"rok": {"run_px": 250.0, "jump_px": 680.0, "grav": 1.15, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": true, "latent_climb": false, "color": Color("8a5a3c")},
+	"nix": {"run_px": 295.0, "jump_px": 740.0, "grav": 1.0, "jumps": 2, "latent_extra_jumps": 0, "latent_dash": false, "latent_glide": false, "latent_pound": false, "latent_climb": true, "color": Color("5a3488")},
+}
+## Nadia lock: Nix #5a3488 is hair and cape only. Coat, body, boots, pack and
+## the pose arms stay dark gray. Not a whole-mesh tint.
+const NIX_MARK := Color("5a3488")
+const NIX_OUTFIT := Color("242428")
+@export var hero_id := "maya"
+## Active stats. Initialisers are Maya so a tick before _ready still matches the 54 checks.
+var _run_speed := 290.0 * PX_TO_M
+var _jump_velocity := 720.0 * PX_TO_M
+var _jumps := 2
+var _gravity_mul := 1.0
+var _hero_color := Color("3d8a72")
+var _latent_extra_jumps := 0
+## Later phase turns these on. The kit never does.
+var power_extra_jumps := 0
+var power_climb := false
+var power_glide := false
+var power_dash := false
+var power_pound := false
 
 ## sim.ts
 const GRAV_UP := 2100.0 * PX_TO_M
@@ -67,9 +101,19 @@ const HANG_OVERLAP := 6.0 * PX_TO_M        # hang x = plat.x - p.w + 6
 const HANG_TOP := 8.0 * PX_TO_M            # hang y = plat.y - 8 (head 8 px above the lip)
 const STAND_INSET := 2.0 * PX_TO_M         # stand x = plat.x + 2
 const GRAB_MAX_RISE := 40.0 * PX_TO_M      # ledgeGrab bails while rising faster than 40 px/s
-## applyJump wall kick used when leaving a hang (resolveX sets wallDir = hangDir
-## every hang tick): vx = -wallDir * runSpeed * 0.95, facing flips.
+## applyJump wall kick (sim.ts): vx = -wallDir * runSpeed * 0.95, facing flips,
+## wallLock = 0.14. The same mul is the hang-leave kick already covered by the
+## 54 checks (resolveX used to flag the lip as wallDir during a hang).
 const HANG_KICK_MUL := 0.95
+const WALL_LOCK := 0.14
+## probeWall (sim.ts): dir>0 probes x = right+1, w=4; dir<0 probes x = left-5, w=4;
+## vertical span is feet+8 px .. head-10 px (h-18). |moveX| > 0.2 to arm it.
+const PROBE_AHEAD := 1.0 * PX_TO_M
+const PROBE_BACK := 5.0 * PX_TO_M
+const PROBE_W := 4.0 * PX_TO_M
+const PROBE_FEET := 8.0 * PX_TO_M
+const PROBE_SHRINK := 18.0 * PX_TO_M
+const WALL_INPUT := 0.2
 ## Probe boxes are inset so a face touching the floor/ceiling is not "blocked"
 ## (2D overlaps() is strict).
 const PROBE_EPS := 0.01
@@ -113,6 +157,13 @@ var _buffer_timer := 0.0
 var _drop_timer := 0.0
 var _jumps_left := 0
 var _facing := 1.0
+## sim.ts player.wallDir / wallLock (sand-vivid-dawn-sail @ 5fd45031).
+## wallCoyote exists on the 2D struct and is never updated, so it stays 0.
+var _wall_dir := 0
+var _wall_lock := 0.0
+var _wall_coyote := 0.0
+## Greybox pose id: stand / wall / bounce / hang / crouch / drag.
+var pose_id := "stand"
 var _cam_look := 0.0
 var _cam_focus := Vector3.ZERO
 var _spawn: Transform3D
@@ -148,35 +199,66 @@ var _tint_cache := {}
 
 
 func _ready() -> void:
+	# Godot's default ADD_VELOCITY copies the platform into velocity on jump.
+	# 2D riding is a position delta only, dropped the frame you leave.
+	platform_on_leave = PLATFORM_ON_LEAVE_DO_NOTHING
 	_visual = _mesh_placeholder
 	# Try to instance greybox glTF if present under res://models/.
 	_try_attach_hero_mesh()
 	_collect_tint_slots(_visual)
 	_read_hitbox()
+	_build_pose_rig()
+	_apply_hero_stats()
 	_spawn = global_transform
 	_snap_camera()
 
 
+func _apply_hero_stats() -> void:
+	var id := hero_id if HERO_KIT.has(hero_id) else "maya"
+	hero_id = id
+	var s: Dictionary = HERO_KIT[id]
+	_run_speed = float(s["run_px"]) * PX_TO_M
+	_jump_velocity = float(s["jump_px"]) * PX_TO_M
+	_gravity_mul = float(s["grav"])
+	# power_extra_jumps is the later-phase latch (Teko's third jump). Default 0.
+	_jumps = int(s["jumps"]) + power_extra_jumps
+	_latent_extra_jumps = int(s["latent_extra_jumps"])
+	_hero_color = s["color"]
+	if id == "nix":
+		_apply_nix_look()
+	else:
+		_clear_nix_look()
+	_tint_pose_arms()
+
+
 func _physics_process(delta: float) -> void:
-	# Same order as sim.ts updateGame(): applyRun → applyJump → applyGravity →
-	# resolveX/Y → tickMantle | ledgeGrab → updateCrouch → kill → followCam.
+	# sim.ts tickDash decrements wallLock before applyRun. A lock set by the
+	# jump later this tick is not consumed until the next tick.
+	_wall_lock = maxf(0.0, _wall_lock - delta)
+	# Same order as sim.ts updateGame(): applyRun → applyJump → (powers) →
+	# applyGravity → applyWind → resolve → wall sense → tickMantle | ledgeGrab → updateCrouch.
 	_apply_run(delta)
 	_apply_jump(delta)
+	_tick_powers(delta)
 	_apply_gravity(delta)
+	_apply_wind(delta)
 
 	if _hanging:
 		# 2D: vx = vy = 0 during the hang; tickMantle owns x/y until it lands.
 		_grounded = false
 		_coyote_timer = maxf(0.0, _coyote_timer - delta)
+		_wall_dir = 0
 		_tick_mantle(delta)
 	else:
 		# Greybox lane: Z lightly locked toward 0.
-		velocity.z = move_toward(velocity.z, 0.0, RUN_SPEED * delta)
+		velocity.z = move_toward(velocity.z, 0.0, _run_speed * delta)
 		move_and_slide()
 		_update_ground(delta)
+		_sense_wall()
 		if not _grounded and Input.is_action_pressed("jump") and velocity.y < 0.0:
 			_ledge_grab()
 	_update_crouch()
+	_apply_pose()
 
 	if global_position.y < kill_y:
 		_respawn()
@@ -194,7 +276,7 @@ func _apply_run(delta: float) -> void:
 			_release_hang()
 		return
 	var crouch_mul := DRAG_MUL if _dragging else (CROUCH_MUL if _crouching else 1.0)
-	var target := Input.get_axis("move_left", "move_right") * RUN_SPEED * crouch_mul
+	var target := Input.get_axis("move_left", "move_right") * _run_speed * crouch_mul
 	var accel := ACCEL_G if _grounded else ACCEL_A
 	if absf(target) > RUN_DEADZONE:
 		velocity.x += signf(target - velocity.x) * accel * delta
@@ -223,16 +305,23 @@ func _apply_jump(delta: float) -> void:
 		_grounded = false
 		_buffer_timer = 0.0
 
-	var can_jump := (_grounded or _coyote_timer > 0.0 or _jumps_left > 0 or _hanging) and _buffer_timer > 0.0
+	# wallDir joins the 2D canJump set. Climbing is a Nix power and is not in the kit.
+	var can_jump := (_grounded or _coyote_timer > 0.0 or _jumps_left > 0 or _wall_dir != 0 or _hanging) and _buffer_timer > 0.0
 	if can_jump:
 		_buffer_timer = 0.0
 		_grounded = false
 		if _hanging:
 			# Leaving a hang is a wall kick in 2D (resolveX flags the lip as wallDir).
-			velocity.x = -_hang_dir * RUN_SPEED * HANG_KICK_MUL
+			velocity.x = -_hang_dir * _run_speed * HANG_KICK_MUL
 			_facing = -_hang_dir
 			_release_hang()
-		velocity.y = JUMP_VELOCITY
+		elif _wall_dir != 0:
+			# sim.ts applyJump: airborne + wallDir → kick, then wallLock 0.14.
+			velocity.x = -float(_wall_dir) * _run_speed * HANG_KICK_MUL
+			_facing = -float(_wall_dir)
+			_wall_lock = WALL_LOCK
+			_wall_dir = 0
+		velocity.y = _jump_velocity
 		_jumps_left = maxi(0, _jumps_left - 1)
 
 	if not Input.is_action_pressed("jump") and velocity.y > 0.0:
@@ -245,17 +334,120 @@ func _apply_gravity(delta: float) -> void:
 	var grav := GRAV_DOWN
 	if velocity.y > 0.0:
 		grav = GRAV_APEX if velocity.y < APEX else GRAV_UP
-	velocity.y -= grav * GRAVITY_MUL * delta
+	velocity.y -= grav * _gravity_mul * delta
 	velocity.y = maxf(velocity.y, -MAX_FALL)
+
+
+## sim.ts applyWind (after gravity, before resolve). vx/ay are px/s, ay downward.
+## mass = max(0.72, gravityMul). Velocity only: llamaShove is what writes x.
+## Zones are group "wind" with meta vx, ay and either meta aabb or a BoxShape.
+func _apply_wind(delta: float) -> void:
+	var mass := maxf(0.72, _gravity_mul)
+	var body := _body_rect()
+	for node in get_tree().get_nodes_in_group("wind"):
+		if not _wind_hits(body, node):
+			continue
+		var vx_px := float(node.get_meta("vx", 0.0))
+		var ay_px := float(node.get_meta("ay", 0.0))
+		velocity.x += (vx_px / mass) * PX_TO_M * delta
+		velocity.y -= (ay_px / mass) * PX_TO_M * delta
+
+
+func _body_rect() -> Rect2:
+	return Rect2(global_position.x - _pw * 0.5, global_position.y, _pw, _h)
+
+
+func _wind_hits(body: Rect2, node: Node) -> bool:
+	var zone := Rect2()
+	var have := false
+	if node.has_meta("aabb"):
+		var box: AABB = node.get_meta("aabb")
+		zone = Rect2(box.position.x, box.position.y, box.size.x, box.size.y)
+		have = true
+	else:
+		var shape_node := node.get_node_or_null("CollisionShape3D") as CollisionShape3D
+		if shape_node and shape_node.shape is BoxShape3D:
+			var box_shape := shape_node.shape as BoxShape3D
+			var origin: Vector3 = shape_node.global_position
+			var size := box_shape.size
+			zone = Rect2(origin.x - size.x * 0.5, origin.y - size.y * 0.5, size.x, size.y)
+			have = true
+	if not have or zone.size.x <= 0.0 or zone.size.y <= 0.0:
+		return false
+	return body.intersects(zone)
 
 
 func _update_ground(delta: float) -> void:
 	_grounded = is_on_floor()
 	if _grounded:
-		_jumps_left = JUMPS
+		_jumps_left = _jumps
 		_coyote_timer = COYOTE
+		_wall_dir = 0
 	else:
 		_coyote_timer = maxf(0.0, _coyote_timer - delta)
+
+
+## Later phase writes the body. Call site is the 2D nix-climb slot (after jump,
+## before gravity). power_climb / power_glide / power_dash / power_pound /
+## power_extra_jumps stay false/0, so this is a no-op.
+func _tick_powers(_delta: float) -> void:
+	pass
+
+
+## resolveX wallDir, then probeWall, then wallLock forces wallDir back to 0.
+## One-ways are not solids (sim.ts solids() skips kind == "oneway").
+func _sense_wall() -> void:
+	if _grounded or _wall_lock > 0.0 or _hanging:
+		_wall_dir = 0
+		return
+	_wall_dir = _wall_dir_from_slides()
+	if _wall_dir == 0:
+		var move := Input.get_axis("move_left", "move_right")
+		if absf(move) > WALL_INPUT:
+			_wall_dir = _probe_wall(signf(move))
+
+
+func _wall_dir_from_slides() -> int:
+	var best := 0
+	var best_pen := 0.0
+	for i in get_slide_collision_count():
+		var hit := get_slide_collision(i)
+		if _collider_is_oneway(hit.get_collider()):
+			continue
+		var n := hit.get_normal()
+		if absf(n.x) < 0.6 or absf(n.y) > 0.45:
+			continue
+		var dir := 1 if n.x < 0.0 else -1
+		if absf(n.x) > best_pen:
+			best_pen = absf(n.x)
+			best = dir
+	return best
+
+
+## Returns 1, -1, or 0. Skips a solid the feet are already standing on (onTopOf).
+func _probe_wall(dir: float) -> int:
+	if dir == 0.0:
+		return 0
+	var left := global_position.x + _pw * 0.5 + PROBE_AHEAD if dir > 0.0 else global_position.x - _pw * 0.5 - PROBE_BACK
+	var bottom := global_position.y + PROBE_FEET
+	var height := _h - PROBE_SHRINK
+	if height <= PROBE_EPS:
+		return 0
+	for s in _solids_in_rect(left, bottom, PROBE_W, height):
+		if _on_top_of(s):
+			continue
+		return 1 if dir > 0.0 else -1
+	return 0
+
+
+func _on_top_of(s: AABB) -> bool:
+	var feet := global_position.y
+	var top := s.end.y
+	var slop := 5.0 * PX_TO_M
+	if feet > top + slop or feet < top - 2.0 * PX_TO_M:
+		return false
+	var inset := PX_TO_M
+	return _left() + _pw > s.position.x + inset and _left() < s.end.x - inset
 
 
 func _respawn() -> void:
@@ -266,6 +458,9 @@ func _respawn() -> void:
 	_buffer_timer = 0.0
 	_drop_timer = 0.0
 	_jumps_left = 0
+	_wall_dir = 0
+	_wall_lock = 0.0
+	_wall_coyote = 0.0
 	_release_hang()
 	_crouching = false
 	_dragging = false
@@ -372,8 +567,9 @@ func _tick_mantle(delta: float) -> void:
 	global_position.y = stand.y
 	_release_hang()
 	_grounded = true
-	_jumps_left = JUMPS
+	_jumps_left = _jumps
 	_coyote_timer = COYOTE
+	_wall_dir = 0
 
 
 func _release_hang() -> void:
@@ -476,6 +672,10 @@ func _set_pose_tint(pose: PoseTint) -> void:
 	if pose == _pose_tint:
 		return
 	_pose_tint = pose
+	# Maya's cream crouch/crawl is T-020. Nix keeps the dark outfit in every pose.
+	if hero_id == "nix":
+		_apply_nix_look()
+		return
 	for slot in _tint_slots:
 		var node: Node = slot["node"]
 		if not is_instance_valid(node):
@@ -582,7 +782,10 @@ func _blocked_rect(left: float, bottom: float, w: float, h: float) -> bool:
 	q.transform = Transform3D(Basis(), Vector3(left + w * 0.5, bottom + h * 0.5, global_position.z))
 	q.collision_mask = collision_mask
 	q.exclude = [get_rid()]
-	return not get_world_3d().direct_space_state.intersect_shape(q, 1).is_empty()
+	for hit in get_world_3d().direct_space_state.intersect_shape(q, 8):
+		if not _collider_is_oneway(hit["collider"]):
+			return true
+	return false
 
 
 ## World-space AABBs of solids within ledge reach (2D solids() list, local slice).
@@ -597,10 +800,49 @@ func _nearby_solids() -> Array[AABB]:
 	q.exclude = [get_rid()]
 	var out: Array[AABB] = []
 	for hit in get_world_3d().direct_space_state.intersect_shape(q, 32):
+		if _collider_is_oneway(hit["collider"]):
+			continue
 		var aabb := _collider_aabb(hit["collider"], int(hit["shape"]))
 		if aabb.size.x > 0.0 and aabb.size.y > 0.0:
 			out.append(aabb)
 	return out
+
+
+func _solids_in_rect(left: float, bottom: float, w: float, h: float) -> Array[AABB]:
+	var out: Array[AABB] = []
+	var size := Vector3(w - 2.0 * PROBE_EPS, h - 2.0 * PROBE_EPS, _pw - 2.0 * PROBE_EPS)
+	if size.x <= 0.0 or size.y <= 0.0:
+		return out
+	var box := BoxShape3D.new()
+	box.size = size
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = box
+	q.transform = Transform3D(Basis(), Vector3(left + w * 0.5, bottom + h * 0.5, global_position.z))
+	q.collision_mask = collision_mask
+	q.exclude = [get_rid()]
+	for hit in get_world_3d().direct_space_state.intersect_shape(q, 8):
+		if _collider_is_oneway(hit["collider"]):
+			continue
+		var aabb := _collider_aabb(hit["collider"], int(hit["shape"]))
+		if aabb.size.x > 0.0 and aabb.size.y > 0.0:
+			out.append(aabb)
+	return out
+
+
+## 2D solids() drops kind == "oneway" (sand-vivid-dawn-sail @ 5fd45031).
+## Bodies opt in with group "oneway" or meta kind. The Cuyabeno CSGOneway
+## carries both, so mantle skips that plank.
+func _collider_is_oneway(collider: Object) -> bool:
+	var n := collider as Node
+	var hops := 0
+	while n != null and hops < 4:
+		if n.is_in_group("oneway"):
+			return true
+		if n.has_meta("kind") and String(n.get_meta("kind")) == "oneway":
+			return true
+		n = n.get_parent()
+		hops += 1
+	return false
 
 
 func _collider_aabb(collider: Object, shape_idx: int) -> AABB:
@@ -668,6 +910,220 @@ func _follow_camera(delta: float) -> void:
 	_cam_focus = _cam_focus.lerp(_cam_target(), 1.0 - exp(-CAM_FOLLOW_RATE * delta))
 	_camera.global_position = _cam_focus + camera_offset
 	_camera.look_at(_cam_focus, Vector3.UP)
+
+
+# --- Greybox poses (no high-poly). Side camera looks along Z, so a Z lean
+# reads in the gameplay plane: wall stick, bounce, hang, drag.
+
+var _arm_l: MeshInstance3D
+var _arm_r: MeshInstance3D
+var _nix_cape: MeshInstance3D
+var _nix_hair: MeshInstance3D
+var _nix_painted: Array = []
+
+
+func _build_pose_rig() -> void:
+	_arm_l = _make_arm("PoseArmL")
+	_arm_r = _make_arm("PoseArmR")
+	add_child(_arm_l)
+	add_child(_arm_r)
+
+
+func _make_arm(node_name: String) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = node_name
+	var box := BoxMesh.new()
+	box.size = Vector3(0.12, 0.42, 0.12)
+	mi.mesh = box
+	return mi
+
+
+func _tint_pose_arms() -> void:
+	if _arm_l == null or _arm_r == null:
+		return
+	# Pose arms are outfit. Nix's mark stays on hair and cape, not here.
+	var color := NIX_OUTFIT if hero_id == "nix" else _hero_color
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 0.45 if hero_id != "nix" else 1.0
+	mat.roughness = 0.85
+	if hero_id == "nix":
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_arm_l.material_override = mat
+	_arm_r.material_override = mat
+
+
+## Hair slot (#5a3488) and everything else on the greybox (dark gray), plus a
+## cape. Reads the glTF material name, not the override, so a re-apply still
+## finds Maya_Hair. Duplicates nothing on the shared resource.
+func _apply_nix_look() -> void:
+	var mark := _nix_flat(NIX_MARK)
+	var outfit := _nix_flat(NIX_OUTFIT)
+	_nix_painted.clear()
+	var hair := false
+	if _visual:
+		hair = _paint_nix(_visual, mark, outfit)
+	if hair:
+		_drop_node(_nix_hair)
+		_nix_hair = null
+	else:
+		_ensure_nix_hair(mark)
+	_ensure_nix_cape(mark)
+
+
+func _paint_nix(node: Node, mark: Material, outfit: Material) -> bool:
+	var hair := false
+	if node.name == "NixCape" or node.name == "NixHair":
+		return false
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		if mi.mesh:
+			for i in mi.mesh.get_surface_count():
+				var src: Material = mi.mesh.surface_get_material(i)
+				var slot_name := src.resource_name if src else ""
+				var is_hair := slot_name.begins_with("Maya_Hair") or slot_name.begins_with("NixHair")
+				mi.set_surface_override_material(i, mark if is_hair else outfit)
+				_nix_painted.append({"node": mi, "surface": i})
+				if is_hair:
+					hair = true
+	elif node is CSGPrimitive3D:
+		var is_hair := str(node.name).find("Hair") >= 0
+		node.set("material", mark if is_hair else outfit)
+		_nix_painted.append({"node": node, "surface": -1})
+		if is_hair:
+			hair = true
+	for child in node.get_children():
+		if _paint_nix(child, mark, outfit):
+			hair = true
+	return hair
+
+
+func _clear_nix_look() -> void:
+	for slot in _nix_painted:
+		var node: Node = slot["node"]
+		if not is_instance_valid(node):
+			continue
+		var surface := int(slot["surface"])
+		if surface >= 0:
+			(node as MeshInstance3D).set_surface_override_material(surface, null)
+		else:
+			node.set("material", null)
+	_nix_painted.clear()
+	_drop_node(_nix_cape)
+	_drop_node(_nix_hair)
+	_nix_cape = null
+	_nix_hair = null
+
+
+func _ensure_nix_cape(mat: Material) -> void:
+	if _nix_cape == null or not is_instance_valid(_nix_cape):
+		_nix_cape = MeshInstance3D.new()
+		_nix_cape.name = "NixCape"
+		var box := BoxMesh.new()
+		box.size = Vector3(0.72, 1.25, 0.08)
+		_nix_cape.mesh = box
+		# hero_grey faces +Z. The cape hangs on the back (-Z), from the shoulders.
+		_nix_cape.position = Vector3(0.0, 0.88, -0.28)
+		var parent: Node = _visual if _visual else self
+		parent.add_child(_nix_cape)
+	_nix_cape.material_override = mat
+
+
+func _ensure_nix_hair(mat: Material) -> void:
+	if _nix_hair == null or not is_instance_valid(_nix_hair):
+		_nix_hair = MeshInstance3D.new()
+		_nix_hair.name = "NixHair"
+		var box := BoxMesh.new()
+		box.size = Vector3(0.36, 0.22, 0.32)
+		_nix_hair.mesh = box
+		_nix_hair.position = Vector3(0.0, 1.72, 0.0)
+		var parent: Node = _visual if _visual else self
+		parent.add_child(_nix_hair)
+	_nix_hair.material_override = mat
+
+
+func _drop_node(node: Node) -> void:
+	if node and is_instance_valid(node):
+		node.queue_free()
+
+
+func _nix_flat(color: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = color
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.roughness = 1.0
+	return mat
+
+
+func _apply_pose() -> void:
+	var id := "stand"
+	if _hanging:
+		id = "hang"
+	elif _dragging:
+		id = "drag"
+	elif _crouching:
+		id = "crouch"
+	elif _wall_lock > 0.0:
+		id = "bounce"
+	elif _wall_dir != 0:
+		id = "wall"
+	pose_id = id
+	if _visual:
+		var lean := 0.0
+		var yoff := 0.0
+		match id:
+			"wall":
+				lean = -float(_wall_dir) * 24.0
+			"bounce":
+				lean = _facing * 32.0
+			"hang":
+				lean = float(_hang_dir) * 10.0
+				yoff = -0.22
+			"drag":
+				lean = _facing * 76.0
+				yoff = 0.12
+		_visual.rotation_degrees.z = lean
+		_visual.position.y = yoff
+	_pose_arms(id)
+
+
+func _pose_arms(id: String) -> void:
+	if _arm_l == null or _arm_r == null:
+		return
+	var show := id == "wall" or id == "bounce" or id == "hang" or id == "drag"
+	_arm_l.visible = show
+	_arm_r.visible = show
+	if not show:
+		return
+	var sign_face := 1.0 if _facing >= 0.0 else -1.0
+	match id:
+		"wall":
+			# Both arms into the wall.
+			var into := -float(_wall_dir)
+			_arm_l.position = Vector3(into * 0.42, _h * 0.72, 0.08)
+			_arm_r.position = Vector3(into * 0.42, _h * 0.48, -0.08)
+			_arm_l.rotation_degrees = Vector3(0, 0, into * 70.0)
+			_arm_r.rotation_degrees = Vector3(0, 0, into * 70.0)
+		"bounce":
+			_arm_l.position = Vector3(sign_face * 0.28, _h * 0.7, 0.08)
+			_arm_r.position = Vector3(-sign_face * 0.22, _h * 0.55, -0.08)
+			_arm_l.rotation_degrees = Vector3(0, 0, -sign_face * 50.0)
+			_arm_r.rotation_degrees = Vector3(0, 0, sign_face * 30.0)
+		"hang":
+			var into := float(_hang_dir)
+			_arm_l.position = Vector3(into * 0.28, _h + 0.05, 0.06)
+			_arm_r.position = Vector3(into * 0.28, _h - 0.02, -0.06)
+			_arm_l.rotation_degrees = Vector3(0, 0, into * 80.0)
+			_arm_r.rotation_degrees = Vector3(0, 0, into * 80.0)
+		"drag":
+			_arm_l.position = Vector3(sign_face * 0.48, 0.22, 0.06)
+			_arm_r.position = Vector3(sign_face * 0.36, 0.16, -0.06)
+			_arm_l.rotation_degrees = Vector3(0, 0, sign_face * 80.0)
+			_arm_r.rotation_degrees = Vector3(0, 0, sign_face * 80.0)
 
 
 func _try_attach_hero_mesh() -> void:

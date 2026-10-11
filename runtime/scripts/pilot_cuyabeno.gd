@@ -119,8 +119,10 @@ func _try_load_totem() -> void:
 func _try_load_oneway() -> void:
 	# PR#3 / tip 5fd45031 oneway #0: Godot (6, 1, 0), box 4×0.18×2.
 	# CSGOneway keeps use_collision=true even when the placeholder is hidden
-	# (visibility does not disable CSG collision). 3D oneway is not a true
-	# one-way collider yet (same risk as PR#3).
+	# (visibility does not disable CSG collision). Group "oneway" and meta
+	# kind=oneway make player_maya skip it in solids(), so mantle does not
+	# grab the plank. The box still blocks from below; jump-through is not
+	# this scene's job.
 	if _oneway_placeholder:
 		_oneway_placeholder.visible = false
 	if not ResourceLoader.exists(ONEWAY_GLB) or _oneway_anchor == null:

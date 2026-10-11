@@ -31,10 +31,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 0)
 
 [node name="PlatformOnewayPlaceholder" type="Node3D" parent="WorldRoot/PlatformOnewayAnchor"]
 
-[node name="CSGOneway" type="CSGBox3D" parent="WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder"]
+[node name="CSGOneway" type="CSGBox3D" parent="WorldRoot/PlatformOnewayAnchor/PlatformOnewayPlaceholder" groups=["oneway"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 use_collision = true
 size = Vector3(4, 0.18, 2)
+metadata/kind = "oneway"
 
 [node name="TotemWarpAnchor" type="Node3D" parent="WorldRoot"]
 ; CIN-001 / LOOK-001 totem warp Cuyabeno @ (7.5, 0, 0)
@@ -78,6 +79,7 @@ far = 250.0
 [node name="PlayerMaya" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 floor_stop_on_slope = true
+platform_on_leave = 2
 script = ExtResource("2_maya")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerMaya"]
