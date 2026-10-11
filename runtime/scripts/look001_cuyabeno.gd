@@ -1359,27 +1359,27 @@ void fragment() {
 	col *= mix(0.74, 1.0, smoothstep(10.0, 28.0, eye.x));
 	float mid = smoothstep(50.0, 60.0, eye.x) * (1.0 - smoothstep(92.0, 108.0, eye.x));
 	col *= mix(1.0, 0.58, mid);
-	// Almost-horizontal várzea: many small/medium rounded copas, a few
-	// isolated emergents, small sky holes. No big waves, no cordillera.
-	// UV.y=0 is the card TOP. Keep the cut high, well above platform tops.
+	// Almost-horizontal várzea scallop: adjacent rounded copas (small +
+	// medium), a few isolated emergents, small sky holes. No low-freq
+	// envelope — that was the hill. UV.y=0 is the card TOP.
 	float xw = vx + par * 0.03;
-	float lobe_a = pow(0.5 + 0.5 * cos(xw * 52.0), 2.4);
-	float lobe_b = pow(0.5 + 0.5 * cos(xw * 34.0 + 1.4), 2.8);
-	float lobe_c = pow(0.5 + 0.5 * cos(xw * 21.0 + 0.55), 3.2);
-	float env = max(max(lobe_a * 0.50, lobe_b * 0.65), lobe_c * 0.40);
-	float ecell = floor(xw * 16.0 + 0.4);
+	float t_s = fract(xw * 28.0);
+	float t_m = fract(xw * 16.0 + 0.31);
+	float t_s2 = fract(xw * 36.0 + 0.62);
+	float copa_s = pow(max(1.0 - abs(t_s - 0.5) * 2.05, 0.0), 1.55);
+	float copa_m = pow(max(1.0 - abs(t_m - 0.5) * 2.15, 0.0), 1.35);
+	float copa_s2 = pow(max(1.0 - abs(t_s2 - 0.5) * 2.25, 0.0), 1.70);
+	float scallop = max(max(copa_s * 0.88, copa_m * 1.00), copa_s2 * 0.62);
+	float ecell = floor(xw * 14.0 + 0.4);
 	float eh = fract(sin(ecell * 127.13) * 43758.54);
-	float eloc = fract(xw * 16.0 + 0.4);
-	float emerg = step(0.90, eh) * pow(max(1.0 - abs(eloc - 0.5) * 2.0, 0.0), 1.7);
-	float hcell = floor(xw * 24.0 + 1.2);
+	float eloc = fract(xw * 14.0 + 0.4);
+	float emerg = step(0.86, eh) * pow(max(1.0 - abs(eloc - 0.5) * 2.4, 0.0), 1.55);
+	float hcell = floor(xw * 22.0 + 1.2);
 	float hh = fract(sin(hcell * 91.7) * 23341.2);
-	float hloc = fract(xw * 24.0 + 1.2);
-	float hole = step(0.93, hh) * pow(max(1.0 - abs(hloc - 0.5) * 2.0, 0.0), 1.5);
-	float crown = mix(0.048, 0.078, env) + emerg * 0.042 - hole * 0.028;
-	float sy = mix(0.22, 0.40, clamp(vy / 0.16, 0.0, 1.0));
-	float a1 = texture(sil, vec2(fract(vx * 0.28 + par * 0.06), sy)).a;
-	float keep = smoothstep(crown - 0.010, crown + 0.016, vy);
-	keep *= mix(0.82, 1.0, a1);
+	float hloc = fract(xw * 22.0 + 1.2);
+	float hole = step(0.90, hh) * pow(max(1.0 - abs(hloc - 0.5) * 2.6, 0.0), 1.35);
+	float crown = 0.040 + scallop * 0.052 + emerg * 0.050 - hole * 0.026;
+	float keep = smoothstep(crown - 0.003, crown + 0.006, vy);
 	if (keep < 0.22) {
 		discard;
 	}
