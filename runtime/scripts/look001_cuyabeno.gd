@@ -60,10 +60,16 @@ const MAYA_FOLLOW_LAYER := 2
 ## lit back sits in hue 28–35° against Maya_Body albedo (pure #FFF4E6 → ~37°).
 const MAYA_FOLLOW_LIGHT := Color(1.0, 0.86, 0.70)
 const MAYA_BACK_FILL_ENERGY := 0.90
-const MAYA_BACK_FILL_RANGE := 3.0
-const MAYA_BACK_FILL_ATTEN := 1.5
+const MAYA_BACK_FILL_RANGE := 4.4
+const MAYA_BACK_FILL_ATTEN := 0.85
 const MAYA_RIM_ENERGY := 0.14
 const MAYA_RIM_RANGE := 2.6
+## Cream wrap (not orange) on layer 2 only — lifts belly/shadow p10 without
+## changing the approved 0.90 back-fill energy.
+const MAYA_WRAP_LIGHT := Color(1.0, 0.93, 0.82)
+const MAYA_WRAP_ENERGY := 0.34
+const MAYA_WRAP_RANGE := 3.8
+const MAYA_WRAP_ATTEN := 0.70
 
 ## FogVolume ellipsoids from manifest fog.banks (AerialHaze omitted — world
 ## volumetric fog on the Environment covers that role in Forward+).
@@ -100,6 +106,7 @@ var _pod_mats: Array[BaseMaterial3D] = []
 var _lod_roots: Array[Node] = []
 var _maya_fill: OmniLight3D = null
 var _maya_rim: OmniLight3D = null
+var _maya_wrap: OmniLight3D = null
 var _hero_mats: Array[BaseMaterial3D] = []
 var _hp_ok := false
 var _hp_totem_mats: Array[BaseMaterial3D] = []
@@ -361,9 +368,11 @@ func _bind_look_meshes() -> void:
 func _walk_look(n: Node) -> void:
 	if n.name.begins_with("SELVA_GP_Oneway"):
 		n.visible = false
-	# Feel-ledge crate (4×1×3 at x=6.5) and floor clutter sit on P00 and
-	# cover Maya at spawn. Play uses selva-1 P00, not the LOOK greybox slab.
+	# Feel-ledge crate (4×1×3 at x=6.5) and the visual-only SELVA_GP_Platforms
+	# strip (x −6.4 … 5.75, no collision) sit on P00 and read as a false floor.
+	# Play uses selva-1 P00, not the LOOK greybox slab.
 	if n.name.begins_with("SELVA_GP_PlatformSolid") \
+			or n.name.begins_with("SELVA_GP_Platforms") \
 			or n.name.begins_with("SELVA_GP_FloorClutter") \
 			or n.name == "SELVA_GP_Floor":
 		n.visible = false
@@ -543,6 +552,19 @@ func _attach_maya_follow_fill(pilot: Node3D) -> void:
 	_maya_rim.light_cull_mask = MAYA_FOLLOW_LAYER
 	_maya_rim.position = Vector3(0.50, 1.48, -0.60)
 	player.add_child(_maya_rim)
+	_maya_wrap = OmniLight3D.new()
+	_maya_wrap.name = "LOOK001_WRAP_MayaFill"
+	_maya_wrap.light_color = MAYA_WRAP_LIGHT
+	_maya_wrap.light_energy = MAYA_WRAP_ENERGY
+	_maya_wrap.light_specular = 0.0
+	_maya_wrap.omni_range = MAYA_WRAP_RANGE
+	_maya_wrap.omni_attenuation = MAYA_WRAP_ATTEN
+	_maya_wrap.shadow_enabled = false
+	_maya_wrap.light_volumetric_fog_energy = 0.0
+	_maya_wrap.light_cull_mask = MAYA_FOLLOW_LAYER
+	# Front / low: lifts the shaded belly inside the body cull_mask.
+	_maya_wrap.position = Vector3(-0.12, 0.48, 0.52)
+	player.add_child(_maya_wrap)
 
 
 func _set_maya_follow_for_shot(player: Node, gameplay: bool) -> void:
@@ -552,6 +574,9 @@ func _set_maya_follow_for_shot(player: Node, gameplay: bool) -> void:
 	if _maya_rim:
 		_maya_rim.visible = gameplay
 		_maya_rim.light_energy = MAYA_RIM_ENERGY if gameplay else 0.0
+	if _maya_wrap:
+		_maya_wrap.visible = gameplay
+		_maya_wrap.light_energy = MAYA_WRAP_ENERGY if gameplay else 0.0
 	for mat in _hero_mats:
 		if mat:
 			mat.vertex_color_use_as_albedo = not gameplay
@@ -1334,15 +1359,23 @@ void fragment() {
 	col *= mix(0.74, 1.0, smoothstep(10.0, 28.0, eye.x));
 	float mid = smoothstep(50.0, 60.0, eye.x) * (1.0 - smoothstep(92.0, 108.0, eye.x));
 	col *= mix(1.0, 0.58, mid);
-	// Painted canopy crown from sil ALPHA (sky is transparent, not white RGB).
-	// UV.y=0 is the card TOP. Map the sil scallop (≈ y 0.23–0.35) onto the
-	// upper band so the horizon is irregular tree-tops, never a straight cut.
-	float sy = mix(0.10, 0.50, clamp(vy / 0.28, 0.0, 1.0));
-	float a1 = texture(sil, vec2(fract(vx * 1.35 + par * 0.32), sy)).a;
-	float a2 = texture(sil, vec2(fract(vx * 0.52 + par * 0.14 + 0.21), sy)).a;
-	float keep = max(a1, a2 * 0.88);
-	keep = smoothstep(0.10, 0.52, keep);
-	if (keep < 0.16) {
+	// Wide flattened várzea lobes (low-freq raised cosine) + a few isolated
+	// emergents. UV.y=0 is the card TOP. Sil ALPHA modulates, does not saw.
+	float xw = vx + par * 0.06;
+	float lobe_a = pow(0.5 + 0.5 * cos(xw * 9.2), 2.6);
+	float lobe_b = pow(0.5 + 0.5 * cos(xw * 6.4 + 1.1), 3.1);
+	float env = max(lobe_a * 0.90, lobe_b * 0.55);
+	float cell = floor(xw * 5.5 + 0.7);
+	float hsh = fract(sin(cell * 127.13) * 43758.54);
+	float local = fract(xw * 5.5 + 0.7);
+	float emerg_prof = pow(max(1.0 - abs(local - 0.5) * 2.0, 0.0), 1.6);
+	float emerg = step(0.84, hsh) * emerg_prof;
+	float crown = mix(0.028, 0.145, env) + emerg * 0.085;
+	float sy = mix(0.20, 0.44, clamp(vy / 0.20, 0.0, 1.0));
+	float a1 = texture(sil, vec2(fract(vx * 0.34 + par * 0.08), sy)).a;
+	float keep = smoothstep(crown - 0.018, crown + 0.028, vy);
+	keep *= mix(0.78, 1.0, a1);
+	if (keep < 0.20) {
 		discard;
 	}
 	float haze = 1.0 - smoothstep(0.0, 0.22, vy);

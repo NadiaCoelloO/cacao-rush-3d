@@ -31,11 +31,12 @@ const COL_CRUMBLE := Color(0.16, 0.11, 0.07)
 const COL_SPIKE := Color("c9c4bc")
 const COL_SPIKE_EDGE := Color("2c1810")
 const COL_FROG := Color(0.28, 0.46, 0.22)
-const COL_ROCK := Color(0.34, 0.36, 0.40)
+const COL_ROCK := Color("4a4440")
 const COL_WIND := Color(0.78, 0.86, 0.72)
 const COL_BEAN := Color("8b4a2b")
 const COL_BEAN_LO := Color("6b3a1f")
 const COL_BEAN_RIM := Color("ce722e")
+const COL_BEAN_OUTLINE := Color("2c1810")
 const COL_POLE := Color("6a5a4a")
 const COL_POLE_ON := Color("3d8a72")
 
@@ -282,7 +283,10 @@ func _build_world() -> void:
 			_add_wind_card(visual, h)
 		_hazards.append(rec)
 	var bean_mat := _bean_mat()
-	var bean_rim := _bean_rim_mat(0.045)
+	# Orange rim (grow 0.045) inside a darker #2c1810 hull (grow 0.088) so
+	# the cacao face reads on light platform lips and dark jungle.
+	var bean_rim := _bean_hull_mat(0.045, COL_BEAN_RIM)
+	var bean_outline := _bean_hull_mat(0.088, COL_BEAN_OUTLINE)
 	for raw_c in _layout["pickups"]:
 		var c: Dictionary = raw_c
 		var center := _vec(c["center_m"])
@@ -297,6 +301,12 @@ func _build_world() -> void:
 		bean.scale = Vector3(1.515, 2.084, 0.36)
 		bean.position = center
 		bean.material_override = bean_mat
+		var outline := MeshInstance3D.new()
+		outline.name = String(c["id"]) + "_outline"
+		outline.mesh = sphere
+		outline.material_override = bean_outline
+		outline.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		bean.add_child(outline)
 		var rim := MeshInstance3D.new()
 		rim.name = String(c["id"]) + "_rim"
 		rim.mesh = sphere
@@ -451,26 +461,31 @@ func _add_frog(visual: Node3D, h: Dictionary) -> MeshInstance3D:
 
 
 func _add_rock(visual: Node3D, h: Dictionary) -> MeshInstance3D:
-	# Hitbox 22×20 px. Faceted cool-slate block — not an oval cacao bean.
-	# Root is the MeshInstance3D so _tick_rocks can slide the whole stone.
+	# Fallen várzea trunk: warm brown-grey #4A4440, elongated, faceted ends.
+	# Distinct from the cacao bean (sphere + orange rim). No rim on the log.
 	var sz := _vec(h["size_m"])
 	var mi := MeshInstance3D.new()
 	mi.name = String(h["id"])
-	var box := BoxMesh.new()
-	box.size = Vector3(sz.x * 0.92, sz.y * 0.78, sz.x * 0.70)
-	mi.mesh = box
+	var log := CylinderMesh.new()
+	log.top_radius = sz.y * 0.26
+	log.bottom_radius = sz.y * 0.32
+	log.height = sz.x * 1.28
+	log.radial_segments = 7
+	log.rings = 1
+	mi.mesh = log
 	mi.position = _vec(h["center_m"])
-	mi.rotation = Vector3(deg_to_rad(12.0), deg_to_rad(28.0), deg_to_rad(-8.0))
-	var mat := _mat(COL_ROCK, 0.92)
+	mi.rotation = Vector3(deg_to_rad(84.0), deg_to_rad(16.0), deg_to_rad(-10.0))
+	var mat := _mat(COL_ROCK, 0.94)
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mi.material_override = mat
-	var cap := MeshInstance3D.new()
-	var prism := PrismMesh.new()
-	prism.size = Vector3(sz.x * 0.70, sz.y * 0.42, sz.x * 0.55)
-	cap.mesh = prism
-	cap.position = Vector3(0.06, sz.y * 0.28, 0.0)
-	cap.material_override = mat
-	mi.add_child(cap)
+	var end := MeshInstance3D.new()
+	var stub := BoxMesh.new()
+	stub.size = Vector3(sz.y * 0.40, sz.y * 0.36, sz.x * 0.22)
+	end.mesh = stub
+	end.position = Vector3(0.0, log.height * 0.42, 0.0)
+	end.rotation = Vector3(deg_to_rad(8.0), deg_to_rad(20.0), deg_to_rad(-6.0))
+	end.material_override = mat
+	mi.add_child(end)
 	visual.add_child(mi)
 	return mi
 
@@ -565,8 +580,9 @@ void fragment() {
 	return mat
 
 
-func _bean_rim_mat(grow: float) -> ShaderMaterial:
-	# 1–2 px inverted hull, same trick as Maya. Face stays cacao.
+func _bean_hull_mat(grow: float, color: Color) -> ShaderMaterial:
+	# Inverted hull (cull_front + grow). Orange rim sits inside the darker
+	# #2c1810 outline so the cacao face reads on light lips and dark jungle.
 	var mat := ShaderMaterial.new()
 	var shader := Shader.new()
 	shader.code = """shader_type spatial;
@@ -581,7 +597,7 @@ void fragment() {
 }
 """
 	mat.shader = shader
-	mat.set_shader_parameter("albedo", COL_BEAN_RIM)
+	mat.set_shader_parameter("albedo", color)
 	mat.set_shader_parameter("grow", grow)
 	return mat
 
