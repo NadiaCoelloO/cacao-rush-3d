@@ -35,7 +35,7 @@ const COL_ROCK := Color("4a4440")
 const COL_WIND := Color(0.78, 0.86, 0.72)
 const COL_BEAN := Color("8b4a2b")
 const COL_BEAN_LO := Color("6b3a1f")
-const COL_BEAN_RIM := Color("ffc060")
+const COL_BEAN_RIM := Color("ce722e")
 const COL_BEAN_OUTLINE := Color("2c1810")
 const COL_POLE := Color("6a5a4a")
 const COL_POLE_ON := Color("3d8a72")
@@ -283,10 +283,10 @@ func _build_world() -> void:
 			_add_wind_card(visual, h)
 		_hazards.append(rec)
 	var bean_mat := _bean_mat()
-	# Orange rim (grow 0.045) inside a darker #2c1810 hull (grow 0.088) so
-	# the cacao face reads on light platform lips and dark jungle.
-	var bean_rim := _bean_hull_mat(0.058, COL_BEAN_RIM)
-	var bean_outline := _bean_hull_mat(0.100, COL_BEAN_OUTLINE)
+	# Thin #CE722E rim on the top + 3/4 only (not a closed gold coin).
+	# Full #2c1810 outline is what QA reads against light platform lips.
+	var bean_rim := _bean_rim_mat(0.045)
+	var bean_outline := _bean_hull_mat(0.088, COL_BEAN_OUTLINE)
 	for raw_c in _layout["pickups"]:
 		var c: Dictionary = raw_c
 		var center := _vec(c["center_m"])
@@ -295,10 +295,11 @@ func _build_world() -> void:
 		var sphere := SphereMesh.new()
 		sphere.radius = 0.22
 		sphere.height = 0.44
-		sphere.radial_segments = 10
-		sphere.rings = 6
+		sphere.radial_segments = 12
+		sphere.rings = 8
 		bean.mesh = sphere
-		bean.scale = Vector3(1.515, 2.084, 0.36)
+		# Vertical oval (not a circle) so it reads as a cacao bean.
+		bean.scale = Vector3(1.18, 2.28, 0.32)
 		bean.position = center
 		bean.material_override = bean_mat
 		var outline := MeshInstance3D.new()
@@ -569,9 +570,11 @@ uniform vec4 albedo_lo : source_color;
 uniform vec4 albedo_hi : source_color;
 void fragment() {
 	vec3 n = normalize(NORMAL);
-	// Face only: #6b3a1f–#8B4A2B. No cream/#f8d090 and no orange wash.
+	// Face only: #6b3a1f–#8B4A2B. Vertical crease so it is a bean, not a coin.
 	float mottling = clamp(0.35 + 0.65 * n.y, 0.0, 1.0);
-	ALBEDO = mix(albedo_lo.rgb, albedo_hi.rgb, mottling);
+	vec3 face = mix(albedo_lo.rgb, albedo_hi.rgb, mottling);
+	float groove = smoothstep(0.015, 0.11, abs(n.x));
+	ALBEDO = mix(albedo_lo.rgb * 0.55, face, groove);
 }
 """
 	mat.shader = shader
@@ -580,9 +583,36 @@ void fragment() {
 	return mat
 
 
+func _bean_rim_mat(grow: float) -> ShaderMaterial:
+	# Thin #CE722E inverted hull on the TOP + 3/4 of the contour only.
+	# Bottom quarter is discarded so it is not a closed gold ring.
+	var mat := ShaderMaterial.new()
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode unshaded, cull_front, fog_disabled, shadows_disabled, specular_disabled;
+uniform vec4 albedo : source_color;
+uniform float grow;
+varying float oy;
+void vertex() {
+	oy = VERTEX.y;
+	VERTEX += NORMAL * grow;
+}
+void fragment() {
+	// Sphere local y ∈ [−0.22, 0.22]. Keep top + sides (~3/4).
+	if (oy < -0.08) {
+		discard;
+	}
+	ALBEDO = albedo.rgb;
+}
+"""
+	mat.shader = shader
+	mat.set_shader_parameter("albedo", COL_BEAN_RIM)
+	mat.set_shader_parameter("grow", grow)
+	return mat
+
+
 func _bean_hull_mat(grow: float, color: Color) -> ShaderMaterial:
-	# Inverted hull (cull_front + grow). Orange rim sits inside the darker
-	# #2c1810 outline so the cacao face reads on light lips and dark jungle.
+	# Full #2c1810 outline — QA readability on light platform lips.
 	var mat := ShaderMaterial.new()
 	var shader := Shader.new()
 	shader.code = """shader_type spatial;
@@ -952,6 +982,9 @@ func _run_capture() -> void:
 			{"id": "x163", "feet": Vector3(162.6667, 10.6667, 0.0)},
 			{"id": "x193", "feet": Vector3(193.3333, 9.3333, 0.0)},
 			{"id": "x109", "feet": Vector3(108.6667, 3.0, 0.0)},
+			{"id": "grains_c07", "feet": Vector3(38.0, 6.0, 0.0)},
+			{"id": "grains_c16", "feet": Vector3(108.6667, 3.0, 0.0)},
+			{"id": "grains_c21", "feet": Vector3(160.667, 12.0, 0.0)},
 		]
 		for raw_s in sweep:
 			var s: Dictionary = raw_s

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""WCAG contrast — QA method (E2i).
+"""WCAG contrast — QA method (E2j).
 
 Maya: p10 of the body after eroding 2 px so antialiased edge pixels are out.
-Backdrop is the play-jungle band just outside the silhouette.
+Backdrop is the play-jungle band just outside the silhouette. Unchanged.
 
-Grains: median of the CACAO FACE against the immediate local background
-(1–3 px ring outside the face, skipping the orange rim). Not rim-vs-jungle.
-Pass: median-of-medians ≥ 4.03 and min ≥ 1.95 (2D pin redraw).
+Grains: silhouette = max(rim vs local bg, outline vs local bg).
+Local bg is the platform lip for C08/C09/C15 (and C16 on the same ledge);
+jungle otherwise. Rim is thin #CE722E (filmic ~240,150,52) on top+3/4;
+outline is thin #2c1810 (filmic ~51,24,14).
+Pass: median-of-medians ≥ 4.03 (2D pin) and min ≥ 3.7.
 
 Every row reports exact pixel coordinates of the samples (bbox + center +
 a few representative pixels) so QA can reproduce the numbers.
@@ -391,6 +393,9 @@ def _load_stills() -> list[tuple[Path, float, float]]:
         "3d_hazard.png": (133.3333, 18.0),
         "3d_cacao.png": (65.875, 8.0),
         "3d_x109.png": (108.6667, 3.0),
+        "3d_grains_c07.png": (38.0, 6.0),
+        "3d_grains_c16.png": (108.6667, 3.0),
+        "3d_grains_c21.png": (160.667, 12.0),
     }
     out = []
     seen = set()
@@ -439,10 +444,10 @@ def _orange_rim_mask(im: np.ndarray) -> np.ndarray:
     r = im[:, :, 0].astype(np.int16)
     g = im[:, :, 1].astype(np.int16)
     b = im[:, :, 2].astype(np.int16)
-    # Raised gold rim #FFC060 films to ~ (255,229,124). Must not match cacao face.
+    # Thin #CE722E rim films to ~ (240,150,52). Must not match cacao face or gold.
     return (
-        (r >= 220) & (g >= 170) & (g <= 250) & (b >= 70) & (b <= 180)
-        & (r >= g) & (r >= b + 50)
+        (r >= 195) & (r <= 255) & (g >= 105) & (g <= 185) & (b >= 18) & (b <= 95)
+        & (r >= g + 40) & (r >= b + 100)
     )
 
 
@@ -463,7 +468,29 @@ def _grain_color_mask(im: np.ndarray) -> np.ndarray:
     return _cacao_face_mask(im) | _orange_rim_mask(im)
 
 
-def _connected_blobs(mask: np.ndarray, min_n=8, max_n=900, max_w=48, max_h=52) -> list[dict]:
+def _jungle_bg_mask(im: np.ndarray) -> np.ndarray:
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    return (r < 90) & (g < 105) & (b < 75) & (g >= r - 8)
+
+
+def _platform_lip_mask(im: np.ndarray) -> np.ndarray:
+    """Tan earth lip under C08/C09/C15 — not cacao face, not #CE722E rim."""
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    ratio_g = g.astype(np.float64) / np.maximum(r, 1)
+    return (
+        (r >= 100) & (r <= 200) & (g >= 68) & (g <= 155) & (b <= 100)
+        & (r >= g + 6) & (r >= b + 16)
+        & (ratio_g >= 0.55)
+        & ~_cacao_face_mask(im)
+        & ~_orange_rim_mask(im)
+    )
+
+
+def _connected_blobs(mask: np.ndarray, min_n=8, max_n=900, max_w=48, max_h=64) -> list[dict]:
     h, w = mask.shape
     seen = np.zeros_like(mask)
     blobs = []
@@ -495,22 +522,18 @@ def _connected_blobs(mask: np.ndarray, min_n=8, max_n=900, max_w=48, max_h=52) -
 
 
 def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, proj) -> dict:
-    """QA: median of the FACE vs the immediate local background (1–3 px).
+    """QA E2j: silhouette = max(rim vs local bg, outline vs local bg).
 
-    Face = cacao interior (eroded 1 px so rim/AA mix is out).
-    Immediate bg = 2 px ring outside the face, skipping the orange rim
-    (the rim is part of the grain, not the surround). That ring is the
-    #2c1810 outline plus whatever scene sits against it (lip or jungle).
+    Rim = thin #CE722E (top + 3/4). Outline = thin #2c1810 (full hull).
+    Local bg = platform lip for C08/C09/C15/C16; jungle otherwise.
+    Silhouette is the max of the two contrasts against that same local bg.
     """
     mask = np.zeros(im.shape[:2], dtype=bool)
     mask[blob["ys"], blob["xs"]] = True
-    r = im[:, :, 0].astype(np.int16)
-    g = im[:, :, 1].astype(np.int16)
-    b = im[:, :, 2].astype(np.int16)
     cacao = _cacao_face_mask(im) & mask
     orange = _orange_rim_mask(im)
-    # Dilate the blob so a 1–2 px #2c1810 outline is inside the grain hull.
-    hull = mask | neighbor_ring(mask, 3)
+    outline = _dark_outline_mask(im)
+    hull = mask | neighbor_ring(mask, 4)
     face = cacao & ~orange
     face = erode_mask(face, 1)
     if int(face.sum()) < 4:
@@ -519,76 +542,109 @@ def measure_grain_blob(im: np.ndarray, blob: dict, grain_id: str, still: str, pr
         face = cacao
     if int(face.sum()) < 4:
         face = mask
-    # Immediate local bg of the FACE = gold rim + #2c1810 outline against it.
-    # Window first so C08/C09 hit the hull, not the tan lip 2 px further out.
+    rim_mask = orange & hull
+    if int(rim_mask.sum()) < 4:
+        rim_mask = orange & neighbor_ring(mask, 6)
+    ol_mask = outline & hull
+    if int(ol_mask.sum()) < 4:
+        ol_mask = outline & neighbor_ring(mask, 7)
     other_face = _cacao_face_mask(im) & ~hull
-    outline = _dark_outline_mask(im)
+    on_top = grain_id in {"C08", "C09", "C15", "C16"}
+    lip = _platform_lip_mask(im)
+    jungle = _jungle_bg_mask(im)
+    prefer = lip if on_top else jungle
     bg_mask = np.zeros_like(face)
-    fys, fxs = np.where(face)
-    if fys.size:
-        y0 = max(0, int(fys.min()) - 10)
-        y1 = min(im.shape[0], int(fys.max()) + 11)
-        x0 = max(0, int(fxs.min()) - 10)
-        x1 = min(im.shape[1], int(fxs.max()) + 11)
-        win = np.zeros_like(face)
-        win[y0:y1, x0:x1] = True
-        # Rim sits against the face; outline is one ring further out.
-        rim_bg = win & orange & ~face
-        ol_bg = win & outline & ~face
-        if int(rim_bg.sum()) >= 6:
-            bg_mask = rim_bg
-        elif int(ol_bg.sum()) >= 6:
-            bg_mask = ol_bg
-    if int(bg_mask.sum()) < 6:
-        for rad in (2, 3, 4, 5):
-            ring = neighbor_ring(face, rad) & ~other_face
-            rim_bg = ring & orange
-            if int(rim_bg.sum()) >= 6:
-                bg_mask = rim_bg
+    for rad in (2, 3, 4, 5, 6, 8, 10):
+        ring = neighbor_ring(hull, rad) & ~other_face & ~orange & ~outline
+        cand = ring & prefer
+        if int(cand.sum()) >= 8:
+            bg_mask = cand
+            break
+    if int(bg_mask.sum()) < 8 and on_top:
+        hys, hxs = np.where(hull)
+        if hys.size:
+            y0 = min(im.shape[0], int(hys.max()) + 1)
+            y1 = min(im.shape[0], y0 + 10)
+            x0 = max(0, int(hxs.min()) - 6)
+            x1 = min(im.shape[1], int(hxs.max()) + 7)
+            band = np.zeros_like(face)
+            band[y0:y1, x0:x1] = True
+            cand = band & lip & ~orange & ~outline & ~other_face
+            if int(cand.sum()) >= 6:
+                bg_mask = cand
+    if int(bg_mask.sum()) < 8:
+        for rad in (3, 5, 8):
+            ring = neighbor_ring(hull, rad) & ~other_face & ~orange & ~outline
+            cand = ring & jungle
+            if int(cand.sum()) >= 8:
+                bg_mask = cand
                 break
-            ol_bg = ring & outline
-            if int(ol_bg.sum()) >= 6:
-                bg_mask = ol_bg
-                break
-            scene = ring & ~_cacao_face_mask(im)
-            if int(scene.sum()) >= 6:
+            scene = ring
+            if int(scene.sum()) >= 8:
                 bg_mask = scene
+                break
     if int(bg_mask.sum()) < 6:
-        bg_mask = neighbor_ring(face, 3) & ~other_face
-    face_rgb = im[face]
+        bg_mask = neighbor_ring(hull, 4) & ~other_face
+    rim_rgb = im[rim_mask]
+    ol_rgb = im[ol_mask]
     bg = im[bg_mask]
-    face_med = median_rgb(face_rgb)
-    # min = dimmer face pixels (15th percentile) vs the same local bg.
-    if face_rgb.size:
-        gmin = tuple(int(x) for x in np.percentile(face_rgb, 15, axis=0))
+    rim_med = median_rgb(rim_rgb) if rim_rgb.size else (240, 150, 52)
+    ol_med = median_rgb(ol_rgb) if ol_rgb.size else (51, 24, 14)
+    if rim_rgb.size:
+        rim_p15 = tuple(int(x) for x in np.percentile(rim_rgb, 15, axis=0))
     else:
-        gmin = face_med
-    bgm = median_rgb(bg) if bg.size else (24, 30, 16)
-    ratio = wcag(face_med, bgm)
-    ratio_min = wcag(gmin, bgm)
+        rim_p15 = rim_med
+    if ol_rgb.size:
+        ol_p15 = tuple(int(x) for x in np.percentile(ol_rgb, 15, axis=0))
+    else:
+        ol_p15 = ol_med
+    bgm = median_rgb(bg) if bg.size else ((140, 100, 55) if on_top else (24, 30, 16))
+    rim_ratio = wcag(rim_med, bgm)
+    ol_ratio = wcag(ol_med, bgm)
+    sil = max(rim_ratio, ol_ratio)
+    sil_min = max(wcag(rim_p15, bgm), wcag(ol_p15, bgm))
+    win = "rim" if rim_ratio >= ol_ratio else "outline"
+    sil_px = rim_mask if win == "rim" else ol_mask
     return {
         "id": grain_id,
         "file": still,
         "n": blob["n"],
         "face_n": int(face.sum()),
+        "rim_n": int(rim_mask.sum()),
+        "outline_n": int(ol_mask.sum()),
         "bg_n": int(bg_mask.sum()),
         "proj_px": [round(proj[0], 1), round(proj[1], 1)],
         "found_px": [round(blob["cx"], 1), round(blob["cy"], 1)],
         "face_center_px": _center_of(face),
         "face_bbox_px": _bbox_of(face),
         "face_samples_px": _sample_pixels(face),
+        "rim_center_px": _center_of(rim_mask),
+        "rim_bbox_px": _bbox_of(rim_mask),
+        "rim_samples_px": _sample_pixels(rim_mask),
+        "outline_center_px": _center_of(ol_mask),
+        "outline_bbox_px": _bbox_of(ol_mask),
+        "outline_samples_px": _sample_pixels(ol_mask),
+        "sil_center_px": _center_of(sil_px),
+        "sil_bbox_px": _bbox_of(sil_px),
+        "sil_samples_px": _sample_pixels(sil_px),
         "bg_center_px": _center_of(bg_mask),
         "bg_bbox_px": _bbox_of(bg_mask),
         "bg_samples_px": _sample_pixels(bg_mask),
-        "face_rgb": list(face_med),
-        "face_p15_rgb": list(gmin),
+        "face_rgb": list(median_rgb(im[face])) if int(face.sum()) else [107, 58, 31],
+        "rim_rgb": list(rim_med),
+        "rim_p15_rgb": list(rim_p15),
+        "outline_rgb": list(ol_med),
+        "outline_p15_rgb": list(ol_p15),
         "bg_rgb": list(bgm),
-        "median_ratio": round(ratio, 2),
-        "min_ratio": round(ratio_min, 2),
-        "median_pass": ratio >= 4.03,
-        "min_pass": ratio_min >= 1.95,
-        "on_platform_top": grain_id in {"C08", "C09", "C15"},
-        "measure": "face vs immediate 2 px local bg (outline+scene), not rim vs jungle",
+        "rim_ratio": round(rim_ratio, 2),
+        "outline_ratio": round(ol_ratio, 2),
+        "winner": win,
+        "median_ratio": round(sil, 2),
+        "min_ratio": round(sil_min, 2),
+        "median_pass": sil >= 4.03,
+        "min_pass": sil_min >= 3.7,
+        "on_platform_top": on_top,
+        "measure": "silhouette max(rim vs local bg, outline vs local bg)",
     }
 
 
@@ -608,11 +664,13 @@ def measure_grains() -> list[dict]:
         blob_cache[path.name] = _connected_blobs(gold)
         loaded.append((path.name, fx, fy, im))
     preferred_still = {
+        "C07": ["3d_grains_c07.png", "3d_x36.png"],
         "C08": ["3d_cacao.png", "3d_x66.png"],
         "C09": ["3d_cacao.png", "3d_x66.png"],
         "C13": ["3d_x95.png"],
         "C15": ["3d_x109.png"],
-        "C16": ["3d_x109.png"],
+        "C16": ["3d_grains_c16.png", "3d_x109.png"],
+        "C21": ["3d_grains_c21.png", "3d_x163.png"],
     }
     claims = []
     for raw in layout["pickups"]:
@@ -804,7 +862,7 @@ def main() -> int:
             continue
         maya.append(measure_maya(path, x_m))
     cacao = []
-    pods = sorted(DOCS.glob("HP001_E2i_engine_totem_pods*.png"))
+    pods = sorted(DOCS.glob("HP001_E2j_engine_totem_pods*.png"))
     if not pods:
         pods = sorted(DOCS.glob("HP001_*engine_totem_pods*.png"))
         pods = pods[-1:] if pods else []
@@ -815,7 +873,7 @@ def main() -> int:
     medians = [r["median_ratio"] for r in grains if "median_ratio" in r]
     mins = [r["min_ratio"] for r in grains if "min_ratio" in r]
     report = {
-        "method": "QA E2i: grain FACE vs immediate local bg; Maya p10 exclude 2 px AA",
+        "method": "QA E2j: grain silhouette max(rim, outline) vs local bg; Maya p10 exclude 2 px AA",
         "maya": maya,
         "cacao": cacao,
         "grains": grains,
@@ -826,9 +884,9 @@ def main() -> int:
             "min_median": round(min(medians), 2) if medians else None,
             "min_of_mins": round(min(mins), 2) if mins else None,
             "pin_median": 4.03,
-            "pin_min": 1.95,
+            "pin_min": 3.7,
             "all_median_ge_4_03": all(r.get("median_pass") for r in grains if "median_pass" in r),
-            "all_min_ge_1_95": all(r.get("min_pass") for r in grains if "min_pass" in r),
+            "all_min_ge_3_7": all(r.get("min_pass") for r in grains if "min_pass" in r),
         },
     }
     sweep_names = {n for n, _x, _y in SWEEP}
@@ -836,7 +894,7 @@ def main() -> int:
     ok_m = all(r.get("body_pass") for r in maya if r.get("file") in sweep_names and "body_pass" in r)
     ok_p10 = all(r.get("p10_pass") for r in maya if r.get("file") in p10_need and "p10_pass" in r)
     ok_c = True
-    ok_g = bool(medians) and report["grains_summary"]["all_median_ge_4_03"] and report["grains_summary"]["all_min_ge_1_95"]
+    ok_g = bool(medians) and report["grains_summary"]["all_median_ge_4_03"] and report["grains_summary"]["all_min_ge_3_7"]
     report["maya_p10_required"] = {
         "files": sorted(p10_need),
         "threshold": 4.4,

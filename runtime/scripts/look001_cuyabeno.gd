@@ -1359,23 +1359,28 @@ void fragment() {
 	col *= mix(0.74, 1.0, smoothstep(10.0, 28.0, eye.x));
 	float mid = smoothstep(50.0, 60.0, eye.x) * (1.0 - smoothstep(92.0, 108.0, eye.x));
 	col *= mix(1.0, 0.58, mid);
-	// Wide flattened várzea lobes (low-freq raised cosine) + a few isolated
-	// emergents. UV.y=0 is the card TOP. Sil ALPHA modulates, does not saw.
-	float xw = vx + par * 0.06;
-	float lobe_a = pow(0.5 + 0.5 * cos(xw * 9.2), 2.6);
-	float lobe_b = pow(0.5 + 0.5 * cos(xw * 6.4 + 1.1), 3.1);
-	float env = max(lobe_a * 0.90, lobe_b * 0.55);
-	float cell = floor(xw * 5.5 + 0.7);
-	float hsh = fract(sin(cell * 127.13) * 43758.54);
-	float local = fract(xw * 5.5 + 0.7);
-	float emerg_prof = pow(max(1.0 - abs(local - 0.5) * 2.0, 0.0), 1.6);
-	float emerg = step(0.84, hsh) * emerg_prof;
-	float crown = mix(0.028, 0.145, env) + emerg * 0.085;
-	float sy = mix(0.20, 0.44, clamp(vy / 0.20, 0.0, 1.0));
-	float a1 = texture(sil, vec2(fract(vx * 0.34 + par * 0.08), sy)).a;
-	float keep = smoothstep(crown - 0.018, crown + 0.028, vy);
-	keep *= mix(0.78, 1.0, a1);
-	if (keep < 0.20) {
+	// Almost-horizontal várzea: many small/medium rounded copas, a few
+	// isolated emergents, small sky holes. No big waves, no cordillera.
+	// UV.y=0 is the card TOP. Keep the cut high, well above platform tops.
+	float xw = vx + par * 0.03;
+	float lobe_a = pow(0.5 + 0.5 * cos(xw * 52.0), 2.4);
+	float lobe_b = pow(0.5 + 0.5 * cos(xw * 34.0 + 1.4), 2.8);
+	float lobe_c = pow(0.5 + 0.5 * cos(xw * 21.0 + 0.55), 3.2);
+	float env = max(max(lobe_a * 0.50, lobe_b * 0.65), lobe_c * 0.40);
+	float ecell = floor(xw * 16.0 + 0.4);
+	float eh = fract(sin(ecell * 127.13) * 43758.54);
+	float eloc = fract(xw * 16.0 + 0.4);
+	float emerg = step(0.90, eh) * pow(max(1.0 - abs(eloc - 0.5) * 2.0, 0.0), 1.7);
+	float hcell = floor(xw * 24.0 + 1.2);
+	float hh = fract(sin(hcell * 91.7) * 23341.2);
+	float hloc = fract(xw * 24.0 + 1.2);
+	float hole = step(0.93, hh) * pow(max(1.0 - abs(hloc - 0.5) * 2.0, 0.0), 1.5);
+	float crown = mix(0.048, 0.078, env) + emerg * 0.042 - hole * 0.028;
+	float sy = mix(0.22, 0.40, clamp(vy / 0.16, 0.0, 1.0));
+	float a1 = texture(sil, vec2(fract(vx * 0.28 + par * 0.06), sy)).a;
+	float keep = smoothstep(crown - 0.010, crown + 0.016, vy);
+	keep *= mix(0.82, 1.0, a1);
+	if (keep < 0.22) {
 		discard;
 	}
 	float haze = 1.0 - smoothstep(0.0, 0.22, vy);

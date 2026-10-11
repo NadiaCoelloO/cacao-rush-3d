@@ -190,6 +190,6 @@ func _run_capture() -> void:
 					tag = "cmp_bg"
 			elif s == "gameplay":
 				tag = "gameplay_final"
-			var stem := "HP001_E2i_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
+			var stem := "HP001_E2j_engine_%s.png" if hp else "LOOK-001_engine_%s.png"
 			await _look.capture_still(s, "%s%s" % [out_dir, stem % tag])
 	get_tree().quit()

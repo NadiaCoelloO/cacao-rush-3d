@@ -58,7 +58,8 @@ def main():
     rows = [
         pair(
             sky_card(),
-            load(DOCS / "HP001_E2i_engine_cmp_bg.png") if (DOCS / "HP001_E2i_engine_cmp_bg.png").exists()
+            load(DOCS / "HP001_E2j_engine_cmp_bg.png") if (DOCS / "HP001_E2j_engine_cmp_bg.png").exists()
+            else load(DOCS / "HP001_E2i_engine_cmp_bg.png") if (DOCS / "HP001_E2i_engine_cmp_bg.png").exists()
             else load(DOCS / "HP001_E2h_engine_cmp_bg.png") if (DOCS / "HP001_E2h_engine_cmp_bg.png").exists()
             else load(DOCS / "HP001_E2g_engine_cmp_bg.png") if (DOCS / "HP001_E2g_engine_cmp_bg.png").exists()
             else load(DOCS / "HP001_E2f_engine_cmp_bg.png"),
