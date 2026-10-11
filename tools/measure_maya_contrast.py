@@ -267,7 +267,12 @@ def measure_maya(path: Path, x_m=None) -> dict:
     plat = platform_mask(im)
     win = np.zeros(cream.shape, dtype=bool)
     win[y0:y1, x0:x1] = True
-    body = (cream | (win & tan)) & ~outline & ~plat
+    r = im[:, :, 0].astype(np.int16)
+    g = im[:, :, 1].astype(np.int16)
+    b = im[:, :, 2].astype(np.int16)
+    # Dressed tops are dark litter — do not count them as Maya's tan body.
+    earth_dark = (r < 115) & (g < 88) & (b < 70) & (r >= g - 10)
+    body = cream & ~outline & ~plat & ~earth_dark
     body = densest_window(body, 40, 70, 12, 900)
     n_body = int(body.sum())
     if n_body < 12:

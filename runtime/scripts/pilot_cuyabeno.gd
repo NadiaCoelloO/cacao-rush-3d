@@ -190,6 +190,8 @@ func _run_capture() -> void:
 					tag = "cmp_bg"
 				elif s == "platform":
 					tag = "platform_close"
+				elif s == "platform_face":
+					tag = "platform_face"
 			elif s == "gameplay":
 				tag = "gameplay_final"
 			var stem := "HP001_E3a_engine_%s.png" if hp else "LOOK-001_engine_%s.png"

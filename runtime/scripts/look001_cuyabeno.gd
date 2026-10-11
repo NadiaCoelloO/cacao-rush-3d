@@ -206,7 +206,7 @@ func capture_still(shot: String, out_path: String) -> void:
 	# Laguna / dosel / dock / pods / cmp_bg are art cameras. Hide the 200 m
 	# selva-1 strip so brown boxes do not fill the canopy or blow the draw cap.
 	# Gameplay and SELVA_CAPTURE keep the 1:1 geometry.
-	if shot != "gameplay" and shot != "platform":
+	if shot != "gameplay" and shot != "platform" and shot != "platform_face":
 		_set_spawn_crate_visible(get_parent(), true)
 		for path in [
 			"WorldRoot/Selva1Geo",
@@ -237,19 +237,34 @@ func capture_still(shot: String, out_path: String) -> void:
 	elif shot == "platform":
 		# Close 3/4 of a dressed P00 top + lip + Maya. Keep selva-1 geo.
 		if player:
-			player.global_position = Vector3(6.4, 1.2, 0.0)
+			# Stand near the front lip so Maya and hanging moss share the frame.
+			player.global_position = Vector3(6.55, 1.2, 0.92)
 			player.rotation = Vector3.ZERO
-			player.rotation.y = deg_to_rad(32.0)
+			player.rotation.y = deg_to_rad(38.0)
 			player.set_physics_process(true)
 			if play_cam:
 				play_cam.current = false
 		pods_cam = Camera3D.new()
 		pods_cam.name = "Cam_PlatformClose"
 		pods_cam.far = 80.0
-		pods_cam.fov = 40.0
-		pods_cam.position = Vector3(8.85, 1.85, 5.35)
+		pods_cam.fov = 38.0
+		pods_cam.position = Vector3(8.05, 0.55, 3.25)
 		get_parent().add_child(pods_cam)
-		pods_cam.look_at(Vector3(7.15, 0.22, 0.20), Vector3.UP)
+		pods_cam.look_at(Vector3(6.40, 0.35, 0.55), Vector3.UP)
+		cam = pods_cam
+	elif shot == "platform_face":
+		# Identity close-up of hanging moss / roots on a dressed solid.
+		if player:
+			player.visible = false
+			if play_cam:
+				play_cam.current = false
+		pods_cam = Camera3D.new()
+		pods_cam.name = "Cam_PlatformFace"
+		pods_cam.far = 80.0
+		pods_cam.fov = 42.0
+		pods_cam.position = Vector3(7.55, -0.45, 3.95)
+		get_parent().add_child(pods_cam)
+		pods_cam.look_at(Vector3(6.45, 0.42, 0.10), Vector3.UP)
 		cam = pods_cam
 	elif shot == "dock":
 		# Capture-only: side view of the bank/deck joint. Maya stands on the
@@ -339,7 +354,7 @@ func capture_still(shot: String, out_path: String) -> void:
 	# Follow fill is for the spawn gameplay cam (KEY_Maya does not reach).
 	# Laguna / dosel / pods keep vertex albedo + scene KEY so Maya stays cream.
 	_set_maya_follow_for_shot(player, shot == "gameplay" or shot == "platform")
-	if shot == "gameplay" or shot == "dock" or shot == "platform":
+	if shot == "gameplay" or shot == "dock" or shot == "platform" or shot == "platform_face":
 		# Let Maya land from y=1.2 so feet sit on the existing collision.
 		for i in 50:
 			await tree.physics_frame

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bskinscuyalod2"
-path="res://.godot/imported/platform_skins_cuyabeno_LOD2.glb-e3a0lod2cuyabeno0001.scn"
+uid="uid://dcmd1vf7480oi"
+path="res://.godot/imported/platform_skins_cuyabeno_LOD2.glb-e1ad73bf83c96fe98556b824c327fe7b.scn"
 
 [deps]
 
 source_file="res://models/hp001/platform_skins_cuyabeno_LOD2.glb"
-dest_files=["res://.godot/imported/platform_skins_cuyabeno_LOD2.glb-e3a0lod2cuyabeno0001.scn"]
+dest_files=["res://.godot/imported/platform_skins_cuyabeno_LOD2.glb-e1ad73bf83c96fe98556b824c327fe7b.scn"]
 
 [params]
 
